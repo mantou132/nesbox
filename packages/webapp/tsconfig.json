@@ -1,0 +1,8 @@
+{
+  "extends": "@nesbox/config/tsconfig",
+  "compilerOptions": {
+    "outDir": "./"
+  },
+  "include": ["src"],
+  "exclude": []
+}

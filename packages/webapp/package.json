@@ -1,0 +1,19 @@
+{
+  "name": "@nesbox/webapp",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "files": [
+    "/index.*"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "start": "yarn build --watch",
+    "prepublishOnly": "yarn build"
+  },
+  "devDependencies": {
+    "@nesbox/config": "^0.0.1"
+  },
+  "author": "wangxianqiao",
+  "license": "ISC"
+}

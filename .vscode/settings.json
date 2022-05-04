@@ -1,0 +1,18 @@
+{
+  "typescript.validate.enable": true,
+  "javascript.validate.enable": true,
+  "css.validate": false,
+  "less.validate": false,
+  "scss.validate": false,
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "eslint.validate": ["typescript", "typescriptreact"],
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[xml]": {
+    "editor.defaultFormatter": null
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true
+  }
+}

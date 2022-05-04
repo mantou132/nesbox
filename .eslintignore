@@ -1,0 +1,4 @@
+packages/*/dist
+packages/*/bin
+packages/*/coverage
+packages/*/extension

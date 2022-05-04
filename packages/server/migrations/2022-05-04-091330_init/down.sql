@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS comments,favorites,friends,games,invites,messages,playing,rooms,users;
