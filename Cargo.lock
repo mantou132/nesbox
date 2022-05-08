@@ -220,6 +220,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "actix-web-httpauth"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "08c25a48b4684f90520183cd1a688e5f4f7e9905835fa75d02c0fe4f60fcdbe6"
+dependencies = [
+ "actix-service",
+ "actix-utils",
+ "actix-web",
+ "base64",
+ "futures-core",
+ "futures-util",
+ "pin-project-lite",
+]
+
+[[package]]
 name = "actix-web-lab"
 version = "0.16.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1483,6 +1498,7 @@ version = "0.1.0"
 dependencies = [
  "actix-cors",
  "actix-web",
+ "actix-web-httpauth",
  "actix-web-lab",
  "chrono",
  "diesel",

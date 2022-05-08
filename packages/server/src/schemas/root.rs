@@ -1,5 +1,6 @@
 use juniper::{EmptySubscription, FieldResult, RootNode};
 
+use super::comment::*;
 use super::game::*;
 use crate::db::root::Pool;
 
@@ -11,6 +12,10 @@ impl QueryRoot {
         let conn = context.dbpool.get().unwrap();
         Ok(get_games(&conn))
     }
+    fn comments(context: &Context, game_id: i32) -> FieldResult<Vec<ScComment>> {
+        let conn = context.dbpool.get().unwrap();
+        Ok(get_comments(&conn, game_id))
+    }
 }
 
 pub struct MutationRoot;
@@ -20,6 +25,10 @@ impl MutationRoot {
     fn create_game(context: &Context, new_game: ScNewGame) -> FieldResult<ScGame> {
         let conn = context.dbpool.get().unwrap();
         Ok(create_game(&conn, new_game))
+    }
+    fn create_comment(context: &Context, new_comment: ScNewComment) -> FieldResult<ScComment> {
+        let conn = context.dbpool.get().unwrap();
+        Ok(create_comment(&conn, new_comment))
     }
 }
 

@@ -6,28 +6,29 @@ use std::{env, io, sync::Arc};
 
 use actix_cors::Cors;
 use actix_web::{
-    get, middleware, route,
+    get, middleware,
     web::{self, Data},
     App, HttpResponse, HttpServer, Responder,
 };
+use actix_web_httpauth::middleware::HttpAuthentication;
 use actix_web_lab::respond::Html;
-use juniper::http::{graphiql::graphiql_source, GraphQLRequest};
+use juniper::http::{playground::playground_source, GraphQLRequest};
 
+mod auth;
 mod db;
 mod schemas;
 
 use crate::{
+    auth::validator,
     db::root::{get_db_pool, Pool},
     schemas::root::{create_schema, Context, Schema},
 };
 
-#[get("/graphiql")]
+#[get("/playground")]
 async fn graphql_playground() -> impl Responder {
-    // TODO: subscriptions
-    Html(graphiql_source("/graphql", None))
+    Html(playground_source("/graphql", None))
 }
 
-#[route("/graphql", method = "GET", method = "POST")]
 async fn graphql(
     schema: web::Data<Schema>,
     pool: web::Data<Pool>,
@@ -54,15 +55,18 @@ async fn main() -> io::Result<()> {
         .parse::<u16>()
         .expect("port parse error");
 
-    log::info!("GraphiQL playground: http://localhost:{}/graphiql", port);
+    log::info!("GraphQL playground: http://localhost:{}/playground", port);
 
     HttpServer::new(move || {
         App::new()
-            .app_data(Data::new(pool.clone()))
             .app_data(Data::from(schema.clone()))
-            .service(graphql)
+            .service(
+                web::resource("/graphql")
+                    .app_data(Data::new(pool.clone()))
+                    .route(web::post().to(graphql))
+                    .wrap(HttpAuthentication::bearer(validator))
+            )
             .service(graphql_playground)
-            // the graphiql UI requires CORS to be enabled
             .wrap(Cors::permissive())
             .wrap(middleware::Logger::default())
     })

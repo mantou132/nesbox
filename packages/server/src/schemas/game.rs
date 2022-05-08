@@ -1,4 +1,4 @@
-use chrono::{NaiveDate, NaiveDateTime};
+use chrono::Utc;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use juniper::{GraphQLInputObject, GraphQLObject};
@@ -12,8 +12,8 @@ pub struct ScGame {
     name: String,
     description: String,
     preview: String,
-    created_at: NaiveDateTime,
-    updated_at: NaiveDateTime,
+    created_at: f64,
+    updated_at: f64,
     rom: String,
 }
 
@@ -30,7 +30,6 @@ pub fn get_games(conn: &PgConnection) -> Vec<ScGame> {
 
     games
         .filter(deleted_at.is_null())
-        .limit(5)
         .load::<Game>(conn)
         .expect("Error loading posts")
         .iter()
@@ -40,8 +39,8 @@ pub fn get_games(conn: &PgConnection) -> Vec<ScGame> {
             description: game.description.clone(),
             preview: game.preview.clone(),
             rom: game.rom.clone(),
-            updated_at: game.updated_at,
-            created_at: game.created_at,
+            created_at: game.created_at.timestamp_millis() as f64,
+            updated_at: game.updated_at.timestamp_millis() as f64,
         })
         .collect()
 }
@@ -53,8 +52,8 @@ pub fn create_game(conn: &PgConnection, req: ScNewGame) -> ScGame {
         preview: &req.preview,
         rom: &req.rom,
         deleted_at: None,
-        created_at: NaiveDate::from_ymd(2016, 7, 8).and_hms(9, 10, 11),
-        updated_at: NaiveDate::from_ymd(2016, 7, 8).and_hms(9, 10, 11),
+        created_at: Utc::now().naive_utc(),
+        updated_at: Utc::now().naive_utc(),
     };
 
     let game = diesel::insert_into(games::table)
@@ -67,8 +66,8 @@ pub fn create_game(conn: &PgConnection, req: ScNewGame) -> ScGame {
         name: game.name,
         description: game.description,
         preview: game.preview,
-        created_at: game.created_at,
-        updated_at: game.updated_at,
+        created_at: game.created_at.timestamp_millis() as f64,
+        updated_at: game.updated_at.timestamp_millis() as f64,
         rom: game.rom,
     }
 }
