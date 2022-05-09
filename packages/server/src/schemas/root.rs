@@ -34,6 +34,7 @@ impl MutationRoot {
 
 pub struct Context {
     pub dbpool: Pool,
+    pub username: String,
 }
 
 impl juniper::Context for Context {}
