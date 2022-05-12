@@ -42,5 +42,13 @@ impl UserToken {
 }
 
 pub fn extract_token(req: &HttpRequest) -> &str {
-    "return"
+    if let Some(authn_header) = req.headers().get("authorization") {
+        if let Ok(authen_str) = authn_header.to_str() {
+            if authen_str.to_lowercase().starts_with("bearer") {
+                let token = authen_str[6..authen_str.len()].trim();
+                return token;
+            }
+        }
+    }
+    ""
 }

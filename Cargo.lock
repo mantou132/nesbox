@@ -560,6 +560,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "data-encoding"
+version = "2.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3ee2393c4a91429dffb4bedf19f4d6abf27d8a732c8ce4980305d782e5426d57"
+
+[[package]]
 name = "derive_more"
 version = "0.99.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1558,12 +1564,14 @@ dependencies = [
  "actix-web",
  "actix-web-lab",
  "chrono",
+ "data-encoding",
  "diesel",
  "dotenv",
  "env_logger",
  "jsonwebtoken",
  "juniper",
  "log",
+ "ring",
  "serde",
  "serde_derive",
  "serde_json",

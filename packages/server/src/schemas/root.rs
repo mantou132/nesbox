@@ -35,10 +35,6 @@ impl MutationRoot {
         let conn = context.dbpool.get().unwrap();
         Ok(create_comment(&conn, new_comment))
     }
-    fn create_user(context: &Context, new_user: ScNewUser) -> FieldResult<ScUser> {
-        let conn = context.dbpool.get().unwrap();
-        Ok(create_user(&conn, new_user))
-    }
 }
 
 pub struct Context {
@@ -52,4 +48,44 @@ pub type Schema = RootNode<'static, QueryRoot, MutationRoot, EmptySubscription<C
 
 pub fn create_schema() -> Schema {
     Schema::new(QueryRoot {}, MutationRoot {}, EmptySubscription::new())
+}
+
+pub struct GuestContext {
+    pub dbpool: Pool,
+    pub secret: String,
+}
+
+pub struct GuestQueryRoot;
+
+#[juniper::graphql_object(Context = GuestContext)]
+impl GuestQueryRoot {
+    fn hello() -> FieldResult<String> {
+        Ok("guest".to_owned())
+    }
+}
+
+pub struct GuestMutationRoot;
+
+#[juniper::graphql_object(Context = GuestContext)]
+impl GuestMutationRoot {
+    fn register(context: &GuestContext, new_user: ScLoginReq) -> FieldResult<ScLoginResp> {
+        let conn = context.dbpool.get().unwrap();
+        Ok(register(&conn, new_user, &context.secret))
+    }
+
+    fn login(context: &GuestContext, user: ScLoginReq) -> FieldResult<ScLoginResp> {
+        let conn = context.dbpool.get().unwrap();
+        Ok(login(&conn, user, &context.secret))
+    }
+}
+
+pub type GuestSchema =
+    RootNode<'static, GuestQueryRoot, GuestMutationRoot, EmptySubscription<GuestContext>>;
+
+pub fn create_guest_schema() -> GuestSchema {
+    GuestSchema::new(
+        GuestQueryRoot {},
+        GuestMutationRoot {},
+        EmptySubscription::new(),
+    )
 }
