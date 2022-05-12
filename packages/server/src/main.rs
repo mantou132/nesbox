@@ -8,7 +8,7 @@ use std::{env, io, sync::Arc};
 
 use actix_cors::Cors;
 use actix_web::{
-    get, middleware,
+    middleware,
     web::{self, Data},
     App, HttpRequest, HttpResponse, HttpServer, Responder,
 };
@@ -24,11 +24,6 @@ use crate::{
     db::root::{get_db_pool, Pool},
     schemas::root::{create_schema, Context, Schema},
 };
-
-#[get("/playground")]
-async fn graphql_playground() -> impl Responder {
-    Html(playground_source("/graphql", None))
-}
 
 async fn graphql(
     req: HttpRequest,
@@ -57,7 +52,7 @@ async fn main() -> io::Result<()> {
         .unwrap_or("8080".to_owned())
         .parse::<u16>()
         .unwrap();
-    let secret = env::var("SECRET").unwrap_or("".to_owned());
+    let secret = env::var("SECRET").unwrap_or("xxx".to_owned());
 
     let pool = get_db_pool();
     // TODO: download schema without jwt
@@ -74,7 +69,10 @@ async fn main() -> io::Result<()> {
                     .app_data(Data::new(secret.clone()))
                     .route(web::post().to(graphql)),
             )
-            .service(graphql_playground)
+            .service(
+                web::resource("/playground")
+                    .route(web::get().to(|| async { Html(playground_source("/graphql", None)) })),
+            )
             .wrap(Cors::permissive())
             .wrap(middleware::Logger::default())
     })
