@@ -10,55 +10,21 @@ use actix_cors::Cors;
 use actix_web::{
     middleware,
     web::{self, Data},
-    App, HttpRequest, HttpResponse, HttpServer, Responder,
+    App, HttpServer,
 };
 use actix_web_lab::respond::Html;
-use juniper::http::{playground::playground_source, GraphQLRequest};
+use juniper::http::playground::playground_source;
+
+use crate::{
+    db::root::get_db_pool,
+    handles::*,
+    schemas::root::{create_guest_schema, create_schema},
+};
 
 mod auth;
 mod db;
+mod handles;
 mod schemas;
-
-use crate::{
-    auth::{extract_token, UserToken},
-    db::root::{get_db_pool, Pool},
-    schemas::root::{
-        create_guest_schema, create_schema, Context, GuestContext, GuestSchema, Schema,
-    },
-};
-
-async fn graphql(
-    req: HttpRequest,
-    schema: web::Data<Schema>,
-    pool: web::Data<Pool>,
-    secret: web::Data<String>,
-    data: web::Json<GraphQLRequest>,
-) -> impl Responder {
-    let username = match UserToken::parse(secret.get_ref().as_bytes(), extract_token(&req)) {
-        Some(username) => username,
-        None => return HttpResponse::Unauthorized().finish(),
-    };
-    let ctx = Context {
-        username,
-        dbpool: pool.get_ref().to_owned(),
-    };
-    let res = data.execute(&schema, &ctx).await;
-    HttpResponse::Ok().json(res)
-}
-
-async fn guestgraphql(
-    schema: web::Data<GuestSchema>,
-    pool: web::Data<Pool>,
-    secret: web::Data<String>,
-    data: web::Json<GraphQLRequest>,
-) -> impl Responder {
-    let ctx = GuestContext {
-        secret: secret.to_string(),
-        dbpool: pool.get_ref().to_owned(),
-    };
-    let res = data.execute(&schema, &ctx).await;
-    HttpResponse::Ok().json(res)
-}
 
 #[actix_web::main]
 async fn main() -> io::Result<()> {
@@ -71,7 +37,7 @@ async fn main() -> io::Result<()> {
     let secret = env::var("SECRET").unwrap_or("xxx".to_owned());
 
     let pool = get_db_pool();
-    // TODO: download schema without jwt
+
     let schema = Arc::new(create_schema());
     let guestschema = Arc::new(create_guest_schema());
 
@@ -87,6 +53,12 @@ async fn main() -> io::Result<()> {
                     .route(web::post().to(graphql)),
             )
             .service(
+                web::resource("/schema")
+                    .app_data(Data::new(pool.clone()))
+                    .app_data(Data::from(schema.clone()))
+                    .route(web::get().to(graphqlschema)),
+            )
+            .service(
                 web::resource("/playground")
                     .route(web::get().to(|| async { Html(playground_source("/graphql", None)) })),
             )
@@ -96,6 +68,12 @@ async fn main() -> io::Result<()> {
                     .app_data(Data::new(secret.clone()))
                     .app_data(Data::from(guestschema.clone()))
                     .route(web::post().to(guestgraphql)),
+            )
+            .service(
+                web::resource("/guestschema")
+                    .app_data(Data::new(pool.clone()))
+                    .app_data(Data::from(guestschema.clone()))
+                    .route(web::get().to(guestgraphqlschema)),
             )
             .service(
                 web::resource("/guestplayground").route(
