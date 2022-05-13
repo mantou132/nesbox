@@ -2,6 +2,8 @@
 extern crate diesel;
 #[macro_use]
 extern crate serde_derive;
+#[macro_use]
+extern crate lazy_static;
 
 use dotenv::dotenv;
 use std::{env, io, sync::Arc};
@@ -24,6 +26,7 @@ use crate::{
 mod auth;
 mod db;
 mod handles;
+mod notify;
 mod schemas;
 
 #[actix_web::main]
@@ -41,10 +44,18 @@ async fn main() -> io::Result<()> {
     let schema = Arc::new(create_schema());
     let guestschema = Arc::new(create_guest_schema());
 
-    log::info!("GraphQL playground: http://localhost:{}/playground", port);
+    log::info!("playground: http://localhost:{}/playground", port);
+    log::info!("guestplayground: http://localhost:{}/guestplayground", port);
 
     HttpServer::new(move || {
         App::new()
+            .service(
+                web::resource("/subscriptions")
+                    .app_data(Data::new(pool.clone()))
+                    .app_data(Data::from(schema.clone()))
+                    .app_data(Data::new(secret.clone()))
+                    .route(web::get().to(subscriptions)),
+            )
             .service(
                 web::resource("/graphql")
                     .app_data(Data::new(pool.clone()))
@@ -59,8 +70,11 @@ async fn main() -> io::Result<()> {
                     .route(web::get().to(graphqlschema)),
             )
             .service(
-                web::resource("/playground")
-                    .route(web::get().to(|| async { Html(playground_source("/graphql", None)) })),
+                web::resource("/playground").route(
+                    web::get().to(|| async {
+                        Html(playground_source("/graphql", Some("/subscriptions")))
+                    }),
+                ),
             )
             .service(
                 web::resource("/guestgraphql")

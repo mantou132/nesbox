@@ -1,9 +1,11 @@
-use juniper::{EmptySubscription, FieldResult, RootNode};
-
 use super::comment::*;
 use super::game::*;
 use super::user::*;
 use crate::db::root::Pool;
+use crate::notify::{get_receiver, send_msg};
+use futures::Stream;
+use juniper::{graphql_subscription, EmptySubscription, FieldError, FieldResult, RootNode};
+use std::pin::Pin;
 
 pub struct QueryRoot;
 
@@ -11,6 +13,8 @@ pub struct QueryRoot;
 impl QueryRoot {
     fn games(context: &Context) -> FieldResult<Vec<ScGame>> {
         let conn = context.dbpool.get().unwrap();
+        // TODO
+        send_msg(context.username.clone(), "adf".to_string());
         Ok(get_games(&conn))
     }
     fn comments(context: &Context, game_id: i32) -> FieldResult<Vec<ScComment>> {
@@ -37,6 +41,25 @@ impl MutationRoot {
     }
 }
 
+pub struct Subscription;
+
+type StringStream = Pin<Box<dyn Stream<Item = Result<String, FieldError>> + Send>>;
+
+#[graphql_subscription(context = Context)]
+impl Subscription {
+    async fn hello_world(context: &Context) -> StringStream {
+        let username = context.username.clone();
+        let mut rx = get_receiver(username);
+        let stream = async_stream::stream! {
+            loop {
+                let result = rx.recv().await.unwrap();
+                yield Ok(format!("Hello {}", result))
+            }
+        };
+        Box::pin(stream)
+    }
+}
+
 pub struct Context {
     pub dbpool: Pool,
     pub username: String,
@@ -44,10 +67,10 @@ pub struct Context {
 
 impl juniper::Context for Context {}
 
-pub type Schema = RootNode<'static, QueryRoot, MutationRoot, EmptySubscription<Context>>;
+pub type Schema = RootNode<'static, QueryRoot, MutationRoot, Subscription>;
 
 pub fn create_schema() -> Schema {
-    Schema::new(QueryRoot {}, MutationRoot {}, EmptySubscription::new())
+    Schema::new(QueryRoot {}, MutationRoot {}, Subscription {})
 }
 
 pub struct GuestContext {
@@ -65,6 +88,8 @@ impl GuestQueryRoot {
 }
 
 pub struct GuestMutationRoot;
+
+impl juniper::Context for GuestContext {}
 
 #[juniper::graphql_object(Context = GuestContext)]
 impl GuestMutationRoot {

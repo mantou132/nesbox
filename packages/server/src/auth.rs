@@ -14,7 +14,7 @@ pub struct UserToken {
 }
 
 impl UserToken {
-    pub fn generate_token(secret: &[u8], username: &str) -> String {
+    pub fn generate_token(secret: &str, username: &str) -> String {
         let now = Utc::now().timestamp();
         let payload = UserToken {
             iat: now,
@@ -25,14 +25,14 @@ impl UserToken {
         encode(
             &Header::default(),
             &payload,
-            &EncodingKey::from_secret(secret),
+            &EncodingKey::from_secret(secret.as_bytes()),
         )
         .unwrap()
     }
-    pub fn parse(secret: &[u8], token: &str) -> Option<String> {
+    pub fn parse(secret: &str, token: &str) -> Option<String> {
         match decode::<UserToken>(
             token,
-            &DecodingKey::from_secret(secret),
+            &DecodingKey::from_secret(secret.as_bytes()),
             &Validation::new(Algorithm::HS256),
         ) {
             Ok(token_data) => Some(token_data.claims.username),
@@ -41,13 +41,18 @@ impl UserToken {
     }
 }
 
-pub fn extract_token(req: &HttpRequest) -> &str {
+pub fn extract_token_from_str(authen_str: &str) -> &str {
+    if authen_str.to_lowercase().starts_with("bearer") {
+        let token = authen_str[6..authen_str.len()].trim();
+        return token;
+    }
+    ""
+}
+
+pub fn extract_token_from_req(req: &HttpRequest) -> &str {
     if let Some(authn_header) = req.headers().get("authorization") {
         if let Ok(authen_str) = authn_header.to_str() {
-            if authen_str.to_lowercase().starts_with("bearer") {
-                let token = authen_str[6..authen_str.len()].trim();
-                return token;
-            }
+            return extract_token_from_str(authen_str);
         }
     }
     ""

@@ -108,7 +108,7 @@ pub fn login(conn: &PgConnection, req: ScLoginReq, secret: &str) -> ScLoginResp 
 
     ScLoginResp {
         user,
-        token: UserToken::generate_token(secret.as_bytes(), &req.username),
+        token: UserToken::generate_token(secret, &req.username),
     }
 }
 
@@ -141,6 +141,6 @@ pub fn register(conn: &PgConnection, req: ScLoginReq, secret: &str) -> ScLoginRe
 
     ScLoginResp {
         user,
-        token: UserToken::generate_token(secret.as_bytes(), &req.username),
+        token: UserToken::generate_token(secret, &req.username),
     }
 }

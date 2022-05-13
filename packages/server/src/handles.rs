@@ -1,14 +1,50 @@
-use actix_web::{web, HttpRequest, HttpResponse, Responder};
+use actix_web::{error, web, Error, HttpRequest, HttpResponse, Responder};
 use juniper::{
     http::{GraphQLRequest, GraphQLResponse},
-    introspect, IntrospectionFormat,
+    introspect, DefaultScalarValue, InputValue, IntrospectionFormat, Variables,
 };
+use juniper_actix::subscriptions::subscriptions_handler;
+use juniper_graphql_ws::ConnectionConfig;
+use std::time::Duration;
 
 use crate::{
-    auth::{extract_token, UserToken},
+    auth::{extract_token_from_req, extract_token_from_str, UserToken},
     db::root::Pool,
     schemas::root::{Context, GuestContext, GuestSchema, Schema},
 };
+
+pub async fn subscriptions(
+    req: HttpRequest,
+    schema: web::Data<Schema>,
+    pool: web::Data<Pool>,
+    secret: web::Data<String>,
+    stream: web::Payload,
+) -> Result<HttpResponse, Error> {
+    let schema = schema.into_inner();
+    subscriptions_handler(req, stream, schema, |params: Variables| async move {
+        let authorization = params
+            .get("authorization")
+            .unwrap_or(params.get("Authorization").unwrap_or(&InputValue::Null));
+        let user = match authorization {
+            InputValue::Scalar(DefaultScalarValue::String(auth_string)) => {
+                UserToken::parse(&secret, extract_token_from_str(&auth_string))
+            }
+            _ => None,
+        };
+        let username = match user {
+            Some(username) => username,
+            None => return Err(error::ErrorUnauthorized("Unauthorized")),
+        };
+        let ctx = Context {
+            username,
+            dbpool: pool.get_ref().to_owned(),
+        };
+        let config = ConnectionConfig::new(ctx);
+        let config = config.with_keep_alive_interval(Duration::from_secs(15));
+        Ok(config) as Result<ConnectionConfig<Context>, Error>
+    })
+    .await
+}
 
 pub async fn graphql(
     req: HttpRequest,
@@ -17,7 +53,7 @@ pub async fn graphql(
     secret: web::Data<String>,
     data: web::Json<GraphQLRequest>,
 ) -> impl Responder {
-    let username = match UserToken::parse(secret.get_ref().as_bytes(), extract_token(&req)) {
+    let username = match UserToken::parse(&secret, extract_token_from_req(&req)) {
         Some(username) => username,
         None => return HttpResponse::Unauthorized().finish(),
     };
