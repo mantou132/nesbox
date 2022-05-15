@@ -29,6 +29,7 @@ pub fn get_messages(conn: &PgConnection, uid: i32, tid: i32) -> Vec<ScMessage> {
         .filter(deleted_at.is_null())
         .filter(user_id.eq(uid))
         .filter(target_id.eq(tid))
+        .limit(100)
         .load::<Message>(conn)
         .expect("Error loading messages")
         .iter()

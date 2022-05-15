@@ -11,7 +11,7 @@ use crate::db::models::{NewUser, User};
 use crate::db::schema::users;
 
 #[derive(GraphQLEnum)]
-enum UserStatus {
+pub enum ScUserStatus {
     Online,
     Offline,
 }
@@ -24,7 +24,7 @@ pub struct ScUser {
     settings: Option<String>,
     created_at: f64,
     updated_at: f64,
-    status: UserStatus,
+    status: ScUserStatus,
 }
 
 #[derive(GraphQLInputObject)]
@@ -39,18 +39,18 @@ pub struct ScLoginResp {
     token: String,
 }
 
-fn convert_status_to_string(status: UserStatus) -> String {
+fn convert_status_to_string(status: ScUserStatus) -> String {
     match status {
-        UserStatus::Online => String::from("online"),
-        UserStatus::Offline => String::from("offline"),
+        ScUserStatus::Online => String::from("online"),
+        ScUserStatus::Offline => String::from("offline"),
     }
 }
 
-fn convert_status_to_enum(status: String) -> UserStatus {
+pub fn convert_status_to_enum(status: String) -> ScUserStatus {
     match status.as_str() {
-        "online" => UserStatus::Online,
-        "offline" => UserStatus::Offline,
-        _ => UserStatus::Offline,
+        "online" => ScUserStatus::Online,
+        "offline" => ScUserStatus::Offline,
+        _ => ScUserStatus::Offline,
     }
 }
 
@@ -106,10 +106,9 @@ pub fn login(conn: &PgConnection, req: ScLoginReq, secret: &str) -> ScLoginResp 
         status: convert_status_to_enum(user.status),
     };
 
-    ScLoginResp {
-        user,
-        token: UserToken::generate_token(secret, &req.username),
-    }
+    let token = UserToken::generate_token(secret, &user.username, &user.nickname);
+
+    ScLoginResp { user, token }
 }
 
 pub fn register(conn: &PgConnection, req: ScLoginReq, secret: &str) -> ScLoginResp {
@@ -121,7 +120,7 @@ pub fn register(conn: &PgConnection, req: ScLoginReq, secret: &str) -> ScLoginRe
         deleted_at: None,
         created_at: Utc::now().naive_utc(),
         updated_at: Utc::now().naive_utc(),
-        status: &convert_status_to_string(UserStatus::Offline),
+        status: &convert_status_to_string(ScUserStatus::Offline),
     };
 
     let user = diesel::insert_into(users::table)
@@ -139,8 +138,7 @@ pub fn register(conn: &PgConnection, req: ScLoginReq, secret: &str) -> ScLoginRe
         status: convert_status_to_enum(user.status),
     };
 
-    ScLoginResp {
-        user,
-        token: UserToken::generate_token(secret, &req.username),
-    }
+    let token = UserToken::generate_token(secret, &user.username, &user.nickname);
+
+    ScLoginResp { user, token }
 }

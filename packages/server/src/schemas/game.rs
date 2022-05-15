@@ -31,7 +31,7 @@ pub fn get_games(conn: &PgConnection) -> Vec<ScGame> {
     games
         .filter(deleted_at.is_null())
         .load::<Game>(conn)
-        .expect("Error loading posts")
+        .expect("Error loading games")
         .iter()
         .map(|game| ScGame {
             id: game.id,

@@ -10,16 +10,18 @@ pub struct UserToken {
     // expiration
     pub exp: i64,
     // data
-    pub username: String,
+    pub preferred_username: String,
+    pub nickname: String,
 }
 
 impl UserToken {
-    pub fn generate_token(secret: &str, username: &str) -> String {
+    pub fn generate_token(secret: &str, username: &str, nickname: &str) -> String {
         let now = Utc::now().timestamp();
         let payload = UserToken {
             iat: now,
             exp: now + 60 * 60 * 24 * 7,
-            username: username.to_owned(),
+            preferred_username: username.to_owned(),
+            nickname: nickname.to_owned(),
         };
 
         encode(
@@ -35,7 +37,7 @@ impl UserToken {
             &DecodingKey::from_secret(secret.as_bytes()),
             &Validation::new(Algorithm::HS256),
         ) {
-            Ok(token_data) => Some(token_data.claims.username),
+            Ok(token_data) => Some(token_data.claims.preferred_username),
             _ => None,
         }
     }

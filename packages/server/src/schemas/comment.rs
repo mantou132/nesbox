@@ -18,7 +18,6 @@ pub struct ScComment {
 
 #[derive(GraphQLInputObject)]
 pub struct ScNewComment {
-    user_id: i32,
     game_id: i32,
     body: String,
     like: bool,
@@ -44,9 +43,9 @@ pub fn get_comments(conn: &PgConnection, gid: i32) -> Vec<ScComment> {
         .collect()
 }
 
-pub fn create_comment(conn: &PgConnection, req: ScNewComment) -> ScComment {
+pub fn create_comment(conn: &PgConnection, uid: i32, req: ScNewComment) -> ScComment {
     let new_comment = NewComment {
-        user_id: req.user_id,
+        user_id: uid,
         game_id: req.game_id,
         body: &req.body,
         like: req.like,
