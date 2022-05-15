@@ -29,9 +29,9 @@ pub fn get_comments(conn: &PgConnection, gid: i32) -> Vec<ScComment> {
 
     comments
         .filter(deleted_at.is_null())
-        .filter(self::comments::dsl::game_id.eq(gid))
+        .filter(game_id.eq(gid))
         .load::<Comment>(conn)
-        .expect("Error loading posts")
+        .expect("Error loading comments")
         .iter()
         .map(|comment| ScComment {
             user_id: comment.user_id,

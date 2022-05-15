@@ -1,5 +1,6 @@
 use super::schema::comments;
 use super::schema::games;
+use super::schema::messages;
 use super::schema::users;
 
 use chrono::NaiveDateTime;
@@ -73,6 +74,28 @@ pub struct NewUser<'a> {
     pub nickname: &'a str,
     pub status: &'a str,
     pub settings: Option<&'a Value>,
+    pub deleted_at: Option<NaiveDateTime>,
+    pub created_at: NaiveDateTime,
+    pub updated_at: NaiveDateTime,
+}
+
+#[derive(Queryable)]
+pub struct Message {
+    pub id: i32,
+    pub body: String,
+    pub target_id: i32,
+    pub user_id: i32,
+    pub deleted_at: Option<NaiveDateTime>,
+    pub created_at: NaiveDateTime,
+    pub updated_at: NaiveDateTime,
+}
+
+#[derive(Insertable)]
+#[table_name = "messages"]
+pub struct NewMessage<'a> {
+    pub body: &'a str,
+    pub target_id: i32,
+    pub user_id: i32,
     pub deleted_at: Option<NaiveDateTime>,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,

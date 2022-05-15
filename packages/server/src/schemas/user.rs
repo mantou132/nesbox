@@ -18,7 +18,7 @@ enum UserStatus {
 
 #[derive(GraphQLObject)]
 pub struct ScUser {
-    id: i32,
+    pub id: i32,
     username: String,
     nickname: String,
     settings: Option<String>,

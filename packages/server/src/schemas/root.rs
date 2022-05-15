@@ -1,8 +1,9 @@
 use super::comment::*;
 use super::game::*;
+use super::message::*;
 use super::user::*;
 use crate::db::root::Pool;
-use crate::notify::{get_receiver, send_msg};
+use crate::notify::{get_receiver, send_message};
 use futures::Stream;
 use juniper::{graphql_subscription, EmptySubscription, FieldError, FieldResult, RootNode};
 use std::pin::Pin;
@@ -13,8 +14,6 @@ pub struct QueryRoot;
 impl QueryRoot {
     fn games(context: &Context) -> FieldResult<Vec<ScGame>> {
         let conn = context.dbpool.get().unwrap();
-        // TODO
-        send_msg(context.username.clone(), "adf".to_string());
         Ok(get_games(&conn))
     }
     fn comments(context: &Context, game_id: i32) -> FieldResult<Vec<ScComment>> {
@@ -24,6 +23,11 @@ impl QueryRoot {
     fn user(context: &Context) -> FieldResult<ScUser> {
         let conn = context.dbpool.get().unwrap();
         Ok(get_user(&conn, &context.username))
+    }
+    fn messages(context: &Context, target_id: i32) -> FieldResult<Vec<ScMessage>> {
+        let conn = context.dbpool.get().unwrap();
+        let user = get_user(&conn, &context.username);
+        Ok(get_messages(&conn, user.id, target_id))
     }
 }
 
@@ -39,21 +43,29 @@ impl MutationRoot {
         let conn = context.dbpool.get().unwrap();
         Ok(create_comment(&conn, new_comment))
     }
+    fn create_message(context: &Context, new_message: ScNewMessage) -> FieldResult<ScMessage> {
+        let conn = context.dbpool.get().unwrap();
+        let user = get_user(&conn, &context.username);
+        let message = create_message(&conn, user.id, new_message);
+        send_message(message.clone());
+        Ok(message)
+    }
 }
 
 pub struct Subscription;
 
-type StringStream = Pin<Box<dyn Stream<Item = Result<String, FieldError>> + Send>>;
+type MessageStream = Pin<Box<dyn Stream<Item = Result<ScMessage, FieldError>> + Send>>;
 
 #[graphql_subscription(context = Context)]
 impl Subscription {
-    async fn hello_world(context: &Context) -> StringStream {
-        let username = context.username.clone();
-        let mut rx = get_receiver(username);
+    async fn message(context: &Context) -> MessageStream {
+        let conn = context.dbpool.get().unwrap();
+        let user = get_user(&conn, &context.username);
+        let mut rx = get_receiver(user.id);
         let stream = async_stream::stream! {
             loop {
                 let result = rx.recv().await.unwrap();
-                yield Ok(format!("Hello {}", result))
+                yield Ok(result)
             }
         };
         Box::pin(stream)
