@@ -26,7 +26,6 @@ use crate::{
 mod auth;
 mod db;
 mod handles;
-mod notify;
 mod schemas;
 
 #[actix_web::main]

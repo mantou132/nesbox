@@ -8,7 +8,7 @@ use super::playing::*;
 use crate::db::models::{NewRoom, Room};
 use crate::db::schema::rooms;
 
-#[derive(GraphQLObject)]
+#[derive(GraphQLObject, Debug, Clone)]
 pub struct ScRoom {
     id: i32,
     game_id: i32,

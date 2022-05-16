@@ -12,7 +12,7 @@ use crate::auth::UserToken;
 use crate::db::models::{NewUser, User};
 use crate::db::schema::users;
 
-#[derive(GraphQLEnum)]
+#[derive(GraphQLEnum, Debug, Clone)]
 pub enum ScUserStatus {
     Online,
     Offline,
@@ -30,7 +30,7 @@ pub struct ScUser {
     updated_at: f64,
 }
 
-#[derive(GraphQLObject)]
+#[derive(GraphQLObject, Debug, Clone)]
 pub struct ScUserBasic {
     pub id: i32,
     pub username: String,
@@ -97,6 +97,17 @@ pub fn get_user(conn: &PgConnection, uid: i32) -> ScUser {
         status: convert_status_to_enum(user.status.clone()),
         playing: get_playing(conn, user.id),
     }
+}
+
+pub fn update_user_status(conn: &PgConnection, uid: i32, user_status: ScUserStatus) -> String {
+    use self::users::dsl::*;
+
+    diesel::update(users.filter(id.eq(uid)))
+        .set(status.eq(&convert_status_to_string(user_status)))
+        .execute(conn)
+        .expect("Error saving new friend");
+
+    "Ok".into()
 }
 
 pub fn get_user_basic(conn: &PgConnection, uid: i32) -> ScUserBasic {

@@ -6,7 +6,7 @@ use juniper::{GraphQLInputObject, GraphQLObject};
 use crate::db::models::{Game, NewGame};
 use crate::db::schema::games;
 
-#[derive(GraphQLObject)]
+#[derive(GraphQLObject, Debug, Clone)]
 pub struct ScGame {
     id: i32,
     name: String,

@@ -39,8 +39,7 @@ pub async fn subscriptions(
             user_id,
             dbpool: pool.get_ref().to_owned(),
         };
-        let config = ConnectionConfig::new(ctx);
-        let config = config.with_keep_alive_interval(Duration::from_secs(15));
+        let config = ConnectionConfig::new(ctx).with_keep_alive_interval(Duration::from_secs(15));
         Ok(config) as Result<ConnectionConfig<Context>, Error>
     })
     .await
