@@ -22,8 +22,7 @@ impl QueryRoot {
     }
     fn favorites(context: &Context) -> FieldResult<Vec<i32>> {
         let conn = context.dbpool.get().unwrap();
-        let user = get_user(&conn, &context.username);
-        Ok(get_favorites(&conn, user.id))
+        Ok(get_favorites(&conn, context.user_id))
     }
     fn comments(context: &Context, game_id: i32) -> FieldResult<Vec<ScComment>> {
         let conn = context.dbpool.get().unwrap();
@@ -31,17 +30,15 @@ impl QueryRoot {
     }
     fn user(context: &Context) -> FieldResult<ScUser> {
         let conn = context.dbpool.get().unwrap();
-        Ok(get_user(&conn, &context.username))
+        Ok(get_user(&conn, context.user_id))
     }
     fn messages(context: &Context, target_id: i32) -> FieldResult<Vec<ScMessage>> {
         let conn = context.dbpool.get().unwrap();
-        let user = get_user(&conn, &context.username);
-        Ok(get_messages(&conn, user.id, target_id))
+        Ok(get_messages(&conn, context.user_id, target_id))
     }
     fn friends(context: &Context) -> FieldResult<Vec<ScFriend>> {
         let conn = context.dbpool.get().unwrap();
-        let user = get_user(&conn, &context.username);
-        Ok(get_friends(&conn, user.id))
+        Ok(get_friends(&conn, context.user_id))
     }
     fn rooms(context: &Context) -> FieldResult<Vec<ScRoom>> {
         let conn = context.dbpool.get().unwrap();
@@ -49,8 +46,7 @@ impl QueryRoot {
     }
     fn invites(context: &Context) -> FieldResult<Vec<ScInvite>> {
         let conn = context.dbpool.get().unwrap();
-        let user = get_user(&conn, &context.username);
-        Ok(get_invites(&conn, user.id))
+        Ok(get_invites(&conn, context.user_id))
     }
 }
 
@@ -64,43 +60,37 @@ impl MutationRoot {
     }
     fn create_comment(context: &Context, new_comment: ScNewComment) -> FieldResult<ScComment> {
         let conn = context.dbpool.get().unwrap();
-        let user = get_user(&conn, &context.username);
-        Ok(create_comment(&conn, user.id, new_comment))
+        Ok(create_comment(&conn, context.user_id, new_comment))
     }
     fn create_message(context: &Context, new_message: ScNewMessage) -> FieldResult<ScMessage> {
         let conn = context.dbpool.get().unwrap();
-        let user = get_user(&conn, &context.username);
-        let message = create_message(&conn, user.id, new_message);
+        let message = create_message(&conn, context.user_id, new_message);
         send_message(message.clone());
         Ok(message)
     }
     fn favorite_game(context: &Context, game_id: i32, favorite: bool) -> FieldResult<String> {
         let conn = context.dbpool.get().unwrap();
-        let user = get_user(&conn, &context.username);
         if favorite {
-            Ok(create_favorite(&conn, user.id, game_id))
+            Ok(create_favorite(&conn, context.user_id, game_id))
         } else {
-            Ok(delete_favorite(&conn, user.id, game_id))
+            Ok(delete_favorite(&conn, context.user_id, game_id))
         }
     }
     fn apply_friend(context: &Context, target_id: i32) -> FieldResult<String> {
         let conn = context.dbpool.get().unwrap();
-        let user = get_user(&conn, &context.username);
-        Ok(apply_friend(&conn, user.id, target_id))
+        Ok(apply_friend(&conn, context.user_id, target_id))
     }
     fn accept_friend(context: &Context, target_id: i32, accept: bool) -> FieldResult<String> {
         let conn = context.dbpool.get().unwrap();
-        let user = get_user(&conn, &context.username);
         if accept {
-            Ok(accept_friend(&conn, user.id, target_id))
+            Ok(accept_friend(&conn, context.user_id, target_id))
         } else {
-            Ok(delete_friend(&conn, user.id, target_id))
+            Ok(delete_friend(&conn, context.user_id, target_id))
         }
     }
     fn create_invite(context: &Context, req: ScNewInvite) -> FieldResult<String> {
         let conn = context.dbpool.get().unwrap();
-        let user = get_user(&conn, &context.username);
-        Ok(create_invite(&conn, user.id, req))
+        Ok(create_invite(&conn, context.user_id, req))
     }
     fn create_room(context: &Context, new_room: ScNewRoom) -> FieldResult<ScRoom> {
         let conn = context.dbpool.get().unwrap();
@@ -108,13 +98,11 @@ impl MutationRoot {
     }
     fn enter_room(context: &Context, room_id: i32) -> FieldResult<String> {
         let conn = context.dbpool.get().unwrap();
-        let user = get_user(&conn, &context.username);
-        Ok(enter_room(&conn, user.id, room_id))
+        Ok(enter_room(&conn, context.user_id, room_id))
     }
     fn leave_room(context: &Context, room_id: i32) -> FieldResult<String> {
         let conn = context.dbpool.get().unwrap();
-        let user = get_user(&conn, &context.username);
-        Ok(leave_room(&conn, user.id, room_id))
+        Ok(leave_room(&conn, context.user_id, room_id))
     }
 }
 
@@ -125,9 +113,7 @@ type MessageStream = Pin<Box<dyn Stream<Item = Result<ScMessage, FieldError>> + 
 #[graphql_subscription(context = Context)]
 impl Subscription {
     async fn message(context: &Context) -> MessageStream {
-        let conn = context.dbpool.get().unwrap();
-        let user = get_user(&conn, &context.username);
-        let mut rx = get_receiver(user.id);
+        let mut rx = get_receiver(context.user_id);
         let stream = async_stream::stream! {
             loop {
                 let result = rx.recv().await.unwrap();
@@ -140,7 +126,7 @@ impl Subscription {
 
 pub struct Context {
     pub dbpool: Pool,
-    pub username: String,
+    pub user_id: i32,
 }
 
 impl juniper::Context for Context {}

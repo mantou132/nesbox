@@ -6,6 +6,8 @@ use juniper::{GraphQLEnum, GraphQLInputObject, GraphQLObject};
 use ring::{digest, pbkdf2};
 use std::num::NonZeroU32;
 
+use super::playing::*;
+use super::room::*;
 use crate::auth::UserToken;
 use crate::db::models::{NewUser, User};
 use crate::db::schema::users;
@@ -19,12 +21,22 @@ pub enum ScUserStatus {
 #[derive(GraphQLObject)]
 pub struct ScUser {
     pub id: i32,
-    username: String,
-    nickname: String,
+    pub username: String,
+    pub nickname: String,
+    pub status: ScUserStatus,
+    pub playing: Option<ScRoom>,
     settings: Option<String>,
     created_at: f64,
     updated_at: f64,
-    status: ScUserStatus,
+}
+
+#[derive(GraphQLObject)]
+pub struct ScUserBasic {
+    pub id: i32,
+    pub username: String,
+    pub nickname: String,
+    pub status: ScUserStatus,
+    pub playing: Option<ScRoom>,
 }
 
 #[derive(GraphQLInputObject)]
@@ -66,12 +78,12 @@ fn hash_password(password: &str) -> String {
     HEXUPPER.encode(&pbkdf2_hash)
 }
 
-pub fn get_user(conn: &PgConnection, u: &str) -> ScUser {
+pub fn get_user(conn: &PgConnection, uid: i32) -> ScUser {
     use self::users::dsl::*;
 
     let user = users
         .filter(deleted_at.is_null())
-        .filter(username.eq(u))
+        .filter(id.eq(uid))
         .get_result::<User>(conn)
         .expect("Error loading user");
 
@@ -83,6 +95,25 @@ pub fn get_user(conn: &PgConnection, u: &str) -> ScUser {
         created_at: user.created_at.timestamp_millis() as f64,
         updated_at: user.updated_at.timestamp_millis() as f64,
         status: convert_status_to_enum(user.status.clone()),
+        playing: get_playing(conn, user.id),
+    }
+}
+
+pub fn get_user_basic(conn: &PgConnection, uid: i32) -> ScUserBasic {
+    use self::users::dsl::*;
+
+    let user = users
+        .filter(deleted_at.is_null())
+        .filter(id.eq(uid))
+        .get_result::<User>(conn)
+        .expect("Error loading user");
+
+    ScUserBasic {
+        id: user.id,
+        username: user.username.clone(),
+        nickname: user.nickname.clone(),
+        status: convert_status_to_enum(user.status.clone()),
+        playing: get_playing(conn, user.id),
     }
 }
 
@@ -104,9 +135,10 @@ pub fn login(conn: &PgConnection, req: ScLoginReq, secret: &str) -> ScLoginResp 
         created_at: user.created_at.timestamp_millis() as f64,
         updated_at: user.updated_at.timestamp_millis() as f64,
         status: convert_status_to_enum(user.status),
+        playing: get_playing(conn, user.id),
     };
 
-    let token = UserToken::generate_token(secret, &user.username, &user.nickname);
+    let token = UserToken::generate_token(secret, &user);
 
     ScLoginResp { user, token }
 }
@@ -136,9 +168,10 @@ pub fn register(conn: &PgConnection, req: ScLoginReq, secret: &str) -> ScLoginRe
         created_at: user.created_at.timestamp_millis() as f64,
         updated_at: user.updated_at.timestamp_millis() as f64,
         status: convert_status_to_enum(user.status),
+        playing: None,
     };
 
-    let token = UserToken::generate_token(secret, &user.username, &user.nickname);
+    let token = UserToken::generate_token(secret, &user);
 
     ScLoginResp { user, token }
 }

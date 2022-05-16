@@ -3,12 +3,11 @@ use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use juniper::{GraphQLEnum, GraphQLObject};
 
-use crate::db::models::{Friend, NewFriend, User};
+use crate::db::models::{Friend, NewFriend};
 use crate::db::schema::friends;
-use crate::db::schema::users;
 
-use super::playing::*;
 use super::room::*;
+use super::user::*;
 
 #[derive(GraphQLEnum)]
 pub enum ScFriendStatus {
@@ -52,19 +51,11 @@ pub fn get_friends(conn: &PgConnection, uid: i32) -> Vec<ScFriend> {
         .expect("Error loading friend")
         .iter()
         .map(|friend| {
-            use self::users::dsl::*;
-
-            let user = users
-                .filter(deleted_at.is_null())
-                .filter(id.eq(friend.target_id))
-                .get_result::<User>(conn)
-                .expect("Error loading user");
-
-            let playing = get_playing(conn, friend.target_id);
+            let user = get_user_basic(conn, friend.target_id);
 
             ScFriend {
-                playing,
-                user_status: super::user::convert_status_to_enum(user.status.clone()),
+                playing: user.playing,
+                user_status: user.status,
                 target_id: friend.target_id,
                 created_at: friend.created_at.timestamp_millis() as f64,
                 status: convert_status_to_enum(friend.status.clone()),

@@ -31,12 +31,12 @@ pub async fn subscriptions(
             }
             _ => None,
         };
-        let username = match user {
-            Some(username) => username,
+        let user_id = match user {
+            Some(id) => id,
             None => return Err(error::ErrorUnauthorized("Unauthorized")),
         };
         let ctx = Context {
-            username,
+            user_id,
             dbpool: pool.get_ref().to_owned(),
         };
         let config = ConnectionConfig::new(ctx);
@@ -53,12 +53,12 @@ pub async fn graphql(
     secret: web::Data<String>,
     data: web::Json<GraphQLRequest>,
 ) -> impl Responder {
-    let username = match UserToken::parse(&secret, extract_token_from_req(&req)) {
-        Some(username) => username,
+    let user_id = match UserToken::parse(&secret, extract_token_from_req(&req)) {
+        Some(id) => id,
         None => return HttpResponse::Unauthorized().finish(),
     };
     let ctx = Context {
-        username,
+        user_id,
         dbpool: pool.get_ref().to_owned(),
     };
     let res = data.execute(&schema, &ctx).await;
@@ -67,7 +67,7 @@ pub async fn graphql(
 
 pub async fn graphqlschema(schema: web::Data<Schema>, pool: web::Data<Pool>) -> impl Responder {
     let ctx = Context {
-        username: "".to_string(),
+        user_id: 0,
         dbpool: pool.get_ref().to_owned(),
     };
     let result = introspect(&schema, &ctx, IntrospectionFormat::default());
