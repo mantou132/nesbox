@@ -93,7 +93,6 @@ table! {
         deleted_at -> Nullable<Timestamp>,
         created_at -> Timestamp,
         updated_at -> Timestamp,
-        status -> Varchar,
     }
 }
 

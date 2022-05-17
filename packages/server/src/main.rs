@@ -6,7 +6,9 @@ extern crate serde_derive;
 extern crate lazy_static;
 
 use dotenv::dotenv;
+use std::time::Duration;
 use std::{env, io, sync::Arc};
+use tokio::time;
 
 use actix_cors::Cors;
 use actix_web::{
@@ -20,6 +22,7 @@ use juniper::http::playground::playground_source;
 use crate::{
     db::root::get_db_pool,
     handles::*,
+    schemas::notify::check_user,
     schemas::root::{create_guest_schema, create_schema},
 };
 
@@ -39,12 +42,21 @@ async fn main() -> io::Result<()> {
     let secret = env::var("SECRET").unwrap_or("xxx".to_owned());
 
     let pool = get_db_pool();
+    let pool2 = pool.clone();
 
     let schema = Arc::new(create_schema());
     let guestschema = Arc::new(create_guest_schema());
 
     log::info!("playground: http://localhost:{}/playground", port);
     log::info!("guestplayground: http://localhost:{}/guestplayground", port);
+
+    tokio::spawn(async move {
+        let mut interval = time::interval(Duration::from_secs(3));
+        loop {
+            interval.tick().await;
+            check_user(&pool2);
+        }
+    });
 
     HttpServer::new(move || {
         App::new()

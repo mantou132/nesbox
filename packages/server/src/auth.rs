@@ -36,30 +36,26 @@ impl UserToken {
         .unwrap()
     }
     pub fn parse(secret: &str, token: &str) -> Option<i32> {
-        match decode::<UserToken>(
+        decode::<UserToken>(
             token,
             &DecodingKey::from_secret(secret.as_bytes()),
             &Validation::new(Algorithm::HS256),
-        ) {
-            Ok(token_data) => Some(token_data.claims.user_id),
-            _ => None,
-        }
+        )
+        .map(|token_data| token_data.claims.user_id)
+        .ok()
     }
 }
 
 pub fn extract_token_from_str(authen_str: &str) -> &str {
     if authen_str.to_lowercase().starts_with("bearer") {
-        let token = authen_str[6..authen_str.len()].trim();
-        return token;
+        return authen_str[6..authen_str.len()].trim();
     }
     ""
 }
 
 pub fn extract_token_from_req(req: &HttpRequest) -> &str {
-    if let Some(authn_header) = req.headers().get("authorization") {
-        if let Ok(authen_str) = authn_header.to_str() {
-            return extract_token_from_str(authen_str);
-        }
-    }
-    ""
+    req.headers()
+        .get("authorization")
+        .map(|authn| extract_token_from_str(authn.to_str().unwrap_or_default()))
+        .unwrap_or("")
 }

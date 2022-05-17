@@ -68,7 +68,6 @@ pub struct User {
     pub deleted_at: Option<NaiveDateTime>,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
-    pub status: String,
 }
 
 #[derive(Insertable)]
@@ -77,7 +76,6 @@ pub struct NewUser<'a> {
     pub username: &'a str,
     pub password: &'a str,
     pub nickname: &'a str,
-    pub status: &'a str,
     pub settings: Option<&'a Value>,
     pub deleted_at: Option<NaiveDateTime>,
     pub created_at: NaiveDateTime,

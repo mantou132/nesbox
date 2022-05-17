@@ -51,7 +51,7 @@ pub fn get_friends(conn: &PgConnection, uid: i32) -> Vec<ScFriend> {
         .expect("Error loading friend")
         .iter()
         .map(|friend| {
-            let user = get_user(conn, friend.target_id);
+            let user = get_user_basic(conn, friend.target_id);
 
             ScFriend {
                 playing: user.playing,
@@ -90,7 +90,7 @@ pub fn apply_friend(conn: &PgConnection, uid: i32, tid: i32) -> ScFriend {
         .get_result::<Friend>(conn)
         .expect("Error saving new friend");
 
-    let user = get_user(conn, tid);
+    let user = get_user_basic(conn, tid);
 
     ScFriend {
         playing: user.playing,
@@ -121,7 +121,7 @@ pub fn accept_friend(conn: &PgConnection, uid: i32, tid: i32) -> ScFriend {
         .get_result::<Friend>(conn)
         .expect("Error saving new friend");
 
-    let user = get_user(conn, tid);
+    let user = get_user_basic(conn, tid);
 
     ScFriend {
         playing: user.playing,

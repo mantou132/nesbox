@@ -1,5 +1,8 @@
+use crate::db::root::Pool;
+
 use super::{
-    friend::ScFriend, game::ScGame, invite::ScInvite, message::ScMessage, user::ScUserBasic,
+    friend::get_friend_ids, friend::ScFriend, game::ScGame, invite::ScInvite, message::ScMessage,
+    user::get_user_basic, user::ScUserBasic,
 };
 use juniper::GraphQLObject;
 use std::collections::HashMap;
@@ -18,7 +21,7 @@ pub struct ScNotifyMessage {
 }
 
 impl ScNotifyMessage {
-    fn new() -> Self {
+    pub fn new() -> Self {
         ScNotifyMessage {
             new_message: None,
             new_game: None,
@@ -75,34 +78,53 @@ lazy_static! {
 
 pub fn notify(user_id: i32, msg: ScNotifyMessage) {
     let map = NOTIFY_MAP.lock().unwrap();
-    if let Some(tx) = map.get(&user_id) {
-        tx.send(msg).unwrap();
-    }
+    map.get(&user_id).and_then(|tx| tx.send(msg).ok());
 }
 
 pub fn notify_ids(ids: Vec<i32>, msg: ScNotifyMessage) {
     let map = NOTIFY_MAP.lock().unwrap();
     for user_id in ids {
-        let msg = msg.clone();
-        if let Some(tx) = map.get(&user_id) {
-            tx.send(msg).unwrap();
-        }
+        map.get(&user_id).and_then(|tx| tx.send(msg.clone()).ok());
     }
 }
 
 pub fn notify_all(msg: ScNotifyMessage) {
     let map = NOTIFY_MAP.lock().unwrap();
     for (user_id, _) in map.iter() {
-        let msg = msg.clone();
-        if let Some(tx) = map.get(&user_id) {
-            tx.send(msg).unwrap();
-        }
+        map.get(&user_id).and_then(|tx| tx.send(msg.clone()).ok());
     }
 }
 
 pub fn get_receiver(user_id: i32) -> Receiver<ScNotifyMessage> {
     let mut map = NOTIFY_MAP.lock().unwrap();
     map.entry(user_id)
-        .or_insert(broadcast::channel(5).0)
+        .or_insert_with(|| broadcast::channel(5).0)
         .subscribe()
+}
+
+pub fn has_user(user_id: i32) -> bool {
+    let map = NOTIFY_MAP.lock().unwrap();
+    map.contains_key(&user_id)
+}
+
+pub fn check_user(pool: &Pool) {
+    let conn = pool.get().unwrap();
+    let mut map = NOTIFY_MAP.lock().unwrap();
+    let mut ids = Vec::new();
+
+    map.retain(|user_id, tx| {
+        let is_ok = tx.receiver_count() > 0;
+        if !is_ok {
+            log::debug!("{} is offline", user_id);
+            ids.push(*user_id);
+        }
+        is_ok
+    });
+
+    for id in ids {
+        let msg = ScNotifyMessage::update_user(get_user_basic(&conn, id));
+        for user_id in get_friend_ids(&conn, id) {
+            map.get(&user_id).and_then(|tx| tx.send(msg.clone()).ok());
+        }
+    }
 }

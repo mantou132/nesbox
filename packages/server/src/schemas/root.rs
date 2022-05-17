@@ -139,16 +139,6 @@ type FriendSysStream = Pin<Box<dyn Stream<Item = Result<ScNotifyMessage, FieldEr
 #[graphql_subscription(context = Context)]
 impl Subscription {
     async fn friend_sys(context: &Context) -> FriendSysStream {
-        let conn = context.dbpool.get().unwrap();
-
-        // TODO: offline
-        // https://github.com/graphql-rust/juniper/issues/1066
-        update_user_status(&conn, context.user_id, ScUserStatus::Online);
-        notify_ids(
-            get_friend_ids(&conn, context.user_id),
-            ScNotifyMessage::update_user(get_user_basic(&conn, context.user_id)),
-        );
-
         let mut rx = get_receiver(context.user_id);
         let stream = async_stream::stream! {
             loop {
@@ -156,6 +146,13 @@ impl Subscription {
                 yield Ok(result)
             }
         };
+
+        let conn = context.dbpool.get().unwrap();
+        notify_ids(
+            get_friend_ids(&conn, context.user_id),
+            ScNotifyMessage::update_user(get_user_basic(&conn, context.user_id)),
+        );
+
         Box::pin(stream)
     }
 }
