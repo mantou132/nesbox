@@ -21,6 +21,7 @@ fn main() {
         deleted_at: None,
         created_at: NaiveDate::from_ymd(2016, 7, 8).and_hms(9, 10, 11),
         updated_at: NaiveDate::from_ymd(2016, 7, 8).and_hms(9, 10, 11),
+        screenshots: None,
     };
 
     diesel::insert_into(games::table)

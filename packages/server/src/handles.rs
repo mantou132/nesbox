@@ -10,7 +10,12 @@ use std::time::Duration;
 use crate::{
     auth::{extract_token_from_req, extract_token_from_str, UserToken},
     db::root::Pool,
+    github::{get_sc_new_game, validate, GithubPayload},
     schemas::root::{Context, GuestContext, GuestSchema, Schema},
+    schemas::{
+        game::{create_game, delete_game, get_game_from_name},
+        notify::{notify_all, ScNotifyMessage},
+    },
 };
 
 pub async fn subscriptions(
@@ -97,4 +102,34 @@ pub async fn guestgraphqlschema(
     };
     let result = introspect(&schema, &ctx, IntrospectionFormat::default());
     HttpResponse::Ok().json(GraphQLResponse::from_result(result))
+}
+
+pub async fn webhook(
+    req: HttpRequest,
+    body: web::Bytes,
+    secret: web::Data<String>,
+    pool: web::Data<Pool>,
+) -> impl Responder {
+    let payload: GithubPayload = serde_json::from_slice(&body).unwrap();
+
+    log::debug!("Webhook payload: {:?}", payload);
+
+    if !validate(&req, &secret, &body) || !payload.is_owner() {
+        return HttpResponse::Unauthorized().finish();
+    }
+
+    let conn = &pool.get_ref().get().unwrap();
+
+    match payload.action.as_str() {
+        "closed" => {
+            create_game(conn, get_sc_new_game(&payload));
+        }
+        "reopened" => {
+            let game = get_game_from_name(conn, &payload.issue.title);
+            delete_game(conn, game.id);
+            notify_all(ScNotifyMessage::delete_game(game.id));
+        }
+        _ => {}
+    }
+    HttpResponse::Ok().json(payload)
 }

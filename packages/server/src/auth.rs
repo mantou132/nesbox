@@ -33,7 +33,7 @@ impl UserToken {
             &payload,
             &EncodingKey::from_secret(secret.as_bytes()),
         )
-        .unwrap()
+        .unwrap_or_default()
     }
     pub fn parse(secret: &str, token: &str) -> Option<i32> {
         decode::<UserToken>(

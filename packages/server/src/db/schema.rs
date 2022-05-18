@@ -32,11 +32,12 @@ table! {
         id -> Int4,
         name -> Varchar,
         description -> Text,
-        preview -> Bpchar,
+        preview -> Varchar,
         deleted_at -> Nullable<Timestamp>,
         created_at -> Timestamp,
         updated_at -> Timestamp,
-        rom -> Bpchar,
+        rom -> Varchar,
+        screenshots -> Nullable<Text>,
     }
 }
 

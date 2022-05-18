@@ -13,6 +13,7 @@ use tokio::sync::broadcast::{self, Receiver, Sender};
 pub struct ScNotifyMessage {
     new_message: Option<ScMessage>,
     new_game: Option<ScGame>,
+    delete_game: Option<i32>,
     new_invite: Option<ScInvite>,
     apply_friend: Option<ScFriend>,
     accept_friend: Option<ScFriend>,
@@ -25,6 +26,7 @@ impl ScNotifyMessage {
         ScNotifyMessage {
             new_message: None,
             new_game: None,
+            delete_game: None,
             new_invite: None,
             apply_friend: None,
             accept_friend: None,
@@ -40,6 +42,11 @@ impl ScNotifyMessage {
     pub fn new_game(data: ScGame) -> ScNotifyMessage {
         let mut msg = ScNotifyMessage::new();
         msg.new_game = Some(data);
+        msg
+    }
+    pub fn delete_game(data: i32) -> ScNotifyMessage {
+        let mut msg = ScNotifyMessage::new();
+        msg.delete_game = Some(data);
         msg
     }
     pub fn new_invite(data: ScInvite) -> ScNotifyMessage {

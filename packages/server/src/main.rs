@@ -28,6 +28,7 @@ use crate::{
 
 mod auth;
 mod db;
+mod github;
 mod handles;
 mod schemas;
 
@@ -36,9 +37,9 @@ async fn main() -> io::Result<()> {
     dotenv().ok();
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
     let port = env::var("PORT")
-        .unwrap_or("8080".to_owned())
+        .unwrap_or_default()
         .parse::<u16>()
-        .unwrap();
+        .unwrap_or(8080);
     let secret = env::var("SECRET").unwrap_or("xxx".to_owned());
 
     let pool = get_db_pool();
@@ -104,6 +105,12 @@ async fn main() -> io::Result<()> {
                 web::resource("/guestplayground").route(
                     web::get().to(|| async { Html(playground_source("/guestgraphql", None)) }),
                 ),
+            )
+            .service(
+                web::resource("/webhook")
+                    .app_data(Data::new(pool.clone()))
+                    .app_data(Data::new(secret.clone()))
+                    .route(web::post().to(webhook)),
             )
             .wrap(Cors::permissive())
             .wrap(middleware::Logger::default())
