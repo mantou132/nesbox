@@ -6,7 +6,7 @@ use super::{
 };
 use juniper::GraphQLObject;
 use std::collections::HashMap;
-use std::sync::Mutex;
+use std::sync::RwLock;
 use tokio::sync::broadcast::{self, Receiver, Sender};
 
 #[derive(GraphQLObject, Debug, Clone)]
@@ -77,49 +77,53 @@ impl ScNotifyMessage {
 }
 
 lazy_static! {
-    static ref NOTIFY_MAP: Mutex<HashMap<i32, Sender<ScNotifyMessage>>> = {
+    static ref NOTIFY_MAP: RwLock<HashMap<i32, Sender<ScNotifyMessage>>> = {
         let m = HashMap::new();
-        Mutex::new(m)
+        RwLock::new(m)
     };
 }
 
 pub fn notify(user_id: i32, msg: ScNotifyMessage) {
-    let map = NOTIFY_MAP.lock().unwrap();
+    let map = NOTIFY_MAP.read().unwrap();
     map.get(&user_id).and_then(|tx| tx.send(msg).ok());
 }
 
 pub fn notify_ids(ids: Vec<i32>, msg: ScNotifyMessage) {
-    let map = NOTIFY_MAP.lock().unwrap();
+    let map = NOTIFY_MAP.read().unwrap();
     for user_id in ids {
         map.get(&user_id).and_then(|tx| tx.send(msg.clone()).ok());
     }
 }
 
 pub fn notify_all(msg: ScNotifyMessage) {
-    let map = NOTIFY_MAP.lock().unwrap();
+    let map = NOTIFY_MAP.read().unwrap();
     for (user_id, _) in map.iter() {
         map.get(&user_id).and_then(|tx| tx.send(msg.clone()).ok());
     }
 }
 
 pub fn get_receiver(user_id: i32) -> Receiver<ScNotifyMessage> {
-    let mut map = NOTIFY_MAP.lock().unwrap();
-    map.entry(user_id)
-        .or_insert_with(|| broadcast::channel(5).0)
+    NOTIFY_MAP
+        .write()
+        .unwrap()
+        .entry(user_id)
+        .or_insert_with(|| {
+            log::debug!("{} is online", user_id);
+            broadcast::channel(5).0
+        })
         .subscribe()
 }
 
 pub fn has_user(user_id: i32) -> bool {
-    let map = NOTIFY_MAP.lock().unwrap();
+    let map = NOTIFY_MAP.read().unwrap();
     map.contains_key(&user_id)
 }
 
 pub fn check_user(pool: &Pool) {
-    let conn = pool.get().unwrap();
-    let mut map = NOTIFY_MAP.lock().unwrap();
     let mut ids = Vec::new();
 
-    map.retain(|user_id, tx| {
+    // Temporary value release write lock
+    NOTIFY_MAP.write().unwrap().retain(|user_id, tx| {
         let is_ok = tx.receiver_count() > 0;
         if !is_ok {
             log::debug!("{} is offline", user_id);
@@ -128,10 +132,11 @@ pub fn check_user(pool: &Pool) {
         is_ok
     });
 
+    let conn = pool.get().unwrap();
     for id in ids {
-        let msg = ScNotifyMessage::update_user(get_user_basic(&conn, id));
-        for user_id in get_friend_ids(&conn, id) {
-            map.get(&user_id).and_then(|tx| tx.send(msg.clone()).ok());
-        }
+        notify_ids(
+            get_friend_ids(&conn, id),
+            ScNotifyMessage::update_user(get_user_basic(&conn, id)),
+        );
     }
 }
