@@ -22,6 +22,17 @@ pub struct ScNewMessage {
     target_id: i32,
 }
 
+pub fn convert_to_sc_message(message: &Message) -> ScMessage {
+    ScMessage {
+        id: message.id,
+        user_id: message.user_id,
+        target_id: message.target_id,
+        body: message.body.clone(),
+        created_at: message.created_at.timestamp_millis() as f64,
+        updated_at: message.updated_at.timestamp_millis() as f64,
+    }
+}
+
 pub fn get_messages(conn: &PgConnection, uid: i32, tid: i32) -> Vec<ScMessage> {
     use self::messages::dsl::*;
 
@@ -33,18 +44,11 @@ pub fn get_messages(conn: &PgConnection, uid: i32, tid: i32) -> Vec<ScMessage> {
         .load::<Message>(conn)
         .expect("Error loading messages")
         .iter()
-        .map(|message| ScMessage {
-            id: message.id,
-            user_id: message.user_id,
-            target_id: message.target_id,
-            body: message.body.clone(),
-            created_at: message.created_at.timestamp_millis() as f64,
-            updated_at: message.updated_at.timestamp_millis() as f64,
-        })
+        .map(|message| convert_to_sc_message(message))
         .collect()
 }
 
-pub fn create_message(conn: &PgConnection, user_id: i32, req: ScNewMessage) -> ScMessage {
+pub fn create_message(conn: &PgConnection, user_id: i32, req: &ScNewMessage) -> ScMessage {
     let new_message = NewMessage {
         user_id,
         target_id: req.target_id,
@@ -59,12 +63,5 @@ pub fn create_message(conn: &PgConnection, user_id: i32, req: ScNewMessage) -> S
         .get_result::<Message>(conn)
         .expect("Error saving new message");
 
-    ScMessage {
-        id: message.id,
-        user_id: message.user_id,
-        target_id: message.target_id,
-        body: message.body,
-        created_at: message.created_at.timestamp_millis() as f64,
-        updated_at: message.updated_at.timestamp_millis() as f64,
-    }
+    convert_to_sc_message(&message)
 }

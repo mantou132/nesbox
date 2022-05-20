@@ -14,7 +14,9 @@ pub struct ScNotifyMessage {
     new_message: Option<ScMessage>,
     new_game: Option<ScGame>,
     delete_game: Option<i32>,
+    delete_room: Option<i32>,
     new_invite: Option<ScInvite>,
+    delete_invite: Option<i32>,
     apply_friend: Option<ScFriend>,
     accept_friend: Option<ScFriend>,
     delete_friend: Option<i32>,
@@ -22,57 +24,51 @@ pub struct ScNotifyMessage {
 }
 
 impl ScNotifyMessage {
-    pub fn new() -> Self {
-        ScNotifyMessage {
+    pub fn new(init: impl FnOnce(&mut Self) -> ()) -> Self {
+        let mut msg = ScNotifyMessage {
             new_message: None,
             new_game: None,
             delete_game: None,
+            delete_room: None,
             new_invite: None,
+            delete_invite: None,
             apply_friend: None,
             accept_friend: None,
             delete_friend: None,
             update_user: None,
-        }
+        };
+        init(&mut msg);
+        msg
     }
     pub fn new_message(data: ScMessage) -> ScNotifyMessage {
-        let mut msg = ScNotifyMessage::new();
-        msg.new_message = Some(data);
-        msg
+        ScNotifyMessage::new(|msg| msg.new_message = Some(data))
     }
     pub fn new_game(data: ScGame) -> ScNotifyMessage {
-        let mut msg = ScNotifyMessage::new();
-        msg.new_game = Some(data);
-        msg
+        ScNotifyMessage::new(|msg| msg.new_game = Some(data))
     }
     pub fn delete_game(data: i32) -> ScNotifyMessage {
-        let mut msg = ScNotifyMessage::new();
-        msg.delete_game = Some(data);
-        msg
+        ScNotifyMessage::new(|msg| msg.delete_game = Some(data))
+    }
+    pub fn delete_room(data: i32) -> ScNotifyMessage {
+        ScNotifyMessage::new(|msg| msg.delete_room = Some(data))
     }
     pub fn new_invite(data: ScInvite) -> ScNotifyMessage {
-        let mut msg = ScNotifyMessage::new();
-        msg.new_invite = Some(data);
-        msg
+        ScNotifyMessage::new(|msg| msg.new_invite = Some(data))
+    }
+    pub fn delete_invite(data: i32) -> ScNotifyMessage {
+        ScNotifyMessage::new(|msg| msg.delete_invite = Some(data))
     }
     pub fn apply_friend(data: ScFriend) -> ScNotifyMessage {
-        let mut msg = ScNotifyMessage::new();
-        msg.apply_friend = Some(data);
-        msg
+        ScNotifyMessage::new(|msg| msg.apply_friend = Some(data))
     }
     pub fn accept_friend(data: ScFriend) -> ScNotifyMessage {
-        let mut msg = ScNotifyMessage::new();
-        msg.accept_friend = Some(data);
-        msg
+        ScNotifyMessage::new(|msg| msg.accept_friend = Some(data))
     }
     pub fn delete_friend(data: i32) -> ScNotifyMessage {
-        let mut msg = ScNotifyMessage::new();
-        msg.delete_friend = Some(data);
-        msg
+        ScNotifyMessage::new(|msg| msg.delete_friend = Some(data))
     }
     pub fn update_user(data: ScUserBasic) -> ScNotifyMessage {
-        let mut msg = ScNotifyMessage::new();
-        msg.update_user = Some(data);
-        msg
+        ScNotifyMessage::new(|msg| msg.update_user = Some(data))
     }
 }
 

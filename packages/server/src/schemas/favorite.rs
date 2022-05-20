@@ -1,4 +1,5 @@
 use chrono::Utc;
+use diesel::dsl::count;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 
@@ -15,6 +16,17 @@ pub fn get_favorites(conn: &PgConnection, uid: i32) -> Vec<i32> {
         .iter()
         .map(|favorite| favorite.game_id)
         .collect()
+}
+
+pub fn get_top_ids(conn: &PgConnection) -> Vec<i32> {
+    use self::favorites::dsl::*;
+
+    favorites
+        .group_by(game_id)
+        .select(game_id)
+        .order(count(game_id).desc())
+        .load(conn)
+        .expect("Error loading favorite")
 }
 
 pub fn create_favorite(conn: &PgConnection, uid: i32, gid: i32) -> String {

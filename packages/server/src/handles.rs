@@ -97,7 +97,7 @@ pub async fn guestgraphqlschema(
     pool: web::Data<Pool>,
 ) -> impl Responder {
     let ctx = GuestContext {
-        secret: "".to_string(),
+        secret: String::new(),
         dbpool: pool.get_ref().to_owned(),
     };
     let result = introspect(&schema, &ctx, IntrospectionFormat::default());
@@ -122,7 +122,7 @@ pub async fn webhook(
 
     match payload.action.as_str() {
         "closed" => {
-            create_game(conn, get_sc_new_game(&payload));
+            create_game(conn, &get_sc_new_game(&payload));
         }
         "reopened" => {
             let game = get_game_from_name(conn, &payload.issue.title);

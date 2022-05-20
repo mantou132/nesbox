@@ -24,10 +24,16 @@ pub struct ScUser {
     pub id: i32,
     pub username: String,
     pub nickname: String,
-    pub playing: Option<ScRoom>,
+    pub playing: Option<ScRoomBasic>,
     settings: Option<String>,
     created_at: f64,
     updated_at: f64,
+}
+
+#[derive(GraphQLInputObject)]
+pub struct ScUpdateUserReq {
+    nickname: String,
+    settings: Option<String>,
 }
 
 #[derive(GraphQLObject, Debug, Clone)]
@@ -36,7 +42,7 @@ pub struct ScUserBasic {
     pub username: String,
     pub nickname: String,
     pub status: ScUserStatus,
-    pub playing: Option<ScRoom>,
+    pub playing: Option<ScRoomBasic>,
 }
 
 #[derive(GraphQLInputObject)]
@@ -71,15 +77,7 @@ fn hash_password(password: &str) -> String {
     HEXUPPER.encode(&pbkdf2_hash)
 }
 
-pub fn get_user(conn: &PgConnection, uid: i32) -> ScUser {
-    use self::users::dsl::*;
-
-    let user = users
-        .filter(deleted_at.is_null())
-        .filter(id.eq(uid))
-        .get_result::<User>(conn)
-        .expect("Error loading user");
-
+fn convert_to_sc_user(conn: &PgConnection, user: &User) -> ScUser {
     ScUser {
         id: user.id,
         username: user.username.clone(),
@@ -89,6 +87,36 @@ pub fn get_user(conn: &PgConnection, uid: i32) -> ScUser {
         updated_at: user.updated_at.timestamp_millis() as f64,
         playing: get_playing(conn, user.id),
     }
+}
+
+pub fn get_account(conn: &PgConnection, uid: i32) -> ScUser {
+    use self::users::dsl::*;
+
+    let user = users
+        .filter(deleted_at.is_null())
+        .filter(id.eq(uid))
+        .get_result::<User>(conn)
+        .expect("Error loading user");
+
+    convert_to_sc_user(conn, &user)
+}
+
+pub fn update_user(conn: &PgConnection, uid: i32, req: &ScUpdateUserReq) -> ScUser {
+    use self::users::dsl::*;
+
+    let user = diesel::update(users.filter(deleted_at.is_null()).filter(id.eq(uid)))
+        .set((
+            nickname.eq(req.nickname.clone()),
+            settings.eq(req
+                .settings
+                .as_ref()
+                .map(|s| serde_json::from_str::<serde_json::Value>(&s).unwrap_or_default())),
+            updated_at.eq(Utc::now().naive_utc()),
+        ))
+        .get_result::<User>(conn)
+        .expect("Error update user");
+
+    convert_to_sc_user(conn, &user)
 }
 
 pub fn get_user_basic(conn: &PgConnection, uid: i32) -> ScUserBasic {
@@ -119,15 +147,7 @@ pub fn login(conn: &PgConnection, req: ScLoginReq, secret: &str) -> ScLoginResp 
         .get_result::<User>(conn)
         .expect("Error saving new user");
 
-    let user = ScUser {
-        id: user.id,
-        username: user.username,
-        nickname: user.nickname,
-        settings: user.settings.map(|v| v.to_string()),
-        created_at: user.created_at.timestamp_millis() as f64,
-        updated_at: user.updated_at.timestamp_millis() as f64,
-        playing: get_playing(conn, user.id),
-    };
+    let user = convert_to_sc_user(conn, &user);
 
     let token = UserToken::generate_token(secret, &user);
 
@@ -150,15 +170,7 @@ pub fn register(conn: &PgConnection, req: ScLoginReq, secret: &str) -> ScLoginRe
         .get_result::<User>(conn)
         .expect("Error saving new user");
 
-    let user = ScUser {
-        id: user.id,
-        username: user.username,
-        nickname: user.nickname,
-        settings: user.settings.map(|v| v.to_string()),
-        created_at: user.created_at.timestamp_millis() as f64,
-        updated_at: user.updated_at.timestamp_millis() as f64,
-        playing: None,
-    };
+    let user = convert_to_sc_user(conn, &user);
 
     let token = UserToken::generate_token(secret, &user);
 

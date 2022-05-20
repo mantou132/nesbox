@@ -27,42 +27,7 @@ pub struct ScNewGame {
     pub screenshots: Vec<String>,
 }
 
-pub fn get_games(conn: &PgConnection) -> Vec<ScGame> {
-    use self::games::dsl::*;
-
-    games
-        .filter(deleted_at.is_null())
-        .load::<Game>(conn)
-        .expect("Error loading games")
-        .iter()
-        .map(|game| ScGame {
-            id: game.id,
-            name: game.name.clone(),
-            description: game.description.clone(),
-            preview: game.preview.clone(),
-            rom: game.rom.clone(),
-            created_at: game.created_at.timestamp_millis() as f64,
-            updated_at: game.updated_at.timestamp_millis() as f64,
-            screenshots: game
-                .screenshots
-                .clone()
-                .unwrap_or_default()
-                .split(",")
-                .map(|str| str.to_string())
-                .collect::<Vec<String>>(),
-        })
-        .collect()
-}
-
-pub fn get_game_from_name(conn: &PgConnection, n: &str) -> ScGame {
-    use self::games::dsl::*;
-
-    let game = games
-        .filter(deleted_at.is_null())
-        .filter(name.eq(n))
-        .get_result::<Game>(conn)
-        .expect("Error loading game");
-
+fn convert_to_sc_game(game: &Game) -> ScGame {
     ScGame {
         id: game.id,
         name: game.name.clone(),
@@ -76,12 +41,36 @@ pub fn get_game_from_name(conn: &PgConnection, n: &str) -> ScGame {
             .clone()
             .unwrap_or_default()
             .split(",")
-            .map(|str| str.to_string())
+            .map(|url| url.into())
             .collect::<Vec<String>>(),
     }
 }
 
-pub fn create_game(conn: &PgConnection, req: ScNewGame) -> ScGame {
+pub fn get_games(conn: &PgConnection) -> Vec<ScGame> {
+    use self::games::dsl::*;
+
+    games
+        .filter(deleted_at.is_null())
+        .load::<Game>(conn)
+        .expect("Error loading games")
+        .iter()
+        .map(|game| convert_to_sc_game(game))
+        .collect()
+}
+
+pub fn get_game_from_name(conn: &PgConnection, n: &str) -> ScGame {
+    use self::games::dsl::*;
+
+    let game = games
+        .filter(deleted_at.is_null())
+        .filter(name.eq(n))
+        .get_result::<Game>(conn)
+        .expect("Error loading game");
+
+    convert_to_sc_game(&game)
+}
+
+pub fn create_game(conn: &PgConnection, req: &ScNewGame) -> ScGame {
     let screenshots = &req.screenshots.join(",");
     let new_game = NewGame {
         name: &req.name,
@@ -99,21 +88,7 @@ pub fn create_game(conn: &PgConnection, req: ScNewGame) -> ScGame {
         .get_result::<Game>(conn)
         .expect("Error saving new game");
 
-    ScGame {
-        id: game.id,
-        name: game.name,
-        description: game.description,
-        preview: game.preview,
-        created_at: game.created_at.timestamp_millis() as f64,
-        updated_at: game.updated_at.timestamp_millis() as f64,
-        rom: game.rom,
-        screenshots: game
-            .screenshots
-            .unwrap_or_default()
-            .split(",")
-            .map(|str| str.to_string())
-            .collect::<Vec<String>>(),
-    }
+    convert_to_sc_game(&game)
 }
 
 pub fn delete_game(conn: &PgConnection, gid: i32) -> String {

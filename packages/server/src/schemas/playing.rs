@@ -6,7 +6,7 @@ use super::room::*;
 use crate::db::models::{NewPlaying, Playing};
 use crate::db::schema::playing;
 
-pub fn get_playing(conn: &PgConnection, uid: i32) -> Option<ScRoom> {
+pub fn get_playing(conn: &PgConnection, uid: i32) -> Option<ScRoomBasic> {
     use self::playing::dsl::*;
 
     playing
@@ -15,6 +15,16 @@ pub fn get_playing(conn: &PgConnection, uid: i32) -> Option<ScRoom> {
         .optional()
         .expect("Error loading invite")
         .map(|row| get_room(conn, row.room_id))
+}
+
+pub fn get_room_user_ids(conn: &PgConnection, rid: i32) -> Vec<i32> {
+    use self::playing::dsl::*;
+
+    playing
+        .select(user_id)
+        .filter(room_id.eq(rid))
+        .load(conn)
+        .expect("Error loading room users")
 }
 
 pub fn create_playing(conn: &PgConnection, uid: i32, rid: i32) -> String {

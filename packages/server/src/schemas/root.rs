@@ -5,6 +5,7 @@ use super::game::*;
 use super::invite::*;
 use super::message::*;
 use super::notify::*;
+use super::playing::*;
 use super::room::*;
 use super::user::*;
 use crate::db::root::Pool;
@@ -20,6 +21,10 @@ impl QueryRoot {
         let conn = context.dbpool.get().unwrap();
         Ok(get_games(&conn))
     }
+    fn top_games(context: &Context) -> FieldResult<Vec<i32>> {
+        let conn = context.dbpool.get().unwrap();
+        Ok(get_top_ids(&conn))
+    }
     fn favorites(context: &Context) -> FieldResult<Vec<i32>> {
         let conn = context.dbpool.get().unwrap();
         Ok(get_favorites(&conn, context.user_id))
@@ -28,9 +33,9 @@ impl QueryRoot {
         let conn = context.dbpool.get().unwrap();
         Ok(get_comments(&conn, game_id))
     }
-    fn user(context: &Context) -> FieldResult<ScUser> {
+    fn account(context: &Context) -> FieldResult<ScUser> {
         let conn = context.dbpool.get().unwrap();
-        Ok(get_user(&conn, context.user_id))
+        Ok(get_account(&conn, context.user_id))
     }
     fn messages(context: &Context, target_id: i32) -> FieldResult<Vec<ScMessage>> {
         let conn = context.dbpool.get().unwrap();
@@ -54,19 +59,27 @@ pub struct MutationRoot;
 
 #[juniper::graphql_object(Context = Context)]
 impl MutationRoot {
+    fn update_account(context: &Context, update_account: ScUpdateUserReq) -> FieldResult<ScUser> {
+        let conn = context.dbpool.get().unwrap();
+        Ok(update_user(&conn, context.user_id, &update_account))
+    }
     fn create_game(context: &Context, new_game: ScNewGame) -> FieldResult<ScGame> {
         let conn = context.dbpool.get().unwrap();
-        let game = create_game(&conn, new_game);
+        let game = create_game(&conn, &new_game);
         notify_all(ScNotifyMessage::new_game(game.clone()));
         Ok(game)
     }
     fn create_comment(context: &Context, new_comment: ScNewComment) -> FieldResult<ScComment> {
         let conn = context.dbpool.get().unwrap();
-        Ok(create_comment(&conn, context.user_id, new_comment))
+        Ok(create_comment(&conn, context.user_id, &new_comment))
+    }
+    fn update_comment(context: &Context, new_comment: ScNewComment) -> FieldResult<ScComment> {
+        let conn = context.dbpool.get().unwrap();
+        Ok(update_comment(&conn, context.user_id, &new_comment))
     }
     fn create_message(context: &Context, new_message: ScNewMessage) -> FieldResult<ScMessage> {
         let conn = context.dbpool.get().unwrap();
-        let message = create_message(&conn, context.user_id, new_message);
+        let message = create_message(&conn, context.user_id, &new_message);
         notify(
             message.target_id,
             ScNotifyMessage::new_message(message.clone()),
@@ -94,26 +107,48 @@ impl MutationRoot {
             notify(target_id, ScNotifyMessage::accept_friend(friend.clone()));
             Ok("Ok".into())
         } else {
+            delete_friend(&conn, context.user_id, target_id);
             notify(context.user_id, ScNotifyMessage::delete_friend(target_id));
             notify(target_id, ScNotifyMessage::delete_friend(context.user_id));
-            Ok(delete_friend(&conn, context.user_id, target_id))
+            Ok("Ok".into())
         }
     }
     fn create_invite(context: &Context, req: ScNewInvite) -> FieldResult<ScInvite> {
         let conn = context.dbpool.get().unwrap();
-        let invite = create_invite(&conn, context.user_id, req);
-        notify(
-            invite.target_id,
-            ScNotifyMessage::new_invite(invite.clone()),
-        );
+        let invite = create_invite(&conn, context.user_id, &req);
+        notify(req.target_id, ScNotifyMessage::new_invite(invite.clone()));
         Ok(invite)
+    }
+    fn accept_invite(context: &Context, invite_id: i32, accept: bool) -> FieldResult<String> {
+        let conn = context.dbpool.get().unwrap();
+        if accept {
+            let invite = get_invite(&conn, context.user_id, invite_id);
+            enter_room(&conn, context.user_id, invite.room.id);
+            notify_ids(
+                get_friend_ids(&conn, context.user_id),
+                ScNotifyMessage::update_user(get_user_basic(&conn, context.user_id)),
+            );
+            Ok("Ok".into())
+        } else {
+            delete_invite_by_id(&conn, context.user_id, invite_id);
+            Ok("Ok".into())
+        }
     }
     fn create_room(context: &Context, new_room: ScNewRoom) -> FieldResult<ScRoom> {
         let conn = context.dbpool.get().unwrap();
-        Ok(create_room(&conn, new_room))
+        let room = create_room(&conn, context.user_id, &new_room);
+        notify_ids(
+            get_friend_ids(&conn, context.user_id),
+            ScNotifyMessage::update_user(get_user_basic(&conn, context.user_id)),
+        );
+        Ok(room)
     }
-    fn enter_room(context: &Context, room_id: i32) -> FieldResult<String> {
+    fn enter_pub_room(context: &Context, room_id: i32) -> FieldResult<String> {
         let conn = context.dbpool.get().unwrap();
+        let room = get_room(&conn, room_id);
+        if room.private {
+            return Err("private room".into());
+        }
         enter_room(&conn, context.user_id, room_id);
         notify_ids(
             get_friend_ids(&conn, context.user_id),
@@ -123,11 +158,19 @@ impl MutationRoot {
     }
     fn leave_room(context: &Context, room_id: i32) -> FieldResult<String> {
         let conn = context.dbpool.get().unwrap();
+        let invites = get_invites_with(&conn, context.user_id);
         leave_room(&conn, context.user_id, room_id);
+        for invite in invites {
+            notify(invite.target_id, ScNotifyMessage::delete_invite(invite.id));
+        }
         notify_ids(
             get_friend_ids(&conn, context.user_id),
             ScNotifyMessage::update_user(get_user_basic(&conn, context.user_id)),
         );
+        if get_room_user_ids(&conn, room_id).len() == 0 {
+            delete_room(&conn, room_id);
+            notify_all(ScNotifyMessage::delete_room(room_id))
+        }
         Ok("Ok".into())
     }
 }
@@ -138,7 +181,7 @@ type FriendSysStream = Pin<Box<dyn Stream<Item = Result<ScNotifyMessage, FieldEr
 
 #[graphql_subscription(context = Context)]
 impl Subscription {
-    async fn friend_sys(context: &Context) -> FriendSysStream {
+    async fn event(context: &Context) -> FriendSysStream {
         let mut rx = get_receiver(context.user_id);
         let stream = async_stream::stream! {
             loop {
