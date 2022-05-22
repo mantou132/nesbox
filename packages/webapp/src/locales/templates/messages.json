@@ -1,0 +1,56 @@
+{
+  "title": {
+    "message": "NESBox"
+  },
+  "loginTitle": {
+    "message": "登录"
+  },
+  "username": {
+    "message": "用户名"
+  },
+  "password": {
+    "message": "密码"
+  },
+  "login": {
+    "message": "登录"
+  },
+  "search": {
+    "message": "搜索"
+  },
+  "notFoundTitle": {
+    "message": "未找到页面"
+  },
+  "notFoundDetail": {
+    "message": "您访问的页面没有找到，$1<点击>返回首页"
+  },
+  "screencastMode": {
+    "message": "截屏模式"
+  },
+  "sidebarHelp": {
+    "message": "帮助"
+  },
+  "sidebarLanguage": {
+    "message": "切换语言"
+  },
+  "sidebarTheme": {
+    "message": "选择主题"
+  },
+  "sidebarAutoTheme": {
+    "message": "跟随系统"
+  },
+  "sidebarDarkTheme": {
+    "message": "暗黑主题"
+  },
+  "sidebarLightTheme": {
+    "message": "明亮主题"
+  },
+  "code0": { "message": "当前网络不稳定" },
+  "code400": { "message": "参数错误" },
+  "code401": { "message": "用户信息不能通过验证，尝试重新登陆" },
+  "code403": { "message": "无权限操作" },
+  "code404": { "message": "资源未找到" },
+  "code409": { "message": "资源冲突" },
+  "code500": { "message": "服务器出小差了，请稍后再试" },
+  "code501": { "message": "暂未实现" },
+  "code504": { "message": "请求超时，请稍后再试" }
+}

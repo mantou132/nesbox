@@ -1,0 +1,29 @@
+fragment ScUserPart on ScUser {
+  id
+  username
+  nickname
+  playing {
+    gameId
+  }
+  settings
+  createdAt
+  updatedAt
+}
+
+mutation login($input: ScLoginReq!) {
+  login(input: $input) {
+    token
+    user {
+      ...ScUserPart
+    }
+  }
+}
+
+mutation register($input: ScLoginReq!) {
+  register(input: $input) {
+    token
+    user {
+      ...ScUserPart
+    }
+  }
+}

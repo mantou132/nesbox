@@ -1,0 +1,28 @@
+overwrite: true
+generates:
+  src/generated/graphql.ts:
+    schema:
+      - ${API_BASE:http://localhost:8080}/schema:
+          method: GET
+    documents: "src/**/schema.graphql"
+    plugins:
+      - typescript
+      - typescript-operations
+      - typescript-document-nodes
+    config:
+      # https://github.com/dotansimha/graphql-code-generator/issues/3919#issuecomment-618431761
+      maybeValue: T
+      # https://github.com/dotansimha/graphql-code-generator/issues/2400#issuecomment-668694432
+      documentMode: string
+  src/generated/guestgraphql.ts:
+    schema:
+      - ${API_BASE:http://localhost:8080}/guestschema:
+          method: GET
+    documents: "src/**/guest.graphql"
+    plugins:
+      - typescript
+      - typescript-operations
+      - typescript-document-nodes
+    config:
+      maybeValue: T
+      documentMode: string

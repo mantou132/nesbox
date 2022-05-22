@@ -1,7 +1,7 @@
 use chrono::Utc;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
-use juniper::{GraphQLEnum, GraphQLObject};
+use juniper::{GraphQLEnum, GraphQLInputObject, GraphQLObject};
 
 use crate::db::models::{Friend, NewFriend};
 use crate::db::schema::friends;
@@ -13,6 +13,17 @@ pub enum ScFriendStatus {
     Accept,
     Pending,
     Deny,
+}
+
+#[derive(GraphQLInputObject)]
+pub struct ScNewFriend {
+    pub target_id: i32,
+}
+
+#[derive(GraphQLInputObject)]
+pub struct ScUpdateFriend {
+    pub target_id: i32,
+    pub accept: bool,
 }
 
 #[derive(GraphQLObject, Debug, Clone)]

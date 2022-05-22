@@ -129,6 +129,7 @@ pub struct Room {
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub deleted_at: Option<NaiveDateTime>,
+    pub host: i32,
 }
 
 #[derive(Insertable)]
@@ -139,6 +140,7 @@ pub struct NewRoom {
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub deleted_at: Option<NaiveDateTime>,
+    pub host: i32,
 }
 
 #[derive(Queryable)]

@@ -27,7 +27,7 @@
     "*.ts": "eslint --fix"
   },
   "workspaces": [
-    "packages/config",
-    "packages/webapp"
+    "packages/*",
+    "!packages/server"
   ]
 }

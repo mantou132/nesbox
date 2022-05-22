@@ -2,9 +2,9 @@ use crate::db::root::Pool;
 
 use super::{
     friend::get_friend_ids, friend::ScFriend, game::ScGame, invite::ScInvite, message::ScMessage,
-    user::get_user_basic, user::ScUserBasic,
+    room::ScRoomBasic, user::get_user_basic, user::ScUserBasic,
 };
-use juniper::GraphQLObject;
+use juniper::{GraphQLInputObject, GraphQLObject};
 use std::collections::HashMap;
 use std::sync::RwLock;
 use tokio::sync::broadcast::{self, Receiver, Sender};
@@ -14,6 +14,7 @@ pub struct ScNotifyMessage {
     new_message: Option<ScMessage>,
     new_game: Option<ScGame>,
     delete_game: Option<i32>,
+    update_room: Option<ScRoomBasic>,
     delete_room: Option<i32>,
     new_invite: Option<ScInvite>,
     delete_invite: Option<i32>,
@@ -21,6 +22,18 @@ pub struct ScNotifyMessage {
     accept_friend: Option<ScFriend>,
     delete_friend: Option<i32>,
     update_user: Option<ScUserBasic>,
+    send_signal: Option<ScSignal>,
+}
+
+#[derive(GraphQLObject, Debug, Clone)]
+pub struct ScSignal {
+    pub user_id: i32,
+    pub json: String,
+}
+#[derive(GraphQLInputObject)]
+pub struct ScNewSignal {
+    pub target_id: i32,
+    pub json: String,
 }
 
 impl ScNotifyMessage {
@@ -29,6 +42,7 @@ impl ScNotifyMessage {
             new_message: None,
             new_game: None,
             delete_game: None,
+            update_room: None,
             delete_room: None,
             new_invite: None,
             delete_invite: None,
@@ -36,6 +50,7 @@ impl ScNotifyMessage {
             accept_friend: None,
             delete_friend: None,
             update_user: None,
+            send_signal: None,
         };
         init(&mut msg);
         msg
@@ -48,6 +63,9 @@ impl ScNotifyMessage {
     }
     pub fn delete_game(data: i32) -> ScNotifyMessage {
         ScNotifyMessage::new(|msg| msg.delete_game = Some(data))
+    }
+    pub fn update_room(data: ScRoomBasic) -> ScNotifyMessage {
+        ScNotifyMessage::new(|msg| msg.update_room = Some(data))
     }
     pub fn delete_room(data: i32) -> ScNotifyMessage {
         ScNotifyMessage::new(|msg| msg.delete_room = Some(data))
@@ -69,6 +87,9 @@ impl ScNotifyMessage {
     }
     pub fn update_user(data: ScUserBasic) -> ScNotifyMessage {
         ScNotifyMessage::new(|msg| msg.update_user = Some(data))
+    }
+    pub fn send_signal(data: ScSignal) -> ScNotifyMessage {
+        ScNotifyMessage::new(|msg| msg.send_signal = Some(data))
     }
 }
 

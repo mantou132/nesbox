@@ -1,10 +1,16 @@
 use chrono::Utc;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
+use juniper::GraphQLInputObject;
 
 use super::room::*;
 use crate::db::models::{NewPlaying, Playing};
 use crate::db::schema::playing;
+
+#[derive(GraphQLInputObject)]
+pub struct ScUpdatePlaying {
+    pub room_id: i32,
+}
 
 pub fn get_playing(conn: &PgConnection, uid: i32) -> Option<ScRoomBasic> {
     use self::playing::dsl::*;

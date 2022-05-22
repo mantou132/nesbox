@@ -1,0 +1,11 @@
+projects:
+  webapp:
+    schema:
+      - ${API_BASE:http://localhost:8080}/schema:
+          method: GET
+    documents: packages/webapp/src/services/schema.graphql
+  webappguest:
+    schema:
+      - ${API_BASE:http://localhost:8080}/guestschema:
+          method: GET
+    documents: packages/webapp/src/services/guest.graphql

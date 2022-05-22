@@ -2,9 +2,16 @@ use chrono::Utc;
 use diesel::dsl::count;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
+use juniper::GraphQLInputObject;
 
 use crate::db::models::{Favorite, NewFavorite};
 use crate::db::schema::favorites;
+
+#[derive(GraphQLInputObject)]
+pub struct ScNewFavorite {
+    pub game_id: i32,
+    pub favorite: bool,
+}
 
 pub fn get_favorites(conn: &PgConnection, uid: i32) -> Vec<i32> {
     use self::favorites::dsl::*;

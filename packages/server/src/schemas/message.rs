@@ -22,6 +22,11 @@ pub struct ScNewMessage {
     target_id: i32,
 }
 
+#[derive(GraphQLInputObject)]
+pub struct ScMessagesReq {
+    pub target_id: i32,
+}
+
 pub fn convert_to_sc_message(message: &Message) -> ScMessage {
     ScMessage {
         id: message.id,

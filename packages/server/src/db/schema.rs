@@ -81,6 +81,7 @@ table! {
         created_at -> Timestamp,
         updated_at -> Timestamp,
         deleted_at -> Nullable<Timestamp>,
+        host -> Int4,
     }
 }
 
@@ -105,7 +106,16 @@ joinable!(invites -> rooms (room_id));
 joinable!(playing -> rooms (room_id));
 joinable!(playing -> users (user_id));
 joinable!(rooms -> games (game_id));
+joinable!(rooms -> users (host));
 
 allow_tables_to_appear_in_same_query!(
-    comments, favorites, friends, games, invites, messages, playing, rooms, users,
+    comments,
+    favorites,
+    friends,
+    games,
+    invites,
+    messages,
+    playing,
+    rooms,
+    users,
 );

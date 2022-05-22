@@ -24,6 +24,12 @@ pub struct ScNewInvite {
     pub target_id: i32,
 }
 
+#[derive(GraphQLInputObject)]
+pub struct ScUpdateInvite {
+    pub invite_id: i32,
+    pub accept: bool,
+}
+
 fn convert_to_sc_invite(conn: &PgConnection, invite: &Invite) -> ScInvite {
     ScInvite {
         id: invite.id,

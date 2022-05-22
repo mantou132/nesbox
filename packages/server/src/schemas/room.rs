@@ -15,6 +15,7 @@ pub struct ScRoomBasic {
     pub id: i32,
     pub game_id: i32,
     pub private: bool,
+    pub host: i32,
     created_at: f64,
     updated_at: f64,
 }
@@ -24,6 +25,7 @@ pub struct ScRoom {
     pub id: i32,
     pub game_id: i32,
     pub private: bool,
+    pub host: i32,
     created_at: f64,
     updated_at: f64,
     users: Vec<ScUserBasic>,
@@ -35,9 +37,18 @@ pub struct ScNewRoom {
     pub private: bool,
 }
 
+#[derive(GraphQLInputObject)]
+pub struct ScUpdateRoom {
+    pub id: i32,
+    pub game_id: i32,
+    pub private: bool,
+    pub host: i32,
+}
+
 pub fn convert_to_sc_room_basic(room: &Room) -> ScRoomBasic {
     ScRoomBasic {
         id: room.id,
+        host: room.host,
         private: room.private,
         game_id: room.game_id,
         created_at: room.created_at.timestamp_millis() as f64,
@@ -48,6 +59,7 @@ pub fn convert_to_sc_room_basic(room: &Room) -> ScRoomBasic {
 pub fn convert_to_sc_room(conn: &PgConnection, room: &Room) -> ScRoom {
     ScRoom {
         id: room.id,
+        host: room.host,
         private: room.private,
         game_id: room.game_id,
         created_at: room.created_at.timestamp_millis() as f64,
@@ -85,13 +97,14 @@ pub fn get_rooms(conn: &PgConnection) -> Vec<ScRoom> {
         .collect()
 }
 
-pub fn create_room(conn: &PgConnection, uid: i32, req: &ScNewRoom) -> ScRoom {
+pub fn create_room(conn: &PgConnection, uid: i32, req: &ScNewRoom) -> ScRoomBasic {
     let new_room = NewRoom {
         game_id: req.game_id,
         private: req.private,
         deleted_at: None,
         created_at: Utc::now().naive_utc(),
         updated_at: Utc::now().naive_utc(),
+        host: uid,
     };
 
     let room = diesel::insert_into(rooms::table)
@@ -101,7 +114,28 @@ pub fn create_room(conn: &PgConnection, uid: i32, req: &ScNewRoom) -> ScRoom {
 
     enter_room(conn, uid, room.id);
 
-    convert_to_sc_room(conn, &room)
+    convert_to_sc_room_basic(&room)
+}
+
+pub fn update_room(conn: &PgConnection, uid: i32, req: &ScUpdateRoom) -> ScRoomBasic {
+    use self::rooms::dsl::*;
+
+    let room = diesel::update(
+        rooms
+            .filter(deleted_at.is_null())
+            .filter(id.eq(req.id))
+            .filter(host.eq(uid)),
+    )
+    .set((
+        game_id.eq(req.game_id),
+        host.eq(req.host),
+        private.eq(req.private),
+        updated_at.eq(Utc::now().naive_utc()),
+    ))
+    .get_result::<Room>(conn)
+    .expect("Error update comment");
+
+    convert_to_sc_room_basic(&room)
 }
 
 pub fn delete_room(conn: &PgConnection, rid: i32) -> String {

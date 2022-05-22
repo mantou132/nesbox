@@ -31,7 +31,7 @@ pub struct ScUser {
 }
 
 #[derive(GraphQLInputObject)]
-pub struct ScUpdateUserReq {
+pub struct ScUpdateUser {
     nickname: String,
     settings: Option<String>,
 }
@@ -101,7 +101,7 @@ pub fn get_account(conn: &PgConnection, uid: i32) -> ScUser {
     convert_to_sc_user(conn, &user)
 }
 
-pub fn update_user(conn: &PgConnection, uid: i32, req: &ScUpdateUserReq) -> ScUser {
+pub fn update_user(conn: &PgConnection, uid: i32, req: &ScUpdateUser) -> ScUser {
     use self::users::dsl::*;
 
     let user = diesel::update(users.filter(deleted_at.is_null()).filter(id.eq(uid)))

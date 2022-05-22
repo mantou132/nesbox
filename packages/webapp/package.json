@@ -2,18 +2,28 @@
   "name": "@nesbox/webapp",
   "version": "0.0.1",
   "description": "",
-  "main": "index.js",
-  "files": [
-    "/index.*"
-  ],
   "scripts": {
-    "build": "tsc",
-    "start": "yarn build --watch",
-    "prepublishOnly": "yarn build"
+    "codegen": "graphql-codegen -r dotenv/config --watch",
+    "build": "vite build --mode=production",
+    "build:dev": "vite build --mode=development",
+    "preview": "vite preview",
+    "test": "cypress open",
+    "start": "vite serve",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@mantou/gem": "^1.6.0",
+    "duoyun-ui": "^0.0.27",
+    "graphql": "^16.2.0",
+    "subscriptions-transport-ws": "^0.11.0"
   },
   "devDependencies": {
-    "@nesbox/config": "^0.0.1"
-  },
-  "author": "wangxianqiao",
-  "license": "ISC"
+    "@nesbox/config": "^0.0.1",
+    "@graphql-codegen/cli": "^2.3.0",
+    "@graphql-codegen/typescript": "^2.4.1",
+    "@graphql-codegen/typescript-document-nodes": "^2.2.1",
+    "@graphql-codegen/typescript-operations": "^2.2.1",
+    "dotenv": "^10.0.0",
+    "vite": "^2.3.8"
+  }
 }

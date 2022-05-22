@@ -1,0 +1,5 @@
+# https://github.com/mozilla/pontoon/blob/master/l10n.toml
+
+[[paths]]
+reference = "src/locales/templates/*.json"
+l10n = "src/locales/{locale}/*.json"

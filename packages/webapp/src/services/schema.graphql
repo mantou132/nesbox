@@ -1,0 +1,22 @@
+fragment ScGamePart on ScGame {
+  id
+  name
+  description
+  preview
+  createdAt
+  updatedAt
+  rom
+  screenshots
+}
+
+query getGames {
+  games {
+    ...ScGamePart
+  }
+}
+
+subscription event {
+  event {
+    deleteGame
+  }
+}

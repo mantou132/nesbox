@@ -1,0 +1,29 @@
+{
+  "id": "com.cloudfine.console",
+  "name": "CloudFine Console",
+  "short_name": "CloudFine",
+  "description": "Scheduling, monitoring, managing your own multi-cloud resources",
+  "scope": "/",
+  "start_url": "/?utm_source=web_app_manifest",
+  "background_color": "#fff",
+  "theme_color": "black",
+  "display": "minimal-ui",
+  "icons": [
+    {
+      "src": "/logo-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/logo-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

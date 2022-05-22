@@ -25,6 +25,11 @@ pub struct ScNewComment {
     like: bool,
 }
 
+#[derive(GraphQLInputObject)]
+pub struct ScCommentsReq {
+    pub game_id: i32,
+}
+
 fn convert_to_sc_comment(conn: &PgConnection, comment: &Comment) -> ScComment {
     ScComment {
         user: get_user_basic(conn, comment.user_id),
