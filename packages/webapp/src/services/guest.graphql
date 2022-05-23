@@ -1,20 +1,27 @@
-fragment ScUserPart on ScUser {
+fragment ScRoomBasicPart on ScRoomBasic {
+  id
+  gameId
+  private
+  host
+  createdAt
+  updatedAt
+}
+
+fragment ScAccountPart on ScUser {
   id
   username
   nickname
-  playing {
-    gameId
-  }
   settings
-  createdAt
-  updatedAt
+  playing {
+    ...ScRoomBasicPart
+  }
 }
 
 mutation login($input: ScLoginReq!) {
   login(input: $input) {
     token
     user {
-      ...ScUserPart
+      ...ScAccountPart
     }
   }
 }
@@ -23,7 +30,7 @@ mutation register($input: ScLoginReq!) {
   register(input: $input) {
     token
     user {
-      ...ScUserPart
+      ...ScAccountPart
     }
   }
 }

@@ -2,11 +2,8 @@ import { html, createStore, updateStore, connect } from '@mantou/gem';
 import { GemRouteElement } from '@mantou/gem/elements/route';
 import { ValueOf } from 'duoyun-ui/lib/types';
 
-import { localStorageKeys } from 'src/constants';
+import { paramKeys } from 'src/constants';
 import { i18n } from 'src/i18n';
-import { logger } from 'src/logger';
-
-import '@mantou/gem/elements/use';
 
 // url data
 export const locationStore = GemRouteElement.createLocationStore();
@@ -16,8 +13,30 @@ const getInitRoutes = () => {
     home: {
       title: '',
       pattern: '/',
+      redirect: '/games',
+    },
+    games: {
+      title: i18n.get('gamesTitle'),
+      pattern: '/games',
       async getContent(_params: Record<string, string>) {
-        return html``;
+        await import('src/pages/games');
+        return html`<p-games></p-games>`;
+      },
+    },
+    rooms: {
+      title: i18n.get('roomsTitle'),
+      pattern: '/rooms',
+      async getContent(_params: Record<string, string>) {
+        await import('src/pages/rooms');
+        return html`<p-rooms></p-rooms>`;
+      },
+    },
+    room: {
+      title: i18n.get('roomTitle'),
+      pattern: `/game/:${paramKeys.ROOM_ID}`,
+      async getContent(params: Record<string, string>) {
+        await import('src/pages/room');
+        return html`<p-room id=${params[paramKeys.ROOM_ID]}></p-room>`;
       },
     },
     login: {
@@ -26,6 +45,14 @@ const getInitRoutes = () => {
       async getContent(_params: Record<string, string>) {
         await import('src/pages/login');
         return html`<p-login></p-login>`;
+      },
+    },
+    register: {
+      title: i18n.get('registerTitle'),
+      pattern: '/register',
+      async getContent(_params: Record<string, string>) {
+        await import('src/pages/login');
+        return html`<p-login .register=${true}></p-login>`;
       },
     },
     notfound: {
@@ -42,27 +69,7 @@ const getInitRoutes = () => {
 type Routes = ReturnType<typeof getInitRoutes>;
 export type Route = ValueOf<Routes>;
 
-let routesCache: Partial<Routes> | undefined = undefined;
-try {
-  // 是否需要持久化储存？
-  // routesCache = JSON.parse(localStorage.getItem(localStorageKeys.ROUTES_LOCAL_STORAGE_KEY) || '{}');
-  routesCache = {};
-} catch (err) {
-  logger.warn(err);
-}
-
-export const routes = createStore(
-  Object.fromEntries(
-    Object.entries(getInitRoutes()).map(([routeName, route]) => [
-      routeName,
-      // only restore `query` field
-      Object.assign({}, routesCache?.[routeName as keyof Routes], route),
-    ]),
-  ) as Routes,
-);
-window.addEventListener('pagehide', () => {
-  localStorage.setItem(localStorageKeys.ROUTES_LOCAL_STORAGE_KEY, JSON.stringify(routes));
-});
+export const routes = createStore(getInitRoutes() as Routes);
 
 connect(i18n.store, () => {
   Object.entries(getInitRoutes()).forEach(([routeName, route]) => {

@@ -7,14 +7,24 @@ import { configure } from 'src/configure';
 import { COMMAND, RELEASE } from 'src/constants';
 import { logger } from 'src/logger';
 import { routes } from 'src/routes';
-import { gotoRedirectUri } from 'src/auth';
+import { gotoRedirectUri, isExpiredProfile, logout } from 'src/auth';
 
 import 'src/modules/meta';
-import 'src/app';
 
 logger.info('MODE\t', import.meta.env.MODE);
 logger.info('RELEASE\t', RELEASE);
 logger.info('COMMAND\t', COMMAND);
+
+if (
+  matchPath(routes.login.pattern, history.getParams().path) ||
+  matchPath(routes.register.pattern, history.getParams().path)
+) {
+  if (configure.profile) {
+    gotoRedirectUri();
+  }
+} else if (!configure.profile || isExpiredProfile(configure.profile)) {
+  logout();
+}
 
 render(
   html`
@@ -54,21 +64,19 @@ render(
     <gem-route
       .routes=${[
         routes.login,
+        routes.register,
         {
           pattern: '*',
-          content: html`<app-root></app-root>`,
+          getContent() {
+            import('src/app');
+            return html`<app-root></app-root>`;
+          },
         },
       ]}
     ></gem-route>
   `,
   document.body,
 );
-
-if (matchPath(routes.login.pattern, history.getParams().path)) {
-  if (configure.profile) {
-    gotoRedirectUri();
-  }
-}
 
 let unloading = false;
 window.addEventListener('beforeunload', () => {

@@ -1,4 +1,4 @@
-use chrono::Utc;
+use chrono::{NaiveDateTime, Utc};
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use juniper::{GraphQLInputObject, GraphQLObject};
@@ -55,6 +55,18 @@ pub fn get_comments(conn: &PgConnection, gid: i32) -> Vec<ScComment> {
 }
 
 pub fn create_comment(conn: &PgConnection, uid: i32, req: &ScNewComment) -> ScComment {
+    use self::comments::dsl::*;
+
+    let c = comments
+        .filter(user_id.eq(uid))
+        .filter(game_id.eq(req.game_id))
+        .get_results::<Comment>(conn)
+        .expect("Error find comments");
+
+    if c.len() != 0 {
+        return update_comment(conn, uid, req);
+    }
+
     let new_comment = NewComment {
         user_id: uid,
         game_id: req.game_id,
@@ -65,7 +77,7 @@ pub fn create_comment(conn: &PgConnection, uid: i32, req: &ScNewComment) -> ScCo
         updated_at: Utc::now().naive_utc(),
     };
 
-    let comment = diesel::insert_into(comments::table)
+    let comment = diesel::insert_into(comments)
         .values(&new_comment)
         .get_result::<Comment>(conn)
         .expect("Error saving new comment");
@@ -86,6 +98,7 @@ pub fn update_comment(conn: &PgConnection, uid: i32, req: &ScNewComment) -> ScCo
         body.eq(req.body.clone()),
         like.eq(req.like),
         updated_at.eq(Utc::now().naive_utc()),
+        deleted_at.eq(None::<NaiveDateTime>),
     ))
     .get_result::<Comment>(conn)
     .expect("Error update comment");

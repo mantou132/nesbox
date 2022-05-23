@@ -1,4 +1,5 @@
 use chrono::Utc;
+use diesel::dsl::*;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use juniper::{GraphQLInputObject, GraphQLObject};
@@ -43,8 +44,8 @@ pub fn get_messages(conn: &PgConnection, uid: i32, tid: i32) -> Vec<ScMessage> {
 
     messages
         .filter(deleted_at.is_null())
-        .filter(user_id.eq(uid))
-        .filter(target_id.eq(tid))
+        .filter(user_id.eq(any(vec![uid, tid])))
+        .filter(target_id.eq(any(vec![uid, tid])))
         .limit(100)
         .load::<Message>(conn)
         .expect("Error loading messages")

@@ -5,6 +5,9 @@
   "loginTitle": {
     "message": "登录"
   },
+  "registerTitle": {
+    "message": "注册"
+  },
   "username": {
     "message": "用户名"
   },
@@ -14,8 +17,26 @@
   "login": {
     "message": "登录"
   },
+  "register": {
+    "message": "注册"
+  },
+  "goLogin": {
+    "message": "已有账号"
+  },
+  "goRegister": {
+    "message": "暂无账号"
+  },
   "search": {
     "message": "搜索"
+  },
+  "gamesTitle": {
+    "message": "游戏大厅"
+  },
+  "roomsTitle": {
+    "message": "公开的游戏"
+  },
+  "roomTitle": {
+    "message": "游戏"
   },
   "notFoundTitle": {
     "message": "未找到页面"

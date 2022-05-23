@@ -12,7 +12,6 @@ import { configure, toggoleScreencaseMode } from 'src/configure';
 
 import '@mantou/gem/elements/use';
 import 'duoyun-ui/elements/input-capture';
-import 'duoyun-ui/elements/keyboard-access';
 
 const style = createCSSSheet(css`
   .menu {
@@ -78,7 +77,6 @@ export class ModuleGuestElement extends GemElement {
         @keydown=${commonHandle}
         .element=${icons.more}
       ></gem-use>
-      <dy-keyboard-access></dy-keyboard-access>
       ${configure.screencastMode ? html`<dy-input-capture></dy-input-capture>` : ''}
     `;
   };

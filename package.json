@@ -3,7 +3,7 @@
   "name": "root",
   "version": "0.0.1",
   "scripts": {
-    "lint": "lerna exec --ignore @nesbox/config -- tsc --noEmit && eslint --ext .ts,.tsx,.js,.jsx packages/*/src/",
+    "lint": "lerna exec --ignore @nesbox/config -- tsc --noEmit && eslint --ext .ts,.tsx,.js,.jsx packages/[!server]*/src/",
     "test": "echo test",
     "release": "lerna version",
     "prepare": "husky install"

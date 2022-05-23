@@ -83,10 +83,6 @@ impl MutationRoot {
         let conn = context.dbpool.get().unwrap();
         Ok(create_comment(&conn, context.user_id, &input))
     }
-    fn update_comment(context: &Context, input: ScNewComment) -> FieldResult<ScComment> {
-        let conn = context.dbpool.get().unwrap();
-        Ok(update_comment(&conn, context.user_id, &input))
-    }
     fn create_message(context: &Context, input: ScNewMessage) -> FieldResult<ScMessage> {
         let conn = context.dbpool.get().unwrap();
         let message = create_message(&conn, context.user_id, &input);
@@ -179,7 +175,7 @@ impl MutationRoot {
 
         Ok(room)
     }
-    fn enter_pub_room(context: &Context, input: ScUpdatePlaying) -> FieldResult<String> {
+    fn enter_pub_room(context: &Context, input: ScUpdatePlaying) -> FieldResult<ScRoomBasic> {
         let conn = context.dbpool.get().unwrap();
         let room = get_room(&conn, input.room_id);
         if room.private {
@@ -190,12 +186,13 @@ impl MutationRoot {
             get_friend_ids(&conn, context.user_id),
             ScNotifyMessage::update_user(get_user_basic(&conn, context.user_id)),
         );
-        Ok("Ok".into())
+        Ok(room)
     }
-    fn leave_room(context: &Context, input: ScUpdatePlaying) -> FieldResult<String> {
+    fn leave_room(context: &Context) -> FieldResult<String> {
         let conn = context.dbpool.get().unwrap();
+        let room = get_playing(&conn, context.user_id).unwrap();
         let invites = get_invites_with(&conn, context.user_id);
-        leave_room(&conn, context.user_id, input.room_id);
+        leave_room(&conn, context.user_id, room.id);
         for invite in invites {
             notify(invite.target_id, ScNotifyMessage::delete_invite(invite.id));
         }
@@ -203,9 +200,9 @@ impl MutationRoot {
             get_friend_ids(&conn, context.user_id),
             ScNotifyMessage::update_user(get_user_basic(&conn, context.user_id)),
         );
-        if get_room_user_ids(&conn, input.room_id).len() == 0 {
-            delete_room(&conn, input.room_id);
-            notify_all(ScNotifyMessage::delete_room(input.room_id))
+        if get_room_user_ids(&conn, room.id).len() == 0 {
+            delete_room(&conn, room.id);
+            notify_all(ScNotifyMessage::delete_room(room.id))
         }
         Ok("Ok".into())
     }

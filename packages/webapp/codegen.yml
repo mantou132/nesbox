@@ -14,6 +14,8 @@ generates:
       maybeValue: T
       # https://github.com/dotansimha/graphql-code-generator/issues/2400#issuecomment-668694432
       documentMode: string
+      # https://github.com/dotansimha/graphql-code-generator/issues/3063#issuecomment-870831301
+      dedupeFragments: true
   src/generated/guestgraphql.ts:
     schema:
       - ${API_BASE:http://localhost:8080}/guestschema:
@@ -26,3 +28,4 @@ generates:
     config:
       maybeValue: T
       documentMode: string
+      dedupeFragments: true

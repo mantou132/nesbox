@@ -9,14 +9,225 @@ fragment ScGamePart on ScGame {
   screenshots
 }
 
+fragment ScMessagePart on ScMessage {
+  id
+  body
+  targetId
+  userId
+  createdAt
+  updatedAt
+}
+
+fragment ScRoomBasicPart on ScRoomBasic {
+  id
+  gameId
+  private
+  host
+  createdAt
+  updatedAt
+}
+
+fragment ScInvitePart on ScInvite {
+  id
+  room {
+    ...ScRoomBasicPart
+  }
+  targetId
+  userId
+  createdAt
+  updatedAt
+}
+
+fragment ScUserBasicPart on ScUserBasic {
+  id
+  username
+  nickname
+  status
+  playing {
+    ...ScRoomBasicPart
+  }
+}
+
+fragment ScAccountPart on ScUser {
+  id
+  username
+  nickname
+  settings
+  playing {
+    ...ScRoomBasicPart
+  }
+}
+
+fragment ScRoomPart on ScRoom {
+  id
+  gameId
+  private
+  host
+  createdAt
+  updatedAt
+  users {
+    ...ScUserBasicPart
+  }
+}
+
+fragment ScCommentPart on ScComment {
+  user {
+    ...ScUserBasicPart
+  }
+  gameId
+  body
+  like
+  createdAt
+  updatedAt
+}
+
+fragment ScFriendPart on ScFriend {
+  user {
+    ...ScUserBasicPart
+  }
+  createdAt
+  status
+}
+
 query getGames {
   games {
     ...ScGamePart
   }
+  topGames
+  favorites
+}
+
+query getRooms {
+  rooms {
+    ...ScRoomPart
+  }
+}
+
+query getComments($input: ScCommentsReq!) {
+  comments(input: $input) {
+    ...ScCommentPart
+  }
+}
+
+query getFriends {
+  friends {
+    ...ScFriendPart
+  }
+  invites {
+    ...ScInvitePart
+  }
+}
+
+query getMessages($input: ScMessagesReq!) {
+  messages(input: $input) {
+    ...ScMessagePart
+  }
+}
+
+query getAccount {
+  account {
+    ...ScAccountPart
+  }
+}
+
+mutation sendSignal($input: ScNewSignal!) {
+  signaling(input: $input)
+}
+
+mutation updateAccount($input: ScUpdateUser!) {
+  updateAccount(input: $input) {
+    ...ScAccountPart
+  }
+}
+
+mutation createComment($input: ScNewComment!) {
+  createComment(input: $input) {
+    ...ScCommentPart
+  }
+}
+
+mutation createMessage($input: ScNewMessage!) {
+  createMessage(input: $input) {
+    ...ScMessagePart
+  }
+}
+
+mutation favoriteGame($input: ScNewFavorite!) {
+  favoriteGame(input: $input)
+}
+
+mutation applyFriend($input: ScNewFriend!) {
+  applyFriend(input: $input) {
+    ...ScFriendPart
+  }
+}
+
+mutation acceptFriend($input: ScUpdateFriend!) {
+  acceptFriend(input: $input)
+}
+
+mutation createInvite($input: ScNewInvite!) {
+  createInvite(input: $input) {
+    ...ScInvitePart
+  }
+}
+
+mutation acceptInvite($input: ScUpdateInvite!) {
+  acceptInvite(input: $input)
+}
+
+mutation createRoom($input: ScNewRoom!) {
+  createRoom(input: $input) {
+    ...ScRoomBasicPart
+  }
+}
+
+mutation updateRoom($input: ScUpdateRoom!) {
+  updateRoom(input: $input) {
+    ...ScRoomBasicPart
+  }
+}
+
+mutation enterPubRoom($input: ScUpdatePlaying!) {
+  enterPubRoom(input: $input) {
+    ...ScRoomBasicPart
+  }
+}
+
+mutation leaveRoom {
+  leaveRoom
 }
 
 subscription event {
   event {
+    newMessage {
+      ...ScMessagePart
+    }
+    newGame {
+      ...ScGamePart
+    }
     deleteGame
+    updateRoom {
+      ...ScRoomBasicPart
+    }
+    deleteRoom
+    newInvite {
+      ...ScInvitePart
+    }
+    deleteInvite
+    applyFriend {
+      ...ScFriendPart
+    }
+    acceptFriend {
+      ...ScFriendPart
+    }
+    deleteFriend
+    updateUser {
+      ...ScUserBasicPart
+    }
+    sendSignal {
+      userId
+      json
+    }
   }
 }

@@ -65,33 +65,43 @@ export type ScUser = {
   username: Scalars['String'];
 };
 
-export type ScUserPartFragment = { __typename?: 'ScUser', id: number, username: string, nickname: string, settings?: string, createdAt: number, updatedAt: number, playing?: { __typename?: 'ScRoomBasic', gameId: number } };
+export type ScRoomBasicPartFragment = { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number };
+
+export type ScAccountPartFragment = { __typename?: 'ScUser', id: number, username: string, nickname: string, settings?: string, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } };
 
 export type LoginMutationVariables = Exact<{
   input: ScLoginReq;
 }>;
 
 
-export type LoginMutation = { __typename?: 'GuestMutationRoot', login: { __typename?: 'ScLoginResp', token: string, user: { __typename?: 'ScUser', id: number, username: string, nickname: string, settings?: string, createdAt: number, updatedAt: number, playing?: { __typename?: 'ScRoomBasic', gameId: number } } } };
+export type LoginMutation = { __typename?: 'GuestMutationRoot', login: { __typename?: 'ScLoginResp', token: string, user: { __typename?: 'ScUser', id: number, username: string, nickname: string, settings?: string, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } } } };
 
 export type RegisterMutationVariables = Exact<{
   input: ScLoginReq;
 }>;
 
 
-export type RegisterMutation = { __typename?: 'GuestMutationRoot', register: { __typename?: 'ScLoginResp', token: string, user: { __typename?: 'ScUser', id: number, username: string, nickname: string, settings?: string, createdAt: number, updatedAt: number, playing?: { __typename?: 'ScRoomBasic', gameId: number } } } };
+export type RegisterMutation = { __typename?: 'GuestMutationRoot', register: { __typename?: 'ScLoginResp', token: string, user: { __typename?: 'ScUser', id: number, username: string, nickname: string, settings?: string, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } } } };
 
-export const ScUserPart = `
-    fragment ScUserPart on ScUser {
+export const ScRoomBasicPart = `
+    fragment ScRoomBasicPart on ScRoomBasic {
+  id
+  gameId
+  private
+  host
+  createdAt
+  updatedAt
+}
+    `;
+export const ScAccountPart = `
+    fragment ScAccountPart on ScUser {
   id
   username
   nickname
-  playing {
-    gameId
-  }
   settings
-  createdAt
-  updatedAt
+  playing {
+    ...ScRoomBasicPart
+  }
 }
     `;
 export const Login = `
@@ -99,18 +109,20 @@ export const Login = `
   login(input: $input) {
     token
     user {
-      ...ScUserPart
+      ...ScAccountPart
     }
   }
 }
-    ${ScUserPart}`;
+    ${ScAccountPart}
+${ScRoomBasicPart}`;
 export const Register = `
     mutation register($input: ScLoginReq!) {
   register(input: $input) {
     token
     user {
-      ...ScUserPart
+      ...ScAccountPart
     }
   }
 }
-    ${ScUserPart}`;
+    ${ScAccountPart}
+${ScRoomBasicPart}`;

@@ -145,7 +145,7 @@ pub fn login(conn: &PgConnection, req: ScLoginReq, secret: &str) -> ScLoginResp 
         .filter(username.eq(&req.username))
         .filter(password.eq(&hash_password(&req.password)))
         .get_result::<User>(conn)
-        .expect("Error saving new user");
+        .expect("Error find user");
 
     let user = convert_to_sc_user(conn, &user);
 

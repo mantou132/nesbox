@@ -4,6 +4,9 @@ import { updateStore } from '@mantou/gem';
 import { configure } from 'src/configure';
 import { i18n } from 'src/i18n';
 
+lightTheme.smallRound = '0px';
+lightTheme.normalRound = '0px';
+
 export const themeNames = {
   get auto() {
     return i18n.get('sidebarAutoTheme');
