@@ -10,6 +10,7 @@ import { routes } from 'src/routes';
 import { gotoRedirectUri, isExpiredProfile, logout } from 'src/auth';
 
 import 'src/modules/meta';
+import 'src/theme';
 
 logger.info('MODE\t', import.meta.env.MODE);
 logger.info('RELEASE\t', RELEASE);

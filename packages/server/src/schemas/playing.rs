@@ -57,3 +57,13 @@ pub fn delete_playing(conn: &PgConnection, uid: i32) -> String {
 
     "Ok".into()
 }
+
+pub fn delete_playing_with_room(conn: &PgConnection, rid: i32) -> String {
+    use self::playing::dsl::*;
+
+    diesel::delete(playing.filter(room_id.eq(rid)))
+        .execute(conn)
+        .expect("Error delete playing");
+
+    "Ok".into()
+}

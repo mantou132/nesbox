@@ -15,6 +15,7 @@
     "@mantou/gem": "^1.6.0",
     "duoyun-ui": "^0.0.27",
     "graphql": "^16.2.0",
+    "jszip": "^3.10.0",
     "nes_rust_wasm": "^0.1.2",
     "subscriptions-transport-ws": "^0.11.0"
   },

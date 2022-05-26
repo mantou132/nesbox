@@ -283,6 +283,10 @@ export const subscribeEvent = () => {
       if (deleteRoom) {
         delete store.rooms[deleteRoom];
         updateStore(store, { roomIds: store.roomIds?.filter((id) => id !== deleteRoom) });
+        if (configure.user && configure.user.playing?.id === deleteGame) {
+          delete configure.user.playing;
+          updateStore(configure);
+        }
       }
 
       if (newInvite) {

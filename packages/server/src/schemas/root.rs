@@ -191,6 +191,9 @@ impl MutationRoot {
     fn leave_room(context: &Context) -> FieldResult<String> {
         let conn = context.dbpool.get().unwrap();
         let room = get_playing(&conn, context.user_id).unwrap();
+        if context.user_id == room.host {
+            delete_playing_with_room(&conn, room.id);
+        }
         let invites = get_invites_with(&conn, context.user_id);
         leave_room(&conn, context.user_id, room.id);
         for invite in invites {

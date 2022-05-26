@@ -11,19 +11,42 @@ import {
   RefObject,
 } from '@mantou/gem';
 import { createPath } from 'duoyun-ui/elements/route';
-import { WasmNes, Button } from 'nes_rust_wasm';
+import { Button, WasmNes } from 'nes_rust_wasm';
+import JSZip from 'jszip';
 
 import { logout } from 'src/auth';
 import { configure } from 'src/configure';
 import { routes } from 'src/routes';
 import { leaveRoom } from 'src/services/api';
-import { ChannelMessage, RTC } from 'src/services/rtc';
+import {
+  ChannelMessage,
+  ChannelMessageType,
+  getButton,
+  KeyDownMsg,
+  KeyUpMsg,
+  Role,
+  RoleAnswer,
+  RTC,
+  TextMsg,
+} from 'src/rtc';
 import { store } from 'src/store';
 
-const style = createCSSSheet(css``);
+import 'duoyun-ui/elements/input';
+import 'duoyun-ui/elements/button';
+
+const style = createCSSSheet(css`
+  :host {
+    display: flex;
+  }
+  .right {
+    display: flex;
+    flex-direction: column;
+  }
+`);
 
 type State = {
-  start: boolean;
+  messages: TextMsg[];
+  roles: Role[];
 };
 
 /**
@@ -39,20 +62,12 @@ export class PRoomElement extends GemElement<State> {
   @refobject audioRef: RefObject<HTMLAudioElement>;
 
   state: State = {
-    start: false,
+    messages: [],
+    roles: [],
   };
+
   get #isHost() {
     return configure.user?.id === configure.user?.playing?.host;
-  }
-
-  constructor() {
-    super();
-    setInterval(() => {
-      this.#nes?.press_button(Button.Joypad1Up);
-      setTimeout(() => {
-        this.#nes?.release_button(Button.Joypad1Up);
-      }, 10);
-    }, 1000);
   }
 
   #nes?: WasmNes;
@@ -61,20 +76,13 @@ export class PRoomElement extends GemElement<State> {
   #rtc: RTC;
   #audioContext: AudioContext;
 
-  #createPixelBuf = () => {
-    const ctx = this.canvasRef.element!.getContext('2d')!;
-    return ctx.createImageData(ctx.canvas.width, ctx.canvas.height);
-  };
-
   #enableAudio = () => {
     if (this.#isHost) {
       if (this.#audioContext.state === 'suspended') {
         this.#audioContext.resume();
-      } else {
-        this.#audioContext.suspend();
       }
     } else {
-      this.videoRef.element!.muted = !this.videoRef.element!.muted;
+      this.videoRef.element!.muted = false;
     }
   };
 
@@ -101,15 +109,7 @@ export class PRoomElement extends GemElement<State> {
     return stream;
   };
 
-  #initNes = async () => {
-    if (!this.#isHost) return;
-    const buffer = await (await fetch('https://takahirox.github.io/nes-rust/roms/nestest.nes')).arrayBuffer();
-    this.#nes = WasmNes.new();
-    this.#nes.set_rom(new Uint8Array(buffer));
-    this.#nes.bootup();
-  };
-
-  #tick = () => {
+  #renderCanvas = () => {
     if (this.#isHost && this.#nes && this.#imageData) {
       const ctx = this.canvasRef.element!.getContext('2d')!;
       this.#nes.step_frame();
@@ -118,26 +118,84 @@ export class PRoomElement extends GemElement<State> {
     }
 
     if (this.isConnected) {
-      requestAnimationFrame(this.#tick);
+      requestAnimationFrame(this.#renderCanvas);
+    }
+  };
+
+  #initNes = async () => {
+    if (!this.#isHost) return;
+    const ctx = this.canvasRef.element!.getContext('2d')!;
+    this.#imageData = ctx.createImageData(ctx.canvas.width, ctx.canvas.height);
+    const rom = 'https://github.com/mantou132/nesbox/files/8713065/legend.nes.zip';
+    const zip = await (
+      await fetch(`https://cors-anywhere.herokuapp.com/${rom}`, {
+        headers: { 'x-requested-with': location.origin },
+      })
+    ).arrayBuffer();
+    const folder = await JSZip.loadAsync(zip);
+    const buffer = await Object.values(folder.files)
+      .find((e) => e.name.endsWith('.nes'))!
+      .async('arraybuffer');
+    this.#nes = WasmNes.new();
+    this.#nes.set_rom(new Uint8Array(buffer));
+    this.#nes.bootup();
+    requestAnimationFrame(this.#renderCanvas);
+  };
+
+  #onMessage = ({ detail }: CustomEvent<ChannelMessage>) => {
+    switch (detail.type) {
+      // both
+      case ChannelMessageType.CHAT_TEXT:
+        this.setState({ messages: [...this.state.messages, detail as TextMsg] });
+        break;
+      // both
+      case ChannelMessageType.ROLE_ANSWER:
+        this.setState({ roles: (detail as RoleAnswer).roles });
+        break;
+      // host
+      case ChannelMessageType.KEYDOWN:
+        this.#nes?.press_button((detail as KeyDownMsg).button);
+        break;
+      // host
+      case ChannelMessageType.KEYUP:
+        this.#nes?.release_button((detail as KeyUpMsg).button);
+        break;
     }
   };
 
   #init = () => {
     this.#rtc = new RTC();
-    this.#rtc.addEventListener('message', ({ detail }: CustomEvent<ChannelMessage>) => {
-      console.log('[MESSAGE]:', detail);
-    });
+    this.#rtc.addEventListener('message', this.#onMessage);
 
     if (configure.user?.playing) {
-      this.#rtc.start(configure.user.playing, {
+      this.#rtc.start({
+        host: configure.user.playing.host,
         video: this.videoRef.element!,
         stream: this.#createStream(),
       });
       this.#initNes();
-      this.#imageData = this.#createPixelBuf();
     }
+  };
 
-    requestAnimationFrame(this.#tick);
+  #onKeyDown = (event: KeyboardEvent) => {
+    const button = getButton(event);
+    if (!button) return;
+    if (button !== Button.Reset) this.#enableAudio();
+    if (this.#isHost) {
+      this.#nes?.press_button(button);
+    } else {
+      this.#rtc.send(new KeyDownMsg(button));
+    }
+  };
+
+  #onKeyUp = (event: KeyboardEvent) => {
+    const button = getButton(event);
+    if (!button) return;
+    if (this.#isHost) {
+      this.#nes?.release_button(button);
+    } else {
+      this.#rtc.send(new KeyUpMsg(button));
+    }
   };
 
   mounted = () => {
@@ -153,20 +211,41 @@ export class PRoomElement extends GemElement<State> {
     );
 
     this.#init();
+
+    window.addEventListener('keydown', this.#onKeyDown);
+    window.addEventListener('keyup', this.#onKeyUp);
     return () => {
       this.#rtc?.destroy();
+      window.removeEventListener('keydown', this.#onKeyDown);
+      window.removeEventListener('keyup', this.#onKeyUp);
     };
   };
 
   render = () => {
     return html`
-      <div>user: ${configure.user?.id}</div>
-      <div @click=${logout}>logout</div>
-      <div>game: ${store.games[configure.user?.playing?.gameId || 0]?.name}</div>
-      <div @click=${leaveRoom}>leave room</div>
-      <canvas width="256" height="240" ?hidden=${!this.#isHost} ref=${this.canvasRef.ref}></canvas>
-      <video width="256" height="240" ?hidden=${this.#isHost} ref=${this.videoRef.ref}></video>
-      <div @click=${this.#enableAudio}>start audio</div>
+      <div class="left">
+        <div>user: ${configure.user?.id} ${configure.user?.username}</div>
+        <div><a href="#" @click=${logout}>logout</a></div>
+        <div>game: ${store.games[configure.user?.playing?.gameId || 0]?.name}</div>
+        <div><a href="#" @click=${leaveRoom}>leave room</a></div>
+        <canvas width="256" height="240" ?hidden=${!this.#isHost} ref=${this.canvasRef.ref}></canvas>
+        <video width="256" height="240" ?hidden=${this.#isHost} ref=${this.videoRef.ref}></video>
+      </div>
+      <div class="right">
+        <div>${this.state.roles.map((role, index) => role && html`<div>${index}: ${role.username}</div>`)}</div>
+        <dy-input-group>
+          <dy-input
+            @keydown=${(e: Event) => e.stopPropagation()}
+            @keyup=${(e: Event) => e.stopPropagation()}
+            @change=${(e: any) => (e.target.value = e.detail)}
+          ></dy-input>
+          <dy-button @click=${(e: any) => this.#rtc.send(new TextMsg(e.target.previousElementSibling.value))}>
+            Send
+          </dy-button>
+        </dy-input-group>
+        <div>Chat:</div>
+        <div>${this.state.messages.map((e) => html`<div>${e.username}: ${e.text}</div>`)}</div>
+      </div>
     `;
   };
 }
