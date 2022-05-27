@@ -1,4 +1,5 @@
 import { updateStore } from '@mantou/gem';
+import { Toast } from 'duoyun-ui/elements/toast';
 
 import {
   AcceptFriend,
@@ -33,6 +34,7 @@ import {
   GetAccount,
   GetAccountQuery,
   GetAccountQueryVariables,
+  GetComments,
   GetCommentsQuery,
   GetCommentsQueryVariables,
   GetFriends,
@@ -64,9 +66,9 @@ import {
   UpdateRoomMutation,
   UpdateRoomMutationVariables,
 } from 'src/generated/graphql';
-import { store } from 'src/store';
+import { store, friendStore } from 'src/store';
 import { request, subscribe } from 'src/services';
-import { configure } from 'src/configure';
+import { configure, parseAccount, Settings } from 'src/configure';
 import { events, Singal, SingalEvent } from 'src/constants';
 
 export const getGames = async () => {
@@ -78,7 +80,7 @@ export const getGames = async () => {
   updateStore(store, {
     gameIds,
     favoriteIds: favorites,
-    topGameIds: [...topGames, ...gameIds].splice(0, 5),
+    topGameIds: topGames.length ? topGames : gameIds.splice(0, 5),
   });
 };
 
@@ -121,45 +123,51 @@ export const leaveRoom = async () => {
 export const getAccount = async () => {
   const { account } = await request<GetAccountQuery, GetAccountQueryVariables>(GetAccount, {});
   updateStore(configure, {
-    user: account,
+    user: parseAccount(account),
   });
 };
 
-export const updateAccount = async ({ nickname, settings }: { nickname: string; settings: string }) => {
+export const updateAccount = async ({
+  nickname = configure.user!.nickname,
+  settings = configure.user!.settings,
+}: {
+  nickname?: string;
+  settings?: Settings;
+}) => {
   const { updateAccount } = await request<UpdateAccountMutation, UpdateAccountMutationVariables>(UpdateAccount, {
-    input: { nickname, settings },
+    input: { nickname, settings: JSON.stringify(settings) },
   });
   updateStore(configure, {
-    user: updateAccount,
+    user: parseAccount(updateAccount),
   });
 };
 
 export const getFriends = async () => {
   const { friends, invites } = await request<GetFriendsQuery, GetFriendsQueryVariables>(GetFriends, {});
-  updateStore(store, {
+  updateStore(friendStore, {
     friendIds: friends.map((e) => {
-      store.friends[e.user.id] = e;
+      friendStore.friends[e.user.id] = e;
       return e.user.id;
     }),
     inviteIds: invites.map((e) => {
-      store.invites[e.id] = e;
+      friendStore.invites[e.id] = e;
       return e.id;
     }),
   });
 };
 
-export const applyFriend = async (targetId: number) => {
-  await request<ApplyFriendMutation, ApplyFriendMutationVariables>(ApplyFriend, { input: { targetId } });
+export const applyFriend = async (username: string) => {
+  await request<ApplyFriendMutation, ApplyFriendMutationVariables>(ApplyFriend, { input: { username } });
 };
 
 export const acceptFriend = async (targetId: number, accept: boolean) => {
   await request<AcceptFriendMutation, AcceptFriendMutationVariables>(AcceptFriend, { input: { targetId, accept } });
   if (accept) {
-    store.friends[targetId]!.status = ScFriendStatus.Accept;
+    friendStore.friends[targetId] = { ...friendStore.friends[targetId]!, status: ScFriendStatus.Accept };
   } else {
-    store.friendIds = store.friendIds?.filter((id) => id !== targetId);
+    friendStore.friendIds = friendStore.friendIds?.filter((id) => id !== targetId);
   }
-  updateStore(store);
+  updateStore(friendStore);
 };
 
 export const createInvite = async (targetId: number, roomId: number) => {
@@ -169,17 +177,16 @@ export const createInvite = async (targetId: number, roomId: number) => {
 export const acceptInvite = async (inviteId: number, accept: boolean) => {
   await request<AcceptInviteMutation, AcceptInviteMutationVariables>(AcceptInvite, { input: { inviteId, accept } });
   if (accept) {
-    configure.user!.playing = store.invites[inviteId]?.room;
+    configure.user!.playing = friendStore.invites[inviteId]?.room;
     updateStore(configure);
-  } else {
-    store.inviteIds = store.inviteIds?.filter((id) => id !== inviteId);
-    delete store.invites[inviteId];
-    updateStore(store);
   }
+  friendStore.inviteIds = friendStore.inviteIds?.filter((id) => id !== inviteId);
+  delete friendStore.invites[inviteId];
+  updateStore(friendStore);
 };
 
 export const getComments = async (gameId: number) => {
-  const { comments } = await request<GetCommentsQuery, GetCommentsQueryVariables>(GetRooms, { input: { gameId } });
+  const { comments } = await request<GetCommentsQuery, GetCommentsQueryVariables>(GetComments, { input: { gameId } });
   store.comment[gameId] = {
     userIds: comments.map((e) => e.user.id),
     comments: Object.fromEntries(comments.map((e) => [e.user.id, e])),
@@ -191,30 +198,35 @@ export const createComment = async (input: ScNewComment) => {
   const { createComment } = await request<CreateCommentMutation, CreateCommentMutationVariables>(CreateComment, {
     input,
   });
-  store.comment[input.gameId].userIds = [
-    ...store.comment[input.gameId].userIds!.filter((id) => configure.user!.id !== id),
-    configure.user!.id,
-  ];
-  store.comment[input.gameId].comments[configure.user!.id] = createComment;
+  store.comment[input.gameId] = {
+    userIds: [
+      ...(store.comment[input.gameId]?.userIds?.filter((id) => configure.user!.id !== id) || []),
+      configure.user!.id,
+    ],
+    comments: {
+      ...store.comment[input.gameId]?.comments,
+      [configure.user!.id]: createComment,
+    },
+  };
   updateStore(store);
 };
 
 export const getMessages = async (targetId: number) => {
   const { messages } = await request<GetMessagesQuery, GetMessagesQueryVariables>(GetMessages, { input: { targetId } });
-  store.messageIds[targetId] = messages.map((e) => {
-    store.messages[targetId] = e;
+  friendStore.messageIds[targetId] = messages.map((e) => {
+    friendStore.messages[e.id] = e;
     return e.id;
   });
-  updateStore(store);
+  updateStore(friendStore);
 };
 
 export const createMessage = async (targetId: number, body: string) => {
   const { createMessage } = await request<CreateMessageMutation, CreateMessageMutationVariables>(CreateMessage, {
     input: { targetId, body },
   });
-  store.messageIds[targetId]?.push(createMessage.id);
-  store.messages[createMessage.id] = createMessage;
-  updateStore(store);
+  friendStore.messageIds[targetId] = [...(friendStore.messageIds[targetId] || []), createMessage.id];
+  friendStore.messages[createMessage.id] = createMessage;
+  updateStore(friendStore);
 };
 
 export const favoriteGame = async (gameId: number, favorite: boolean) => {
@@ -225,7 +237,7 @@ export const favoriteGame = async (gameId: number, favorite: boolean) => {
     },
   });
   if (favorite) {
-    store.favoriteIds?.push(gameId);
+    store.favoriteIds = [...(store.favoriteIds || []), gameId];
   } else {
     store.favoriteIds = store.favoriteIds?.filter((id) => id !== gameId);
   }
@@ -258,16 +270,17 @@ export const subscribeEvent = () => {
       } = event;
 
       if (newMessage) {
-        store.messages[newMessage.id] = newMessage;
+        friendStore.messages[newMessage.id] = newMessage;
         const userId = newMessage.userId === configure.user?.id ? newMessage.targetId : newMessage.userId;
-        (store.messageIds[userId] ||= []).push(newMessage.id);
-        updateStore(store);
+        friendStore.messageIds[userId] = [...(friendStore.messageIds[userId] || []), newMessage.id];
+        updateStore(friendStore);
       }
 
       if (newGame) {
         store.games[newGame.id] = newGame;
-        (store.gameIds ||= []).push(newGame.id);
-        updateStore(store);
+        updateStore(store, {
+          gameIds: [...(store.gameIds || []), newGame.id],
+        });
       }
 
       if (deleteGame) {
@@ -276,51 +289,65 @@ export const subscribeEvent = () => {
       }
 
       if (updateRoom) {
-        Object.assign(store.rooms[updateRoom.id], updateRoom);
+        if (store.rooms[updateRoom.id]) {
+          Object.assign(store.rooms[updateRoom.id], updateRoom);
+        }
         updateStore(store);
       }
 
       if (deleteRoom) {
         delete store.rooms[deleteRoom];
         updateStore(store, { roomIds: store.roomIds?.filter((id) => id !== deleteRoom) });
-        if (configure.user && configure.user.playing?.id === deleteGame) {
+        if (configure.user && configure.user.playing?.id === deleteRoom) {
+          if (configure.user.playing.host !== configure.user.id) {
+            Toast.open('warning', 'Room 已经被删除');
+          }
           delete configure.user.playing;
           updateStore(configure);
         }
       }
 
       if (newInvite) {
-        store.invites[newInvite.id] = newInvite;
-        (store.inviteIds ||= []).push(newInvite.id);
-        updateStore(store);
+        friendStore.invites[newInvite.id] = newInvite;
+        updateStore(friendStore, {
+          inviteIds: [...(friendStore.inviteIds || []), newInvite.id],
+        });
       }
 
       if (deleteInvite) {
-        delete store.invites[deleteInvite];
-        updateStore(store, { inviteIds: store.inviteIds?.filter((id) => id !== deleteInvite) });
+        delete friendStore.invites[deleteInvite];
+        updateStore(friendStore, { inviteIds: friendStore.inviteIds?.filter((id) => id !== deleteInvite) });
       }
 
       if (applyFriend) {
-        store.friends[applyFriend.user.id] = applyFriend;
-        (store.friendIds ||= []).push(applyFriend.user.id);
-        updateStore(store);
+        friendStore.friends[applyFriend.user.id] = applyFriend;
+        updateStore(friendStore, {
+          friendIds: [...(friendStore.friendIds || []), applyFriend.user.id],
+        });
       }
 
       if (acceptFriend) {
-        Object.assign(store.friends[acceptFriend.user.id], acceptFriend);
-        updateStore(store);
+        friendStore.friends[acceptFriend.user.id] = acceptFriend;
+        updateStore(friendStore, {
+          friendIds: [...(friendStore.friendIds || []), acceptFriend.user.id],
+        });
       }
 
       if (deleteFriend) {
-        delete store.friends[deleteFriend];
-        updateStore(store, { friendIds: store.friendIds?.filter((id) => id !== deleteFriend) });
+        delete friendStore.friends[deleteFriend];
+        friendStore.messageIds[deleteFriend]?.forEach((id) => delete friendStore.messages[id]);
+        updateStore(friendStore, {
+          friendIds: friendStore.friendIds?.filter((id) => id !== deleteFriend),
+          messageIds: { ...friendStore.messageIds, [deleteFriend]: undefined },
+          draft: { ...friendStore.draft, [deleteFriend]: undefined },
+        });
       }
 
       if (updateUser) {
-        const friend = store.friends[updateUser.id];
+        const friend = friendStore.friends[updateUser.id];
         if (friend) {
-          friend.user = updateUser;
-          updateStore(store);
+          friendStore.friends[updateUser.id] = { ...friend, user: updateUser };
+          updateStore(friendStore);
         }
       }
 

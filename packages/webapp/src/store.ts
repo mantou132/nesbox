@@ -4,40 +4,35 @@ import {
   GetCommentsQuery,
   GetFriendsQuery,
   GetGamesQuery,
-  GetMessagesQuery,
   GetRoomsQuery,
+  GetMessagesQuery,
 } from 'src/generated/graphql';
 import { localStorageKeys } from 'src/constants';
 import { configure } from 'src/configure';
 import { createCacheStore } from 'src/utils';
 
 export type Game = ElementOf<GetGamesQuery['games']>;
-export type Message = ElementOf<GetMessagesQuery['messages']>;
 export type Room = ElementOf<GetRoomsQuery['rooms']>;
 export type Invite = ElementOf<GetFriendsQuery['invites']>;
 export type Friend = ElementOf<GetFriendsQuery['friends']>;
 export type Comment = ElementOf<GetCommentsQuery['comments']>;
+export type Message = ElementOf<GetMessagesQuery['messages']>;
 
 interface Store {
   games: Record<number, Game | undefined>;
   gameIds?: number[];
   comment: Record<
-    number,
-    {
-      comments: Record<number, Comment | undefined>;
-      userIds?: number[];
-    }
+    number, // gameId
+    | {
+        comments: Record<number /**userId */, Comment | undefined>;
+        userIds?: number[];
+      }
+    | undefined
   >;
   topGameIds?: number[];
   favoriteIds?: number[];
-  messages: Record<number, Message | undefined>;
-  messageIds: Record<number, number[] | undefined>;
   rooms: Record<number, Room | undefined>;
   roomIds?: number[];
-  invites: Record<number, Invite | undefined>;
-  inviteIds?: number[];
-  friends: Record<number, Friend | undefined>;
-  friendIds?: number[];
 }
 
 export const [store] = createCacheStore<Store>(
@@ -45,13 +40,31 @@ export const [store] = createCacheStore<Store>(
   {
     games: {},
     comment: {},
-    messages: {},
-    messageIds: {},
     rooms: {},
+  },
+  {
+    prefix: configure.user!.username,
+  },
+);
+
+interface FriendStore {
+  draft: Record<number, string | undefined>;
+  messages: Record<number, Message | undefined>;
+  messageIds: Record<number, number[] | undefined>;
+  invites: Record<number, Invite | undefined>;
+  inviteIds?: number[];
+  friends: Record<number, Friend | undefined>;
+  friendIds?: number[];
+}
+
+export const [friendStore] = createCacheStore<FriendStore>(
+  localStorageKeys.FRIEND_CHAT_STORAGE_KEY,
+  {
+    draft: {},
+    messageIds: {},
+    messages: {},
     invites: {},
     friends: {},
   },
-  {
-    prefix: configure.profile!.username,
-  },
+  { prefix: configure.user!.username },
 );

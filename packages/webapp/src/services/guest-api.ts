@@ -11,14 +11,14 @@ import {
   RegisterMutationVariables,
   ScLoginReq,
 } from 'src/generated/guestgraphql';
-import { configure } from 'src/configure';
+import { configure, parseAccount } from 'src/configure';
 
 export const GUEST_ENDPOINT = '/guestgraphql';
 
 function setUser(resp: LoginMutation['login']) {
   const tokenParsed = JSON.parse(b64ToUtf8(resp.token.split('.')[1]));
   updateStore(configure, {
-    user: resp.user,
+    user: parseAccount(resp.user),
     profile: {
       token: resp.token,
       exp: tokenParsed.exp,

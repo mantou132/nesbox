@@ -100,14 +100,15 @@ impl MutationRoot {
             Ok(delete_favorite(&conn, context.user_id, input.game_id))
         }
     }
-    fn apply_friend(context: &Context, input: ScNewFriend) -> FieldResult<ScFriend> {
+    fn apply_friend(context: &Context, input: ScNewFriend) -> FieldResult<String> {
         let conn = context.dbpool.get().unwrap();
-        let friend = apply_friend(&conn, context.user_id, input.target_id);
+        let target_user = get_user_by_username(&conn, &input.username);
+        let friend = apply_friend(&conn, context.user_id, target_user.id);
         notify(
-            input.target_id,
+            target_user.id,
             ScNotifyMessage::apply_friend(friend.clone()),
         );
-        Ok(friend)
+        Ok("Ok".into())
     }
     fn accept_friend(context: &Context, input: ScUpdateFriend) -> FieldResult<String> {
         let conn = context.dbpool.get().unwrap();
@@ -117,19 +118,14 @@ impl MutationRoot {
                 input.target_id,
                 ScNotifyMessage::accept_friend(friend.clone()),
             );
-            Ok("Ok".into())
         } else {
             delete_friend(&conn, context.user_id, input.target_id);
-            notify(
-                context.user_id,
-                ScNotifyMessage::delete_friend(input.target_id),
-            );
             notify(
                 input.target_id,
                 ScNotifyMessage::delete_friend(context.user_id),
             );
-            Ok("Ok".into())
         }
+        Ok("Ok".into())
     }
     fn create_invite(context: &Context, input: ScNewInvite) -> FieldResult<ScInvite> {
         let conn = context.dbpool.get().unwrap();
@@ -141,16 +137,25 @@ impl MutationRoot {
         let conn = context.dbpool.get().unwrap();
         if input.accept {
             let invite = get_invite(&conn, context.user_id, input.invite_id);
+
+            match get_playing(&conn, context.user_id) {
+                Some(room) => {
+                    delete_playing_with_room(&conn, room.id);
+                    delete_room(&conn, room.id);
+                    notify_all(ScNotifyMessage::delete_room(room.id))
+                }
+                None => (),
+            }
+
             enter_room(&conn, context.user_id, invite.room.id);
             notify_ids(
                 get_friend_ids(&conn, context.user_id),
                 ScNotifyMessage::update_user(get_user_basic(&conn, context.user_id)),
             );
-            Ok("Ok".into())
         } else {
             delete_invite_by_id(&conn, context.user_id, input.invite_id);
-            Ok("Ok".into())
         }
+        Ok("Ok".into())
     }
     fn create_room(context: &Context, input: ScNewRoom) -> FieldResult<ScRoomBasic> {
         let conn = context.dbpool.get().unwrap();

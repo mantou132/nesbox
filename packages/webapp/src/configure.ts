@@ -1,12 +1,37 @@
 import { updateStore } from '@mantou/gem';
 import { isMac, getDisplayKey } from 'duoyun-ui/lib/hotkeys';
+import { Modify } from 'duoyun-ui/lib/types';
 
 import { LoginMutation } from 'src/generated/guestgraphql';
 import { localStorageKeys } from 'src/constants';
 import type { ThemeName } from 'src/theme';
 import { createCacheStore } from 'src/utils';
+import { GetAccountQuery } from 'src/generated/graphql';
 
-export type User = LoginMutation['login']['user'];
+const defaultKeybinding = {
+  Up: 'w',
+  Left: 'a',
+  Down: 's',
+  Right: 'd',
+  A: 'j',
+  B: 'k',
+  Select: 'u',
+  Start: 'i',
+};
+
+export type Settings = {
+  keybinding: typeof defaultKeybinding;
+};
+
+export type User = Modify<LoginMutation['login']['user'], { settings: Settings }>;
+
+export const parseAccount = (account: GetAccountQuery['account']): User => {
+  const settings = JSON.parse(account.settings || '{}');
+  return {
+    ...account,
+    settings: { ...settings, keybinding: { ...defaultKeybinding, ...settings.keybinding } },
+  };
+};
 
 export interface Profile {
   token: string;
@@ -24,19 +49,27 @@ interface Configure {
   user?: User;
   profile?: Profile;
   screencastMode?: boolean;
+  friendListState?: boolean;
+  settingsState?: boolean;
+  friendChatState?: number;
   usedRelease?: number;
   theme: ThemeName;
   shortcuts: {
     OPEN_HELP: Shortcut;
+    OPEN_SETTINGS: Shortcut;
   };
 }
 
 export const [configure, storeConfigure] = createCacheStore<Configure>(localStorageKeys.CONFIGURE_LOCAL_STORAGE_KEY, {
-  theme: 'light',
+  theme: 'default',
   shortcuts: {
     OPEN_HELP: {
       win: ['ctrl', 'shift', 'k'],
       mac: ['command', 'shift', 'k'],
+    },
+    OPEN_SETTINGS: {
+      win: ['esc'],
+      mac: ['esc'],
     },
   },
 });
@@ -53,4 +86,16 @@ export const deleteUser = () => {
 
 export const toggoleScreencaseMode = () => {
   updateStore(configure, { screencastMode: !configure.screencastMode });
+};
+
+export const toggoleFriendListState = () => {
+  updateStore(configure, { friendListState: !configure.friendListState });
+};
+
+export const toggoleFriendChatState = (id?: number) => {
+  updateStore(configure, { friendChatState: id });
+};
+
+export const toggoleSettingsState = () => {
+  updateStore(configure, { settingsState: !configure.settingsState });
 };

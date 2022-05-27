@@ -1,28 +1,33 @@
 {
-  "id": "com.cloudfine.console",
-  "name": "CloudFine Console",
-  "short_name": "CloudFine",
-  "description": "Scheduling, monitoring, managing your own multi-cloud resources",
+  "id": "com.nesbox",
+  "name": "NESBox",
+  "short_name": "NESBox",
+  "description": "Enjoy game",
   "scope": "/",
   "start_url": "/?utm_source=web_app_manifest",
-  "background_color": "#fff",
+  "background_color": "black",
   "theme_color": "black",
-  "display": "minimal-ui",
+  "display": "standalone",
   "icons": [
     {
-      "src": "/logo-192.png",
-      "sizes": "192x192",
+      "src": "/logo-32.png",
+      "sizes": "32x32",
       "type": "image/png"
     },
     {
-      "src": "/logo-maskable-192.png",
-      "sizes": "192x192",
+      "src": "/logo-96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo-maskable-144.png",
+      "sizes": "144x144",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/logo-512.png",
-      "sizes": "512x512",
+      "src": "/logo-144.png",
+      "sizes": "144x144",
       "type": "image/png"
     }
   ]

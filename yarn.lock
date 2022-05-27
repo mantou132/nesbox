@@ -3225,12 +3225,13 @@ dset@^3.1.0:
   resolved "https://registry.yarnpkg.com/dset/-/dset-3.1.2.tgz#89c436ca6450398396dc6538ea00abc0c54cd45a"
   integrity sha512-g/M9sqy3oHe477Ar4voQxWtaPIFw1jTdKZuomOjhCcBx9nHUNn0pu6NopuFFrTh/TRZIKEj+76vLWFu9BNKk+Q==
 
-duoyun-ui@^0.0.27:
-  version "0.0.27"
-  resolved "https://registry.yarnpkg.com/duoyun-ui/-/duoyun-ui-0.0.27.tgz#9c2b563146c7ec0ea1a133450bf1094ffcf0ff1c"
-  integrity sha512-xwoOwGNo/OQ9hSYIHrKIaLp8UP/5xoskj63tVm9EgOvpAOYu+514zpUHUwoYadPkMaJ9LdUqjO1t8//c9lHlkg==
+duoyun-ui@^0.0.29:
+  version "0.0.29"
+  resolved "https://registry.yarnpkg.com/duoyun-ui/-/duoyun-ui-0.0.29.tgz#c22f224ea1e9b0574bf0f46d6e1685d181ba05ae"
+  integrity sha512-SbTtSqfmQogpvR4/D7xZ+vVEFU75mfnjixMsz2ZYo0q7inHz9MB3A3yhoTtKuKjxvQpLxl7dreRZLs9CcyCfJg==
   dependencies:
     d3-geo "^3.0.1"
+    elkjs "^0.7.1"
 
 duplexer3@^0.1.4:
   version "0.1.4"
@@ -3266,6 +3267,11 @@ elegant-spinner@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/elegant-spinner/-/elegant-spinner-1.0.1.tgz#db043521c95d7e303fd8f345bedc3349cfb0729e"
   integrity sha1-2wQ1IcldfjA/2PNFvtwzSc+wcp4=
+
+elkjs@^0.7.1:
+  version "0.7.1"
+  resolved "https://registry.yarnpkg.com/elkjs/-/elkjs-0.7.1.tgz#4751c5e918a4988139baf7f214e010aea22de969"
+  integrity sha512-lD86RWdh480/UuRoHhRcnv2IMkIcK6yMDEuT8TPBIbO3db4HfnVF+1lgYdQi99Ck0yb+lg5Eb46JCHI5uOsmAw==
 
 emoji-regex@^8.0.0:
   version "8.0.0"

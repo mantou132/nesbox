@@ -94,6 +94,7 @@ pub fn get_rooms(conn: &PgConnection) -> Vec<ScRoom> {
         .expect("Error loading room")
         .iter()
         .map(|room| convert_to_sc_room(conn, room))
+        .filter(|room| room.users.len() > 0)
         .collect()
 }
 
@@ -133,7 +134,7 @@ pub fn update_room(conn: &PgConnection, uid: i32, req: &ScUpdateRoom) -> ScRoomB
         updated_at.eq(Utc::now().naive_utc()),
     ))
     .get_result::<Room>(conn)
-    .expect("Error update comment");
+    .expect("Error update room");
 
     convert_to_sc_room_basic(&room)
 }
@@ -143,7 +144,7 @@ pub fn delete_room(conn: &PgConnection, rid: i32) -> String {
 
     diesel::delete(rooms.filter(id.eq(rid)))
         .execute(conn)
-        .expect("Error delete favorite");
+        .expect("Error delete room");
 
     "Ok".into()
 }

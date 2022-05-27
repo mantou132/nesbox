@@ -1,8 +1,9 @@
 import { html, render, history } from '@mantou/gem';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { Toast } from 'duoyun-ui/elements/toast';
-import { matchPath } from '@mantou/gem/elements/route';
+import { matchPath } from 'duoyun-ui/elements/route';
 
+import { theme } from 'src/theme';
 import { configure } from 'src/configure';
 import { COMMAND, RELEASE } from 'src/constants';
 import { logger } from 'src/logger';
@@ -10,7 +11,6 @@ import { routes } from 'src/routes';
 import { gotoRedirectUri, isExpiredProfile, logout } from 'src/auth';
 
 import 'src/modules/meta';
-import 'src/theme';
 
 logger.info('MODE\t', import.meta.env.MODE);
 logger.info('RELEASE\t', RELEASE);
@@ -42,27 +42,31 @@ render(
         overflow: hidden;
       }
       body {
+        color-scheme: dark;
         height: 100%;
         overflow: auto;
         scrollbar-width: thin;
         -webkit-overflow-scrolling: touch;
         margin: 0;
         padding: 0;
-        font-size: 0.9rem;
+        font-size: 1rem;
+        color: ${theme.textColor};
+        background-color: ${theme.backgroundColor};
+        scrollbar-width: thin;
       }
       @media ${mediaQuery.DESKTOP} {
-        body {
-          font-size: 1rem;
-        }
-      }
-      @media ${mediaQuery.WIDTHSCREEN} {
         body {
           font-size: 1.1rem;
         }
       }
+      @media ${mediaQuery.WIDTHSCREEN} {
+        body {
+          font-size: 1.2rem;
+        }
+      }
     </style>
     <m-meta></m-meta>
-    <gem-route
+    <dy-route
       .routes=${[
         routes.login,
         routes.register,
@@ -74,7 +78,7 @@ render(
           },
         },
       ]}
-    ></gem-route>
+    ></dy-route>
   `,
   document.body,
 );
@@ -104,5 +108,7 @@ function handleRejection({ reason }: PromiseRejectionEvent) {
 addEventListener('error', printError);
 addEventListener('unhandledrejection', handleRejection);
 addEventListener('load', () => {
-  navigator.serviceWorker?.register('/sw.js', { type: 'module' });
+  if (COMMAND === 'build') {
+    navigator.serviceWorker?.register('/sw.js', { type: 'module' });
+  }
 });

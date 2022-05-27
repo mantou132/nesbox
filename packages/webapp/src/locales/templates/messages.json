@@ -2,6 +2,45 @@
   "title": {
     "message": "NESBox"
   },
+  "slogan": {
+    "message": "NESBox"
+  },
+  "sloganDesc": {
+    "message": "隔壁班的那個女孩\n怎麼還沒經過我的窗前\n嘴裏的零食手裏的漫畫\n心裏初戀的童年\n......"
+  },
+  "logout": {
+    "message": "登出"
+  },
+  "search": {
+    "message": "搜索"
+  },
+  "close": {
+    "message": "关闭"
+  },
+  "notFoundTitle": {
+    "message": "未找到页面"
+  },
+  "notFoundDetail": {
+    "message": "您访问的页面没有找到，$1<点击>返回首页"
+  },
+  "notDataTitle": {
+    "message": "暂无数据"
+  },
+  "screencastMode": {
+    "message": "截屏模式"
+  },
+  "help": {
+    "message": "帮助"
+  },
+  "changeLanguage": {
+    "message": "切换语言"
+  },
+  "changeTheme": {
+    "message": "选择主题"
+  },
+  "defaultTheme": {
+    "message": "默认主题"
+  },
   "loginTitle": {
     "message": "登录"
   },
@@ -26,44 +65,38 @@
   "goRegister": {
     "message": "暂无账号"
   },
-  "search": {
-    "message": "搜索"
+  "bgCopyright": {
+    "message": "图像版权"
   },
   "gamesTitle": {
-    "message": "游戏大厅"
+    "message": "所有游戏"
+  },
+  "gameTitle": {
+    "message": "游戏"
+  },
+  "favoritesTitle": {
+    "message": "我收藏的"
   },
   "roomsTitle": {
-    "message": "公开的游戏"
+    "message": "公开房间"
   },
   "roomTitle": {
     "message": "游戏"
   },
-  "notFoundTitle": {
-    "message": "未找到页面"
+  "leaveRoom": {
+    "message": "离开房间"
   },
-  "notFoundDetail": {
-    "message": "您访问的页面没有找到，$1<点击>返回首页"
+  "roomEmptyRole": {
+    "message": "无"
   },
-  "screencastMode": {
-    "message": "截屏模式"
+  "selectGame": {
+    "message": "更换游戏"
   },
-  "sidebarHelp": {
-    "message": "帮助"
+  "profileItem": {
+    "message": "账号：$1"
   },
-  "sidebarLanguage": {
-    "message": "切换语言"
-  },
-  "sidebarTheme": {
-    "message": "选择主题"
-  },
-  "sidebarAutoTheme": {
-    "message": "跟随系统"
-  },
-  "sidebarDarkTheme": {
-    "message": "暗黑主题"
-  },
-  "sidebarLightTheme": {
-    "message": "明亮主题"
+  "profileSetting": {
+    "message": "设置"
   },
   "code0": { "message": "当前网络不稳定" },
   "code400": { "message": "参数错误" },

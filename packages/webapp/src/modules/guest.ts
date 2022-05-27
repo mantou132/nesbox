@@ -1,17 +1,16 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, connectStore } from '@mantou/gem';
 import { waitLoading } from 'duoyun-ui/elements/wait';
-import { theme } from 'duoyun-ui/lib/theme';
 import { icons } from 'duoyun-ui/lib/icons';
 import { commonHandle } from 'duoyun-ui/lib/hotkeys';
 import { ContextMenu } from 'duoyun-ui/elements/menu';
 import type { GemUseElement } from '@mantou/gem/elements/use';
 
 import { i18n, langNames } from 'src/i18n';
-import { ThemeName, themeNames, changeTheme } from 'src/theme';
+import { ThemeName, themeNames, changeTheme, theme } from 'src/theme';
 import { configure, toggoleScreencaseMode } from 'src/configure';
 
-import '@mantou/gem/elements/use';
 import 'duoyun-ui/elements/input-capture';
+import 'duoyun-ui/elements/use';
 
 const style = createCSSSheet(css`
   .menu {
@@ -39,7 +38,7 @@ export class ModuleGuestElement extends GemElement {
     ContextMenu.open(
       [
         {
-          text: i18n.get('sidebarLanguage'),
+          text: i18n.get('changeLanguage'),
           menu: Object.keys(i18n.resources).map((code) => ({
             selected: i18n.currentLanguage === code,
             text: langNames[code],
@@ -47,7 +46,7 @@ export class ModuleGuestElement extends GemElement {
           })),
         },
         {
-          text: i18n.get('sidebarTheme'),
+          text: i18n.get('changeTheme'),
           menu: Object.entries(themeNames).map(([theme, name]: [ThemeName, string]) => ({
             selected: configure.theme === theme,
             text: name,
@@ -68,7 +67,7 @@ export class ModuleGuestElement extends GemElement {
 
   render = () => {
     return html`
-      <gem-use
+      <dy-use
         tabindex="0"
         role="button"
         aria-label="Preference"
@@ -76,7 +75,7 @@ export class ModuleGuestElement extends GemElement {
         @click=${this.#openMenu}
         @keydown=${commonHandle}
         .element=${icons.more}
-      ></gem-use>
+      ></dy-use>
       ${configure.screencastMode ? html`<dy-input-capture></dy-input-capture>` : ''}
     `;
   };

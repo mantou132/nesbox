@@ -23,6 +23,22 @@ const getInitRoutes = () => {
         return html`<p-games></p-games>`;
       },
     },
+    game: {
+      title: i18n.get('gameTitle'),
+      pattern: `/game/:${paramKeys.GAME_ID}`,
+      async getContent(params: Record<string, string>) {
+        await import('src/pages/game');
+        return html`<p-game .gameId=${Number(params[paramKeys.GAME_ID])}></p-game>`;
+      },
+    },
+    favorites: {
+      title: i18n.get('favoritesTitle'),
+      pattern: '/favorites',
+      async getContent(_params: Record<string, string>) {
+        await import('src/pages/favorites');
+        return html`<p-favorites></p-favorites>`;
+      },
+    },
     rooms: {
       title: i18n.get('roomsTitle'),
       pattern: '/rooms',
@@ -33,7 +49,7 @@ const getInitRoutes = () => {
     },
     room: {
       title: i18n.get('roomTitle'),
-      pattern: `/game/:${paramKeys.ROOM_ID}`,
+      pattern: `/room/:${paramKeys.ROOM_ID}`,
       async getContent(params: Record<string, string>) {
         await import('src/pages/room');
         return html`<p-room id=${params[paramKeys.ROOM_ID]}></p-room>`;

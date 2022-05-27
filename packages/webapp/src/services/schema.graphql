@@ -157,9 +157,7 @@ mutation favoriteGame($input: ScNewFavorite!) {
 }
 
 mutation applyFriend($input: ScNewFriend!) {
-  applyFriend(input: $input) {
-    ...ScFriendPart
-  }
+  applyFriend(input: $input)
 }
 
 mutation acceptFriend($input: ScUpdateFriend!) {

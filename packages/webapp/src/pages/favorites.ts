@@ -1,37 +1,27 @@
 import { html, adoptedStyle, customElement, createCSSSheet, css, connectStore } from '@mantou/gem';
-import { polling } from 'duoyun-ui/lib/utils';
 
-import { getRooms } from 'src/services/api';
 import { store } from 'src/store';
-import { i18n } from 'src/i18n';
-import { icons } from 'src/icons';
 import { PBaseElement } from 'src/pages/base';
-import { theme } from 'src/theme';
+import { icons } from 'src/icons';
+import { i18n } from 'src/i18n';
 
-import 'duoyun-ui/elements/result';
+import 'duoyun-ui/elements/carousel';
 import 'src/modules/nav';
-import 'src/modules/room-list';
+import 'src/modules/game-list';
 import 'src/modules/footer';
 
-const style = createCSSSheet(css`
-  main {
-    padding-inline: ${theme.gridGutter};
-  }
-`);
+const style = createCSSSheet(css``);
 
-@customElement('p-rooms')
+@customElement('p-favorites')
 @adoptedStyle(style)
+@connectStore(i18n.store)
 @connectStore(store)
-export class PRoomsElement extends PBaseElement {
-  mounted = () => {
-    return polling(getRooms, 10_000);
-  };
-
+export class PFavoritesElement extends PBaseElement {
   render = () => {
     return html`
       <m-nav></m-nav>
       <main>
-        ${store.roomIds?.length === 0
+        ${store.favoriteIds?.length === 0
           ? html`
               <dy-result
                 style="height: 60vh"
@@ -39,7 +29,7 @@ export class PRoomsElement extends PBaseElement {
                 .header=${i18n.get('notDataTitle')}
               ></dy-result>
             `
-          : html`<m-room-list></m-room-list>`}
+          : html`<m-game-list .favorite=${true}></m-game-list>`}
       </main>
       <m-footer></m-footer>
     `;

@@ -16,7 +16,7 @@ export type MutationRoot = {
   __typename?: 'MutationRoot';
   acceptFriend: Scalars['String'];
   acceptInvite: Scalars['String'];
-  applyFriend: ScFriend;
+  applyFriend: Scalars['String'];
   createComment: ScComment;
   createGame: ScGame;
   createInvite: ScInvite;
@@ -193,7 +193,7 @@ export type ScNewFavorite = {
 };
 
 export type ScNewFriend = {
-  targetId: Scalars['Int'];
+  username: Scalars['String'];
 };
 
 export type ScNewGame = {
@@ -415,7 +415,7 @@ export type ApplyFriendMutationVariables = Exact<{
 }>;
 
 
-export type ApplyFriendMutation = { __typename?: 'MutationRoot', applyFriend: { __typename?: 'ScFriend', createdAt: number, status: ScFriendStatus, user: { __typename?: 'ScUserBasic', id: number, username: string, nickname: string, status: ScUserStatus, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } } } };
+export type ApplyFriendMutation = { __typename?: 'MutationRoot', applyFriend: string };
 
 export type AcceptFriendMutationVariables = Exact<{
   input: ScUpdateFriend;
@@ -660,13 +660,9 @@ export const FavoriteGame = `
     `;
 export const ApplyFriend = `
     mutation applyFriend($input: ScNewFriend!) {
-  applyFriend(input: $input) {
-    ...ScFriendPart
-  }
+  applyFriend(input: $input)
 }
-    ${ScFriendPart}
-${ScUserBasicPart}
-${ScRoomBasicPart}`;
+    `;
 export const AcceptFriend = `
     mutation acceptFriend($input: ScUpdateFriend!) {
   acceptFriend(input: $input)

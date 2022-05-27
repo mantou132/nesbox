@@ -12,18 +12,20 @@ import {
   history,
 } from '@mantou/gem';
 import type { DuoyunFormElement } from 'duoyun-ui/elements/form';
-import { theme } from 'duoyun-ui/lib/theme';
 import { createPath } from 'duoyun-ui/elements/route';
 
+import { theme } from 'src/theme';
 import { gotoRedirectUri } from 'src/auth';
 import { i18n } from 'src/i18n';
 import { routes } from 'src/routes';
 import { login, register } from 'src/services/guest-api';
 
 import 'duoyun-ui/elements/form';
+import 'duoyun-ui/elements/link';
 import 'duoyun-ui/elements/button';
 import 'duoyun-ui/elements/heading';
 import 'duoyun-ui/elements/action-text';
+import 'src/elements/tooltip';
 import 'src/modules/guest';
 
 const style = createCSSSheet(css`
@@ -35,7 +37,37 @@ const style = createCSSSheet(css`
     color: ${theme.textColor};
     background: url(https://cdn.dribbble.com/users/870476/screenshots/10244007/media/ba3b0d812068691f20b835e7381284b1.jpg)
       center center / cover no-repeat fixed;
-    background-color: ${theme.hoverBackgroundColor};
+  }
+  .bg-copyright {
+    position: fixed;
+    inset: auto auto 1em 1em;
+    font-size: 0.75em;
+  }
+  .slogan {
+    flex-grow: 1;
+    display: flex;
+    padding-inline: 10vw;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  .slogan * {
+    margin: 0;
+    background-color: ${theme.backgroundColor};
+    color: ${theme.highlightColor};
+    vertical-align: middle;
+    padding-inline: 0.2em 0.4em;
+  }
+  .slogan h1 {
+    font-size: 2.7em;
+    font-weight: bold;
+    margin-block: -2em 0.3em;
+  }
+  .slogan p {
+    font-style: italic;
+    font-size: 1.6em;
+    line-height: 1.5;
+    margin-block-end: 4px;
   }
   .content {
     display: flex;
@@ -44,7 +76,6 @@ const style = createCSSSheet(css`
     justify-content: center;
     padding: 2em 1.6em;
     background: ${theme.backgroundColor};
-    box-shadow: 0 0 1em rgba(0, 0, 0, 0.2);
   }
   .header {
     margin-block: -10vh 1.2em;
@@ -109,8 +140,20 @@ export class PLoginElement extends GemElement<State> {
     const { username, password } = this.state;
     return html`
       <m-guest></m-guest>
+      <div class="bg-copyright">
+        <nesbox-tooltip .content=${i18n.get('bgCopyright')}>
+          <dy-link href="https://dribbble.com/shots/10244007-Old-tech-devices-2">@Tanner Wayment</dy-link>
+        </nesbox-tooltip>
+      </div>
+      <div class="slogan">
+        <h1>${i18n.get('slogan')}</h1>
+        ${i18n
+          .get('sloganDesc')
+          .split('\n')
+          .map((line) => html`<p>${line}</p>`)}
+      </div>
       <div class="content">
-        <dy-heading lv="2" class="header">${this.register ? routes.register.title : routes.login.title}</dy-heading>
+        <dy-heading lv="1" class="header">${this.register ? routes.register.title : routes.login.title}</dy-heading>
         <dy-form class="form" ref=${this.formRef.ref} @change=${this.#onChange}>
           <dy-form-item name="username" required .placeholder=${i18n.get('username')} .value=${username}></dy-form-item>
           <dy-form-item

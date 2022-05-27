@@ -137,6 +137,17 @@ pub fn get_user_basic(conn: &PgConnection, uid: i32) -> ScUserBasic {
     }
 }
 
+pub fn get_user_by_username(conn: &PgConnection, u: &str) -> ScUser {
+    use self::users::dsl::*;
+
+    let user = users
+        .filter(username.eq(u))
+        .get_result(conn)
+        .expect("Error find user");
+
+    convert_to_sc_user(conn, &user)
+}
+
 pub fn login(conn: &PgConnection, req: ScLoginReq, secret: &str) -> ScLoginResp {
     use self::users::dsl::*;
 

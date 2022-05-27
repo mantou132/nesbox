@@ -34,7 +34,7 @@ fn convert_to_sc_invite(conn: &PgConnection, invite: &Invite) -> ScInvite {
     ScInvite {
         id: invite.id,
         room: get_room(conn, invite.room_id),
-        target_id: invite.user_id,
+        target_id: invite.target_id,
         user_id: invite.user_id,
         created_at: invite.created_at.timestamp_millis() as f64,
         updated_at: invite.updated_at.timestamp_millis() as f64,
@@ -111,7 +111,7 @@ pub fn create_invite(conn: &PgConnection, uid: i32, req: &ScNewInvite) -> ScInvi
 pub fn delete_invite_by_id(conn: &PgConnection, uid: i32, iid: i32) -> ScInvite {
     use self::invites::dsl::*;
 
-    let invite = diesel::delete(invites.filter(user_id.eq(uid)).filter(id.eq(iid)))
+    let invite = diesel::delete(invites.filter(target_id.eq(uid)).filter(id.eq(iid)))
         .get_result::<Invite>(conn)
         .expect("Error delete invite");
 

@@ -4,6 +4,7 @@ export const COMMAND = process.env.COMMAND as 'serve' | 'build';
 
 export const paramKeys = {
   ROOM_ID: 'rid',
+  GAME_ID: 'gid',
 };
 
 export const events = {
@@ -17,8 +18,9 @@ export const queryKeys = {
 // clean outdate cache data
 [].forEach((key) => localStorage.removeItem(key));
 export const localStorageKeys = {
-  CONFIGURE_LOCAL_STORAGE_KEY: 'configure_v1',
+  CONFIGURE_LOCAL_STORAGE_KEY: 'configure_v2',
   STORE_LOCAL_STORAGE_KEY: 'store_v2',
+  FRIEND_CHAT_STORAGE_KEY: 'friend_chat_v1',
 };
 
 export enum SingalType {

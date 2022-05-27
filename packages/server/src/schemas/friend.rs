@@ -17,7 +17,7 @@ pub enum ScFriendStatus {
 
 #[derive(GraphQLInputObject)]
 pub struct ScNewFriend {
-    pub target_id: i32,
+    pub username: String,
 }
 
 #[derive(GraphQLInputObject)]
@@ -35,7 +35,7 @@ pub struct ScFriend {
 
 fn convert_status_to_string(status: ScFriendStatus) -> String {
     match status {
-        ScFriendStatus::Accept => String::from("online"),
+        ScFriendStatus::Accept => String::from("accept"),
         ScFriendStatus::Pending => String::from("pending"),
         ScFriendStatus::Deny => String::from("deny"),
     }

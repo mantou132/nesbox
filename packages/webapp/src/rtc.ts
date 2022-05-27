@@ -18,16 +18,16 @@ const buttonMap: Record<Button, Record<string, Button | undefined>> = {
 };
 
 export function getButton(event: KeyboardEvent) {
+  const { keybinding } = configure.user!.settings;
   const map: Record<string, Button> = {
-    ['w']: Button.Joypad1Up,
-    ['a']: Button.Joypad1Left,
-    ['s']: Button.Joypad1Down,
-    ['d']: Button.Joypad1Right,
-    ['j']: Button.Joypad1A,
-    ['k']: Button.Joypad1B,
-    ['u']: Button.Select,
-    ['i']: Button.Start,
-    ['escape']: Button.Reset,
+    [keybinding.Up]: Button.Joypad1Up,
+    [keybinding.Left]: Button.Joypad1Left,
+    [keybinding.Down]: Button.Joypad1Down,
+    [keybinding.Right]: Button.Joypad1Right,
+    [keybinding.A]: Button.Joypad1A,
+    [keybinding.B]: Button.Joypad1B,
+    [keybinding.Select]: Button.Select,
+    [keybinding.Start]: Button.Start,
   };
   return map[event.key.toLowerCase()];
 }
@@ -47,7 +47,7 @@ export type Role =
     }
   | undefined;
 
-export class ChannelMessageBase {
+export abstract class ChannelMessageBase {
   type: ChannelMessageType;
   timestamp: number;
   userId: number;
@@ -57,6 +57,11 @@ export class ChannelMessageBase {
     this.timestamp = Date.now();
     this.userId = configure.user!.id;
     this.username = configure.user!.nickname;
+  }
+
+  toSystemRole() {
+    this.userId = 0;
+    this.username = '系统';
   }
 
   toString() {
@@ -115,7 +120,7 @@ export class RTC extends EventTarget {
 
   #connMap = new Map<number, RTCPeerConnection>();
   #channelMap = new Map<RTCPeerConnection, RTCDataChannel>();
-  #roles: Role[] = [, { userId: configure.user!.id, username: configure.user!.username }, , ,];
+  #roles: Role[] = [, { userId: configure.user!.id, username: configure.user!.nickname }];
 
   #stream: MediaStream;
   #video: HTMLVideoElement;
@@ -180,19 +185,25 @@ export class RTC extends EventTarget {
   };
 
   #emitAnswer = () => {
-    const roleAnswer = new RoleAnswer(this.#roles);
+    const roleAnswer = new RoleAnswer([...this.#roles]);
     this.#channelMap.forEach((channel) => channel.send(roleAnswer.toString()));
     this.#emitMessage(roleAnswer);
   };
 
   #onDataChannel = (userId: number, conn: RTCPeerConnection, channel: RTCDataChannel) => {
     channel.onopen = () => {
+      this.#channelMap.set(conn, channel);
+
       channel.onclose = () => {
+        const textMsg = new TextMsg(`${this.#roles.find((role) => role?.userId === userId)?.username}离开房间`);
+        textMsg.toSystemRole();
+        this.#channelMap.forEach((channel) => channel.send(textMsg.toString()));
+        this.#emitMessage(textMsg);
+
         this.#deleteUser(userId);
-        this.#roles = this.#roles.filter((role) => role?.userId !== userId);
+        this.#roles = this.#roles.map((role) => (role?.userId === userId ? undefined : role));
         this.#emitAnswer();
       };
-      this.#channelMap.set(conn, channel);
     };
     channel.onmessage = ({ data }: MessageEvent<string>) => {
       const msg = JSON.parse(data) as ChannelMessage;
@@ -205,10 +216,15 @@ export class RTC extends EventTarget {
         case ChannelMessageType.KEYUP:
           const button = this.#getButton(userId, (msg as KeyDownMsg).button);
           if (button) {
-            this.#emitMessage({ ...msg, button });
+            this.#emitMessage({ ...msg, button } as KeyDownMsg);
           }
           break;
         case ChannelMessageType.ROLE_OFFER:
+          const textMsg = new TextMsg(`${msg.username}进入房间`);
+          textMsg.toSystemRole();
+          this.#channelMap.forEach((channel) => channel.send(textMsg.toString()));
+          this.#emitMessage(textMsg);
+
           this.#setRoles(userId, msg as RoleOffer);
           this.#emitAnswer();
           break;
@@ -324,12 +340,18 @@ export class RTC extends EventTarget {
   };
 
   destroy = () => {
-    [...this.#connMap.keys()].forEach((id) => this.#deleteUser(id));
+    this.#connMap.forEach((_, id) => this.#deleteUser(id));
     window.removeEventListener(events.SINGAL, this.#onSignal);
   };
 
   send = (data: ChannelMessage) => {
     this.#channelMap.forEach((c) => c.send(data.toString()));
     this.#emitMessage(data);
+  };
+
+  kickoutRole = (userId: number) => {
+    if (!this.#isHost) return;
+    this.#setRoles(userId, new RoleOffer(0));
+    this.send(new RoleAnswer(this.#roles));
   };
 }
