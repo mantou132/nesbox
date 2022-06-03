@@ -16,6 +16,7 @@
     "duoyun-ui": "^0.0.29",
     "graphql": "^16.2.0",
     "jszip": "^3.10.0",
+    "marked": "^4.0.16",
     "nes_rust_wasm": "^0.1.2",
     "subscriptions-transport-ws": "^0.11.0"
   },
@@ -25,6 +26,7 @@
     "@graphql-codegen/typescript-document-nodes": "^2.2.1",
     "@graphql-codegen/typescript-operations": "^2.2.1",
     "@nesbox/config": "^0.0.1",
+    "@types/marked": "^4.0.3",
     "dotenv": "^10.0.0",
     "vite": "^2.3.8",
     "vite-plugin-top-level-await": "^1.0.0",

@@ -25,6 +25,7 @@ import 'src/modules/nav';
 import 'src/modules/screenshots';
 import 'src/modules/comment';
 import 'src/modules/footer';
+import 'src/modules/game-detail';
 
 const style = createCSSSheet(css`
   main {
@@ -33,6 +34,7 @@ const style = createCSSSheet(css`
     align-items: flex-start;
   }
   .info {
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -153,11 +155,11 @@ export class PGameElement extends PBaseElement {
         <div class="info">
           <m-screenshots .links=${game?.screenshots}></m-screenshots>
           <div class="header">
-            <dy-heading lv=1 class="title">${game?.name}</dy-heading>
+            <dy-heading lv="1" class="title">${game?.name}</dy-heading>
             <dy-button  @click=${() => game && createRoom({ gameId: game.id, private: false })}>开始游戏</dy-button>
           </div>
-          <div>${game?.description}</div>
-          <dy-heading lv=2>用户评论</dy-heading>
+          <m-game-detail .md=${game?.description || ''}></m-game-detail>
+          <dy-heading lv="2">用户评论</dy-heading>
           ${commentList}
         </div>
         <div class="aside">

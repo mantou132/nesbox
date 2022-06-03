@@ -122,7 +122,7 @@ pub async fn webhook(
 
     match payload.action.as_str() {
         "closed" => {
-            create_game(conn, &get_sc_new_game(&payload));
+            notify_all(ScNotifyMessage::new_game(create_game(conn, &get_sc_new_game(&payload))));
         }
         "reopened" => {
             let game = get_game_from_name(conn, &payload.issue.title);

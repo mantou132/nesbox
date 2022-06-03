@@ -1,5 +1,6 @@
 import { html, adoptedStyle, customElement, createCSSSheet, css, connectStore, history } from '@mantou/gem';
 import { createPath } from 'duoyun-ui/elements/route';
+import { marked } from 'marked';
 
 import { store } from 'src/store';
 import { PBaseElement } from 'src/pages/base';
@@ -11,6 +12,8 @@ import 'duoyun-ui/elements/carousel';
 import 'src/modules/nav';
 import 'src/modules/game-list';
 import 'src/modules/footer';
+
+const domParser = new DOMParser();
 
 const style = createCSSSheet(css`
   .top {
@@ -38,7 +41,9 @@ export class PGamesElement extends PBaseElement {
           .data=${store.topGameIds?.map((id) => ({
             onClick: () =>
               history.push({ path: createPath(routes.game, { params: { [paramKeys.GAME_ID]: String(id) } }) }),
-            description: store.games[id]?.description || '',
+            description:
+              domParser.parseFromString(marked.parse(store.games[id]?.description || ''), 'text/html').body
+                .textContent || '',
             img: store.games[id]?.preview || '',
             title: store.games[id]?.name || '',
             background: '#9d8e72',
