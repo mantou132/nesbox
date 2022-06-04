@@ -4,13 +4,19 @@ import { store } from 'src/store';
 import { PBaseElement } from 'src/pages/base';
 import { icons } from 'src/icons';
 import { i18n } from 'src/i18n';
+import { theme } from 'src/theme';
 
 import 'duoyun-ui/elements/carousel';
 import 'src/modules/nav';
 import 'src/modules/game-list';
 import 'src/modules/footer';
 
-const style = createCSSSheet(css``);
+const style = createCSSSheet(css`
+  main {
+    margin-block-start: ${theme.gridGutter};
+    padding-inline: ${theme.gridGutter};
+  }
+`);
 
 @customElement('p-favorites')
 @adoptedStyle(style)

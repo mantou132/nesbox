@@ -40,18 +40,19 @@ export class MRoomItemElement extends GemElement {
     const game = store.games[this.room.gameId || 0];
 
     return html`
-        <img class="cover" src=${game?.preview || ''}></img>
-        <div class="info">
-          <div>${game?.name}</div>
-          <dy-avatar-group
-            class="users"
-            max=9
-            .data=${this.room.users.map((e) => ({
-              src: `https://joeschmoe.io/api/v1/${e.username}`,
-              tooltip: e.username,
-            }))}>
-          </dy-avatar-group>
-        </div>
-      `;
+      <img class="cover" src=${game?.preview || ''} />
+      <div class="info">
+        <div>${game?.name}</div>
+        <dy-avatar-group
+          class="users"
+          max="9"
+          .data=${this.room.users.map((e) => ({
+            src: `https://joeschmoe.io/api/v1/${e.username}`,
+            tooltip: e.username,
+          }))}
+        >
+        </dy-avatar-group>
+      </div>
+    `;
   };
 }

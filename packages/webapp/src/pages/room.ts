@@ -33,6 +33,7 @@ import {
 import { store } from 'src/store';
 import { i18n } from 'src/i18n';
 import type { MRoomChatElement } from 'src/modules/room-chat';
+import { getCorsSrc } from 'src/utils';
 
 import 'duoyun-ui/elements/input';
 import 'src/modules/room-player-list';
@@ -70,8 +71,11 @@ const style = createCSSSheet(css`
   .player-list {
     position: absolute;
     left: 50%;
-    bottom: 1rem;
     transform: translateX(-50%);
+    bottom: 1rem;
+    box-sizing: border-box;
+    width: min(38em, 100vw);
+    padding-inline: 1rem;
   }
 `);
 
@@ -112,13 +116,13 @@ export class PRoomElement extends GemElement<State> {
 
   #nes?: WasmNes;
   #imageData?: ImageData;
+  #audioContext?: AudioContext;
 
-  #rtc: RTC;
-  #audioContext: AudioContext;
+  #rtc?: RTC;
 
   #enableAudio = () => {
     if (this.#isHost) {
-      if (this.#audioContext.state === 'suspended') {
+      if (this.#audioContext?.state === 'suspended') {
         this.#audioContext.resume();
       }
     } else {
@@ -167,7 +171,7 @@ export class PRoomElement extends GemElement<State> {
     if (!this.#isHost) return;
     const ctx = this.canvasRef.element!.getContext('2d')!;
     this.#imageData = ctx.createImageData(ctx.canvas.width, ctx.canvas.height);
-    const zip = await (await fetch(`https://files.xianqiao.wang/${this.#rom}`)).arrayBuffer();
+    const zip = await (await fetch(getCorsSrc(this.#rom!))).arrayBuffer();
     const folder = await JSZip.loadAsync(zip);
     const buffer = await Object.values(folder.files)
       .find((e) => e.name.endsWith('.nes'))!
@@ -227,7 +231,7 @@ export class PRoomElement extends GemElement<State> {
     if (this.#isHost) {
       this.#nes?.press_button(button);
     } else {
-      this.#rtc.send(new KeyDownMsg(button));
+      this.#rtc?.send(new KeyDownMsg(button));
     }
   };
 
@@ -237,7 +241,7 @@ export class PRoomElement extends GemElement<State> {
     if (this.#isHost) {
       this.#nes?.release_button(button);
     } else {
-      this.#rtc.send(new KeyUpMsg(button));
+      this.#rtc?.send(new KeyUpMsg(button));
     }
   };
 
@@ -270,7 +274,7 @@ export class PRoomElement extends GemElement<State> {
     window.addEventListener('keydown', this.#onKeyDown);
     window.addEventListener('keyup', this.#onKeyUp);
     return () => {
-      this.#audioContext.close();
+      this.#audioContext?.close();
       this.#rtc?.destroy();
       window.removeEventListener('keydown', this.#onKeyDown);
       window.removeEventListener('keyup', this.#onKeyUp);
@@ -288,14 +292,14 @@ export class PRoomElement extends GemElement<State> {
         class="chat"
         ref=${this.chatRef.ref}
         .messages=${messages}
-        @submit=${({ detail }: CustomEvent<TextMsg>) => this.#rtc.send(detail)}
+        @submit=${({ detail }: CustomEvent<TextMsg>) => this.#rtc?.send(detail)}
       ></m-room-chat>
       <m-room-player-list
         class="player-list"
         .isHost=${this.#isHost}
         .roles=${roles}
-        @rolechange=${({ detail }: CustomEvent<RoleOffer>) => this.#rtc.send(detail)}
-        @kickout=${({ detail }: CustomEvent<number>) => this.#rtc.kickoutRole(detail)}
+        @rolechange=${({ detail }: CustomEvent<RoleOffer>) => this.#rtc?.send(detail)}
+        @kickout=${({ detail }: CustomEvent<number>) => this.#rtc?.kickoutRole(detail)}
       ></m-room-player-list>
     `;
   };

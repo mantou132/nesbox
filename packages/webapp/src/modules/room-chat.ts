@@ -45,6 +45,7 @@ const style = createCSSSheet(css`
   }
   .msg {
     line-height: 1.5;
+    font-variant-numeric: tabular-nums;
   }
   .msg.system {
     color: ${theme.informativeColor};
@@ -114,6 +115,10 @@ export class MRoomChatElement extends GemElement<State> {
   };
 
   mounted = () => {
+    this.addEventListener('mouseover', () => {
+      this.setState({ silent: false });
+    });
+
     this.effect(
       () => {
         this.messageRef.element?.scrollTo(0, 10000);
@@ -153,7 +158,7 @@ export class MRoomChatElement extends GemElement<State> {
       <dy-input
         ref=${this.inputRef.ref}
         class=${classMap({ input: true, silent: this.state.silent })}
-        placeholder="Send message..."
+        placeholder=${i18n.get('placeholderMessage')}
         @keydown=${this.#onKeyDown}
         @keyup=${this.#stopPropagation}
         @change=${this.#onChange}

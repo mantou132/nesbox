@@ -70,6 +70,7 @@ import { store, friendStore } from 'src/store';
 import { request, subscribe } from 'src/services';
 import { configure, parseAccount, Settings } from 'src/configure';
 import { events, Singal, SingalEvent } from 'src/constants';
+import { i18n } from 'src/i18n';
 
 export const getGames = async () => {
   const { games, topGames, favorites } = await request<GetGamesQuery, GetGamesQueryVariables>(GetGames, {});
@@ -80,7 +81,7 @@ export const getGames = async () => {
   updateStore(store, {
     gameIds,
     favoriteIds: favorites,
-    topGameIds: topGames.length ? topGames : gameIds.splice(0, 5),
+    topGameIds: (topGames.length ? topGames : gameIds).splice(0, 5),
   });
 };
 
@@ -294,7 +295,7 @@ export const subscribeEvent = () => {
         updateStore(store, { roomIds: store.roomIds?.filter((id) => id !== deleteRoom) });
         if (configure.user && configure.user.playing?.id === deleteRoom) {
           if (configure.user.playing.host !== configure.user.id) {
-            Toast.open('warning', 'Room 已经被删除');
+            Toast.open('warning', i18n.get('tipRoomDeleted'));
           }
           delete configure.user.playing;
           updateStore(configure);

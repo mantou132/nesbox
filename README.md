@@ -4,5 +4,9 @@
 
 ## TODO
 
-- Mobile adaptation
+- Help/Search
+- Server error handle
+- Unread message
+- Modify password
 - Tauri
+- Mobile/GamePad adaptation

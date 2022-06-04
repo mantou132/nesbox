@@ -26,6 +26,9 @@ const style = createCSSSheet(css`
     display: flex;
     gap: 1em;
     font-size: 0.875em;
+    max-width: 100%;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
   }
 `);
 

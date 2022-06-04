@@ -17,10 +17,9 @@ import 'src/modules/game-item';
 const style = createCSSSheet(css`
   :host {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(10em, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(12em, 1fr));
     grid-template-rows: max-content;
     grid-gap: ${theme.gridGutter};
-    padding-inline: ${theme.gridGutter};
   }
 `);
 

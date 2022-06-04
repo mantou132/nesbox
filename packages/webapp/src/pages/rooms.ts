@@ -15,6 +15,7 @@ import 'src/modules/footer';
 
 const style = createCSSSheet(css`
   main {
+    margin-block-start: ${theme.gridGutter};
     padding-inline: ${theme.gridGutter};
   }
 `);

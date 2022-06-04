@@ -19,6 +19,7 @@ const style = createCSSSheet(css`
     background-color: ${theme.backgroundColor};
     display: flex;
     flex-direction: column;
+    box-shadow: 0 0px 10px rgba(0, 0, 0, calc(${theme.maskAlpha} - 0.15));
   }
   .list {
     overscroll-behavior: contain;
@@ -59,11 +60,11 @@ export class MFriendListElement extends GemElement {
 
   #addFriend = async () => {
     const input = await Modal.open<DuoyunInputElement>({
-      header: '添加好友',
+      header: i18n.get('addFriend'),
       body: html`
         <dy-input
           style="width: 100%"
-          placeholder="username"
+          placeholder=${i18n.get('placeholderUsername')}
           @change=${(e: any) => (e.target.value = e.detail)}
         ></dy-input>
       `,
@@ -91,7 +92,7 @@ export class MFriendListElement extends GemElement {
       </div>
       <div class="actions">
         <dy-button color=${theme.textColor} @click=${this.#addFriend} type="reverse" .icon=${icons.addPerson}>
-          添加好友
+          ${i18n.get('addFriend')}
         </dy-button>
       </div>
     `;

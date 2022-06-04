@@ -10,6 +10,7 @@ import {
   property,
   refobject,
   RefObject,
+  classMap,
 } from '@mantou/gem';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 
@@ -18,10 +19,13 @@ import { createMessage, getMessages } from 'src/services/api';
 import { icons } from 'src/icons';
 import { theme } from 'src/theme';
 import { toggoleFriendChatState } from 'src/configure';
+import { ScUserStatus } from 'src/generated/graphql';
+import { i18n } from 'src/i18n';
 
 import 'duoyun-ui/elements/use';
 import 'duoyun-ui/elements/result';
 import 'duoyun-ui/elements/action-text';
+import 'duoyun-ui/elements/status-light';
 import 'duoyun-ui/elements/input';
 import 'src/modules/msg';
 
@@ -34,6 +38,7 @@ const style = createCSSSheet(css`
     width: 20em;
     background-color: ${theme.lightBackgroundColor};
     border: 1px solid ${theme.borderColor};
+    box-shadow: 0 5px 10px rgba(0, 0, 0, calc(${theme.maskAlpha} - 0.15));
   }
   .header {
     display: flex;
@@ -42,10 +47,13 @@ const style = createCSSSheet(css`
     padding: 0 0 0 0.5em;
   }
   .title {
-    flex-grow: 1;
+    font-weight: bold;
+    flex-direction: row-reverse;
   }
   .close {
     padding: 0.3em;
+    width: 1.2em;
+    margin: 0.5em;
   }
   .close:hover {
     background-color: ${theme.hoverBackgroundColor};
@@ -61,6 +69,17 @@ const style = createCSSSheet(css`
     scrollbar-width: none;
     overscroll-behavior: contain;
   }
+  .notlastmsg::part(body) {
+    overflow: hidden;
+  }
+  .recent::part(time) {
+    display: none;
+  }
+  .msg:not(.recent) {
+    border-block-start: 1px solid ${theme.hoverBackgroundColor};
+    margin-block-start: 1em;
+    padding-block-start: 1em;
+  }
   .input {
     width: auto;
     margin: 0.5em;
@@ -72,10 +91,19 @@ const style = createCSSSheet(css`
  */
 @customElement('m-chat')
 @adoptedStyle(style)
+@connectStore(i18n.store)
 @connectStore(friendStore)
 export class MChatElement extends GemElement {
   @refobject messageRef: RefObject<HTMLElement>;
   @property friendId: number;
+
+  get #friend() {
+    return friendStore.friends[this.friendId];
+  }
+
+  get #isOnLine() {
+    return this.#friend?.user.status === ScUserStatus.Online;
+  }
 
   #onChange = ({ detail }: CustomEvent<string>) => {
     updateStore(friendStore, { draft: { ...friendStore.draft, [this.friendId]: detail } });
@@ -113,16 +141,35 @@ export class MChatElement extends GemElement {
   render = () => {
     return html`
       <div class="header">
-        <div class="title">${friendStore.friends[this.friendId]?.user.nickname}</div>
+        <dy-status-light class="title" .status=${this.#isOnLine ? 'positive' : 'negative'}>
+          ${this.#friend?.user.nickname}
+        </dy-status-light>
+        <span style="flex-grow: 1"></span>
         <dy-use class="close" .element=${icons.close} @click=${() => toggoleFriendChatState()}></dy-use>
       </div>
       <div ref=${this.messageRef.ref} class="list">
-        ${friendStore.messageIds[this.friendId]?.map((id) => html`<m-msg .msg=${friendStore.messages[id]}></m-msg>`)}
+        ${friendStore.messageIds[this.friendId]?.map(
+          (id, i, arr) =>
+            html`
+              <m-msg
+                class=${classMap({
+                  msg: true,
+                  notlastmsg: friendStore.messages[id]?.userId === friendStore.messages[arr[i + 1] || 0]?.userId,
+                  recent:
+                    friendStore.messages[id]?.userId === friendStore.messages[arr[i - 1] || 0]?.userId &&
+                    Number(friendStore.messages[id]?.createdAt) -
+                      Number(friendStore.messages[arr[i - 1] || 0]?.createdAt) <
+                      5 * 60_000,
+                })}
+                .msg=${friendStore.messages[id]}
+              ></m-msg>
+            `,
+        )}
       </div>
       <dy-input
         autofocus
         class="input"
-        placeholder="Write message"
+        placeholder=${i18n.get('placeholderMessage')}
         @change=${this.#onChange}
         @keydown=${this.#onKeyDown}
         .value=${friendStore.draft[this.friendId] || ''}

@@ -19,4 +19,4 @@ const style = createCSSSheet(css`
  */
 @customElement('p-base')
 @adoptedStyle(style)
-export class PBaseElement extends GemElement {}
+export class PBaseElement<T = Record<string, string>> extends GemElement<T> {}

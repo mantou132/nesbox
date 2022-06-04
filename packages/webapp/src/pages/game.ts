@@ -9,6 +9,7 @@ import {
   styleMap,
 } from '@mantou/gem';
 import { Modal } from 'duoyun-ui/elements/modal';
+import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
 import { createComment, createRoom, getComments } from 'src/services/api';
 import { store } from 'src/store';
@@ -53,7 +54,20 @@ const style = createCSSSheet(css`
     width: 100%;
     display: flex;
     align-items: center;
-    margin-block: 1em;
+    margin-block-start: 1em;
+  }
+  @media ${mediaQuery.PHONE} {
+    main {
+      flex-direction: column;
+    }
+    .aside {
+      display: none;
+    }
+    .header {
+      flex-direction: column;
+      gap: 1em;
+      align-items: flex-start;
+    }
   }
   .title {
     flex-grow: 1;
@@ -157,14 +171,16 @@ export class PGameElement extends PBaseElement {
           <m-screenshots .links=${game?.screenshots}></m-screenshots>
           <div class="header">
             <dy-heading lv="1" class="title">${game?.name}</dy-heading>
-            <dy-button  @click=${() => game && createRoom({ gameId: game.id, private: false })}>开始游戏</dy-button>
+            <dy-button @click=${() => game && createRoom({ gameId: game.id, private: false })}>
+              ${i18n.get('startGame')}
+            </dy-button>
           </div>
           <m-game-detail .md=${game?.description || ''}></m-game-detail>
-          <dy-heading lv="2">用户评论</dy-heading>
+          <dy-heading lv="2">${i18n.get('gameComment')}</dy-heading>
           ${commentList}
         </div>
         <div class="aside">
-          <img class="preview" src=${game?.preview || ''}></img>
+          <img class="preview" src=${game?.preview || ''} />
           <div class="buttons">
             <dy-button
               color=${theme.textColor}

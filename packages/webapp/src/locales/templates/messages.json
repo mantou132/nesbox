@@ -8,14 +8,26 @@
   "sloganDesc": {
     "message": "隔壁班的那個女孩\n怎麼還沒經過我的窗前\n嘴裏的零食手裏的漫畫\n心裏初戀的童年\n......"
   },
-  "logout": {
-    "message": "登出"
+  "logoutAccount": {
+    "message": "登出 “$1”"
   },
   "search": {
     "message": "搜索"
   },
   "close": {
     "message": "关闭"
+  },
+  "addFriend": {
+    "message": "添加好友"
+  },
+  "deleteFriend": {
+    "message": "删除好友"
+  },
+  "inviteFriend": {
+    "message": "邀请"
+  },
+  "deleteFriendConfirm": {
+    "message": "是否删除好友？"
   },
   "notFoundTitle": {
     "message": "未找到页面"
@@ -32,6 +44,12 @@
   "help": {
     "message": "帮助"
   },
+  "feedback": {
+    "message": "问题反馈"
+  },
+  "discord": {
+    "message": "语音开黑"
+  },
   "changeLanguage": {
     "message": "切换语言"
   },
@@ -47,11 +65,8 @@
   "registerTitle": {
     "message": "注册"
   },
-  "username": {
-    "message": "用户名"
-  },
-  "password": {
-    "message": "密码"
+  "nickname": {
+    "message": "显示名称"
   },
   "login": {
     "message": "登录"
@@ -92,11 +107,41 @@
   "selectGame": {
     "message": "更换游戏"
   },
-  "profileItem": {
-    "message": "账号：$1"
+  "startGame": {
+    "message": "开始游戏"
   },
-  "profileSetting": {
+  "gameComment": {
+    "message": "用户评论"
+  },
+  "placeholderUsername": {
+    "message": "请输入用户名"
+  },
+  "placeholderPassword": {
+    "message": "请输入密码"
+  },
+  "placeholderMessage": {
+    "message": "输入信息按 Enter 键发送"
+  },
+  "setting": {
     "message": "设置"
+  },
+  "accountSetting": {
+    "message": "账号设置"
+  },
+  "keySetting": {
+    "message": "按键设置"
+  },
+  "license": {
+    "message": "许可证"
+  },
+  "tipRoomCrowded": {
+    "message": "房间人数过多"
+  },
+  "tipIviteSuccess": {
+    "message": "邀请已经发送"
+  },
+  "tipRoomDeleted": {
+    "message": "房间已被主机已经被删除"
   },
   "code0": { "message": "当前网络不稳定" },
   "code400": { "message": "参数错误" },

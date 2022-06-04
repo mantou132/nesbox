@@ -7,6 +7,7 @@ const style = createCSSSheet(css`
     display: contents;
   }
   footer {
+    margin-block-start: ${theme.gridGutter};
     padding: ${theme.gridGutter};
     text-align: center;
   }

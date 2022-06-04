@@ -18,7 +18,7 @@ import 'src/modules/game-item';
 
 const style = createCSSSheet(css`
   :host {
-    width: min(70vw, 50em);
+    width: min(60vw, 50em);
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(8em, 1fr));
     grid-template-rows: max-content;

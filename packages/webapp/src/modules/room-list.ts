@@ -4,6 +4,7 @@ import { Toast } from 'duoyun-ui/elements/toast';
 import { store } from 'src/store';
 import { enterPubRoom } from 'src/services/api';
 import { theme } from 'src/theme';
+import { i18n } from 'src/i18n';
 
 import 'src/modules/room-item';
 
@@ -25,7 +26,7 @@ const style = createCSSSheet(css`
 export class MRoomListElement extends GemElement {
   #onClick = (id: number) => {
     if (store.rooms[id] && store.rooms[id]!.users.length > 10) {
-      Toast.open('error', '房间人数过多');
+      Toast.open('error', i18n.get('tipRoomCrowded'));
     } else {
       enterPubRoom(id);
     }

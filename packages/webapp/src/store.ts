@@ -1,4 +1,5 @@
 import { ElementOf } from 'duoyun-ui/lib/types';
+import { createCacheStore } from 'duoyun-ui/lib/utils';
 
 import {
   GetCommentsQuery,
@@ -9,7 +10,6 @@ import {
 } from 'src/generated/graphql';
 import { localStorageKeys } from 'src/constants';
 import { configure } from 'src/configure';
-import { createCacheStore } from 'src/utils';
 
 export type Game = ElementOf<GetGamesQuery['games']>;
 export type Room = ElementOf<GetRoomsQuery['rooms']>;

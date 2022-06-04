@@ -9,12 +9,13 @@ import {
   boolattribute,
 } from '@mantou/gem';
 import type { RouteItem } from 'duoyun-ui/elements/route';
+import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
 import { routes } from 'src/routes';
 import { i18n } from 'src/i18n';
 import { configure, toggoleFriendListState } from 'src/configure';
 import { theme } from 'src/theme';
-import { leaveRoom } from 'src/services/api';
+import { favoriteGame, leaveRoom } from 'src/services/api';
 import { store } from 'src/store';
 import { icons } from 'src/icons';
 
@@ -54,7 +55,6 @@ const style = createCSSSheet(css`
     width: 100%;
   }
   .link {
-    margin-block-start: -3px;
     border-bottom: 2px solid transparent;
     text-transform: uppercase;
     font-size: 1.25em;
@@ -64,6 +64,9 @@ const style = createCSSSheet(css`
   }
   .title {
     font-size: 1.5em;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
   }
   .icon {
     width: 3em;
@@ -74,6 +77,24 @@ const style = createCSSSheet(css`
   }
   dy-use.icon:hover {
     background-color: ${theme.hoverBackgroundColor};
+  }
+  .badge {
+    position: absolute;
+    right: 0;
+    top: 0;
+    background: ${theme.negativeColor};
+    border-radius: 10em;
+    width: 1.5em;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75em;
+  }
+  @media ${mediaQuery.PHONE} {
+    .link {
+      display: none;
+    }
   }
 `);
 
@@ -93,6 +114,10 @@ export class MNavElement extends GemElement<State> {
   };
 
   render = () => {
+    const playing = configure.user?.playing;
+    const gameId = playing?.gameId || 0;
+    const favorited = store.favoriteIds?.includes(gameId || 0);
+
     return html`
       <nav class="nav">
         ${this.room
@@ -100,18 +125,20 @@ export class MNavElement extends GemElement<State> {
               <nesbox-tooltip .content=${i18n.get('leaveRoom')}>
                 <dy-use class="icon" .element=${icons.left} @click=${leaveRoom}></dy-use>
               </nesbox-tooltip>
-              ${
-                configure.user?.playing?.host !== configure.user?.id
-                  ? html`<div class="title">${store.games[configure.user?.playing?.gameId || 0]?.name}</div>`
-                  : html`
-                      <nesbox-tooltip .content=${i18n.get('selectGame')}>
-                        <dy-action-text class="title" @click=${() => this.setState({ select: true })}>
-                          ${store.games[configure.user?.playing?.gameId || 0]?.name}
-                        </dy-action-text>
-                      </nesbox-tooltip>
-                    `
-              }
-              </nesbox-tooltip>
+              ${playing?.host !== configure.user?.id
+                ? html`<div class="title">${store.games[gameId || 0]?.name}</div>`
+                : html`
+                    <nesbox-tooltip .content=${i18n.get('selectGame')}>
+                      <dy-action-text class="title" @click=${() => this.setState({ select: true })}>
+                        ${store.games[gameId || 0]?.name}
+                      </dy-action-text>
+                    </nesbox-tooltip>
+                  `}
+              <dy-use
+                class="icon"
+                .element=${favorited ? icons.favorited : icons.favorite}
+                @click=${() => favoriteGame(gameId, !favorited)}
+              ></dy-use>
               <dy-modal
                 .open=${this.state.select}
                 .disableDefualtOKBtn=${true}
@@ -124,16 +151,18 @@ export class MNavElement extends GemElement<State> {
             `
           : html`
               <dy-link style="display: contents" href="/">
-                <img class="icon" src="/logo-96.png"></img>
+                <img class="icon" src="/logo-96.png" />
               </dy-link>
               <dy-active-link class="link" .route=${routes.games as RouteItem}>${routes.games.title}</dy-active-link>
               <dy-active-link class="link" .route=${routes.favorites as RouteItem}>
-              ${routes.favorites.title}
+                ${routes.favorites.title}
               </dy-active-link>
               <dy-active-link class="link" .route=${routes.rooms as RouteItem}>${routes.rooms.title}</dy-active-link>
-          `}
+            `}
         <span style="flex-grow: 1;"></span>
-        <dy-use class="action icon" .element=${icons.group} @click=${toggoleFriendListState}></dy-use>
+        <dy-use class="icon" .element=${icons.group} @click=${toggoleFriendListState}>
+          <!-- <div class="badge">12</div> -->
+        </dy-use>
         <m-avatar class="icon"></m-avatar>
       </nav>
     `;

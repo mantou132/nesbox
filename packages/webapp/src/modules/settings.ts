@@ -1,6 +1,7 @@
-import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css } from '@mantou/gem';
+import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, connectStore } from '@mantou/gem';
 
 import { theme } from 'src/theme';
+import { i18n } from 'src/i18n';
 
 import 'duoyun-ui/elements/tabs';
 import 'src/modules/keybinding';
@@ -38,6 +39,7 @@ const style = createCSSSheet(css`
  */
 @customElement('m-settings')
 @adoptedStyle(style)
+@connectStore(i18n.store)
 export class MSettingsElement extends GemElement<State> {
   state: State = {
     tab: 0,
@@ -56,7 +58,7 @@ export class MSettingsElement extends GemElement<State> {
         .value=${this.state.tab}
         .data=${[
           {
-            tab: '用户设置',
+            tab: i18n.get('accountSetting'),
             getContent() {
               return html`
                 <dy-tab-panel>
@@ -66,7 +68,7 @@ export class MSettingsElement extends GemElement<State> {
             },
           },
           {
-            tab: '按键设置',
+            tab: i18n.get('keySetting'),
             getContent() {
               return html`
                 <dy-tab-panel>
@@ -76,7 +78,7 @@ export class MSettingsElement extends GemElement<State> {
             },
           },
           {
-            tab: '许可证',
+            tab: i18n.get('license'),
             getContent() {
               return html`
                 <dy-tab-panel>

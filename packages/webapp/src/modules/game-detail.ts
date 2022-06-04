@@ -11,11 +11,6 @@ const style = createCSSSheet(css`
 `);
 
 const contentcss = css`
-  img,
-  p:has(img),
-  a[href$='zip'] {
-    display: none;
-  }
   p {
     display: block;
     margin-block-end: 0.75em;
@@ -23,6 +18,9 @@ const contentcss = css`
   }
   p:where(:lang(zh), :lang(ja), :lang(kr)) {
     line-height: 1.7;
+  }
+  :where(img, p:has(img), a[href$='zip']) {
+    display: none;
   }
 `;
 

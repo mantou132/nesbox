@@ -8,6 +8,7 @@ import { ScUserStatus } from 'src/generated/graphql';
 import { icons } from 'src/icons';
 import { acceptFriend, acceptInvite, createInvite } from 'src/services/api';
 import { configure, toggoleFriendChatState, toggoleFriendListState } from 'src/configure';
+import { i18n } from 'src/i18n';
 
 import 'duoyun-ui/elements/avatar';
 import 'duoyun-ui/elements/help-text';
@@ -48,6 +49,7 @@ const style = createCSSSheet(css`
     width: 0;
   }
   .action {
+    width: 1.5em;
     padding: 0.2em;
   }
   :not(.invite) .action {
@@ -93,7 +95,7 @@ export class MFriendItemElement extends GemElement {
   }
 
   #deleteFriend = async (id: number, activeElement: HTMLElement) => {
-    await ContextMenu.confirm('是否删除该好友？', { activeElement, width: '16em', danger: true });
+    await ContextMenu.confirm(i18n.get('deleteFriendConfirm'), { activeElement, width: '16em', danger: true });
     await acceptFriend(id, false);
     friendStore.messageIds[id]?.forEach((id) => delete friendStore.messages[id]);
     updateStore(friendStore, {
@@ -103,25 +105,26 @@ export class MFriendItemElement extends GemElement {
   };
 
   #onMoreMenu = (evt: Event) => {
+    const activeElement = evt.target as HTMLElement;
     evt.stopPropagation();
     ContextMenu.open(
       [
         {
-          text: '邀请好友',
+          text: i18n.get('inviteFriend'),
           disabled: !configure.user?.playing,
           handle: async () => {
             await createInvite(this.friend.user.id, configure.user!.playing!.id);
-            Toast.open('success', '邀请已经发送');
+            Toast.open('success', i18n.get('tipIviteSuccess'));
           },
         },
         {
-          text: '删除好友',
+          text: i18n.get('deleteFriend'),
           danger: true,
-          handle: () => this.#deleteFriend(this.friend.user.id, evt.target as HTMLElement),
+          handle: () => this.#deleteFriend(this.friend.user.id, activeElement),
         },
       ],
       {
-        activeElement: evt.target as HTMLElement,
+        activeElement,
       },
     );
   };

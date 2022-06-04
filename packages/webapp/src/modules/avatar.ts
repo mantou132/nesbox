@@ -1,27 +1,14 @@
-import {
-  GemElement,
-  html,
-  adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
-  connectStore,
-  styleMap,
-} from '@mantou/gem';
+import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, connectStore } from '@mantou/gem';
 import { ContextMenu } from 'duoyun-ui/elements/menu';
-import { Toast } from 'duoyun-ui/elements/toast';
 import { waitLoading } from 'duoyun-ui/elements/wait';
 
 import { configure, getShortcut, toggoleScreencaseMode, toggoleSettingsState } from 'src/configure';
 import { logout } from 'src/auth';
 import { changeTheme, theme, ThemeName, themeNames } from 'src/theme';
-import { icons } from 'src/icons';
 import { i18n, langNames } from 'src/i18n';
 
-import 'duoyun-ui/elements/help-text';
 import 'duoyun-ui/elements/avatar';
 import 'duoyun-ui/elements/options';
-import 'duoyun-ui/elements/use';
 
 const style = createCSSSheet(css`
   :host {
@@ -54,28 +41,19 @@ export class MAvatarElement extends GemElement {
   }
 
   #onClick = (event: Event) => {
+    const activeElement = event.target as HTMLElement;
     ContextMenu.open(
       [
         {
-          text: html`
-            <dy-help-text style=${styleMap({ fontSize: '1em' })}>
-              ${i18n.get('profileItem', `${configure.user?.username}`)}
-            </dy-help-text>
-          `,
-          tag: html`<dy-use style=${styleMap({ width: '1.2em' })} .element=${icons.copy}></dy-use>`,
-          handle: async () => {
-            try {
-              await navigator.clipboard.writeText(String(configure.user?.username));
-              Toast.open('success', '成功复制用户 ID');
-            } catch (err) {
-              Toast.open('error', err?.message || err);
-            }
-          },
-        },
-        {
-          text: i18n.get('profileSetting'),
+          text: i18n.get('setting'),
           handle: toggoleSettingsState,
           tag: getShortcut('OPEN_SETTINGS', true),
+        },
+        {
+          text: i18n.get('discord'),
+          handle: () => {
+            window.open('https://discord.gg/hY6XkHwc');
+          },
         },
         {
           text: i18n.get('changeLanguage'),
@@ -99,22 +77,26 @@ export class MAvatarElement extends GemElement {
           handle: toggoleScreencaseMode,
         },
         {
-          text: i18n.get('help'),
-          handle: console.log,
-          tag: getShortcut('OPEN_HELP', true),
+          text: i18n.get('feedback'),
+          handle: () => {
+            window.open('https://github.com/mantou132/nesbox/issues');
+          },
         },
+        // {
+        //   text: i18n.get('help'),
+        //   handle: console.log,
+        //   tag: getShortcut('OPEN_HELP', true),
+        // },
         {
           text: '---',
         },
         {
-          text: i18n.get('logout'),
+          text: i18n.get('logoutAccount', configure.user?.username || ''),
           danger: true,
           handle: logout,
         },
       ],
-      {
-        activeElement: event.target as HTMLElement,
-      },
+      { activeElement },
     );
   };
 

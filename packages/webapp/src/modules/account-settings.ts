@@ -3,6 +3,7 @@ import { throttle } from 'duoyun-ui/lib/utils';
 
 import { configure } from 'src/configure';
 import { updateAccount } from 'src/services/api';
+import { i18n } from 'src/i18n';
 
 import 'duoyun-ui/elements/form';
 
@@ -26,7 +27,7 @@ export class MAccountSettingsElement extends GemElement {
     return html`
       <dy-form>
         <dy-form-item
-          label="昵称"
+          label=${i18n.get('nickname')}
           name="nickname"
           .value=${configure.user?.nickname}
           @itemchange=${this.#onItemChange}

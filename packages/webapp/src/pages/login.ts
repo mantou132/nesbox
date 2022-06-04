@@ -13,6 +13,7 @@ import {
 } from '@mantou/gem';
 import type { DuoyunFormElement } from 'duoyun-ui/elements/form';
 import { createPath } from 'duoyun-ui/elements/route';
+import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
 import { theme } from 'src/theme';
 import { gotoRedirectUri } from 'src/auth';
@@ -76,12 +77,11 @@ const style = createCSSSheet(css`
     justify-content: center;
     padding: 2em 1.6em;
     background: ${theme.backgroundColor};
+    width: min(24em, 100%);
+    box-sizing: border-box;
   }
   .header {
     margin-block: -10vh 1.2em;
-  }
-  .form {
-    width: 22em;
   }
   .send {
     flex-grow: 0;
@@ -93,6 +93,12 @@ const style = createCSSSheet(css`
     margin-block: 3em 1em;
     gap: 1em;
     align-items: center;
+  }
+  @media ${mediaQuery.PHONE} {
+    .bg-copyright,
+    .slogan {
+      display: none;
+    }
   }
 `);
 
@@ -155,12 +161,17 @@ export class PLoginElement extends GemElement<State> {
       <div class="content">
         <dy-heading lv="1" class="header">${this.register ? routes.register.title : routes.login.title}</dy-heading>
         <dy-form class="form" ref=${this.formRef.ref} @change=${this.#onChange}>
-          <dy-form-item name="username" required .placeholder=${i18n.get('username')} .value=${username}></dy-form-item>
+          <dy-form-item
+            name="username"
+            required
+            .placeholder=${i18n.get('placeholderUsername')}
+            .value=${username}
+          ></dy-form-item>
           <dy-form-item
             type="password"
             name="password"
             required
-            .placeholder=${i18n.get('password')}
+            .placeholder=${i18n.get('placeholderPassword')}
             .value=${password}
           ></dy-form-item>
         </dy-form>

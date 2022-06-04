@@ -1,11 +1,11 @@
 import { updateStore } from '@mantou/gem';
 import { isMac, getDisplayKey } from 'duoyun-ui/lib/hotkeys';
 import { Modify } from 'duoyun-ui/lib/types';
+import { createCacheStore } from 'duoyun-ui/lib/utils';
 
 import { LoginMutation } from 'src/generated/guestgraphql';
 import { localStorageKeys } from 'src/constants';
 import type { ThemeName } from 'src/theme';
-import { createCacheStore } from 'src/utils';
 import { GetAccountQuery } from 'src/generated/graphql';
 
 const defaultKeybinding = {

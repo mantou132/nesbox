@@ -47,7 +47,7 @@ export class AppRootElement extends GemElement {
 
   #globalShortcut = (evt: KeyboardEvent) => {
     hotkeys({
-      [getShortcut('OPEN_HELP')]: console.log,
+      // [getShortcut('OPEN_HELP')]: console.log,
       [getShortcut('OPEN_SETTINGS')]: toggoleSettingsState,
     })(evt);
   };
@@ -95,7 +95,7 @@ export class AppRootElement extends GemElement {
       ${configure.screencastMode ? html`<dy-input-capture></dy-input-capture>` : ''}
 
       <dy-modal
-        .header=${i18n.get('profileSetting')}
+        .header=${i18n.get('setting')}
         .disableDefualtOKBtn=${true}
         .cancelText=${i18n.get('close')}
         .open=${!!configure.settingsState}
