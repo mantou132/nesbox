@@ -5,12 +5,14 @@ edition = "2021"
 default-run = "server"
 
 [dependencies]
+openssl-probe = "0.1.2"
 dotenv = "0.15.0"
 env_logger = "0.9"
 log = "0.4"
 lazy_static = "1.4.0"
 
 diesel = { version = "1.4.4", features = ["postgres", "chrono", "r2d2", "serde_json"] }
+openssl = "*"
 
 actix-web = "4"
 actix-web-lab = "0.16.1"

@@ -13,7 +13,6 @@ use tokio::sync::broadcast::{self, Receiver, Sender};
 pub struct ScNotifyMessage {
     new_message: Option<ScMessage>,
     new_game: Option<ScGame>,
-    delete_game: Option<i32>,
     update_room: Option<ScRoomBasic>,
     delete_room: Option<i32>,
     new_invite: Option<ScInvite>,
@@ -41,7 +40,6 @@ impl ScNotifyMessage {
         let mut msg = ScNotifyMessage {
             new_message: None,
             new_game: None,
-            delete_game: None,
             update_room: None,
             delete_room: None,
             new_invite: None,
@@ -60,9 +58,6 @@ impl ScNotifyMessage {
     }
     pub fn new_game(data: ScGame) -> ScNotifyMessage {
         ScNotifyMessage::new(|msg| msg.new_game = Some(data))
-    }
-    pub fn delete_game(data: i32) -> ScNotifyMessage {
-        ScNotifyMessage::new(|msg| msg.delete_game = Some(data))
     }
     pub fn update_room(data: ScRoomBasic) -> ScNotifyMessage {
         ScNotifyMessage::new(|msg| msg.update_room = Some(data))

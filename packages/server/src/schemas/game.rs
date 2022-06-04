@@ -58,20 +58,19 @@ pub fn get_games(conn: &PgConnection) -> Vec<ScGame> {
         .collect()
 }
 
-pub fn get_game_from_name(conn: &PgConnection, n: &str) -> ScGame {
+pub fn get_game_from_name(conn: &PgConnection, n: &str) -> Option<ScGame> {
     use self::games::dsl::*;
 
-    let game = games
+    games
         .filter(deleted_at.is_null())
         .filter(name.eq(n))
         .get_result::<Game>(conn)
-        .expect("Error loading game");
-
-    convert_to_sc_game(&game)
+        .map(|game| convert_to_sc_game(&game))
+        .ok()
 }
 
 pub fn create_game(conn: &PgConnection, req: &ScNewGame) -> ScGame {
-    let screenshots = &req.screenshots.join(",");
+    let screenshots_str = &req.screenshots.join(",");
     let new_game = NewGame {
         name: &req.name,
         description: &req.description,
@@ -80,7 +79,7 @@ pub fn create_game(conn: &PgConnection, req: &ScNewGame) -> ScGame {
         deleted_at: None,
         created_at: Utc::now().naive_utc(),
         updated_at: Utc::now().naive_utc(),
-        screenshots: Some(screenshots),
+        screenshots: Some(screenshots_str),
     };
 
     let game = diesel::insert_into(games::table)
@@ -91,12 +90,20 @@ pub fn create_game(conn: &PgConnection, req: &ScNewGame) -> ScGame {
     convert_to_sc_game(&game)
 }
 
-pub fn delete_game(conn: &PgConnection, gid: i32) -> String {
+pub fn update_game(conn: &PgConnection, gid: i32, req: &ScNewGame) -> ScGame {
     use self::games::dsl::*;
+    
+    let screenshots_str = &req.screenshots.join(",");
+    let game = diesel::update(games.filter(deleted_at.is_null()).filter(id.eq(gid)))
+        .set((
+            description.eq(req.description.clone()),
+            preview.eq(req.preview.clone()),
+            rom.eq(req.rom.clone()),
+            updated_at.eq(Utc::now().naive_utc()),
+            screenshots.eq(Some(screenshots_str)),
+        ))
+        .get_result::<Game>(conn)
+        .expect("Error update game");
 
-    diesel::delete(games.filter(id.eq(gid)))
-        .execute(conn)
-        .expect("Error delete game");
-
-    "Ok".into()
+    convert_to_sc_game(&game)
 }

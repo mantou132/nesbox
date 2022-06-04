@@ -19,6 +19,7 @@ const style = createCSSSheet(css`
   .cover {
     width: 10em;
     aspect-ratio: 503/348;
+    object-fit: cover;
   }
   .info {
     display: flex;

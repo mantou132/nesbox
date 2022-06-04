@@ -257,7 +257,6 @@ export const subscribeEvent = () => {
       const {
         newMessage,
         newGame,
-        deleteGame,
         updateRoom,
         deleteRoom,
         newInvite,
@@ -281,11 +280,6 @@ export const subscribeEvent = () => {
         updateStore(store, {
           gameIds: [...(store.gameIds || []), newGame.id],
         });
-      }
-
-      if (deleteGame) {
-        delete store.games[deleteGame];
-        updateStore(store, { gameIds: store.gameIds?.filter((id) => id !== deleteGame) });
       }
 
       if (updateRoom) {

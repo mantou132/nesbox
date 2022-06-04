@@ -48,6 +48,7 @@ export const themeStore = getThemeStore(theme);
 export function changeTheme(name: ThemeName) {
   updateStore(configure, { theme: name });
   updateTheme(theme, name === 'default' ? defaultTheme : {});
+  updateDuoyunTheme(themeStore);
 }
 
-updateDuoyunTheme(theme);
+updateDuoyunTheme(themeStore);

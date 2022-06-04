@@ -59,13 +59,13 @@ export class MAvatarElement extends GemElement {
         {
           text: html`
             <dy-help-text style=${styleMap({ fontSize: '1em' })}>
-              ${i18n.get('profileItem', `${configure.user?.username}#${configure.user?.id}`)}
+              ${i18n.get('profileItem', `${configure.user?.username}`)}
             </dy-help-text>
           `,
           tag: html`<dy-use style=${styleMap({ width: '1.2em' })} .element=${icons.copy}></dy-use>`,
           handle: async () => {
             try {
-              await navigator.clipboard.writeText(String(configure.user?.id));
+              await navigator.clipboard.writeText(String(configure.user?.username));
               Toast.open('success', '成功复制用户 ID');
             } catch (err) {
               Toast.open('error', err?.message || err);

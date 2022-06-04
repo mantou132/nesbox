@@ -13,7 +13,7 @@ use crate::{
     github::{get_sc_new_game, validate, GithubPayload},
     schemas::root::{Context, GuestContext, GuestSchema, Schema},
     schemas::{
-        game::{create_game, delete_game, get_game_from_name},
+        game::{create_game, get_game_from_name, update_game},
         notify::{notify_all, ScNotifyMessage},
     },
 };
@@ -122,12 +122,19 @@ pub async fn webhook(
 
     match payload.action.as_str() {
         "closed" => {
-            notify_all(ScNotifyMessage::new_game(create_game(conn, &get_sc_new_game(&payload))));
-        }
-        "reopened" => {
-            let game = get_game_from_name(conn, &payload.issue.title);
-            delete_game(conn, game.id);
-            notify_all(ScNotifyMessage::delete_game(game.id));
+            let sc_game = get_sc_new_game(&payload);
+            if sc_game.rom.is_empty() {
+                log::debug!("Not rom");
+            } else {
+                match get_game_from_name(conn, &payload.issue.title) {
+                    Some(game) => {
+                        update_game(conn, game.id, &sc_game);
+                    }
+                    None => {
+                        notify_all(ScNotifyMessage::new_game(create_game(conn, &sc_game)));
+                    }
+                };
+            }
         }
         _ => {}
     }

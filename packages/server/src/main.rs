@@ -1,3 +1,4 @@
+extern crate openssl;
 #[macro_use]
 extern crate diesel;
 #[macro_use]
@@ -34,6 +35,8 @@ mod schemas;
 
 #[actix_web::main]
 async fn main() -> io::Result<()> {
+    openssl_probe::init_ssl_cert_env_vars();
+
     dotenv().ok();
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
     let port = env::var("PORT")
@@ -116,7 +119,7 @@ async fn main() -> io::Result<()> {
             .wrap(middleware::Logger::default())
     })
     .workers(2)
-    .bind(("::1", port))?
+    .bind(("0.0.0.0", port))?
     .run()
     .await
 }

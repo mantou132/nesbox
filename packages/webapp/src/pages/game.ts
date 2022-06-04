@@ -62,6 +62,7 @@ const style = createCSSSheet(css`
   .preview {
     width: 100%;
     aspect-ratio: 503/348;
+    object-fit: cover;
   }
   .buttons {
     display: flex;
@@ -163,7 +164,7 @@ export class PGameElement extends PBaseElement {
           ${commentList}
         </div>
         <div class="aside">
-          <img class="preview" src='https://user-images.githubusercontent.com/3841872/168952574-26de855e-b7cd-43fe-ab94-093a2903832d.png'></img>
+          <img class="preview" src=${game?.preview || ''}></img>
           <div class="buttons">
             <dy-button
               color=${theme.textColor}

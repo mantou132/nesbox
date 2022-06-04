@@ -195,14 +195,14 @@ export class RTC extends EventTarget {
       this.#channelMap.set(conn, channel);
 
       channel.onclose = () => {
+        this.#deleteUser(userId);
+        this.#roles = this.#roles.map((role) => (role?.userId === userId ? undefined : role));
+        this.#emitAnswer();
+
         const textMsg = new TextMsg(`${this.#roles.find((role) => role?.userId === userId)?.username}离开房间`);
         textMsg.toSystemRole();
         this.#channelMap.forEach((channel) => channel.send(textMsg.toString()));
         this.#emitMessage(textMsg);
-
-        this.#deleteUser(userId);
-        this.#roles = this.#roles.map((role) => (role?.userId === userId ? undefined : role));
-        this.#emitAnswer();
       };
     };
     channel.onmessage = ({ data }: MessageEvent<string>) => {

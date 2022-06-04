@@ -204,7 +204,6 @@ subscription event {
     newGame {
       ...ScGamePart
     }
-    deleteGame
     updateRoom {
       ...ScRoomBasicPart
     }

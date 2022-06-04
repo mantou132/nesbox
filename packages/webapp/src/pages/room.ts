@@ -14,6 +14,7 @@ import { createPath } from 'duoyun-ui/elements/route';
 import { Button, WasmNes } from 'nes_rust_wasm';
 import JSZip from 'jszip';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
+import { waitLoading } from 'duoyun-ui/elements/wait';
 
 import { configure } from 'src/configure';
 import { routes } from 'src/routes';
@@ -260,7 +261,7 @@ export class PRoomElement extends GemElement<State> {
         }
 
         if (this.#rom) {
-          this.#initNes();
+          waitLoading(this.#initNes());
         }
       },
       () => [this.#playing?.id, this.#rom],

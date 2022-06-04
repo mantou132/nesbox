@@ -28,8 +28,11 @@ const style = createCSSSheet(css`
     display: flex;
     flex-direction: column;
   }
-  .btn::part(button) {
-    border: none;
+  .actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    padding: 1em;
   }
 `);
 
@@ -86,7 +89,11 @@ export class MFriendListElement extends GemElement {
                 `,
             )}
       </div>
-      <dy-button class="btn" @click=${this.#addFriend} type="reverse" .icon=${icons.addPerson}>添加好友</dy-button>
+      <div class="actions">
+        <dy-button color=${theme.textColor} @click=${this.#addFriend} type="reverse" .icon=${icons.addPerson}>
+          添加好友
+        </dy-button>
+      </div>
     `;
   };
 }
