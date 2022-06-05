@@ -92,7 +92,7 @@ pub fn create_game(conn: &PgConnection, req: &ScNewGame) -> ScGame {
 
 pub fn update_game(conn: &PgConnection, gid: i32, req: &ScNewGame) -> ScGame {
     use self::games::dsl::*;
-    
+
     let screenshots_str = &req.screenshots.join(",");
     let game = diesel::update(games.filter(deleted_at.is_null()).filter(id.eq(gid)))
         .set((

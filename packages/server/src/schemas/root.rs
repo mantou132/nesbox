@@ -9,6 +9,7 @@ use super::playing::*;
 use super::room::*;
 use super::user::*;
 use crate::db::root::Pool;
+use crate::error::Error;
 use futures::Stream;
 use juniper::{graphql_subscription, EmptySubscription, FieldError, FieldResult, RootNode};
 use std::pin::Pin;
@@ -276,16 +277,15 @@ impl juniper::Context for GuestContext {}
 impl GuestMutationRoot {
     fn register(context: &GuestContext, input: ScLoginReq) -> FieldResult<ScLoginResp> {
         let conn = context.dbpool.get().unwrap();
-        Ok(register(&conn, input, &context.secret))
+        register(&conn, input, &context.secret)
+            .map_err(|error| FieldError::new(error, Error::register_username_exist()))
     }
 
     fn login(context: &GuestContext, input: ScLoginReq) -> FieldResult<ScLoginResp> {
         let conn = context.dbpool.get().unwrap();
-        let resp = login(&conn, input, &context.secret);
-        notify(
-            resp.user.id,
-            ScNotifyMessage::login(),
-        );
+        let resp = login(&conn, input, &context.secret)
+            .map_err(|error| FieldError::new(error, Error::username_or_password_error()))?;
+        notify(resp.user.id, ScNotifyMessage::login());
         Ok(resp)
     }
 }

@@ -29,6 +29,7 @@ use crate::{
 
 mod auth;
 mod db;
+mod error;
 mod github;
 mod handles;
 mod schemas;

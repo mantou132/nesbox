@@ -35,4 +35,7 @@ export const graphqlErrorMap: Record<string, LocaleKey | undefined> = {
   400000: errorCodeMap[400],
   403000: errorCodeMap[403],
   500000: errorCodeMap[500],
+
+  404001: 'code404001',
+  404002: 'code404002',
 };

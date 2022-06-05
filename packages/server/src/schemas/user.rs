@@ -1,3 +1,4 @@
+use anyhow::Result;
 use chrono::Utc;
 use data_encoding::HEXUPPER;
 use diesel::pg::PgConnection;
@@ -148,24 +149,23 @@ pub fn get_user_by_username(conn: &PgConnection, u: &str) -> ScUser {
     convert_to_sc_user(conn, &user)
 }
 
-pub fn login(conn: &PgConnection, req: ScLoginReq, secret: &str) -> ScLoginResp {
+pub fn login(conn: &PgConnection, req: ScLoginReq, secret: &str) -> Result<ScLoginResp> {
     use self::users::dsl::*;
 
     let user = users
         .filter(deleted_at.is_null())
         .filter(username.eq(&req.username))
         .filter(password.eq(&hash_password(&req.password)))
-        .get_result::<User>(conn)
-        .expect("Error find user");
+        .get_result::<User>(conn)?;
 
     let user = convert_to_sc_user(conn, &user);
 
     let token = UserToken::generate_token(secret, &user);
 
-    ScLoginResp { user, token }
+    Ok(ScLoginResp { user, token })
 }
 
-pub fn register(conn: &PgConnection, req: ScLoginReq, secret: &str) -> ScLoginResp {
+pub fn register(conn: &PgConnection, req: ScLoginReq, secret: &str) -> Result<ScLoginResp> {
     let new_user = NewUser {
         username: &req.username,
         password: &hash_password(&req.password),
@@ -178,12 +178,11 @@ pub fn register(conn: &PgConnection, req: ScLoginReq, secret: &str) -> ScLoginRe
 
     let user = diesel::insert_into(users::table)
         .values(&new_user)
-        .get_result::<User>(conn)
-        .expect("Error saving new user");
+        .get_result::<User>(conn)?;
 
     let user = convert_to_sc_user(conn, &user);
 
     let token = UserToken::generate_token(secret, &user);
 
-    ScLoginResp { user, token }
+    Ok(ScLoginResp { user, token })
 }

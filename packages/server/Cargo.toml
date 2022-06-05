@@ -5,6 +5,7 @@ edition = "2021"
 default-run = "server"
 
 [dependencies]
+anyhow="1.0"
 openssl-probe = "0.1.2"
 dotenv = "0.15.0"
 env_logger = "0.9"

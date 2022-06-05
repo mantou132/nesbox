@@ -5,7 +5,7 @@
 ## TODO
 
 - Help/Search
-- Server error handle
+- Server error handle(e.g: login/register?)
 - Unread message
 - Modify password
 - Tauri
