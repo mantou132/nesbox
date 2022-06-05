@@ -18,7 +18,7 @@ const config = async ({ command }: any) => {
     },
     build: {
       outDir: resolve(process.cwd(), 'dist'),
-      emptyOutDir: true,
+      emptyOutDir: false,
       sourcemap: true,
       brotliSize: false,
     },
