@@ -119,6 +119,7 @@ export type ChannelMessage = TextMsg | KeyDownMsg | KeyUpMsg | RoleOffer | RoleA
 export class RTC extends EventTarget {
   #host = 0;
   #isHost = false;
+  #restartTimer = 0;
 
   #connMap = new Map<number, RTCPeerConnection>();
   #channelMap = new Map<RTCPeerConnection, RTCDataChannel>();
@@ -316,8 +317,8 @@ export class RTC extends EventTarget {
       type: SingalType.OFFER,
       data: conn.localDescription,
     });
-    const timer = setTimeout(() => this.#restart(), 2000);
-    window.addEventListener(events.SINGAL, () => clearTimeout(timer), { once: true });
+    this.#restartTimer = window.setTimeout(() => this.#restart(), 2000);
+    window.addEventListener(events.SINGAL, () => clearTimeout(this.#restartTimer), { once: true });
   };
 
   #restart = () => {
@@ -346,6 +347,7 @@ export class RTC extends EventTarget {
   destroy = () => {
     this.#connMap.forEach((_, id) => this.#deleteUser(id));
     window.removeEventListener(events.SINGAL, this.#onSignal);
+    clearTimeout(this.#restartTimer);
   };
 
   send = (data: ChannelMessage) => {

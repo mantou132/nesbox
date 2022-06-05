@@ -71,6 +71,7 @@ import { request, subscribe } from 'src/services';
 import { configure, parseAccount, Settings } from 'src/configure';
 import { events, Singal, SingalEvent } from 'src/constants';
 import { i18n } from 'src/i18n';
+import { logout } from 'src/auth';
 
 export const getGames = async () => {
   const { games, topGames, favorites } = await request<GetGamesQuery, GetGamesQueryVariables>(GetGames, {});
@@ -267,6 +268,7 @@ export const subscribeEvent = () => {
         deleteFriend,
         updateUser,
         sendSignal,
+        login,
       } = event;
 
       if (newMessage) {
@@ -356,6 +358,10 @@ export const subscribeEvent = () => {
             detail: { userId: sendSignal.userId, singal: JSON.parse(sendSignal.json) },
           }),
         );
+      }
+
+      if (login) {
+        logout();
       }
     }
   })();

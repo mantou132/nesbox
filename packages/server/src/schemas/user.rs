@@ -53,7 +53,7 @@ pub struct ScLoginReq {
 
 #[derive(GraphQLObject)]
 pub struct ScLoginResp {
-    user: ScUser,
+    pub user: ScUser,
     token: String,
 }
 

@@ -22,6 +22,7 @@ pub struct ScNotifyMessage {
     delete_friend: Option<i32>,
     update_user: Option<ScUserBasic>,
     send_signal: Option<ScSignal>,
+    login: Option<bool>,
 }
 
 #[derive(GraphQLObject, Debug, Clone)]
@@ -49,6 +50,7 @@ impl ScNotifyMessage {
             delete_friend: None,
             update_user: None,
             send_signal: None,
+            login: None,
         };
         init(&mut msg);
         msg
@@ -85,6 +87,9 @@ impl ScNotifyMessage {
     }
     pub fn send_signal(data: ScSignal) -> ScNotifyMessage {
         ScNotifyMessage::new(|msg| msg.send_signal = Some(data))
+    }
+    pub fn login() -> ScNotifyMessage {
+        ScNotifyMessage::new(|msg| msg.login = Some(true))
     }
 }
 

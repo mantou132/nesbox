@@ -281,7 +281,12 @@ impl GuestMutationRoot {
 
     fn login(context: &GuestContext, input: ScLoginReq) -> FieldResult<ScLoginResp> {
         let conn = context.dbpool.get().unwrap();
-        Ok(login(&conn, input, &context.secret))
+        let resp = login(&conn, input, &context.secret);
+        notify(
+            resp.user.id,
+            ScNotifyMessage::login(),
+        );
+        Ok(resp)
     }
 }
 
