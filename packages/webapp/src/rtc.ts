@@ -2,8 +2,10 @@ import { Button } from 'nes_rust_wasm';
 
 import { configure } from 'src/configure';
 import { events, SingalEvent, SingalType } from 'src/constants';
+import { i18n } from 'src/i18n';
 import { logger } from 'src/logger';
 import { sendSignal } from 'src/services/api';
+import { getTempText } from 'src/utils';
 
 const buttonMap: Record<Button, Record<string, Button | undefined>> = {
   [Button.Joypad1Up]: { '2': Button.Joypad2Up },
@@ -195,11 +197,13 @@ export class RTC extends EventTarget {
       this.#channelMap.set(conn, channel);
 
       channel.onclose = () => {
+        const username = this.#roles.find((role) => role?.userId === userId)?.username || '';
+
         this.#deleteUser(userId);
         this.#roles = this.#roles.map((role) => (role?.userId === userId ? undefined : role));
         this.#emitAnswer();
 
-        const textMsg = new TextMsg(`${this.#roles.find((role) => role?.userId === userId)?.username}离开房间`);
+        const textMsg = new TextMsg(getTempText(i18n.get('leaveRoomMsg', username)));
         textMsg.toSystemRole();
         this.#channelMap.forEach((channel) => channel.send(textMsg.toString()));
         this.#emitMessage(textMsg);
@@ -220,7 +224,7 @@ export class RTC extends EventTarget {
           }
           break;
         case ChannelMessageType.ROLE_OFFER:
-          const textMsg = new TextMsg(`${msg.username}进入房间`);
+          const textMsg = new TextMsg(getTempText(i18n.get('enterRoomMsg', msg.username)));
           textMsg.toSystemRole();
           this.#channelMap.forEach((channel) => channel.send(textMsg.toString()));
           this.#emitMessage(textMsg);

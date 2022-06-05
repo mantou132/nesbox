@@ -101,6 +101,12 @@
   "leaveRoom": {
     "message": "离开房间"
   },
+  "enterRoomMsg": {
+    "message": "$1进入房间"
+  },
+  "leaveRoomMsg": {
+    "message": "$1离开房间"
+  },
   "roomEmptyRole": {
     "message": "无"
   },

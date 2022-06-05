@@ -286,8 +286,12 @@ export const subscribeEvent = () => {
       if (updateRoom) {
         if (store.rooms[updateRoom.id]) {
           Object.assign(store.rooms[updateRoom.id], updateRoom);
+          updateStore(store);
         }
-        updateStore(store);
+        if (configure.user?.playing?.id === updateRoom.id) {
+          configure.user.playing = updateRoom;
+          updateStore(configure);
+        }
       }
 
       if (deleteRoom) {

@@ -114,6 +114,10 @@ export class PRoomElement extends GemElement<State> {
     return store.games[this.#playing?.gameId || 0]?.rom;
   }
 
+  get #isVisible() {
+    return document.visibilityState === 'visible';
+  }
+
   #nes?: WasmNes;
   #imageData?: ImageData;
   #audioContext?: AudioContext;
@@ -146,8 +150,10 @@ export class PRoomElement extends GemElement<State> {
       scriptProcessor.connect(this.#audioContext.destination);
       scriptProcessor.connect(streamDestination);
       scriptProcessor.onaudioprocess = (e) => {
-        const data = e.outputBuffer.getChannelData(0);
-        this.#nes?.update_sample_buffer(data);
+        if (this.#isVisible) {
+          const data = e.outputBuffer.getChannelData(0);
+          this.#nes?.update_sample_buffer(data);
+        }
       };
     }
 
@@ -155,7 +161,7 @@ export class PRoomElement extends GemElement<State> {
   };
 
   #renderCanvas = () => {
-    if (this.#isHost && this.#nes && this.#imageData) {
+    if (this.#isHost && this.#nes && this.#imageData && this.#isVisible) {
       const ctx = this.canvasRef.element!.getContext('2d')!;
       this.#nes.step_frame();
       this.#nes.update_pixels(new Uint8Array(this.#imageData.data.buffer));
@@ -202,7 +208,7 @@ export class PRoomElement extends GemElement<State> {
     }
   };
 
-  #init = () => {
+  #initRtc = () => {
     this.#rtc = new RTC();
     this.#rtc.addEventListener('message', this.#onMessage);
 
@@ -212,10 +218,6 @@ export class PRoomElement extends GemElement<State> {
         video: this.videoRef.element!,
         stream: this.#createStream(),
       });
-    }
-
-    if (this.#isHost) {
-      requestAnimationFrame(this.#renderCanvas);
     }
   };
 
@@ -246,6 +248,10 @@ export class PRoomElement extends GemElement<State> {
   };
 
   mounted = () => {
+    if (this.#isHost) {
+      requestAnimationFrame(this.#renderCanvas);
+    }
+
     this.effect(
       () => {
         if (!this.#playing) {
@@ -261,7 +267,8 @@ export class PRoomElement extends GemElement<State> {
       () => {
         if (this.#playing) {
           this.#rtc?.destroy();
-          this.#init();
+          this.#audioContext?.close();
+          this.#initRtc();
         }
 
         if (this.#rom) {
