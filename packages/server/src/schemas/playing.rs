@@ -1,7 +1,7 @@
 use chrono::Utc;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
-use juniper::GraphQLInputObject;
+use juniper::{FieldResult, GraphQLInputObject};
 
 use super::room::*;
 use crate::db::models::{NewPlaying, Playing};
@@ -19,7 +19,7 @@ pub fn get_playing(conn: &PgConnection, uid: i32) -> Option<ScRoomBasic> {
         .filter(user_id.eq(uid))
         .get_result::<Playing>(conn)
         .optional()
-        .expect("Error loading invite")
+        .unwrap()
         .map(|row| get_room(conn, row.room_id))
 }
 
@@ -30,10 +30,10 @@ pub fn get_room_user_ids(conn: &PgConnection, rid: i32) -> Vec<i32> {
         .select(user_id)
         .filter(room_id.eq(rid))
         .load(conn)
-        .expect("Error loading room users")
+        .unwrap()
 }
 
-pub fn create_playing(conn: &PgConnection, uid: i32, rid: i32) -> String {
+pub fn create_playing(conn: &PgConnection, uid: i32, rid: i32) -> FieldResult<i32> {
     let new_playing = NewPlaying {
         room_id: rid,
         user_id: uid,
@@ -43,27 +43,22 @@ pub fn create_playing(conn: &PgConnection, uid: i32, rid: i32) -> String {
     diesel::insert_into(playing::table)
         .values(&new_playing)
         .execute(conn)
-        .expect("Error saving new invite");
-
-    "Ok".into()
+        .map(|_| rid as i32)
+        .map_err(|err| err.into())
 }
 
-pub fn delete_playing(conn: &PgConnection, uid: i32) -> String {
+pub fn delete_playing(conn: &PgConnection, uid: i32) {
     use self::playing::dsl::*;
 
     diesel::delete(playing.filter(user_id.eq(uid)))
         .execute(conn)
-        .expect("Error delete playing");
-
-    "Ok".into()
+        .unwrap();
 }
 
-pub fn delete_playing_with_room(conn: &PgConnection, rid: i32) -> String {
+pub fn delete_playing_with_room(conn: &PgConnection, rid: i32) {
     use self::playing::dsl::*;
 
     diesel::delete(playing.filter(room_id.eq(rid)))
         .execute(conn)
-        .expect("Error delete playing");
-
-    "Ok".into()
+        .unwrap();
 }

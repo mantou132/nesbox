@@ -4,9 +4,7 @@
 
 ## TODO
 
-- Help/Search
-- Server error handle(e.g: login/register?)
 - Unread message
-- Modify password
+- Help/Search
 - Tauri
 - Mobile/GamePad adaptation

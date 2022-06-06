@@ -1,7 +1,7 @@
 use chrono::Utc;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
-use juniper::{GraphQLInputObject, GraphQLObject};
+use juniper::{FieldResult, GraphQLInputObject, GraphQLObject};
 
 use crate::db::models::{Invite, NewInvite};
 use crate::db::schema::invites;
@@ -48,7 +48,7 @@ pub fn get_invites(conn: &PgConnection, uid: i32) -> Vec<ScInvite> {
         .filter(deleted_at.is_null())
         .filter(target_id.eq(uid))
         .load::<Invite>(conn)
-        .expect("Error loading invite")
+        .unwrap()
         .iter()
         .map(|invite| convert_to_sc_invite(conn, &invite))
         .collect()
@@ -61,26 +61,25 @@ pub fn get_invites_with(conn: &PgConnection, uid: i32) -> Vec<ScInvite> {
         .filter(deleted_at.is_null())
         .filter(user_id.eq(uid))
         .load::<Invite>(conn)
-        .expect("Error loading invite")
+        .unwrap()
         .iter()
         .map(|invite| convert_to_sc_invite(conn, &invite))
         .collect()
 }
 
-pub fn get_invite(conn: &PgConnection, uid: i32, iid: i32) -> ScInvite {
+pub fn get_invite(conn: &PgConnection, uid: i32, iid: i32) -> FieldResult<ScInvite> {
     use self::invites::dsl::*;
 
     let invite = invites
         .filter(deleted_at.is_null())
         .filter(target_id.eq(uid))
         .filter(id.eq(iid))
-        .get_result::<Invite>(conn)
-        .expect("Error loading invite");
+        .get_result::<Invite>(conn)?;
 
-    convert_to_sc_invite(conn, &invite)
+    Ok(convert_to_sc_invite(conn, &invite))
 }
 
-pub fn create_invite(conn: &PgConnection, uid: i32, req: &ScNewInvite) -> ScInvite {
+pub fn create_invite(conn: &PgConnection, uid: i32, req: &ScNewInvite) -> FieldResult<ScInvite> {
     use self::invites::dsl::*;
 
     diesel::delete(
@@ -89,7 +88,7 @@ pub fn create_invite(conn: &PgConnection, uid: i32, req: &ScNewInvite) -> ScInvi
             .filter(target_id.eq(req.target_id)),
     )
     .execute(conn)
-    .expect("Error delete invite");
+    .unwrap();
 
     let new_invite = NewInvite {
         user_id: uid,
@@ -102,34 +101,29 @@ pub fn create_invite(conn: &PgConnection, uid: i32, req: &ScNewInvite) -> ScInvi
 
     let invite = diesel::insert_into(invites)
         .values(&new_invite)
-        .get_result::<Invite>(conn)
-        .expect("Error saving new invite");
+        .get_result::<Invite>(conn)?;
 
-    convert_to_sc_invite(conn, &invite)
+    Ok(convert_to_sc_invite(conn, &invite))
 }
 
-pub fn delete_invite_by_id(conn: &PgConnection, uid: i32, iid: i32) -> ScInvite {
+pub fn delete_invite_by_id(conn: &PgConnection, uid: i32, iid: i32) {
     use self::invites::dsl::*;
 
-    let invite = diesel::delete(invites.filter(target_id.eq(uid)).filter(id.eq(iid)))
+    diesel::delete(invites.filter(target_id.eq(uid)).filter(id.eq(iid)))
         .get_result::<Invite>(conn)
-        .expect("Error delete invite");
-
-    convert_to_sc_invite(conn, &invite)
+        .unwrap();
 }
 
-pub fn delete_invite(conn: &PgConnection, uid: i32, all: bool) -> String {
+pub fn delete_invite(conn: &PgConnection, uid: i32, all: bool) {
     use self::invites::dsl::*;
 
     diesel::delete(invites.filter(user_id.eq(uid)))
         .execute(conn)
-        .expect("Error delete invite");
+        .unwrap();
 
     if all {
         diesel::delete(invites.filter(target_id.eq(uid)))
             .execute(conn)
-            .expect("Error delete invite");
+            .unwrap();
     }
-
-    "Ok".into()
 }

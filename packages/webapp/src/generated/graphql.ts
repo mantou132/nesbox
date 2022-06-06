@@ -27,6 +27,7 @@ export type MutationRoot = {
   leaveRoom: Scalars['String'];
   signaling: Scalars['String'];
   updateAccount: ScUser;
+  updatePassword: ScUser;
   updateRoom: ScRoomBasic;
 };
 
@@ -88,6 +89,11 @@ export type MutationRootSignalingArgs = {
 
 export type MutationRootUpdateAccountArgs = {
   input: ScUpdateUser;
+};
+
+
+export type MutationRootUpdatePasswordArgs = {
+  input: ScUpdatePassword;
 };
 
 
@@ -277,6 +283,11 @@ export type ScUpdateInvite = {
   inviteId: Scalars['Int'];
 };
 
+export type ScUpdatePassword = {
+  oldpassword: Scalars['String'];
+  password: Scalars['String'];
+};
+
 export type ScUpdatePlaying = {
   roomId: Scalars['Int'];
 };
@@ -388,6 +399,13 @@ export type UpdateAccountMutationVariables = Exact<{
 
 
 export type UpdateAccountMutation = { __typename?: 'MutationRoot', updateAccount: { __typename?: 'ScUser', id: number, username: string, nickname: string, settings?: string, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } } };
+
+export type UpdatePasswordMutationVariables = Exact<{
+  input: ScUpdatePassword;
+}>;
+
+
+export type UpdatePasswordMutation = { __typename?: 'MutationRoot', updatePassword: { __typename?: 'ScUser', id: number, username: string, nickname: string, settings?: string, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } } };
 
 export type CreateCommentMutationVariables = Exact<{
   input: ScNewComment;
@@ -632,6 +650,14 @@ export const SendSignal = `
 export const UpdateAccount = `
     mutation updateAccount($input: ScUpdateUser!) {
   updateAccount(input: $input) {
+    ...ScAccountPart
+  }
+}
+    ${ScAccountPart}
+${ScRoomBasicPart}`;
+export const UpdatePassword = `
+    mutation updatePassword($input: ScUpdatePassword!) {
+  updatePassword(input: $input) {
     ...ScAccountPart
   }
 }

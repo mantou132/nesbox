@@ -2,7 +2,7 @@ use chrono::Utc;
 use diesel::dsl::*;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
-use juniper::{GraphQLInputObject, GraphQLObject};
+use juniper::{FieldResult, GraphQLInputObject, GraphQLObject};
 
 use crate::db::models::{Message, NewMessage};
 use crate::db::schema::messages;
@@ -48,13 +48,17 @@ pub fn get_messages(conn: &PgConnection, uid: i32, tid: i32) -> Vec<ScMessage> {
         .filter(target_id.eq(any(vec![uid, tid])))
         .limit(100)
         .load::<Message>(conn)
-        .expect("Error loading messages")
+        .unwrap()
         .iter()
         .map(|message| convert_to_sc_message(message))
         .collect()
 }
 
-pub fn create_message(conn: &PgConnection, user_id: i32, req: &ScNewMessage) -> ScMessage {
+pub fn create_message(
+    conn: &PgConnection,
+    user_id: i32,
+    req: &ScNewMessage,
+) -> FieldResult<ScMessage> {
     let new_message = NewMessage {
         user_id,
         target_id: req.target_id,
@@ -66,8 +70,7 @@ pub fn create_message(conn: &PgConnection, user_id: i32, req: &ScNewMessage) -> 
 
     let message = diesel::insert_into(messages::table)
         .values(&new_message)
-        .get_result::<Message>(conn)
-        .expect("Error saving new message");
+        .get_result::<Message>(conn)?;
 
-    convert_to_sc_message(&message)
+    Ok(convert_to_sc_message(&message))
 }

@@ -67,7 +67,7 @@ pub fn convert_to_sc_room(conn: &PgConnection, room: &Room) -> ScRoom {
         users: get_room_user_ids(conn, room.id)
             .into_iter()
             .filter(|user_id| has_user(*user_id))
-            .map(|user_id| get_user_basic(conn, user_id))
+            .map(|user_id| get_user_basic(conn, user_id).unwrap())
             .collect(),
     }
 }
@@ -151,7 +151,7 @@ pub fn delete_room(conn: &PgConnection, rid: i32) -> String {
 
 pub fn enter_room(conn: &PgConnection, uid: i32, rid: i32) -> String {
     delete_playing(conn, uid);
-    create_playing(conn, uid, rid);
+    create_playing(conn, uid, rid).ok();
     delete_invite(conn, uid, true);
 
     "Ok".into()

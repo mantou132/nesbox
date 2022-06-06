@@ -140,6 +140,12 @@ mutation updateAccount($input: ScUpdateUser!) {
   }
 }
 
+mutation updatePassword($input: ScUpdatePassword!) {
+  updatePassword(input: $input) {
+    ...ScAccountPart
+  }
+}
+
 mutation createComment($input: ScNewComment!) {
   createComment(input: $input) {
     ...ScCommentPart

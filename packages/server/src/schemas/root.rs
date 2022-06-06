@@ -9,7 +9,6 @@ use super::playing::*;
 use super::room::*;
 use super::user::*;
 use crate::db::root::Pool;
-use crate::error::Error;
 use futures::Stream;
 use juniper::{graphql_subscription, EmptySubscription, FieldError, FieldResult, RootNode};
 use std::pin::Pin;
@@ -36,7 +35,7 @@ impl QueryRoot {
     }
     fn account(context: &Context) -> FieldResult<ScUser> {
         let conn = context.dbpool.get().unwrap();
-        Ok(get_account(&conn, context.user_id))
+        get_account(&conn, context.user_id)
     }
     fn messages(context: &Context, input: ScMessagesReq) -> FieldResult<Vec<ScMessage>> {
         let conn = context.dbpool.get().unwrap();
@@ -72,21 +71,25 @@ impl MutationRoot {
     }
     fn update_account(context: &Context, input: ScUpdateUser) -> FieldResult<ScUser> {
         let conn = context.dbpool.get().unwrap();
-        Ok(update_user(&conn, context.user_id, &input))
+        update_user(&conn, context.user_id, &input)
+    }
+    fn update_password(context: &Context, input: ScUpdatePassword) -> FieldResult<ScUser> {
+        let conn = context.dbpool.get().unwrap();
+        update_password(&conn, context.user_id, &input)
     }
     fn create_game(context: &Context, input: ScNewGame) -> FieldResult<ScGame> {
         let conn = context.dbpool.get().unwrap();
-        let game = create_game(&conn, &input);
+        let game = create_game(&conn, &input)?;
         notify_all(ScNotifyMessage::new_game(game.clone()));
         Ok(game)
     }
     fn create_comment(context: &Context, input: ScNewComment) -> FieldResult<ScComment> {
         let conn = context.dbpool.get().unwrap();
-        Ok(create_comment(&conn, context.user_id, &input))
+        create_comment(&conn, context.user_id, &input)
     }
     fn create_message(context: &Context, input: ScNewMessage) -> FieldResult<ScMessage> {
         let conn = context.dbpool.get().unwrap();
-        let message = create_message(&conn, context.user_id, &input);
+        let message = create_message(&conn, context.user_id, &input)?;
         notify(
             message.target_id,
             ScNotifyMessage::new_message(message.clone()),
@@ -96,29 +99,33 @@ impl MutationRoot {
     fn favorite_game(context: &Context, input: ScNewFavorite) -> FieldResult<String> {
         let conn = context.dbpool.get().unwrap();
         if input.favorite {
-            Ok(create_favorite(&conn, context.user_id, input.game_id))
+            create_favorite(&conn, context.user_id, input.game_id).ok();
         } else {
-            Ok(delete_favorite(&conn, context.user_id, input.game_id))
+            delete_favorite(&conn, context.user_id, input.game_id);
         }
+        Ok("Ok".into())
     }
     fn apply_friend(context: &Context, input: ScNewFriend) -> FieldResult<String> {
         let conn = context.dbpool.get().unwrap();
-        let target_user = get_user_by_username(&conn, &input.username);
-        let friend = apply_friend(&conn, context.user_id, target_user.id);
-        notify(
-            target_user.id,
-            ScNotifyMessage::apply_friend(friend.clone()),
-        );
+        if let Ok(target_user) = get_user_by_username(&conn, &input.username) {
+            if let Ok(friend) = apply_friend(&conn, context.user_id, target_user.id) {
+                notify(
+                    target_user.id,
+                    ScNotifyMessage::apply_friend(friend.clone()),
+                );
+            }
+        }
         Ok("Ok".into())
     }
     fn accept_friend(context: &Context, input: ScUpdateFriend) -> FieldResult<String> {
         let conn = context.dbpool.get().unwrap();
         if input.accept {
-            let friend = accept_friend(&conn, context.user_id, input.target_id);
-            notify(
-                input.target_id,
-                ScNotifyMessage::accept_friend(friend.clone()),
-            );
+            if let Ok(friend) = accept_friend(&conn, context.user_id, input.target_id) {
+                notify(
+                    input.target_id,
+                    ScNotifyMessage::accept_friend(friend.clone()),
+                );
+            }
         } else {
             delete_friend(&conn, context.user_id, input.target_id);
             notify(
@@ -130,14 +137,14 @@ impl MutationRoot {
     }
     fn create_invite(context: &Context, input: ScNewInvite) -> FieldResult<ScInvite> {
         let conn = context.dbpool.get().unwrap();
-        let invite = create_invite(&conn, context.user_id, &input);
+        let invite = create_invite(&conn, context.user_id, &input)?;
         notify(input.target_id, ScNotifyMessage::new_invite(invite.clone()));
         Ok(invite)
     }
     fn accept_invite(context: &Context, input: ScUpdateInvite) -> FieldResult<String> {
         let conn = context.dbpool.get().unwrap();
         if input.accept {
-            let invite = get_invite(&conn, context.user_id, input.invite_id);
+            let invite = get_invite(&conn, context.user_id, input.invite_id)?;
 
             match get_playing(&conn, context.user_id) {
                 Some(room) => {
@@ -151,7 +158,7 @@ impl MutationRoot {
             enter_room(&conn, context.user_id, invite.room.id);
             notify_ids(
                 get_friend_ids(&conn, context.user_id),
-                ScNotifyMessage::update_user(get_user_basic(&conn, context.user_id)),
+                ScNotifyMessage::update_user(get_user_basic(&conn, context.user_id)?),
             );
         } else {
             delete_invite_by_id(&conn, context.user_id, input.invite_id);
@@ -163,7 +170,7 @@ impl MutationRoot {
         let room = create_room(&conn, context.user_id, &input);
         notify_ids(
             get_friend_ids(&conn, context.user_id),
-            ScNotifyMessage::update_user(get_user_basic(&conn, context.user_id)),
+            ScNotifyMessage::update_user(get_user_basic(&conn, context.user_id)?),
         );
         Ok(room)
     }
@@ -172,7 +179,7 @@ impl MutationRoot {
         let room = update_room(&conn, context.user_id, &input);
         notify_ids(
             get_friend_ids(&conn, context.user_id),
-            ScNotifyMessage::update_user(get_user_basic(&conn, context.user_id)),
+            ScNotifyMessage::update_user(get_user_basic(&conn, context.user_id)?),
         );
         notify_ids(
             get_room_user_ids(&conn, input.id),
@@ -190,7 +197,7 @@ impl MutationRoot {
         enter_room(&conn, context.user_id, input.room_id);
         notify_ids(
             get_friend_ids(&conn, context.user_id),
-            ScNotifyMessage::update_user(get_user_basic(&conn, context.user_id)),
+            ScNotifyMessage::update_user(get_user_basic(&conn, context.user_id)?),
         );
         Ok(room)
     }
@@ -207,7 +214,7 @@ impl MutationRoot {
         }
         notify_ids(
             get_friend_ids(&conn, context.user_id),
-            ScNotifyMessage::update_user(get_user_basic(&conn, context.user_id)),
+            ScNotifyMessage::update_user(get_user_basic(&conn, context.user_id)?),
         );
         if get_room_user_ids(&conn, room.id).len() == 0 {
             delete_room(&conn, room.id);
@@ -233,10 +240,12 @@ impl Subscription {
         };
 
         let conn = context.dbpool.get().unwrap();
-        notify_ids(
-            get_friend_ids(&conn, context.user_id),
-            ScNotifyMessage::update_user(get_user_basic(&conn, context.user_id)),
-        );
+        if let Ok(user) = get_user_basic(&conn, context.user_id) {
+            notify_ids(
+                get_friend_ids(&conn, context.user_id),
+                ScNotifyMessage::update_user(user),
+            );
+        }
 
         Box::pin(stream)
     }
@@ -278,13 +287,11 @@ impl GuestMutationRoot {
     fn register(context: &GuestContext, input: ScLoginReq) -> FieldResult<ScLoginResp> {
         let conn = context.dbpool.get().unwrap();
         register(&conn, input, &context.secret)
-            .map_err(|error| FieldError::new(error, Error::register_username_exist()))
     }
 
     fn login(context: &GuestContext, input: ScLoginReq) -> FieldResult<ScLoginResp> {
         let conn = context.dbpool.get().unwrap();
-        let resp = login(&conn, input, &context.secret)
-            .map_err(|error| FieldError::new(error, Error::username_or_password_error()))?;
+        let resp = login(&conn, input, &context.secret)?;
         notify(resp.user.id, ScNotifyMessage::login());
         Ok(resp)
     }

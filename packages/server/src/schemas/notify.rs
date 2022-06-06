@@ -151,9 +151,11 @@ pub fn check_user(pool: &Pool) {
 
     let conn = pool.get().unwrap();
     for id in ids {
-        notify_ids(
-            get_friend_ids(&conn, id),
-            ScNotifyMessage::update_user(get_user_basic(&conn, id)),
-        );
+        if let Ok(user) = get_user_basic(&conn, id) {
+            notify_ids(
+                get_friend_ids(&conn, id),
+                ScNotifyMessage::update_user(user),
+            );
+        }
     }
 }

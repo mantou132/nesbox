@@ -1,9 +1,8 @@
-use anyhow::Result;
 use chrono::Utc;
 use data_encoding::HEXUPPER;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
-use juniper::{GraphQLEnum, GraphQLInputObject, GraphQLObject};
+use juniper::{FieldError, FieldResult, GraphQLEnum, GraphQLInputObject, GraphQLObject};
 use ring::{digest, pbkdf2};
 use std::num::NonZeroU32;
 
@@ -13,6 +12,7 @@ use super::room::*;
 use crate::auth::UserToken;
 use crate::db::models::{NewUser, User};
 use crate::db::schema::users;
+use crate::error::Error;
 
 #[derive(GraphQLEnum, Debug, Clone)]
 pub enum ScUserStatus {
@@ -49,6 +49,12 @@ pub struct ScUserBasic {
 #[derive(GraphQLInputObject)]
 pub struct ScLoginReq {
     username: String,
+    password: String,
+}
+
+#[derive(GraphQLInputObject)]
+pub struct ScUpdatePassword {
+    oldpassword: String,
     password: String,
 }
 
@@ -90,19 +96,18 @@ fn convert_to_sc_user(conn: &PgConnection, user: &User) -> ScUser {
     }
 }
 
-pub fn get_account(conn: &PgConnection, uid: i32) -> ScUser {
+pub fn get_account(conn: &PgConnection, uid: i32) -> FieldResult<ScUser> {
     use self::users::dsl::*;
 
     let user = users
         .filter(deleted_at.is_null())
         .filter(id.eq(uid))
-        .get_result::<User>(conn)
-        .expect("Error loading user");
+        .get_result::<User>(conn)?;
 
-    convert_to_sc_user(conn, &user)
+    Ok(convert_to_sc_user(conn, &user))
 }
 
-pub fn update_user(conn: &PgConnection, uid: i32, req: &ScUpdateUser) -> ScUser {
+pub fn update_user(conn: &PgConnection, uid: i32, req: &ScUpdateUser) -> FieldResult<ScUser> {
     use self::users::dsl::*;
 
     let user = diesel::update(users.filter(deleted_at.is_null()).filter(id.eq(uid)))
@@ -114,49 +119,67 @@ pub fn update_user(conn: &PgConnection, uid: i32, req: &ScUpdateUser) -> ScUser 
                 .map(|s| serde_json::from_str::<serde_json::Value>(&s).unwrap_or_default())),
             updated_at.eq(Utc::now().naive_utc()),
         ))
-        .get_result::<User>(conn)
-        .expect("Error update user");
+        .get_result::<User>(conn)?;
 
-    convert_to_sc_user(conn, &user)
+    Ok(convert_to_sc_user(conn, &user))
 }
 
-pub fn get_user_basic(conn: &PgConnection, uid: i32) -> ScUserBasic {
+pub fn update_password(
+    conn: &PgConnection,
+    uid: i32,
+    req: &ScUpdatePassword,
+) -> FieldResult<ScUser> {
+    use self::users::dsl::*;
+
+    let user = diesel::update(
+        users
+            .filter(deleted_at.is_null())
+            .filter(id.eq(uid))
+            .filter(password.eq(hash_password(&req.oldpassword))),
+    )
+    .set((
+        password.eq(hash_password(&req.password)),
+        updated_at.eq(Utc::now().naive_utc()),
+    ))
+    .get_result::<User>(conn)?;
+
+    Ok(convert_to_sc_user(conn, &user))
+}
+
+pub fn get_user_basic(conn: &PgConnection, uid: i32) -> FieldResult<ScUserBasic> {
     use self::users::dsl::*;
 
     let user = users
         .filter(deleted_at.is_null())
         .filter(id.eq(uid))
-        .get_result::<User>(conn)
-        .expect("Error loading user");
+        .get_result::<User>(conn)?;
 
-    ScUserBasic {
+    Ok(ScUserBasic {
         id: user.id,
         username: user.username.clone(),
         nickname: user.nickname.clone(),
         status: get_user_status(uid),
         playing: get_playing(conn, user.id),
-    }
+    })
 }
 
-pub fn get_user_by_username(conn: &PgConnection, u: &str) -> ScUser {
+pub fn get_user_by_username(conn: &PgConnection, u: &str) -> FieldResult<ScUser> {
     use self::users::dsl::*;
 
-    let user = users
-        .filter(username.eq(u))
-        .get_result(conn)
-        .expect("Error find user");
+    let user = users.filter(username.eq(u)).get_result(conn)?;
 
-    convert_to_sc_user(conn, &user)
+    Ok(convert_to_sc_user(conn, &user))
 }
 
-pub fn login(conn: &PgConnection, req: ScLoginReq, secret: &str) -> Result<ScLoginResp> {
+pub fn login(conn: &PgConnection, req: ScLoginReq, secret: &str) -> FieldResult<ScLoginResp> {
     use self::users::dsl::*;
 
     let user = users
         .filter(deleted_at.is_null())
         .filter(username.eq(&req.username))
         .filter(password.eq(&hash_password(&req.password)))
-        .get_result::<User>(conn)?;
+        .get_result::<User>(conn)
+        .map_err(|error| FieldError::new(error, Error::username_or_password_error()))?;
 
     let user = convert_to_sc_user(conn, &user);
 
@@ -165,7 +188,7 @@ pub fn login(conn: &PgConnection, req: ScLoginReq, secret: &str) -> Result<ScLog
     Ok(ScLoginResp { user, token })
 }
 
-pub fn register(conn: &PgConnection, req: ScLoginReq, secret: &str) -> Result<ScLoginResp> {
+pub fn register(conn: &PgConnection, req: ScLoginReq, secret: &str) -> FieldResult<ScLoginResp> {
     let new_user = NewUser {
         username: &req.username,
         password: &hash_password(&req.password),
@@ -178,7 +201,8 @@ pub fn register(conn: &PgConnection, req: ScLoginReq, secret: &str) -> Result<Sc
 
     let user = diesel::insert_into(users::table)
         .values(&new_user)
-        .get_result::<User>(conn)?;
+        .get_result::<User>(conn)
+        .map_err(|error| FieldError::new(error, Error::register_username_exist()))?;
 
     let user = convert_to_sc_user(conn, &user);
 

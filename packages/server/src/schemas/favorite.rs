@@ -2,7 +2,7 @@ use chrono::Utc;
 use diesel::dsl::count;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
-use juniper::GraphQLInputObject;
+use juniper::{FieldResult, GraphQLInputObject};
 
 use crate::db::models::{Favorite, NewFavorite};
 use crate::db::schema::favorites;
@@ -19,7 +19,7 @@ pub fn get_favorites(conn: &PgConnection, uid: i32) -> Vec<i32> {
     favorites
         .filter(user_id.eq(uid))
         .load::<Favorite>(conn)
-        .expect("Error loading favorite")
+        .unwrap()
         .iter()
         .map(|favorite| favorite.game_id)
         .collect()
@@ -33,10 +33,10 @@ pub fn get_top_ids(conn: &PgConnection) -> Vec<i32> {
         .select(game_id)
         .order(count(game_id).desc())
         .load(conn)
-        .expect("Error loading favorite")
+        .unwrap()
 }
 
-pub fn create_favorite(conn: &PgConnection, uid: i32, gid: i32) -> String {
+pub fn create_favorite(conn: &PgConnection, uid: i32, gid: i32) -> FieldResult<i32> {
     let new_favorite = NewFavorite {
         user_id: uid,
         game_id: gid,
@@ -46,17 +46,14 @@ pub fn create_favorite(conn: &PgConnection, uid: i32, gid: i32) -> String {
     diesel::insert_into(favorites::table)
         .values(&new_favorite)
         .execute(conn)
-        .expect("Error saving new game");
-
-    "Ok".into()
+        .map(|_| gid as i32)
+        .map_err(|err| err.into())
 }
 
-pub fn delete_favorite(conn: &PgConnection, uid: i32, gid: i32) -> String {
+pub fn delete_favorite(conn: &PgConnection, uid: i32, gid: i32) {
     use self::favorites::dsl::*;
 
     diesel::delete(favorites.filter(user_id.eq(uid)).filter(game_id.eq(gid)))
         .execute(conn)
-        .expect("Error delete favorite");
-
-    "Ok".into()
+        .unwrap();
 }

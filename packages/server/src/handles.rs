@@ -128,10 +128,12 @@ pub async fn webhook(
             } else {
                 match get_game_from_name(conn, &payload.issue.title) {
                     Some(game) => {
-                        update_game(conn, game.id, &sc_game);
+                        update_game(conn, game.id, &sc_game).ok();
                     }
                     None => {
-                        notify_all(ScNotifyMessage::new_game(create_game(conn, &sc_game)));
+                        if let Ok(game) = create_game(conn, &sc_game) {
+                            notify_all(ScNotifyMessage::new_game(game));
+                        }
                     }
                 };
             }

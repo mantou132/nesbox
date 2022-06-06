@@ -68,6 +68,21 @@
   "nickname": {
     "message": "显示名称"
   },
+  "changePassword": {
+    "message": "修改密码"
+  },
+  "oldpassword": {
+    "message": "旧密码"
+  },
+  "newpassword": {
+    "message": "新密码"
+  },
+  "renewpassword": {
+    "message": "重复新密码"
+  },
+  "renewpasswordNotMatch": {
+    "message": "不匹配新密码"
+  },
   "login": {
     "message": "登录"
   },
@@ -142,6 +157,9 @@
   },
   "tipRoomCrowded": {
     "message": "房间人数过多"
+  },
+  "tipChangePassword": {
+    "message": "修改密码成功"
   },
   "tipIviteSuccess": {
     "message": "邀请已经发送"

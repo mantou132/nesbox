@@ -1,7 +1,7 @@
 use chrono::{NaiveDateTime, Utc};
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
-use juniper::{GraphQLInputObject, GraphQLObject};
+use juniper::{FieldResult, GraphQLInputObject, GraphQLObject};
 
 use crate::db::models::{Comment, NewComment};
 use crate::db::schema::comments;
@@ -32,7 +32,7 @@ pub struct ScCommentsReq {
 
 fn convert_to_sc_comment(conn: &PgConnection, comment: &Comment) -> ScComment {
     ScComment {
-        user: get_user_basic(conn, comment.user_id),
+        user: get_user_basic(conn, comment.user_id).unwrap(),
         game_id: comment.game_id,
         body: comment.body.clone(),
         like: comment.like,
@@ -48,20 +48,19 @@ pub fn get_comments(conn: &PgConnection, gid: i32) -> Vec<ScComment> {
         .filter(deleted_at.is_null())
         .filter(game_id.eq(gid))
         .load::<Comment>(conn)
-        .expect("Error loading comments")
+        .unwrap()
         .iter()
         .map(|comment| convert_to_sc_comment(conn, comment))
         .collect()
 }
 
-pub fn create_comment(conn: &PgConnection, uid: i32, req: &ScNewComment) -> ScComment {
+pub fn create_comment(conn: &PgConnection, uid: i32, req: &ScNewComment) -> FieldResult<ScComment> {
     use self::comments::dsl::*;
 
     let c = comments
         .filter(user_id.eq(uid))
         .filter(game_id.eq(req.game_id))
-        .get_results::<Comment>(conn)
-        .expect("Error find comments");
+        .get_results::<Comment>(conn)?;
 
     if c.len() != 0 {
         return update_comment(conn, uid, req);
@@ -79,13 +78,12 @@ pub fn create_comment(conn: &PgConnection, uid: i32, req: &ScNewComment) -> ScCo
 
     let comment = diesel::insert_into(comments)
         .values(&new_comment)
-        .get_result::<Comment>(conn)
-        .expect("Error saving new comment");
+        .get_result::<Comment>(conn)?;
 
-    convert_to_sc_comment(conn, &comment)
+    Ok(convert_to_sc_comment(conn, &comment))
 }
 
-pub fn update_comment(conn: &PgConnection, uid: i32, req: &ScNewComment) -> ScComment {
+pub fn update_comment(conn: &PgConnection, uid: i32, req: &ScNewComment) -> FieldResult<ScComment> {
     use self::comments::dsl::*;
 
     let comment = diesel::update(
@@ -100,8 +98,7 @@ pub fn update_comment(conn: &PgConnection, uid: i32, req: &ScNewComment) -> ScCo
         updated_at.eq(Utc::now().naive_utc()),
         deleted_at.eq(None::<NaiveDateTime>),
     ))
-    .get_result::<Comment>(conn)
-    .expect("Error update comment");
+    .get_result::<Comment>(conn)?;
 
-    convert_to_sc_comment(conn, &comment)
+    Ok(convert_to_sc_comment(conn, &comment))
 }

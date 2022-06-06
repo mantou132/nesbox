@@ -55,6 +55,7 @@ import {
   ScFriendStatus,
   ScNewComment,
   ScNewRoom,
+  ScUpdatePassword,
   ScUpdateRoom,
   SendSignal,
   SendSignalMutation,
@@ -62,6 +63,9 @@ import {
   UpdateAccount,
   UpdateAccountMutation,
   UpdateAccountMutationVariables,
+  UpdatePassword,
+  UpdatePasswordMutation,
+  UpdatePasswordMutationVariables,
   UpdateRoom,
   UpdateRoomMutation,
   UpdateRoomMutationVariables,
@@ -141,6 +145,12 @@ export const updateAccount = async ({
   });
   updateStore(configure, {
     user: parseAccount(updateAccount),
+  });
+};
+
+export const updatePassword = async (input: ScUpdatePassword) => {
+  await request<UpdatePasswordMutation, UpdatePasswordMutationVariables>(UpdatePassword, {
+    input,
   });
 };
 

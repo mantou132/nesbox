@@ -1741,7 +1741,6 @@ dependencies = [
  "actix-cors",
  "actix-web",
  "actix-web-lab",
- "anyhow",
  "async-stream",
  "chrono",
  "data-encoding",

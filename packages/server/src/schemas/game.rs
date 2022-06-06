@@ -1,7 +1,7 @@
 use chrono::Utc;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
-use juniper::{GraphQLInputObject, GraphQLObject};
+use juniper::{FieldResult, GraphQLInputObject, GraphQLObject};
 
 use crate::db::models::{Game, NewGame};
 use crate::db::schema::games;
@@ -52,7 +52,7 @@ pub fn get_games(conn: &PgConnection) -> Vec<ScGame> {
     games
         .filter(deleted_at.is_null())
         .load::<Game>(conn)
-        .expect("Error loading games")
+        .unwrap()
         .iter()
         .map(|game| convert_to_sc_game(game))
         .collect()
@@ -69,7 +69,7 @@ pub fn get_game_from_name(conn: &PgConnection, n: &str) -> Option<ScGame> {
         .ok()
 }
 
-pub fn create_game(conn: &PgConnection, req: &ScNewGame) -> ScGame {
+pub fn create_game(conn: &PgConnection, req: &ScNewGame) -> FieldResult<ScGame> {
     let screenshots_str = &req.screenshots.join(",");
     let new_game = NewGame {
         name: &req.name,
@@ -84,13 +84,12 @@ pub fn create_game(conn: &PgConnection, req: &ScNewGame) -> ScGame {
 
     let game = diesel::insert_into(games::table)
         .values(&new_game)
-        .get_result::<Game>(conn)
-        .expect("Error saving new game");
+        .get_result::<Game>(conn)?;
 
-    convert_to_sc_game(&game)
+    Ok(convert_to_sc_game(&game))
 }
 
-pub fn update_game(conn: &PgConnection, gid: i32, req: &ScNewGame) -> ScGame {
+pub fn update_game(conn: &PgConnection, gid: i32, req: &ScNewGame) -> FieldResult<ScGame> {
     use self::games::dsl::*;
 
     let screenshots_str = &req.screenshots.join(",");
@@ -102,8 +101,7 @@ pub fn update_game(conn: &PgConnection, gid: i32, req: &ScNewGame) -> ScGame {
             updated_at.eq(Utc::now().naive_utc()),
             screenshots.eq(Some(screenshots_str)),
         ))
-        .get_result::<Game>(conn)
-        .expect("Error update game");
+        .get_result::<Game>(conn)?;
 
-    convert_to_sc_game(&game)
+    Ok(convert_to_sc_game(&game))
 }
