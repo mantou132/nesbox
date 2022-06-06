@@ -5,6 +5,5 @@
 ## TODO
 
 - Unread message
-- Help/Search
 - Tauri
 - Mobile/GamePad adaptation

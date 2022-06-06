@@ -85,7 +85,6 @@ export class MAvatarElement extends GemElement {
         // {
         //   text: i18n.get('help'),
         //   handle: console.log,
-        //   tag: getShortcut('OPEN_HELP', true),
         // },
         {
           text: '---',

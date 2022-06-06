@@ -143,6 +143,9 @@
   "placeholderMessage": {
     "message": "输入信息按 Enter 键发送"
   },
+  "placeholderSearch": {
+    "message": "$1 搜索游戏或者好友"
+  },
   "setting": {
     "message": "设置"
   },

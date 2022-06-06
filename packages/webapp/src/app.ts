@@ -14,7 +14,13 @@ import { Loadbar } from 'duoyun-ui/elements/page-loadbar';
 import { createPath } from '@mantou/gem/elements/route';
 import { forever } from 'duoyun-ui/lib/utils';
 
-import { configure, getShortcut, toggoleFriendListState, toggoleSettingsState } from 'src/configure';
+import {
+  configure,
+  getShortcut,
+  toggoleFriendListState,
+  toggoleSearchState,
+  toggoleSettingsState,
+} from 'src/configure';
 import { routes, locationStore } from 'src/routes';
 import { getAccount, getFriends, getGames, subscribeEvent } from 'src/services/api';
 import { paramKeys } from 'src/constants';
@@ -25,6 +31,7 @@ import 'duoyun-ui/elements/drawer';
 import 'duoyun-ui/elements/route';
 import 'duoyun-ui/elements/modal';
 import 'src/modules/settings';
+import 'src/modules/search';
 import 'src/modules/friend-list';
 import 'src/modules/chat';
 
@@ -47,7 +54,7 @@ export class AppRootElement extends GemElement {
 
   #globalShortcut = (evt: KeyboardEvent) => {
     hotkeys({
-      // [getShortcut('OPEN_HELP')]: console.log,
+      [getShortcut('OPEN_SEARCH')]: toggoleSearchState,
       [getShortcut('OPEN_SETTINGS')]: toggoleSettingsState,
     })(evt);
   };
@@ -102,6 +109,15 @@ export class AppRootElement extends GemElement {
         @close=${toggoleSettingsState}
       >
         <m-settings slot="body"></m-settings>
+      </dy-modal>
+
+      <dy-modal
+        customize
+        @close=${toggoleSearchState}
+        .maskCloseable=${true}
+        .open=${!!configure.searchState}
+        .body=${html`<m-search></m-search>`}
+      >
       </dy-modal>
     `;
   };

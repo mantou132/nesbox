@@ -13,7 +13,7 @@ import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
 import { routes } from 'src/routes';
 import { i18n } from 'src/i18n';
-import { configure, toggoleFriendListState } from 'src/configure';
+import { configure, toggoleFriendListState, toggoleSearchState } from 'src/configure';
 import { theme } from 'src/theme';
 import { favoriteGame, leaveRoom } from 'src/services/api';
 import { store } from 'src/store';
@@ -73,7 +73,7 @@ const style = createCSSSheet(css`
     box-sizing: border-box;
   }
   dy-use.icon {
-    padding: 0.3em;
+    padding: 0.5em;
   }
   dy-use.icon:hover {
     background-color: ${theme.hoverBackgroundColor};
@@ -160,6 +160,7 @@ export class MNavElement extends GemElement<State> {
               <dy-active-link class="link" .route=${routes.rooms as RouteItem}>${routes.rooms.title}</dy-active-link>
             `}
         <span style="flex-grow: 1;"></span>
+        <dy-use class="icon" .element=${icons.search} @click=${toggoleSearchState}></dy-use>
         <dy-use class="icon" .element=${icons.group} @click=${toggoleFriendListState}>
           <!-- <div class="badge">12</div> -->
         </dy-use>

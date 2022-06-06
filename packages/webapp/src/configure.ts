@@ -51,11 +51,12 @@ interface Configure {
   screencastMode?: boolean;
   friendListState?: boolean;
   settingsState?: boolean;
+  searchState?: boolean;
   friendChatState?: number;
   usedRelease?: number;
   theme: ThemeName;
   shortcuts: {
-    OPEN_HELP: Shortcut;
+    OPEN_SEARCH: Shortcut;
     OPEN_SETTINGS: Shortcut;
   };
 }
@@ -63,9 +64,9 @@ interface Configure {
 export const [configure, storeConfigure] = createCacheStore<Configure>(localStorageKeys.CONFIGURE_LOCAL_STORAGE_KEY, {
   theme: 'default',
   shortcuts: {
-    OPEN_HELP: {
-      win: ['ctrl', 'shift', 'k'],
-      mac: ['command', 'shift', 'k'],
+    OPEN_SEARCH: {
+      win: ['ctrl', 'k'],
+      mac: ['command', 'k'],
     },
     OPEN_SETTINGS: {
       win: ['esc'],
@@ -98,4 +99,8 @@ export const toggoleFriendChatState = (id?: number) => {
 
 export const toggoleSettingsState = () => {
   updateStore(configure, { settingsState: !configure.settingsState });
+};
+
+export const toggoleSearchState = () => {
+  updateStore(configure, { searchState: !configure.searchState });
 };
