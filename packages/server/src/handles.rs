@@ -14,7 +14,7 @@ use crate::{
     schemas::root::{Context, GuestContext, GuestSchema, Schema},
     schemas::{
         game::{create_game, get_game_from_name, update_game},
-        notify::{notify_all, ScNotifyMessage},
+        notify::{notify_all, ScNotifyMessageBuilder},
     },
 };
 
@@ -66,7 +66,11 @@ pub async fn graphql(
         dbpool: pool.get_ref().to_owned(),
     };
     let res = data.execute(&schema, &ctx).await;
-    HttpResponse::Ok().json(res)
+    if res.is_ok() {
+        HttpResponse::Ok().json(res)
+    } else {
+        HttpResponse::BadRequest().json(res)
+    }
 }
 
 pub async fn graphqlschema(schema: web::Data<Schema>, pool: web::Data<Pool>) -> impl Responder {
@@ -89,7 +93,11 @@ pub async fn guestgraphql(
         dbpool: pool.get_ref().to_owned(),
     };
     let res = data.execute(&schema, &ctx).await;
-    HttpResponse::Ok().json(res)
+    if res.is_ok() {
+        HttpResponse::Ok().json(res)
+    } else {
+        HttpResponse::BadRequest().json(res)
+    }
 }
 
 pub async fn guestgraphqlschema(
@@ -132,7 +140,12 @@ pub async fn webhook(
                     }
                     None => {
                         if let Ok(game) = create_game(conn, &sc_game) {
-                            notify_all(ScNotifyMessage::new_game(game));
+                            notify_all(
+                                ScNotifyMessageBuilder::default()
+                                    .new_game(game)
+                                    .build()
+                                    .unwrap(),
+                            );
                         }
                     }
                 };

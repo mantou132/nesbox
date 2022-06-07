@@ -5,6 +5,8 @@ extern crate diesel;
 extern crate serde_derive;
 #[macro_use]
 extern crate lazy_static;
+#[macro_use]
+extern crate derive_builder;
 
 use dotenv::dotenv;
 use std::time::Duration;

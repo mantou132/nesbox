@@ -9,7 +9,8 @@ use std::collections::HashMap;
 use std::sync::RwLock;
 use tokio::sync::broadcast::{self, Receiver, Sender};
 
-#[derive(GraphQLObject, Debug, Clone)]
+#[derive(GraphQLObject, Debug, Clone, Default, Builder)]
+#[builder(setter(strip_option), default)]
 pub struct ScNotifyMessage {
     new_message: Option<ScMessage>,
     new_game: Option<ScGame>,
@@ -34,63 +35,6 @@ pub struct ScSignal {
 pub struct ScNewSignal {
     pub target_id: i32,
     pub json: String,
-}
-
-impl ScNotifyMessage {
-    pub fn new(init: impl FnOnce(&mut Self) -> ()) -> Self {
-        let mut msg = ScNotifyMessage {
-            new_message: None,
-            new_game: None,
-            update_room: None,
-            delete_room: None,
-            new_invite: None,
-            delete_invite: None,
-            apply_friend: None,
-            accept_friend: None,
-            delete_friend: None,
-            update_user: None,
-            send_signal: None,
-            login: None,
-        };
-        init(&mut msg);
-        msg
-    }
-    pub fn new_message(data: ScMessage) -> ScNotifyMessage {
-        ScNotifyMessage::new(|msg| msg.new_message = Some(data))
-    }
-    pub fn new_game(data: ScGame) -> ScNotifyMessage {
-        ScNotifyMessage::new(|msg| msg.new_game = Some(data))
-    }
-    pub fn update_room(data: ScRoomBasic) -> ScNotifyMessage {
-        ScNotifyMessage::new(|msg| msg.update_room = Some(data))
-    }
-    pub fn delete_room(data: i32) -> ScNotifyMessage {
-        ScNotifyMessage::new(|msg| msg.delete_room = Some(data))
-    }
-    pub fn new_invite(data: ScInvite) -> ScNotifyMessage {
-        ScNotifyMessage::new(|msg| msg.new_invite = Some(data))
-    }
-    pub fn delete_invite(data: i32) -> ScNotifyMessage {
-        ScNotifyMessage::new(|msg| msg.delete_invite = Some(data))
-    }
-    pub fn apply_friend(data: ScFriend) -> ScNotifyMessage {
-        ScNotifyMessage::new(|msg| msg.apply_friend = Some(data))
-    }
-    pub fn accept_friend(data: ScFriend) -> ScNotifyMessage {
-        ScNotifyMessage::new(|msg| msg.accept_friend = Some(data))
-    }
-    pub fn delete_friend(data: i32) -> ScNotifyMessage {
-        ScNotifyMessage::new(|msg| msg.delete_friend = Some(data))
-    }
-    pub fn update_user(data: ScUserBasic) -> ScNotifyMessage {
-        ScNotifyMessage::new(|msg| msg.update_user = Some(data))
-    }
-    pub fn send_signal(data: ScSignal) -> ScNotifyMessage {
-        ScNotifyMessage::new(|msg| msg.send_signal = Some(data))
-    }
-    pub fn login() -> ScNotifyMessage {
-        ScNotifyMessage::new(|msg| msg.login = Some(true))
-    }
 }
 
 lazy_static! {
@@ -154,7 +98,10 @@ pub fn check_user(pool: &Pool) {
         if let Ok(user) = get_user_basic(&conn, id) {
             notify_ids(
                 get_friend_ids(&conn, id),
-                ScNotifyMessage::update_user(user),
+                ScNotifyMessageBuilder::default()
+                    .update_user(user)
+                    .build()
+                    .unwrap(),
             );
         }
     }

@@ -62,10 +62,13 @@ impl MutationRoot {
     fn signaling(context: &Context, input: ScNewSignal) -> FieldResult<String> {
         notify(
             input.target_id,
-            ScNotifyMessage::send_signal(ScSignal {
-                json: input.json,
-                user_id: context.user_id,
-            }),
+            ScNotifyMessageBuilder::default()
+                .send_signal(ScSignal {
+                    json: input.json,
+                    user_id: context.user_id,
+                })
+                .build()
+                .unwrap(),
         );
         Ok("Ok".into())
     }
@@ -80,7 +83,12 @@ impl MutationRoot {
     fn create_game(context: &Context, input: ScNewGame) -> FieldResult<ScGame> {
         let conn = context.dbpool.get().unwrap();
         let game = create_game(&conn, &input)?;
-        notify_all(ScNotifyMessage::new_game(game.clone()));
+        notify_all(
+            ScNotifyMessageBuilder::default()
+                .new_game(game.clone())
+                .build()
+                .unwrap(),
+        );
         Ok(game)
     }
     fn create_comment(context: &Context, input: ScNewComment) -> FieldResult<ScComment> {
@@ -92,7 +100,10 @@ impl MutationRoot {
         let message = create_message(&conn, context.user_id, &input)?;
         notify(
             message.target_id,
-            ScNotifyMessage::new_message(message.clone()),
+            ScNotifyMessageBuilder::default()
+                .new_message(message.clone())
+                .build()
+                .unwrap(),
         );
         Ok(message)
     }
@@ -111,7 +122,10 @@ impl MutationRoot {
             if let Ok(friend) = apply_friend(&conn, context.user_id, target_user.id) {
                 notify(
                     target_user.id,
-                    ScNotifyMessage::apply_friend(friend.clone()),
+                    ScNotifyMessageBuilder::default()
+                        .apply_friend(friend.clone())
+                        .build()
+                        .unwrap(),
                 );
             }
         }
@@ -123,14 +137,20 @@ impl MutationRoot {
             if let Ok(friend) = accept_friend(&conn, context.user_id, input.target_id) {
                 notify(
                     input.target_id,
-                    ScNotifyMessage::accept_friend(friend.clone()),
+                    ScNotifyMessageBuilder::default()
+                        .accept_friend(friend.clone())
+                        .build()
+                        .unwrap(),
                 );
             }
         } else {
             delete_friend(&conn, context.user_id, input.target_id);
             notify(
                 input.target_id,
-                ScNotifyMessage::delete_friend(context.user_id),
+                ScNotifyMessageBuilder::default()
+                    .delete_friend(context.user_id)
+                    .build()
+                    .unwrap(),
             );
         }
         Ok("Ok".into())
@@ -138,7 +158,13 @@ impl MutationRoot {
     fn create_invite(context: &Context, input: ScNewInvite) -> FieldResult<ScInvite> {
         let conn = context.dbpool.get().unwrap();
         let invite = create_invite(&conn, context.user_id, &input)?;
-        notify(input.target_id, ScNotifyMessage::new_invite(invite.clone()));
+        notify(
+            input.target_id,
+            ScNotifyMessageBuilder::default()
+                .new_invite(invite.clone())
+                .build()
+                .unwrap(),
+        );
         Ok(invite)
     }
     fn accept_invite(context: &Context, input: ScUpdateInvite) -> FieldResult<String> {
@@ -150,7 +176,12 @@ impl MutationRoot {
                 Some(room) => {
                     delete_playing_with_room(&conn, room.id);
                     delete_room(&conn, room.id);
-                    notify_all(ScNotifyMessage::delete_room(room.id))
+                    notify_all(
+                        ScNotifyMessageBuilder::default()
+                            .delete_room(room.id)
+                            .build()
+                            .unwrap(),
+                    )
                 }
                 None => (),
             }
@@ -158,7 +189,10 @@ impl MutationRoot {
             enter_room(&conn, context.user_id, invite.room.id);
             notify_ids(
                 get_friend_ids(&conn, context.user_id),
-                ScNotifyMessage::update_user(get_user_basic(&conn, context.user_id)?),
+                ScNotifyMessageBuilder::default()
+                    .update_user(get_user_basic(&conn, context.user_id)?)
+                    .build()
+                    .unwrap(),
             );
         } else {
             delete_invite_by_id(&conn, context.user_id, input.invite_id);
@@ -170,7 +204,10 @@ impl MutationRoot {
         let room = create_room(&conn, context.user_id, &input);
         notify_ids(
             get_friend_ids(&conn, context.user_id),
-            ScNotifyMessage::update_user(get_user_basic(&conn, context.user_id)?),
+            ScNotifyMessageBuilder::default()
+                .update_user(get_user_basic(&conn, context.user_id)?)
+                .build()
+                .unwrap(),
         );
         Ok(room)
     }
@@ -179,11 +216,17 @@ impl MutationRoot {
         let room = update_room(&conn, context.user_id, &input);
         notify_ids(
             get_friend_ids(&conn, context.user_id),
-            ScNotifyMessage::update_user(get_user_basic(&conn, context.user_id)?),
+            ScNotifyMessageBuilder::default()
+                .update_user(get_user_basic(&conn, context.user_id)?)
+                .build()
+                .unwrap(),
         );
         notify_ids(
             get_room_user_ids(&conn, input.id),
-            ScNotifyMessage::update_room(get_room(&conn, input.id)),
+            ScNotifyMessageBuilder::default()
+                .update_room(get_room(&conn, input.id))
+                .build()
+                .unwrap(),
         );
 
         Ok(room)
@@ -197,7 +240,10 @@ impl MutationRoot {
         enter_room(&conn, context.user_id, input.room_id);
         notify_ids(
             get_friend_ids(&conn, context.user_id),
-            ScNotifyMessage::update_user(get_user_basic(&conn, context.user_id)?),
+            ScNotifyMessageBuilder::default()
+                .update_user(get_user_basic(&conn, context.user_id)?)
+                .build()
+                .unwrap(),
         );
         Ok(room)
     }
@@ -210,15 +256,29 @@ impl MutationRoot {
         let invites = get_invites_with(&conn, context.user_id);
         leave_room(&conn, context.user_id, room.id);
         for invite in invites {
-            notify(invite.target_id, ScNotifyMessage::delete_invite(invite.id));
+            notify(
+                invite.target_id,
+                ScNotifyMessageBuilder::default()
+                    .delete_invite(invite.id)
+                    .build()
+                    .unwrap(),
+            );
         }
         notify_ids(
             get_friend_ids(&conn, context.user_id),
-            ScNotifyMessage::update_user(get_user_basic(&conn, context.user_id)?),
+            ScNotifyMessageBuilder::default()
+                .update_user(get_user_basic(&conn, context.user_id)?)
+                .build()
+                .unwrap(),
         );
         if get_room_user_ids(&conn, room.id).len() == 0 {
             delete_room(&conn, room.id);
-            notify_all(ScNotifyMessage::delete_room(room.id))
+            notify_all(
+                ScNotifyMessageBuilder::default()
+                    .delete_room(room.id)
+                    .build()
+                    .unwrap(),
+            )
         }
         Ok("Ok".into())
     }
@@ -243,7 +303,10 @@ impl Subscription {
         if let Ok(user) = get_user_basic(&conn, context.user_id) {
             notify_ids(
                 get_friend_ids(&conn, context.user_id),
-                ScNotifyMessage::update_user(user),
+                ScNotifyMessageBuilder::default()
+                    .update_user(user)
+                    .build()
+                    .unwrap(),
             );
         }
 
@@ -292,7 +355,13 @@ impl GuestMutationRoot {
     fn login(context: &GuestContext, input: ScLoginReq) -> FieldResult<ScLoginResp> {
         let conn = context.dbpool.get().unwrap();
         let resp = login(&conn, input, &context.secret)?;
-        notify(resp.user.id, ScNotifyMessage::login());
+        notify(
+            resp.user.id,
+            ScNotifyMessageBuilder::default()
+                .login(true)
+                .build()
+                .unwrap(),
+        );
         Ok(resp)
     }
 }
