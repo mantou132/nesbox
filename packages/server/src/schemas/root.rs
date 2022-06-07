@@ -107,6 +107,10 @@ impl MutationRoot {
         );
         Ok(message)
     }
+    fn read_message(context: &Context, input: ScReadMessage) -> FieldResult<ScFriend> {
+        let conn = context.dbpool.get().unwrap();
+        read_message(&conn, context.user_id, input.target_id, input.message_id)
+    }
     fn favorite_game(context: &Context, input: ScNewFavorite) -> FieldResult<String> {
         let conn = context.dbpool.get().unwrap();
         if input.favorite {

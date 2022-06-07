@@ -87,6 +87,7 @@ fragment ScFriendPart on ScFriend {
   }
   createdAt
   status
+  unreadMessageCount
 }
 
 query getGames {
@@ -155,6 +156,12 @@ mutation createComment($input: ScNewComment!) {
 mutation createMessage($input: ScNewMessage!) {
   createMessage(input: $input) {
     ...ScMessagePart
+  }
+}
+
+mutation readMessage($input: ScReadMessage!) {
+  readMessage(input: $input) {
+    ...ScFriendPart
   }
 }
 

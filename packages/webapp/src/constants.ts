@@ -20,7 +20,7 @@ export const queryKeys = {
 export const localStorageKeys = {
   CONFIGURE_LOCAL_STORAGE_KEY: 'configure_v3',
   STORE_LOCAL_STORAGE_KEY: 'store_v2',
-  FRIEND_CHAT_STORAGE_KEY: 'friend_chat_v1',
+  FRIEND_CHAT_STORAGE_KEY: 'friend_chat_v2',
 };
 
 export enum SingalType {

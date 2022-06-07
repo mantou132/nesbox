@@ -89,7 +89,13 @@ window.addEventListener('beforeunload', () => {
   setTimeout(() => (unloading = false), 1000);
 });
 function printError(err: Error | ErrorEvent) {
-  const ignoreError = ['ResizeObserver', 'Script error.'];
+  const ignoreError = [
+    // chrome
+    'ResizeObserver',
+    'Script error.',
+    // firefox
+    'error loading dynamically imported module',
+  ];
   if (unloading || ignoreError.some((msg) => err.message?.startsWith(msg))) return;
   Toast.open('error', err.message || String(err));
 }

@@ -15,7 +15,7 @@ import {
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 
 import { friendStore } from 'src/store';
-import { createMessage, getMessages } from 'src/services/api';
+import { createMessage, getMessages, readMessage } from 'src/services/api';
 import { icons } from 'src/icons';
 import { theme } from 'src/theme';
 import { toggoleFriendChatState } from 'src/configure';
@@ -75,11 +75,6 @@ const style = createCSSSheet(css`
   .recent::part(time) {
     display: none;
   }
-  .msg:not(.recent) {
-    border-block-start: 1px solid ${theme.hoverBackgroundColor};
-    margin-block-start: 1em;
-    padding-block-start: 1em;
-  }
   .input {
     width: auto;
     margin: 0.5em;
@@ -129,7 +124,7 @@ export class MChatElement extends GemElement {
   };
 
   mounted = () => {
-    getMessages(this.friendId);
+    getMessages(this.friendId).then(() => readMessage(this.friendId));
     this.effect(
       () => {
         this.messageRef.element?.scrollTo(0, 10000);
@@ -141,7 +136,7 @@ export class MChatElement extends GemElement {
   render = () => {
     return html`
       <div class="header">
-        <dy-status-light class="title" .status=${this.#isOnLine ? 'positive' : 'negative'}>
+        <dy-status-light class="title" .status=${this.#isOnLine ? 'positive' : 'default'}>
           ${this.#friend?.user.nickname}
         </dy-status-light>
         <span style="flex-grow: 1"></span>

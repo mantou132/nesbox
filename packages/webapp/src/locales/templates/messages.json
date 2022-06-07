@@ -26,6 +26,15 @@
   "inviteFriend": {
     "message": "邀请"
   },
+  "sendTomeInvite": {
+    "message": "发来邀请"
+  },
+  "playing": {
+    "message": "正在玩《$1》"
+  },
+  "notPlaying": {
+    "message": "中场休息"
+  },
   "deleteFriendConfirm": {
     "message": "是否删除好友？"
   },

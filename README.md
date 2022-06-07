@@ -4,6 +4,5 @@
 
 ## TODO
 
-- Unread message
 - Tauri
 - Mobile/GamePad adaptation

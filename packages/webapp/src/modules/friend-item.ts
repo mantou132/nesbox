@@ -14,6 +14,7 @@ import 'duoyun-ui/elements/avatar';
 import 'duoyun-ui/elements/help-text';
 import 'duoyun-ui/elements/divider';
 import 'duoyun-ui/elements/use';
+import 'src/modules/badge';
 
 const style = createCSSSheet(css`
   :host {
@@ -41,12 +42,15 @@ const style = createCSSSheet(css`
     border: 2px solid ${theme.lightBackgroundColor};
   }
   .content {
+    width: 0;
     flex-grow: 1;
     caret-color: currentColor;
+  }
+  .nickname,
+  .playing {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    width: 0;
   }
   .action {
     width: 1.5em;
@@ -147,7 +151,7 @@ export class MFriendItemElement extends GemElement {
   };
 
   render = () => {
-    const { username, nickname, playing } = this.friend.user;
+    const { username, nickname, playing, id } = this.friend.user;
 
     return html`
       <style>
@@ -162,21 +166,26 @@ export class MFriendItemElement extends GemElement {
       </style>
       <dy-avatar
         class="avatar"
-        status=${this.#isOnline ? 'positive' : 'negative'}
+        status=${this.#isOnline ? 'positive' : 'default'}
         src="https://joeschmoe.io/api/v1/${username}"
       ></dy-avatar>
       <div class="content">
         <div class="nickname">${nickname}</div>
-        <dy-help-text status=${this.#isOnline && playing ? 'positive' : 'default'}>
-          ${!this.#isOnline ? '' : playing ? `正在玩《${store.games[playing.gameId]?.name}》` : '中场休息'}
+        <dy-help-text class="playing" status=${this.#isOnline && playing ? 'positive' : 'default'}>
+          ${!this.#isOnline
+            ? ''
+            : playing
+            ? i18n.get('playing', store.games[playing.gameId]?.name || '')
+            : i18n.get('notPlaying')}
         </dy-help-text>
       </div>
+      <m-badge .friendid=${id}></m-badge>
       <dy-use class="action" .element=${icons.more} @click=${this.#onMoreMenu}></dy-use>
       ${this.invite
         ? html`
             <dy-divider class="divider"></dy-divider>
             <div class="invite">
-              <div class="invite-tip">发来邀请</div>
+              <div class="invite-tip">${i18n.get('sendTomeInvite')}</div>
               <dy-use class="action" .element=${icons.check} @click=${this.#onAcceptInvite}></dy-use>
               <dy-use class="action" .element=${icons.close} @click=${this.#onDenyInvite}></dy-use>
             </div>

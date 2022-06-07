@@ -6,6 +6,7 @@ use juniper::{FieldResult, GraphQLEnum, GraphQLInputObject, GraphQLObject};
 use crate::db::models::{Friend, NewFriend};
 use crate::db::schema::friends;
 
+use super::message::*;
 use super::user::*;
 
 #[derive(GraphQLEnum, Debug, Clone)]
@@ -26,11 +27,18 @@ pub struct ScUpdateFriend {
     pub accept: bool,
 }
 
+#[derive(GraphQLInputObject)]
+pub struct ScReadMessage {
+    pub target_id: i32,
+    pub message_id: i32,
+}
+
 #[derive(GraphQLObject, Debug, Clone)]
 pub struct ScFriend {
     user: ScUserBasic,
     created_at: f64,
     status: ScFriendStatus,
+    unread_message_count: i32,
 }
 
 fn convert_status_to_string(status: ScFriendStatus) -> String {
@@ -54,6 +62,12 @@ fn convert_to_sc_friend(conn: &PgConnection, friend: &Friend) -> ScFriend {
         user: get_user_basic(conn, friend.target_id).unwrap(),
         created_at: friend.created_at.timestamp_millis() as f64,
         status: convert_status_to_enum(friend.status.clone()),
+        unread_message_count: get_messages_count(
+            conn,
+            friend.user_id,
+            friend.target_id,
+            friend.last_read.unwrap_or(0),
+        ),
     }
 }
 
@@ -114,6 +128,16 @@ pub fn accept_friend(conn: &PgConnection, uid: i32, tid: i32) -> FieldResult<ScF
 
     let friend = diesel::insert_into(friends)
         .values(&new_friend)
+        .get_result::<Friend>(conn)?;
+
+    Ok(convert_to_sc_friend(conn, &friend))
+}
+
+pub fn read_message(conn: &PgConnection, uid: i32, tid: i32, mid: i32) -> FieldResult<ScFriend> {
+    use self::friends::dsl::*;
+
+    let friend = diesel::update(friends.filter(user_id.eq(uid)).filter(target_id.eq(tid)))
+        .set(last_read.eq(mid))
         .get_result::<Friend>(conn)?;
 
     Ok(convert_to_sc_friend(conn, &friend))

@@ -1,5 +1,6 @@
 import { updateStore } from '@mantou/gem';
 import { Toast } from 'duoyun-ui/elements/toast';
+import { debounce } from 'duoyun-ui/lib/utils';
 
 import {
   AcceptFriend,
@@ -52,6 +53,9 @@ import {
   LeaveRoom,
   LeaveRoomMutation,
   LeaveRoomMutationVariables,
+  ReadMessage,
+  ReadMessageMutation,
+  ReadMessageMutationVariables,
   ScFriendStatus,
   ScNewComment,
   ScNewRoom,
@@ -76,6 +80,7 @@ import { configure, parseAccount, Settings } from 'src/configure';
 import { events, Singal, SingalEvent } from 'src/constants';
 import { i18n } from 'src/i18n';
 import { logout } from 'src/auth';
+import { documentVisible } from 'src/utils';
 
 export const getGames = async () => {
   const { games, topGames, favorites } = await request<GetGamesQuery, GetGamesQueryVariables>(GetGames, {});
@@ -232,6 +237,19 @@ export const getMessages = async (targetId: number) => {
   updateStore(friendStore);
 };
 
+export const readMessage = debounce(async (targetId: number) => {
+  const messageId = friendStore.messageIds[targetId]?.at(-1);
+  if (!messageId) return;
+  const { readMessage } = await request<ReadMessageMutation, ReadMessageMutationVariables>(ReadMessage, {
+    input: {
+      targetId,
+      messageId,
+    },
+  });
+  friendStore.friends[targetId] = readMessage;
+  updateStore(friendStore);
+});
+
 export const createMessage = async (targetId: number, body: string) => {
   const { createMessage } = await request<CreateMessageMutation, CreateMessageMutationVariables>(CreateMessage, {
     input: { targetId, body },
@@ -285,6 +303,17 @@ export const subscribeEvent = () => {
         friendStore.messages[newMessage.id] = newMessage;
         const userId = newMessage.userId === configure.user?.id ? newMessage.targetId : newMessage.userId;
         friendStore.messageIds[userId] = [...(friendStore.messageIds[userId] || []), newMessage.id];
+        if (configure.friendChatState !== newMessage.userId) {
+          const friend = friendStore.friends[newMessage.userId];
+          if (friend) {
+            friendStore.friends[newMessage.userId] = {
+              ...friend,
+              unreadMessageCount: friend.unreadMessageCount + 1,
+            };
+          }
+        } else {
+          documentVisible().then(() => readMessage(newMessage.userId));
+        }
         updateStore(friendStore);
       }
 

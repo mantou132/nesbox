@@ -26,6 +26,7 @@ import 'duoyun-ui/elements/modal';
 import 'src/modules/game-selector';
 import 'src/elements/tooltip';
 import 'src/modules/avatar';
+import 'src/modules/badge';
 
 type State = {
   select: boolean;
@@ -77,19 +78,6 @@ const style = createCSSSheet(css`
   }
   dy-use.icon:hover {
     background-color: ${theme.hoverBackgroundColor};
-  }
-  .badge {
-    position: absolute;
-    right: 0;
-    top: 0;
-    background: ${theme.negativeColor};
-    border-radius: 10em;
-    width: 1.5em;
-    aspect-ratio: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.75em;
   }
   @media ${mediaQuery.PHONE} {
     .link {
@@ -162,7 +150,7 @@ export class MNavElement extends GemElement<State> {
         <span style="flex-grow: 1;"></span>
         <dy-use class="icon" .element=${icons.search} @click=${toggoleSearchState}></dy-use>
         <dy-use class="icon" .element=${icons.group} @click=${toggoleFriendListState}>
-          <!-- <div class="badge">12</div> -->
+          <m-badge></m-badge>
         </dy-use>
         <m-avatar class="icon"></m-avatar>
       </nav>
