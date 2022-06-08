@@ -13,6 +13,7 @@ const style = createCSSSheet(css`
   }
   .carousel::part(img) {
     --mask-range: 0;
+    object-fit: contain;
   }
   .carousel::part(nav) {
     display: none;

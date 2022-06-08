@@ -1,12 +1,12 @@
-import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, property, updateStore } from '@mantou/gem';
+import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, property } from '@mantou/gem';
 import { ContextMenu } from 'duoyun-ui/elements/menu';
 import { Toast } from 'duoyun-ui/elements/toast';
 
-import { Friend, friendStore, Invite, store } from 'src/store';
+import { Friend, Invite, store } from 'src/store';
 import { theme } from 'src/theme';
-import { ScUserStatus } from 'src/generated/graphql';
+import { ScUserStatus, ScFriendStatus } from 'src/generated/graphql';
 import { icons } from 'src/icons';
-import { acceptFriend, acceptInvite, createInvite } from 'src/services/api';
+import { acceptFriend, acceptInvite, createInvite, deleteFriend } from 'src/services/api';
 import { configure, toggoleFriendChatState, toggoleFriendListState } from 'src/configure';
 import { i18n } from 'src/i18n';
 
@@ -93,6 +93,10 @@ export class MFriendItemElement extends GemElement {
     return this.friend.user.status === ScUserStatus.Online;
   }
 
+  get #isFriend() {
+    return this.friend.status === ScFriendStatus.Accept;
+  }
+
   constructor() {
     super();
     this.addEventListener('click', this.#onClick);
@@ -100,12 +104,12 @@ export class MFriendItemElement extends GemElement {
 
   #deleteFriend = async (id: number, activeElement: HTMLElement) => {
     await ContextMenu.confirm(i18n.get('deleteFriendConfirm'), { activeElement, width: '16em', danger: true });
-    await acceptFriend(id, false);
-    friendStore.messageIds[id]?.forEach((id) => delete friendStore.messages[id]);
-    updateStore(friendStore, {
-      draft: { ...friendStore.draft, [id]: undefined },
-      messageIds: { ...friendStore.messageIds, [id]: undefined },
-    });
+    deleteFriend(id);
+  };
+
+  #onAcceptFriend = (evt: Event) => {
+    evt.stopPropagation();
+    acceptFriend(this.friend.user.id, true);
   };
 
   #onMoreMenu = (evt: Event) => {
@@ -160,7 +164,7 @@ export class MFriendItemElement extends GemElement {
           opacity: ${this.#isOnline ? 1 : 0.4};
         }
         :host {
-          order: ${this.invite || this.#isOnline ? 0 : 1};
+          order: ${!this.#isFriend ? 0 : this.invite || this.#isOnline ? 1 : 2};
           border-color: ${this.invite ? theme.informativeColor : 'transparent'};
         }
       </style>
@@ -180,7 +184,9 @@ export class MFriendItemElement extends GemElement {
         </dy-help-text>
       </div>
       <m-badge .friendid=${id}></m-badge>
-      <dy-use class="action" .element=${icons.more} @click=${this.#onMoreMenu}></dy-use>
+      ${this.#isFriend
+        ? html`<dy-use class="action" .element=${icons.more} @click=${this.#onMoreMenu}></dy-use>`
+        : html`<dy-use class="action" .element=${icons.check} @click=${this.#onAcceptFriend}></dy-use>`}
       ${this.invite
         ? html`
             <dy-divider class="divider"></dy-divider>

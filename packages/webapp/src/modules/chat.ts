@@ -6,7 +6,6 @@ import {
   createCSSSheet,
   css,
   connectStore,
-  updateStore,
   property,
   refobject,
   RefObject,
@@ -14,7 +13,7 @@ import {
 } from '@mantou/gem';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 
-import { friendStore } from 'src/store';
+import { changeFriendChatDraft, friendStore } from 'src/store';
 import { createMessage, getMessages, readMessage } from 'src/services/api';
 import { icons } from 'src/icons';
 import { theme } from 'src/theme';
@@ -100,22 +99,18 @@ export class MChatElement extends GemElement {
     return this.#friend?.user.status === ScUserStatus.Online;
   }
 
-  #onChange = ({ detail }: CustomEvent<string>) => {
-    updateStore(friendStore, { draft: { ...friendStore.draft, [this.friendId]: detail } });
-  };
-
   #onKeyDown = (evt: KeyboardEvent) => {
     evt.stopPropagation();
     hotkeys({
       enter: () => {
         const msg = friendStore.draft[this.friendId];
         if (msg) createMessage(this.friendId, msg);
-        updateStore(friendStore, { draft: { ...friendStore.draft, [this.friendId]: undefined } });
+        changeFriendChatDraft(this.friendId);
       },
       esc: () => {
         const msg = friendStore.draft[this.friendId];
         if (msg) {
-          updateStore(friendStore, { draft: { ...friendStore.draft, [this.friendId]: undefined } });
+          changeFriendChatDraft(this.friendId);
         } else {
           toggoleFriendChatState();
         }
@@ -165,7 +160,7 @@ export class MChatElement extends GemElement {
         autofocus
         class="input"
         placeholder=${i18n.get('placeholderMessage')}
-        @change=${this.#onChange}
+        @change=${({ detail }: CustomEvent<string>) => changeFriendChatDraft(this.friendId, detail)}
         @keydown=${this.#onKeyDown}
         .value=${friendStore.draft[this.friendId] || ''}
       ></dy-input>

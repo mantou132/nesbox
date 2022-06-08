@@ -187,6 +187,15 @@ export const acceptFriend = async (targetId: number, accept: boolean) => {
   updateStore(friendStore);
 };
 
+export const deleteFriend = async (targetId: number) => {
+  await acceptFriend(targetId, false);
+  friendStore.messageIds[targetId]?.forEach((id) => delete friendStore.messages[id]);
+  updateStore(friendStore, {
+    draft: { ...friendStore.draft, [targetId]: undefined },
+    messageIds: { ...friendStore.messageIds, [targetId]: undefined },
+  });
+};
+
 export const createInvite = async (targetId: number, roomId: number) => {
   await request<CreateInviteMutation, CreateInviteMutationVariables>(CreateInvite, { input: { targetId, roomId } });
 };
