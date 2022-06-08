@@ -9,7 +9,6 @@ import {
   property,
   refobject,
   RefObject,
-  classMap,
 } from '@mantou/gem';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 
@@ -63,16 +62,10 @@ const style = createCSSSheet(css`
     height: 15em;
     display: flex;
     flex-direction: column;
-    gap: 0.5em;
+    gap: 0.2em;
     overflow: auto;
     scrollbar-width: none;
     overscroll-behavior: contain;
-  }
-  .notlastmsg::part(body) {
-    overflow: hidden;
-  }
-  .recent::part(time) {
-    display: none;
   }
   .input {
     width: auto;
@@ -139,18 +132,21 @@ export class MChatElement extends GemElement {
       </div>
       <div ref=${this.messageRef.ref} class="list">
         ${friendStore.messageIds[this.friendId]?.map(
-          (id, i, arr) =>
+          (
+            id,
+            index,
+            arr,
+            prevCreatedAt = Number(friendStore.messages[arr[index - 1] || 0]?.createdAt),
+            createdAt = Number(friendStore.messages[id]?.createdAt),
+            nextCreatedAt = Number(friendStore.messages[arr[index + 1] || 0]?.createdAt),
+            recent = createdAt - prevCreatedAt < 5 * 60_000,
+            recent2 = nextCreatedAt - createdAt > 5 * 60_000,
+            someUser = friendStore.messages[id]?.userId !== friendStore.messages[arr[index + 1] || 0]?.userId,
+          ) =>
             html`
               <m-msg
-                class=${classMap({
-                  msg: true,
-                  notlastmsg: friendStore.messages[id]?.userId === friendStore.messages[arr[i + 1] || 0]?.userId,
-                  recent:
-                    friendStore.messages[id]?.userId === friendStore.messages[arr[i - 1] || 0]?.userId &&
-                    Number(friendStore.messages[id]?.createdAt) -
-                      Number(friendStore.messages[arr[i - 1] || 0]?.createdAt) <
-                      5 * 60_000,
-                })}
+                .time=${!index || !recent}
+                .last=${someUser || (!someUser && recent2)}
                 .msg=${friendStore.messages[id]}
               ></m-msg>
             `,

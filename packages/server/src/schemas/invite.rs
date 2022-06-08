@@ -33,7 +33,7 @@ pub struct ScUpdateInvite {
 fn convert_to_sc_invite(conn: &PgConnection, invite: &Invite) -> ScInvite {
     ScInvite {
         id: invite.id,
-        room: get_room(conn, invite.room_id),
+        room: get_room(conn, invite.room_id).unwrap(),
         target_id: invite.target_id,
         user_id: invite.user_id,
         created_at: invite.created_at.timestamp_millis() as f64,

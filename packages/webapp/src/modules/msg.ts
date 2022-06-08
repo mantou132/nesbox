@@ -1,9 +1,21 @@
-import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, property, state, part } from '@mantou/gem';
+import {
+  GemElement,
+  html,
+  adoptedStyle,
+  customElement,
+  createCSSSheet,
+  css,
+  property,
+  state,
+  boolattribute,
+} from '@mantou/gem';
 import { Time } from 'duoyun-ui/lib/time';
 
 import { configure } from 'src/configure';
 import { Message } from 'src/store';
 import { theme } from 'src/theme';
+
+import 'duoyun-ui/elements/tooltip';
 
 const style = createCSSSheet(css`
   :host {
@@ -24,7 +36,10 @@ const style = createCSSSheet(css`
   :host(:where(:--self, [data-self])) .body {
     background-color: ${theme.describeColor};
   }
-  .body::after {
+  :host([last]) {
+    margin-block-end: 0.5em;
+  }
+  :host([last]) .body::after {
     position: absolute;
     content: '';
     top: 100%;
@@ -34,14 +49,17 @@ const style = createCSSSheet(css`
     left: 0;
     border-inline-color: ${theme.noticeColor} transparent;
   }
-  :host(:where(:--self, [data-self])) .body::after {
+  :host(:is(:--self, [data-self])) .body::after {
     left: auto;
     right: 0;
     border-inline-color: transparent ${theme.describeColor};
   }
   .time {
-    font-size: 0.75em;
     opacity: 0.6;
+    font-size: 0.75em;
+    width: 100%;
+    text-align: center;
+    margin-block: 1em;
   }
 `);
 
@@ -51,9 +69,10 @@ const style = createCSSSheet(css`
 @customElement('m-msg')
 @adoptedStyle(style)
 export class MMsgElement extends GemElement {
-  @part static body: string;
-  @part static time: string;
   @property msg?: Message;
+
+  @boolattribute time: boolean;
+  @boolattribute last: boolean;
 
   @state self: boolean;
 
@@ -63,10 +82,12 @@ export class MMsgElement extends GemElement {
     this.self = this.msg?.userId === configure.user?.id;
 
     return html`
-      <div class="body" part=${MMsgElement.body}>
-        <div class="time" part=${MMsgElement.time}>${new Time(this.msg.createdAt).format('HH:mm:ss')}</div>
-        <div>${this.msg.body}</div>
-      </div>
+      ${this.time ? html`<div class="time">${new Time(this.msg.createdAt).format('HH:mm:ss')}</div>` : ''}
+      <dy-tooltip .content=${new Time(this.msg.createdAt).format()}>
+        <div class="body">
+          <div>${this.msg.body}</div>
+        </div>
+      </dy-tooltip>
     `;
   };
 }

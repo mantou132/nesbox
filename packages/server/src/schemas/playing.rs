@@ -20,7 +20,7 @@ pub fn get_playing(conn: &PgConnection, uid: i32) -> Option<ScRoomBasic> {
         .get_result::<Playing>(conn)
         .optional()
         .unwrap()
-        .map(|row| get_room(conn, row.room_id))
+        .map(|row| get_room(conn, row.room_id).unwrap())
 }
 
 pub fn get_room_user_ids(conn: &PgConnection, rid: i32) -> Vec<i32> {

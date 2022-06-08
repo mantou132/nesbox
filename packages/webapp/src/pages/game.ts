@@ -47,14 +47,11 @@ const style = createCSSSheet(css`
     gap: ${theme.gridGutter};
     width: 25em;
     flex-shrink: 0;
-    position: sticky;
-    top: 4em;
   }
   .header {
     width: 100%;
     display: flex;
     align-items: center;
-    margin-block-start: 1em;
   }
   @media ${mediaQuery.PHONE} {
     main {
@@ -80,12 +77,17 @@ const style = createCSSSheet(css`
   }
   .buttons {
     display: flex;
-    width: 13em;
+    align-items: center;
   }
-  .buttons * {
-    width: 0;
+  .buttons > * {
+    margin: 0;
     flex-grow: 1;
-    margin-inline-end: -1px;
+  }
+  .buttons dy-button {
+    width: 0;
+  }
+  .buttons dy-button:last-child {
+    margin-inline-start: -1px;
   }
 `);
 
@@ -143,21 +145,12 @@ export class PGameElement extends PBaseElement {
 
     let likedCount = 0;
 
-    const commentList =
-      this.#commentIds?.length === 0
-        ? html`
-            <dy-result
-              style="height: 60vh; width: 100%;"
-              .illustrator=${icons.empty}
-              .header=${i18n.get('notDataTitle')}
-            ></dy-result>
-          `
-        : html`
-            ${this.#commentIds?.map((id) => {
-              if (this.#comments?.[id]?.like) likedCount++;
-              return this.#comments?.[id] && html`<m-comment .comment=${this.#comments[id]!}></m-comment>`;
-            })}
-          `;
+    const commentList = html`
+      ${this.#commentIds?.map((id) => {
+        if (this.#comments?.[id]?.like) likedCount++;
+        return this.#comments?.[id] && html`<m-comment .comment=${this.#comments[id]!}></m-comment>`;
+      })}
+    `;
 
     const formatPercentage = (like: boolean) =>
       !!this.#commentIds?.length
@@ -176,12 +169,11 @@ export class PGameElement extends PBaseElement {
             </dy-button>
           </div>
           <m-game-detail .md=${game?.description || ''}></m-game-detail>
-          <dy-heading lv="2">${i18n.get('gameComment')}</dy-heading>
-          ${commentList}
         </div>
         <div class="aside">
           <img class="preview" src=${game?.preview || ''} />
           <div class="buttons">
+            <dy-heading lv="3">${i18n.get('gameComment')}</dy-heading>
             <dy-button
               color=${theme.textColor}
               @click=${() => this.#changeComment(true)}
@@ -199,6 +191,7 @@ export class PGameElement extends PBaseElement {
               ${formatPercentage(false)}
             </dy-button>
           </div>
+          ${commentList}
         </div>
       </main>
       <m-footer></m-footer>

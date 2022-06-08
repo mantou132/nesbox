@@ -254,7 +254,6 @@ export type ScNotifyMessage = {
 };
 
 export type ScReadMessage = {
-  messageId: Scalars['Int'];
   targetId: Scalars['Int'];
 };
 

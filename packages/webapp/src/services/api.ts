@@ -247,13 +247,8 @@ export const getMessages = async (targetId: number) => {
 };
 
 export const readMessage = debounce(async (targetId: number) => {
-  const messageId = friendStore.messageIds[targetId]?.at(-1);
-  if (!messageId) return;
   const { readMessage } = await request<ReadMessageMutation, ReadMessageMutationVariables>(ReadMessage, {
-    input: {
-      targetId,
-      messageId,
-    },
+    input: { targetId },
   });
   friendStore.friends[targetId] = readMessage;
   updateStore(friendStore);

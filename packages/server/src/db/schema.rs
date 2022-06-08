@@ -24,7 +24,7 @@ table! {
         target_id -> Int4,
         created_at -> Timestamp,
         status -> Varchar,
-        last_read -> Nullable<Int4>,
+        last_read_at -> Timestamp,
     }
 }
 
@@ -103,7 +103,6 @@ joinable!(comments -> games (game_id));
 joinable!(comments -> users (user_id));
 joinable!(favorites -> games (game_id));
 joinable!(favorites -> users (user_id));
-joinable!(friends -> messages (last_read));
 joinable!(invites -> rooms (room_id));
 joinable!(playing -> rooms (room_id));
 joinable!(playing -> users (user_id));

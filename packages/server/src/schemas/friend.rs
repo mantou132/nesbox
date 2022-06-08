@@ -30,7 +30,6 @@ pub struct ScUpdateFriend {
 #[derive(GraphQLInputObject)]
 pub struct ScReadMessage {
     pub target_id: i32,
-    pub message_id: i32,
 }
 
 #[derive(GraphQLObject, Debug, Clone)]
@@ -66,7 +65,7 @@ fn convert_to_sc_friend(conn: &PgConnection, friend: &Friend) -> ScFriend {
             conn,
             friend.user_id,
             friend.target_id,
-            friend.last_read.unwrap_or(0),
+            friend.last_read_at,
         ),
     }
 }
@@ -133,11 +132,11 @@ pub fn accept_friend(conn: &PgConnection, uid: i32, tid: i32) -> FieldResult<ScF
     Ok(convert_to_sc_friend(conn, &friend))
 }
 
-pub fn read_message(conn: &PgConnection, uid: i32, tid: i32, mid: i32) -> FieldResult<ScFriend> {
+pub fn read_message(conn: &PgConnection, uid: i32, tid: i32) -> FieldResult<ScFriend> {
     use self::friends::dsl::*;
 
     let friend = diesel::update(friends.filter(user_id.eq(uid)).filter(target_id.eq(tid)))
-        .set(last_read.eq(mid))
+        .set(last_read_at.eq(Utc::now().naive_utc()))
         .get_result::<Friend>(conn)?;
 
     Ok(convert_to_sc_friend(conn, &friend))

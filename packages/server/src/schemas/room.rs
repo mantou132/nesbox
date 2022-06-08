@@ -1,7 +1,7 @@
 use chrono::Utc;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
-use juniper::{GraphQLInputObject, GraphQLObject};
+use juniper::{FieldResult, GraphQLInputObject, GraphQLObject};
 
 use super::invite::*;
 use super::notify::*;
@@ -72,15 +72,12 @@ pub fn convert_to_sc_room(conn: &PgConnection, room: &Room) -> ScRoom {
     }
 }
 
-pub fn get_room(conn: &PgConnection, rid: i32) -> ScRoomBasic {
+pub fn get_room(conn: &PgConnection, rid: i32) -> FieldResult<ScRoomBasic> {
     use self::rooms::dsl::*;
 
-    let room = rooms
-        .filter(id.eq(rid))
-        .get_result::<Room>(conn)
-        .expect("Error loading room");
+    let room = rooms.filter(id.eq(rid)).get_result::<Room>(conn)?;
 
-    convert_to_sc_room_basic(&room)
+    Ok(convert_to_sc_room_basic(&room))
 }
 
 pub fn get_rooms(conn: &PgConnection) -> Vec<ScRoom> {
@@ -89,16 +86,15 @@ pub fn get_rooms(conn: &PgConnection) -> Vec<ScRoom> {
     rooms
         .filter(deleted_at.is_null())
         .filter(private.eq(false))
-        .limit(100)
         .load::<Room>(conn)
-        .expect("Error loading room")
+        .unwrap()
         .iter()
         .map(|room| convert_to_sc_room(conn, room))
         .filter(|room| room.users.len() > 0)
         .collect()
 }
 
-pub fn create_room(conn: &PgConnection, uid: i32, req: &ScNewRoom) -> ScRoomBasic {
+pub fn create_room(conn: &PgConnection, uid: i32, req: &ScNewRoom) -> FieldResult<ScRoomBasic> {
     let new_room = NewRoom {
         game_id: req.game_id,
         private: req.private,
@@ -110,15 +106,14 @@ pub fn create_room(conn: &PgConnection, uid: i32, req: &ScNewRoom) -> ScRoomBasi
 
     let room = diesel::insert_into(rooms::table)
         .values(&new_room)
-        .get_result::<Room>(conn)
-        .expect("Error saving new room");
+        .get_result::<Room>(conn)?;
 
     enter_room(conn, uid, room.id);
 
-    convert_to_sc_room_basic(&room)
+    Ok(convert_to_sc_room_basic(&room))
 }
 
-pub fn update_room(conn: &PgConnection, uid: i32, req: &ScUpdateRoom) -> ScRoomBasic {
+pub fn update_room(conn: &PgConnection, uid: i32, req: &ScUpdateRoom) -> FieldResult<ScRoomBasic> {
     use self::rooms::dsl::*;
 
     let room = diesel::update(
@@ -133,33 +128,26 @@ pub fn update_room(conn: &PgConnection, uid: i32, req: &ScUpdateRoom) -> ScRoomB
         private.eq(req.private),
         updated_at.eq(Utc::now().naive_utc()),
     ))
-    .get_result::<Room>(conn)
-    .expect("Error update room");
+    .get_result::<Room>(conn)?;
 
-    convert_to_sc_room_basic(&room)
+    Ok(convert_to_sc_room_basic(&room))
 }
 
-pub fn delete_room(conn: &PgConnection, rid: i32) -> String {
+pub fn delete_room(conn: &PgConnection, rid: i32) {
     use self::rooms::dsl::*;
 
     diesel::delete(rooms.filter(id.eq(rid)))
         .execute(conn)
-        .expect("Error delete room");
-
-    "Ok".into()
+        .unwrap();
 }
 
-pub fn enter_room(conn: &PgConnection, uid: i32, rid: i32) -> String {
+pub fn enter_room(conn: &PgConnection, uid: i32, rid: i32) {
     delete_playing(conn, uid);
     create_playing(conn, uid, rid).ok();
     delete_invite(conn, uid, true);
-
-    "Ok".into()
 }
 
-pub fn leave_room(conn: &PgConnection, uid: i32, _rid: i32) -> String {
+pub fn leave_room(conn: &PgConnection, uid: i32, _rid: i32) {
     delete_playing(conn, uid);
     delete_invite(conn, uid, false);
-
-    "Ok".into()
 }

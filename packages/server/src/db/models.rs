@@ -149,7 +149,7 @@ pub struct Friend {
     pub target_id: i32,
     pub created_at: NaiveDateTime,
     pub status: String,
-    pub last_read: Option<i32>,
+    pub last_read_at: NaiveDateTime,
 }
 
 #[derive(Insertable)]

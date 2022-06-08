@@ -1,3 +1,4 @@
+use chrono::NaiveDateTime;
 use chrono::Utc;
 use diesel::dsl::*;
 use diesel::pg::PgConnection;
@@ -54,14 +55,14 @@ pub fn get_messages(conn: &PgConnection, uid: i32, tid: i32) -> Vec<ScMessage> {
         .collect()
 }
 
-pub fn get_messages_count(conn: &PgConnection, uid: i32, tid: i32, mid: i32) -> i32 {
+pub fn get_messages_count(conn: &PgConnection, uid: i32, tid: i32, at: NaiveDateTime) -> i32 {
     use self::messages::dsl::*;
 
     messages
         .filter(deleted_at.is_null())
         .filter(user_id.eq(tid))
         .filter(target_id.eq(uid))
-        .filter(id.gt(mid))
+        .filter(created_at.gt(at))
         .count()
         .get_result::<i64>(conn)
         .map(|x| x as i32)

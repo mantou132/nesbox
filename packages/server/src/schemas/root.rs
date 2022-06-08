@@ -109,7 +109,7 @@ impl MutationRoot {
     }
     fn read_message(context: &Context, input: ScReadMessage) -> FieldResult<ScFriend> {
         let conn = context.dbpool.get().unwrap();
-        read_message(&conn, context.user_id, input.target_id, input.message_id)
+        read_message(&conn, context.user_id, input.target_id)
     }
     fn favorite_game(context: &Context, input: ScNewFavorite) -> FieldResult<String> {
         let conn = context.dbpool.get().unwrap();
@@ -205,7 +205,7 @@ impl MutationRoot {
     }
     fn create_room(context: &Context, input: ScNewRoom) -> FieldResult<ScRoomBasic> {
         let conn = context.dbpool.get().unwrap();
-        let room = create_room(&conn, context.user_id, &input);
+        let room = create_room(&conn, context.user_id, &input)?;
         notify_ids(
             get_friend_ids(&conn, context.user_id),
             ScNotifyMessageBuilder::default()
@@ -217,7 +217,7 @@ impl MutationRoot {
     }
     fn update_room(context: &Context, input: ScUpdateRoom) -> FieldResult<ScRoomBasic> {
         let conn = context.dbpool.get().unwrap();
-        let room = update_room(&conn, context.user_id, &input);
+        let room = update_room(&conn, context.user_id, &input)?;
         notify_ids(
             get_friend_ids(&conn, context.user_id),
             ScNotifyMessageBuilder::default()
@@ -228,7 +228,7 @@ impl MutationRoot {
         notify_ids(
             get_room_user_ids(&conn, input.id),
             ScNotifyMessageBuilder::default()
-                .update_room(get_room(&conn, input.id))
+                .update_room(get_room(&conn, input.id)?)
                 .build()
                 .unwrap(),
         );
@@ -237,7 +237,7 @@ impl MutationRoot {
     }
     fn enter_pub_room(context: &Context, input: ScUpdatePlaying) -> FieldResult<ScRoomBasic> {
         let conn = context.dbpool.get().unwrap();
-        let room = get_room(&conn, input.room_id);
+        let room = get_room(&conn, input.room_id)?;
         if room.private {
             return Err("private room".into());
         }
