@@ -155,6 +155,9 @@
   "placeholderSearch": {
     "message": "$1 搜索游戏或者好友"
   },
+  "placeholderSearchPlaying": {
+    "message": "$1 更改游戏或者邀请好友"
+  },
   "setting": {
     "message": "设置"
   },

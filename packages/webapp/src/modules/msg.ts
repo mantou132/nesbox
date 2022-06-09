@@ -60,6 +60,7 @@ const style = createCSSSheet(css`
     width: 100%;
     text-align: center;
     margin-block: 1em;
+    white-space: nowrap;
   }
 `);
 

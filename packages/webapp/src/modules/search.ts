@@ -12,7 +12,7 @@ import { configure, getShortcut, toggoleFriendChatState, toggoleSearchState } fr
 import { routes } from 'src/routes';
 import { paramKeys } from 'src/constants';
 import { getTempText } from 'src/utils';
-import { updateRoom } from 'src/services/api';
+import { createInvite, updateRoom } from 'src/services/api';
 
 import 'duoyun-ui/elements/input';
 import 'duoyun-ui/elements/options';
@@ -21,18 +21,27 @@ const style = createCSSSheet(css`
   :host {
     display: flex;
     flex-direction: column;
-    background-color: ${theme.backgroundColor};
     width: min(100vw, 30em);
-    margin-top: -38vh;
+    height: 70vh;
     font-size: 1.125em;
   }
   .header {
+    background-color: ${theme.backgroundColor};
     padding: 0.6em;
   }
   .input {
     width: 100%;
+    font-size: 1.125em;
+  }
+  .result {
+    min-height: 0;
+    flex-grow: 1;
   }
   .options {
+    box-sizing: border-box;
+    background-color: ${theme.backgroundColor};
+    max-height: 100%;
+    overflow: auto;
     margin-block-start: -0.6em;
     border: none;
   }
@@ -97,8 +106,13 @@ export class MSearchElement extends GemElement<State> {
         options.push({
           icon: icons.person,
           label: friend.user.nickname,
+          tag: playing ? html`<dy-use .element=${icons.share}></dy-use>` : undefined,
           onClick: () => {
-            toggoleFriendChatState(friend.user.id);
+            if (playing) {
+              createInvite(friend.user.id, playing.gameId);
+            } else {
+              toggoleFriendChatState(friend.user.id);
+            }
             toggoleSearchState();
           },
         });
@@ -114,19 +128,23 @@ export class MSearchElement extends GemElement<State> {
           @clear=${() => this.setState({ search: '' })}
           .value=${this.state.search}
           @change=${({ detail }: CustomEvent<string>) => this.setState({ search: detail })}
-          placeholder=${getTempText(i18n.get('placeholderSearch', getShortcut('OPEN_SEARCH', true)))}
+          placeholder=${getTempText(
+            i18n.get(playing ? 'placeholderSearchPlaying' : 'placeholderSearch', getShortcut('OPEN_SEARCH', true)),
+          )}
         ></dy-input>
       </div>
-      ${this.state.search
-        ? html`
-            <dy-options
-              class="options"
-              .options=${options.length
-                ? options.sort((a, b) => (a.label > b.label ? 1 : -1))
-                : [{ label: locale.noData }]}
-            ></dy-options>
-          `
-        : ''}
+      <div class="result">
+        ${this.state.search
+          ? html`
+              <dy-options
+                class="options"
+                .options=${options.length
+                  ? options.sort((a, b) => (a.label > b.label ? 1 : -1))
+                  : [{ label: locale.noData }]}
+              ></dy-options>
+            `
+          : ''}
+      </div>
     `;
   };
 }
