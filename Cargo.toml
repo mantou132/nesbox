@@ -1,4 +1,5 @@
 [workspace]
 members = [
-  "packages/server"
+  "packages/server",
+  "packages/tauriapp"
 ]

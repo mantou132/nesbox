@@ -1876,6 +1876,13 @@
   dependencies:
     defer-to-connect "^1.0.1"
 
+"@tauri-apps/api@1.0.0-rc.6":
+  version "1.0.0-rc.6"
+  resolved "https://registry.yarnpkg.com/@tauri-apps/api/-/api-1.0.0-rc.6.tgz#6c3358bc8c2cba705d52c1194e2d340cedf1697a"
+  integrity sha512-/PbVs3/dUzid0/1XbML8tAkRSOmp+6Gv9ql02HGt3aIjNTvaL2902qEbiTX6xK++3oUoKJJ88t+V6IiNd1JUkw==
+  dependencies:
+    type-fest "2.12.2"
+
 "@tootallnate/once@1":
   version "1.1.2"
   resolved "https://registry.npmjs.org/@tootallnate/once/-/once-1.1.2.tgz"
@@ -3230,10 +3237,8 @@ dset@^3.1.0:
   resolved "https://registry.yarnpkg.com/dset/-/dset-3.1.2.tgz#89c436ca6450398396dc6538ea00abc0c54cd45a"
   integrity sha512-g/M9sqy3oHe477Ar4voQxWtaPIFw1jTdKZuomOjhCcBx9nHUNn0pu6NopuFFrTh/TRZIKEj+76vLWFu9BNKk+Q==
 
-duoyun-ui@^0.0.32:
+"duoyun-ui@file:../gem/packages/duoyun-ui":
   version "0.0.32"
-  resolved "https://registry.yarnpkg.com/duoyun-ui/-/duoyun-ui-0.0.32.tgz#7145ee68527d7fcdec68b3fe80d34772f16340aa"
-  integrity sha512-3RAYpwBEOAZBJH6i7SJBajsZMx6kzKlL+bVv0IJ51LDcls3L569F6h28Nu/nHh02p2rWUptLhjH8V9l9us7F3g==
   dependencies:
     d3-geo "^3.0.1"
     elkjs "^0.7.1"
@@ -7598,6 +7603,11 @@ type-check@^0.4.0, type-check@~0.4.0:
   integrity sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==
   dependencies:
     prelude-ls "^1.2.1"
+
+type-fest@2.12.2:
+  version "2.12.2"
+  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-2.12.2.tgz#80a53614e6b9b475eb9077472fb7498dc7aa51d0"
+  integrity sha512-qt6ylCGpLjZ7AaODxbpyBZSs9fCI9SkL3Z9q2oxMBQhs/uyY+VD8jHA8ULCGmWQJlBgqvO3EJeAngOHD8zQCrQ==
 
 type-fest@^0.18.0:
   version "0.18.1"

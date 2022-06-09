@@ -9,6 +9,7 @@ import { COMMAND, RELEASE } from 'src/constants';
 import { logger } from 'src/logger';
 import { routes } from 'src/routes';
 import { gotoRedirectUri, isExpiredProfile, logout } from 'src/auth';
+import { isInputElement } from 'src/utils';
 
 import 'src/modules/meta';
 
@@ -31,28 +32,22 @@ render(
   html`
     <style>
       :root {
+        color-scheme: dark;
         font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
           'Noto Sans', 'PingFang SC', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
           'Noto Color Emoji';
         -moz-osx-font-smoothing: grayscale;
         -webkit-font-smoothing: antialiased;
-      }
-      html {
         height: 100%;
         overflow: hidden;
       }
       body {
-        color-scheme: dark;
         height: 100%;
-        overflow: auto;
-        scrollbar-width: thin;
-        -webkit-overflow-scrolling: touch;
         margin: 0;
         padding: 0;
         font-size: 1rem;
         color: ${theme.textColor};
         background-color: ${theme.backgroundColor};
-        scrollbar-width: thin;
       }
       @media ${mediaQuery.DESKTOP} {
         body {
@@ -67,6 +62,7 @@ render(
     </style>
     <m-meta></m-meta>
     <dy-route
+      @contextmenu=${(e: Event) => e.preventDefault()}
       .routes=${[
         routes.login,
         routes.register,
@@ -78,7 +74,8 @@ render(
           },
         },
       ]}
-    ></dy-route>
+    >
+    </dy-route>
   `,
   document.body,
 );
@@ -116,5 +113,12 @@ addEventListener('unhandledrejection', handleRejection);
 addEventListener('load', () => {
   if (COMMAND === 'build') {
     navigator.serviceWorker?.register('/sw.js', { type: 'module' });
+  }
+});
+
+// https://github.com/tauri-apps/tauri/issues/2626#issuecomment-1151090395
+addEventListener('keypress', (event) => {
+  if (window.__TAURI__ && !isInputElement(event)) {
+    event.preventDefault();
   }
 });

@@ -18,7 +18,9 @@ export class ModuleMetaElement extends GemElement {
   render = () => {
     return html`
       <dy-title suffix=${mediaQuery.isPWA ? '' : ` | ${i18n.get('title')}`}></dy-title>
-      <dy-reflect> </dy-reflect>
+      <dy-reflect>
+        <meta name="theme-color" content="black" />
+      </dy-reflect>
     `;
   };
 }

@@ -7,6 +7,7 @@ import {
   connectStore,
   numattribute,
   styleMap,
+  GemElement,
 } from '@mantou/gem';
 import { Modal } from 'duoyun-ui/elements/modal';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
@@ -15,23 +16,23 @@ import { createComment, createRoom, getComments } from 'src/services/api';
 import { store } from 'src/store';
 import { icons } from 'src/icons';
 import { configure } from 'src/configure';
-import { PBaseElement } from 'src/pages/base';
 import { theme } from 'src/theme';
 import { i18n } from 'src/i18n';
 
 import 'duoyun-ui/elements/button';
 import 'duoyun-ui/elements/input';
 import 'duoyun-ui/elements/heading';
-import 'src/modules/nav';
 import 'src/modules/screenshots';
 import 'src/modules/comment';
-import 'src/modules/footer';
 import 'src/modules/game-detail';
 
 const style = createCSSSheet(css`
-  main {
-    padding-inline: ${theme.gridGutter};
+  :host {
+    display: flex;
     flex-direction: row;
+    gap: 1.5em;
+    min-height: 100vh;
+    padding-inline: ${theme.gridGutter};
     align-items: flex-start;
   }
   .info {
@@ -98,7 +99,7 @@ const style = createCSSSheet(css`
 @adoptedStyle(style)
 @connectStore(i18n.store)
 @connectStore(store)
-export class PGameElement extends PBaseElement {
+export class PGameElement extends GemElement {
   @numattribute gameId: number;
 
   get #comments() {
@@ -158,43 +159,39 @@ export class PGameElement extends PBaseElement {
         : '0%';
 
     return html`
-      <m-nav></m-nav>
-      <main>
-        <div class="info">
-          <m-screenshots .links=${game?.screenshots}></m-screenshots>
-          <div class="header">
-            <dy-heading lv="1" class="title">${game?.name}</dy-heading>
-            <dy-button @click=${() => game && createRoom({ gameId: game.id, private: false })}>
-              ${i18n.get('startGame')}
-            </dy-button>
-          </div>
-          <m-game-detail .md=${game?.description || ''}></m-game-detail>
+      <div class="info">
+        <m-screenshots .links=${game?.screenshots}></m-screenshots>
+        <div class="header">
+          <dy-heading lv="1" class="title">${game?.name}</dy-heading>
+          <dy-button @click=${() => game && createRoom({ gameId: game.id, private: false })}>
+            ${i18n.get('startGame')}
+          </dy-button>
         </div>
-        <div class="aside">
-          <img class="preview" src=${game?.preview || ''} />
-          <div class="buttons">
-            <dy-heading lv="3">${i18n.get('gameComment')}</dy-heading>
-            <dy-button
-              color=${theme.textColor}
-              @click=${() => this.#changeComment(true)}
-              .icon=${this.#isSelfLike ? icons.likeSolid : icons.like}
-              type=${this.#isSelfLike ? 'solid' : 'reverse'}
-            >
-              ${formatPercentage(true)}
-            </dy-button>
-            <dy-button
-              color=${theme.textColor}
-              @click=${() => this.#changeComment(false)}
-              .icon=${this.#isSelfUnLike ? icons.unlikeSolid : icons.unlike}
-              type=${this.#isSelfUnLike ? 'solid' : 'reverse'}
-            >
-              ${formatPercentage(false)}
-            </dy-button>
-          </div>
-          ${commentList}
+        <m-game-detail .md=${game?.description || ''}></m-game-detail>
+      </div>
+      <div class="aside">
+        <img class="preview" src=${game?.preview || ''} />
+        <div class="buttons">
+          <dy-heading lv="3">${i18n.get('gameComment')}</dy-heading>
+          <dy-button
+            color=${theme.textColor}
+            @click=${() => this.#changeComment(true)}
+            .icon=${this.#isSelfLike ? icons.likeSolid : icons.like}
+            type=${this.#isSelfLike ? 'solid' : 'reverse'}
+          >
+            ${formatPercentage(true)}
+          </dy-button>
+          <dy-button
+            color=${theme.textColor}
+            @click=${() => this.#changeComment(false)}
+            .icon=${this.#isSelfUnLike ? icons.unlikeSolid : icons.unlike}
+            type=${this.#isSelfUnLike ? 'solid' : 'reverse'}
+          >
+            ${formatPercentage(false)}
+          </dy-button>
         </div>
-      </main>
-      <m-footer></m-footer>
+        ${commentList}
+      </div>
     `;
   };
 }

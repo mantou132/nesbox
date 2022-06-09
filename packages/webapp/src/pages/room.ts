@@ -14,8 +14,8 @@ import { createPath } from 'duoyun-ui/elements/route';
 import { Button, WasmNes } from 'nes_rust_wasm';
 import JSZip from 'jszip';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
-import { waitLoading } from 'duoyun-ui/elements/wait';
 
+import { NesboxWaitElement } from 'src/elements/wait';
 import { configure } from 'src/configure';
 import { routes } from 'src/routes';
 import {
@@ -34,6 +34,7 @@ import { store } from 'src/store';
 import { i18n } from 'src/i18n';
 import type { MRoomChatElement } from 'src/modules/room-chat';
 import { getCorsSrc } from 'src/utils';
+import { theme } from 'src/theme';
 
 import 'duoyun-ui/elements/input';
 import 'src/modules/room-player-list';
@@ -42,13 +43,9 @@ import 'src/modules/nav';
 
 const style = createCSSSheet(css`
   :host {
-    display: flex;
-    height: 100vh;
-    position: relative;
-  }
-  .nav {
     position: absolute;
-    inset: 0 0 auto;
+    inset: ${theme.titleBarHeight} 0 0;
+    display: flex;
   }
   .canvas {
     position: absolute;
@@ -272,7 +269,7 @@ export class PRoomElement extends GemElement<State> {
         }
 
         if (this.#rom) {
-          waitLoading(this.#initNes());
+          NesboxWaitElement.wait(this.#initNes());
         }
       },
       () => [this.#playing?.id, this.#rom],
@@ -294,7 +291,6 @@ export class PRoomElement extends GemElement<State> {
     return html`
       <canvas class="canvas" width="256" height="240" ?hidden=${!this.#isHost} ref=${this.canvasRef.ref}></canvas>
       <video class="canvas" ?hidden=${this.#isHost} ref=${this.videoRef.ref}></video>
-      <m-nav class="nav" .room=${true}></m-nav>
       <m-room-chat
         class="chat"
         ref=${this.chatRef.ref}

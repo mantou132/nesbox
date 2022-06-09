@@ -48,6 +48,7 @@ const style = createCSSSheet(css`
   }
   .nickname,
   .playing {
+    display: block;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -107,9 +108,9 @@ export class MFriendItemElement extends GemElement {
     deleteFriend(id);
   };
 
-  #onAcceptFriend = (evt: Event) => {
+  #onAcceptFriend = (evt: Event, accept: boolean) => {
     evt.stopPropagation();
-    acceptFriend(this.friend.user.id, true);
+    acceptFriend(this.friend.user.id, accept);
   };
 
   #onMoreMenu = (evt: Event) => {
@@ -176,7 +177,7 @@ export class MFriendItemElement extends GemElement {
       <div class="content">
         <div class="nickname">${nickname}</div>
         <dy-help-text class="playing" status=${this.#isOnline && playing ? 'positive' : 'default'}>
-          ${!this.#isOnline
+          ${!this.#isOnline || !this.#isFriend
             ? ''
             : playing
             ? i18n.get('playing', store.games[playing.gameId]?.name || '')
@@ -186,7 +187,18 @@ export class MFriendItemElement extends GemElement {
       <m-badge .friendid=${id}></m-badge>
       ${this.#isFriend
         ? html`<dy-use class="action" .element=${icons.more} @click=${this.#onMoreMenu}></dy-use>`
-        : html`<dy-use class="action" .element=${icons.check} @click=${this.#onAcceptFriend}></dy-use>`}
+        : html`
+            <dy-use
+              class="action"
+              .element=${icons.check}
+              @click=${(e: Event) => this.#onAcceptFriend(e, true)}
+            ></dy-use>
+            <dy-use
+              class="action"
+              .element=${icons.close}
+              @click=${(e: Event) => this.#onAcceptFriend(e, false)}
+            ></dy-use>
+          `}
       ${this.invite
         ? html`
             <dy-divider class="divider"></dy-divider>

@@ -14,3 +14,8 @@ export const documentVisible = async () => {
   if (document.visibilityState === 'visible') return;
   await new Promise((res) => document.addEventListener('visibilitychange', res, { once: true }));
 };
+
+export const isInputElement = (event: Event) => {
+  const ele = event.composedPath()[0];
+  return ele instanceof HTMLInputElement || ele instanceof HTMLAreaElement;
+};

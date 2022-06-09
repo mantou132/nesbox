@@ -54,6 +54,7 @@ const style = createCSSSheet(css`
     align-items: center;
     justify-content: space-between;
     background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(1px);
   }
   .title {
     flex-grow: 1;

@@ -60,7 +60,6 @@ const style = createCSSSheet(css`
     width: 100%;
     text-align: center;
     margin-block: 1em;
-    white-space: nowrap;
   }
 `);
 
@@ -84,7 +83,7 @@ export class MMsgElement extends GemElement {
 
     return html`
       ${this.time ? html`<div class="time">${new Time(this.msg.createdAt).format('HH:mm:ss')}</div>` : ''}
-      <dy-tooltip .content=${new Time(this.msg.createdAt).format()}>
+      <dy-tooltip .position=${'left'} .content=${new Time(this.msg.createdAt).format()}>
         <div class="body">
           <div>${this.msg.body}</div>
         </div>

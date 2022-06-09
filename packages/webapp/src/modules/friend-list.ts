@@ -16,6 +16,8 @@ import 'src/modules/friend-item';
 const style = createCSSSheet(css`
   :host {
     height: 100%;
+    padding-block-start: ${theme.titleBarHeight};
+    box-sizing: border-box;
     background-color: ${theme.backgroundColor};
     display: flex;
     flex-direction: column;
@@ -63,6 +65,7 @@ export class MFriendListElement extends GemElement {
       header: i18n.get('addFriend'),
       body: html`
         <dy-input
+          autofocus
           style="width: 100%"
           placeholder=${i18n.get('placeholderUsername')}
           @change=${(e: any) => (e.target.value = e.detail)}

@@ -18,6 +18,7 @@ import type { DuoyunInputElement } from 'duoyun-ui/elements/input';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { sleep } from 'duoyun-ui/lib/utils';
 import { Time } from 'duoyun-ui/lib/time';
+import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
 import { TextMsg } from 'src/rtc';
 import { i18n } from 'src/i18n';
@@ -55,6 +56,11 @@ const style = createCSSSheet(css`
   }
   .input.silent {
     display: none;
+  }
+  @media ${mediaQuery.PHONE} {
+    :host {
+      display: none;
+    }
   }
 `);
 

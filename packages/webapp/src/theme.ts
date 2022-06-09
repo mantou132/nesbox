@@ -39,7 +39,7 @@ export const defaultTheme = {
   popupZIndex: '2147483646',
   timingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
   timingEasingFunction: 'cubic-bezier(0.16, 1, 0.29, 0.99)',
-  mainWidth: '90em',
+  titleBarHeight: '0px',
 };
 export const theme = createTheme({ ...defaultTheme });
 
@@ -52,3 +52,7 @@ export function changeTheme(name: ThemeName) {
 }
 
 updateDuoyunTheme(themeStore);
+
+export function updatePartialTheme(t: Partial<typeof defaultTheme>) {
+  updateTheme(theme, t);
+}

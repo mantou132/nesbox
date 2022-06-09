@@ -1,11 +1,11 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, connectStore } from '@mantou/gem';
 import { ContextMenu } from 'duoyun-ui/elements/menu';
-import { waitLoading } from 'duoyun-ui/elements/wait';
 
 import { configure, getShortcut, toggoleScreencaseMode, toggoleSettingsState } from 'src/configure';
 import { logout } from 'src/auth';
 import { changeTheme, theme, ThemeName, themeNames } from 'src/theme';
 import { i18n, langNames } from 'src/i18n';
+import { NesboxWaitElement } from 'src/elements/wait';
 
 import 'duoyun-ui/elements/avatar';
 import 'duoyun-ui/elements/options';
@@ -60,7 +60,7 @@ export class MAvatarElement extends GemElement {
           menu: Object.keys(i18n.resources).map((code) => ({
             selected: i18n.currentLanguage === code,
             text: langNames[code],
-            handle: () => waitLoading(i18n.setLanguage(code)),
+            handle: () => NesboxWaitElement.wait(i18n.setLanguage(code)),
           })),
         },
         {

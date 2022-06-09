@@ -1,11 +1,20 @@
-import { html, adoptedStyle, customElement, createCSSSheet, css, connectStore, history, styleMap } from '@mantou/gem';
+import {
+  html,
+  adoptedStyle,
+  customElement,
+  createCSSSheet,
+  css,
+  connectStore,
+  history,
+  styleMap,
+  GemElement,
+} from '@mantou/gem';
 import { createPath } from 'duoyun-ui/elements/route';
 import { HexColor, hslToRgb, parseHexColor, rgbToHexColor, rgbToHsl } from 'duoyun-ui/lib/color';
 import { marked } from 'marked';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
 import { store } from 'src/store';
-import { PBaseElement } from 'src/pages/base';
 import { routes } from 'src/routes';
 import { paramKeys } from 'src/constants';
 import { createRoom } from 'src/services/api';
@@ -13,13 +22,17 @@ import { theme, themeStore } from 'src/theme';
 import { i18n } from 'src/i18n';
 
 import 'duoyun-ui/elements/carousel';
-import 'src/modules/nav';
 import 'src/modules/game-list';
-import 'src/modules/footer';
 
 const domParser = new DOMParser();
 
 const style = createCSSSheet(css`
+  :host {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5em;
+    min-height: 100vh;
+  }
   .top {
     cursor: pointer;
     transition: all 0.5s ${theme.timingEasingFunction};
@@ -63,7 +76,7 @@ type State = {
 @adoptedStyle(style)
 @connectStore(i18n.store)
 @connectStore(store)
-export class PGamesElement extends PBaseElement<State> {
+export class PGamesElement extends GemElement<State> {
   state: State = {
     background: 'transparent',
   };
@@ -95,17 +108,13 @@ export class PGamesElement extends PBaseElement<State> {
     }));
 
     return html`
-      <m-nav></m-nav>
-      <main>
-        <dy-carousel
-          class="top"
-          style=${styleMap({ background: this.state.background })}
-          .data=${topData}
-          @change=${({ detail }: CustomEvent<number>) => this.#onTopChange(detail, topData?.length)}
-        ></dy-carousel>
-        <m-game-list class="list"></m-game-list>
-      </main>
-      <m-footer></m-footer>
+      <dy-carousel
+        class="top"
+        style=${styleMap({ background: this.state.background })}
+        .data=${topData}
+        @change=${({ detail }: CustomEvent<number>) => this.#onTopChange(detail, topData?.length)}
+      ></dy-carousel>
+      <m-game-list class="list"></m-game-list>
     `;
   };
 }

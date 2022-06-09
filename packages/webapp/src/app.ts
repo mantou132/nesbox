@@ -8,6 +8,8 @@ import {
   adoptedStyle,
   history,
   styleMap,
+  refobject,
+  RefObject,
 } from '@mantou/gem';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { Loadbar } from 'duoyun-ui/elements/page-loadbar';
@@ -34,8 +36,23 @@ import 'src/modules/settings';
 import 'src/modules/search';
 import 'src/modules/friend-list';
 import 'src/modules/chat';
+import 'src/modules/nav';
+import 'src/modules/footer';
 
-const style = createCSSSheet(css``);
+const style = createCSSSheet(css`
+  :host {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .content {
+    height: 0;
+    flex-grow: 1;
+    display: block;
+    overflow: auto;
+    scrollbar-width: thin;
+  }
+`);
 
 @customElement('app-root')
 @connectStore(configure)
@@ -43,13 +60,15 @@ const style = createCSSSheet(css``);
 @connectStore(i18n.store)
 @connectStore(history.store)
 export class AppRootElement extends GemElement {
+  @refobject contentRef: RefObject<HTMLDivElement>;
+
   #onLoading = () => {
     Loadbar.start();
   };
 
   #onChange = async () => {
     Loadbar.end();
-    document.body.scrollTo(0, 0);
+    this.contentRef.element?.scrollTo(0, 0);
   };
 
   #globalShortcut = (evt: KeyboardEvent) => {
@@ -69,6 +88,10 @@ export class AppRootElement extends GemElement {
   };
 
   mounted = () => {
+    if (navigator.platform === 'darwin') {
+      import('src/modules/titlebar');
+    }
+
     this.effect(this.#enterRoom, () => [configure.user?.playing?.id]);
     this.effect(this.#enterRoom, () => [history.getParams().path]);
     forever(getAccount);
@@ -83,12 +106,22 @@ export class AppRootElement extends GemElement {
 
   render = () => {
     return html`
-      <dy-route
-        @loading=${this.#onLoading}
-        @routechange=${this.#onChange}
-        .routes=${routes}
-        .locationStore=${locationStore}
-      ></dy-route>
+      ${navigator.platform === 'darwin' ? html`<m-titlebar style="height: 38px"></m-titlebar>` : ''}
+
+      <m-nav></m-nav>
+      <div class="content" ref=${this.contentRef.ref}>
+        <main style="display: centents">
+          <dy-route
+            @loading=${this.#onLoading}
+            @routechange=${this.#onChange}
+            .routes=${routes}
+            .locationStore=${locationStore}
+          >
+            <div style="height: 100vh"></div
+          ></dy-route>
+        </main>
+        <m-footer></m-footer>
+      </div>
 
       <dy-drawer
         customize

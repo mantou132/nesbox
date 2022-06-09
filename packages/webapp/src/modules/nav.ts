@@ -1,13 +1,4 @@
-import {
-  GemElement,
-  html,
-  adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
-  connectStore,
-  boolattribute,
-} from '@mantou/gem';
+import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, connectStore, state } from '@mantou/gem';
 import type { RouteItem } from 'duoyun-ui/elements/route';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
@@ -35,16 +26,18 @@ type State = {
 const style = createCSSSheet(css`
   :host {
     display: flex;
-    position: sticky;
-    top: 0;
-    z-index: 1;
     background: ${theme.backgroundColor};
   }
-  :host([room]) {
-    background: linear-gradient(${theme.lightBackgroundColor} -60%, transparent);
+  :host(:where(:--room, [data-room])) {
+    position: absolute;
+    z-index: 1;
+    top: ${theme.titleBarHeight};
+    width: 100%;
+    background-color: black;
+    background-image: linear-gradient(${theme.lightBackgroundColor} -60%, transparent);
   }
   .nav {
-    width: min(100%, ${theme.mainWidth});
+    width: 100%;
     box-sizing: border-box;
     padding: 0.5em ${theme.gridGutter};
     margin: auto;
@@ -52,11 +45,12 @@ const style = createCSSSheet(css`
     align-items: center;
     gap: 1em;
   }
-  :host([room]) .nav {
+  :host(:where(:--room, [data-room])) .nav {
     width: 100%;
   }
   .link {
-    border-bottom: 2px solid transparent;
+    line-height: 1.5;
+    border-bottom: 3px solid transparent;
     text-transform: uppercase;
     font-size: 1.25em;
   }
@@ -95,7 +89,7 @@ const style = createCSSSheet(css`
 @connectStore(store)
 @connectStore(i18n.store)
 export class MNavElement extends GemElement<State> {
-  @boolattribute room: boolean;
+  @state room: boolean;
 
   state: State = {
     select: false,
@@ -105,6 +99,8 @@ export class MNavElement extends GemElement<State> {
     const playing = configure.user?.playing;
     const gameId = playing?.gameId || 0;
     const favorited = store.favoriteIds?.includes(gameId || 0);
+
+    this.room = !!playing;
 
     return html`
       <nav class="nav">
