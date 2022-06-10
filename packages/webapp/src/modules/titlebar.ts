@@ -35,7 +35,7 @@ export class MTitlebarElement extends GemElement {
           align-items: center;
           justify-content: center;
           height: ${theme.titleBarHeight};
-          background-color: black;
+          background-color: ${theme.titleBarColor};
           text-align: center;
           font-size: 0.75em;
           font-weight: bolder;

@@ -2,7 +2,7 @@ import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, con
 import type { RouteItem } from 'duoyun-ui/elements/route';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
-import { routes } from 'src/routes';
+import { locationStore, routes } from 'src/routes';
 import { i18n } from 'src/i18n';
 import { configure, toggoleFriendListState, toggoleSearchState } from 'src/configure';
 import { theme } from 'src/theme';
@@ -85,8 +85,8 @@ const style = createCSSSheet(css`
  */
 @customElement('m-nav')
 @adoptedStyle(style)
-@connectStore(configure)
 @connectStore(store)
+@connectStore(locationStore)
 @connectStore(i18n.store)
 export class MNavElement extends GemElement<State> {
   @state room: boolean;
@@ -106,13 +106,13 @@ export class MNavElement extends GemElement<State> {
       <nav class="nav">
         ${this.room
           ? html`
-              <nesbox-tooltip .content=${i18n.get('leaveRoom')}>
+              <nesbox-tooltip .position=${'bottom'} .content=${i18n.get('leaveRoom')}>
                 <dy-use class="icon" .element=${icons.left} @click=${leaveRoom}></dy-use>
               </nesbox-tooltip>
               ${playing?.host !== configure.user?.id
                 ? html`<div class="title">${store.games[gameId || 0]?.name}</div>`
                 : html`
-                    <nesbox-tooltip .content=${i18n.get('selectGame')}>
+                    <nesbox-tooltip .position=${'bottom'} .content=${i18n.get('selectGame')}>
                       <dy-action-text class="title" @click=${() => this.setState({ select: true })}>
                         ${store.games[gameId || 0]?.name}
                       </dy-action-text>

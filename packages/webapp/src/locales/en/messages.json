@@ -1,1 +1,205 @@
-{}
+{
+  "title": {
+    "message": "NESBox"
+  },
+  "slogan": {
+    "message": "NESBox"
+  },
+  "sloganDesc": {
+    "message": "I recall when I was young OH\nI will play and always having fun\nWith the neighbour next to me\nAnd we'll play until the setting sun\nTry to be The best among the others\nIn a game call the \"Spider battle\"\n......"
+  },
+  "search": {
+    "message": "Search"
+  },
+  "screencastMode": {
+    "message": "Screencast Mode"
+  },
+  "help": {
+    "message": "Help"
+  },
+  "feedback": {
+    "message": "Feedback"
+  },
+  "discord": {
+    "message": "Play With Friends"
+  },
+  "changeLanguage": {
+    "message": "Language"
+  },
+  "changeTheme": {
+    "message": "Theme"
+  },
+  "defaultTheme": {
+    "message": "Default"
+  },
+  "punkTheme": {
+    "message": "Punk"
+  },
+  "logoutAccount": {
+    "message": "Logout \"$1\""
+  },
+  "close": {
+    "message": "Close"
+  },
+  "addFriend": {
+    "message": "Add Friend"
+  },
+  "deleteFriend": {
+    "message": "Delete Friend"
+  },
+  "inviteFriend": {
+    "message": "Invite"
+  },
+  "sendTomeInvite": {
+    "message": "Receive Invitation"
+  },
+  "playing": {
+    "message": "Plaging《$1》"
+  },
+  "notPlaying": {
+    "message": "Rest"
+  },
+  "deleteFriendConfirm": {
+    "message": "Do you delete your friends?"
+  },
+  "notFoundTitle": {
+    "message": "No Found"
+  },
+  "notFoundDetail": {
+    "message": "The page you visited was not found,$1<Click> to return to the homepage"
+  },
+  "notDataTitle": {
+    "message": "No Data"
+  },
+  "setting": {
+    "message": "Settings"
+  },
+  "accountSetting": {
+    "message": "Account"
+  },
+  "nickname": {
+    "message": "Nickname"
+  },
+  "changePassword": {
+    "message": "Change Password"
+  },
+  "oldpassword": {
+    "message": "Old Password"
+  },
+  "newpassword": {
+    "message": "New Password"
+  },
+  "renewpassword": {
+    "message": "Repeat Password"
+  },
+  "renewpasswordNotMatch": {
+    "message": "Non-match new password"
+  },
+  "keySetting": {
+    "message": "Key Binding"
+  },
+  "license": {
+    "message": "License"
+  },
+  "loginTitle": {
+    "message": "Login"
+  },
+  "registerTitle": {
+    "message": "Register"
+  },
+  "login": {
+    "message": "Login"
+  },
+  "register": {
+    "message": "Register"
+  },
+  "goLogin": {
+    "message": "Existing Account"
+  },
+  "goRegister": {
+    "message": "No Account"
+  },
+  "bgCopyright": {
+    "message": "Copyright"
+  },
+  "gamesTitle": {
+    "message": "Games"
+  },
+  "gameTitle": {
+    "message": "Game"
+  },
+  "favoritesTitle": {
+    "message": "Favorites"
+  },
+  "roomsTitle": {
+    "message": "Rooms"
+  },
+  "roomTitle": {
+    "message": "Plaging"
+  },
+  "leaveRoom": {
+    "message": "Leave Room"
+  },
+  "enterRoomMsg": {
+    "message": "$1 enter the room"
+  },
+  "leaveRoomMsg": {
+    "message": "$1 leave the room"
+  },
+  "roomEmptyRole": {
+    "message": "None"
+  },
+  "selectGame": {
+    "message": "Change Game"
+  },
+  "startGame": {
+    "message": "Playing"
+  },
+  "addGame": {
+    "message": "Add Game"
+  },
+  "gameComment": {
+    "message": "Comment"
+  },
+  "noneComment": {
+    "message": "None Comment"
+  },
+  "placeholderUsername": {
+    "message": "Please enter username"
+  },
+  "placeholderPassword": {
+    "message": "Please enter the password"
+  },
+  "placeholderMessage": {
+    "message": "Enter information, Press ENTER key"
+  },
+  "placeholderSearch": {
+    "message": "$1 Search game or friends"
+  },
+  "placeholderSearchPlaying": {
+    "message": "$1 Change game or invite friends"
+  },
+  "tipRoomCrowded": {
+    "message": "Room crowded"
+  },
+  "tipChangePassword": {
+    "message": "Password has been updated"
+  },
+  "tipIviteSuccess": {
+    "message": "Invitation has been sent"
+  },
+  "tipRoomDeleted": {
+    "message": "The room has been deleted by the host"
+  },
+  "code404001": { "message": "Users exist" },
+  "code404002": { "message": "Incorrect username or password" },
+  "code0": { "message": "The current network is unstable" },
+  "code400": { "message": "Parameter error" },
+  "code401": { "message": "User information cannot be verified, try to log in again" },
+  "code403": { "message": "No permission" },
+  "code404": { "message": "Not found" },
+  "code409": { "message": "Resource conflict" },
+  "code500": { "message": "Server error, please try again later" },
+  "code501": { "message": "Unimplemented" },
+  "code504": { "message": "The request timeout, please try again later" }
+}

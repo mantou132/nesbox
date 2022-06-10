@@ -22,7 +22,7 @@ impl<R: Runtime> Plugin<R> for PreloadPlugin<R> {
     fn initialization_script(&self) -> Option<String> {
         #[cfg(target_os = "macos")]
         Some(String::from(
-            "Object.defineProperty(navigator, 'platform', {value: 'darwin', configurable: true});",
+            "Object.defineProperty(navigator, 'appName', {value: 'tauriapp', configurable: true});",
         ))
     }
 

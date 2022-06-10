@@ -6,9 +6,11 @@ import { logout } from 'src/auth';
 import { changeTheme, theme, ThemeName, themeNames } from 'src/theme';
 import { i18n, langNames } from 'src/i18n';
 import { NesboxWaitElement } from 'src/elements/wait';
+import { icons } from 'src/icons';
 
 import 'duoyun-ui/elements/avatar';
 import 'duoyun-ui/elements/options';
+import 'duoyun-ui/elements/use';
 
 const style = createCSSSheet(css`
   :host {
@@ -50,12 +52,6 @@ export class MAvatarElement extends GemElement {
           tag: getShortcut('OPEN_SETTINGS', true),
         },
         {
-          text: i18n.get('discord'),
-          handle: () => {
-            window.open('https://discord.gg/hY6XkHwc');
-          },
-        },
-        {
           text: i18n.get('changeLanguage'),
           menu: Object.keys(i18n.resources).map((code) => ({
             selected: i18n.currentLanguage === code,
@@ -77,7 +73,15 @@ export class MAvatarElement extends GemElement {
           handle: toggoleScreencaseMode,
         },
         {
+          text: i18n.get('discord'),
+          tag: html`<dy-use .element=${icons.openNewWindow} style="width: 1.2em"></dy-use>`,
+          handle: () => {
+            window.open('https://discord.gg/hY6XkHwc');
+          },
+        },
+        {
           text: i18n.get('feedback'),
+          tag: html`<dy-use .element=${icons.openNewWindow} style="width: 1.2em"></dy-use>`,
           handle: () => {
             window.open('https://github.com/mantou132/nesbox/issues');
           },

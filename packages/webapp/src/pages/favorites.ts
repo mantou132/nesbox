@@ -6,14 +6,17 @@ import { i18n } from 'src/i18n';
 import { theme } from 'src/theme';
 
 import 'duoyun-ui/elements/carousel';
+import 'duoyun-ui/elements/divider';
 import 'src/modules/game-list';
 
 const style = createCSSSheet(css`
   :host {
     display: block;
     min-height: 100vh;
-    margin-block-start: ${theme.gridGutter};
     padding-inline: ${theme.gridGutter};
+  }
+  dy-divider {
+    margin-block-end: ${theme.gridGutter};
   }
 `);
 
@@ -24,6 +27,7 @@ const style = createCSSSheet(css`
 export class PFavoritesElement extends GemElement {
   render = () => {
     return html`
+      <dy-divider></dy-divider>
       ${store.favoriteIds?.length === 0
         ? html`
             <dy-result style="height: 60vh" .illustrator=${icons.empty} .header=${i18n.get('notDataTitle')}></dy-result>

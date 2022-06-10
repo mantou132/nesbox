@@ -12,6 +12,7 @@ import {
 import { theme } from 'src/theme';
 import { store } from 'src/store';
 
+import 'duoyun-ui/elements/use';
 import 'src/modules/game-item';
 
 const style = createCSSSheet(css`
@@ -53,10 +54,13 @@ export class MGameListElement extends GemElement {
   }
 
   render = () => {
-    return html`${this.#data?.map(
-      (id) =>
-        store.games[id] &&
-        html`<m-game-item .game=${store.games[id]!} .favorited=${this.#favSet.has(id)}></m-game-item>`,
-    )}`;
+    return html`
+      ${this.#data?.map(
+        (id) =>
+          store.games[id] &&
+          html`<m-game-item .game=${store.games[id]!} .favorited=${this.#favSet.has(id)}></m-game-item>`,
+      )}
+      <slot></slot>
+    `;
   };
 }

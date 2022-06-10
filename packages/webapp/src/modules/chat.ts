@@ -80,6 +80,7 @@ const style = createCSSSheet(css`
   .input {
     width: auto;
     margin: 0.5em;
+    flex-shrink: 0;
   }
 `);
 

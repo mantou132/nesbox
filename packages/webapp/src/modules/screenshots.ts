@@ -37,20 +37,20 @@ const style = createCSSSheet(css`
   }
   .preview {
     position: absolute;
-    right: 0;
-    bottom: 0;
+    right: 1em;
+    bottom: 1em;
     display: flex;
+    gap: 0.5em;
   }
   .preview * {
     cursor: pointer;
-    padding: 0.2em 0.7em;
-    margin-inline-start: -3px;
-    border: 3px solid ${theme.borderColor};
-    background-color: black;
+    background: ${theme.borderColor};
+    padding: 0.4em 0.7em;
+    border: 1px solid ${theme.textColor};
   }
   .preview .current {
     position: relative;
-    border-color: ${theme.textColor};
+    background: ${theme.textColor};
   }
 `);
 
@@ -87,9 +87,7 @@ export class MScreenshotsElement extends GemElement<State> {
               <div
                 @click=${() => this.carouselRef.element?.jump(index)}
                 class=${classMap({ current: index === this.state.current })}
-              >
-                ${index + 1}
-              </div>
+              ></div>
             `,
         )}
       </div>

@@ -127,6 +127,7 @@ export class PGameElement extends GemElement {
       header: '编写评论',
       body: html`
         <dy-input
+          autofocus
           type="textarea"
           style=${styleMap({ width: '30em' })}
           .value=${this.#comment?.body || ''}

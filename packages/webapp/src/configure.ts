@@ -77,7 +77,7 @@ export const [configure, storeConfigure] = createCacheStore<Configure>(localStor
 
 export function getShortcut(command: keyof Configure['shortcuts'], isDisplay = false) {
   const keys = configure.shortcuts[command][isMac ? 'mac' : 'win'];
-  if (isDisplay) return keys.map((key) => getDisplayKey(key)).join('');
+  if (isDisplay) return keys.map((key) => getDisplayKey(key)).join('+');
   return keys.join('+');
 }
 

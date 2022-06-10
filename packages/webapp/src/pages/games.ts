@@ -20,6 +20,7 @@ import { paramKeys } from 'src/constants';
 import { createRoom } from 'src/services/api';
 import { theme, themeStore } from 'src/theme';
 import { i18n } from 'src/i18n';
+import { icons } from 'src/icons';
 
 import 'duoyun-ui/elements/carousel';
 import 'src/modules/game-list';
@@ -66,6 +67,21 @@ const style = createCSSSheet(css`
       max-width: 75%;
     }
   }
+  .add {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1em;
+    border: 1px dashed ${theme.borderColor};
+  }
+  .add dy-use {
+    width: 3em;
+  }
+  .add:hover {
+    border-color: currentColor;
+  }
 `);
 
 type State = {
@@ -92,6 +108,12 @@ export class PGamesElement extends GemElement<State> {
     });
   };
 
+  #addGame = () => {
+    window.open(
+      'https://github.com/mantou132/nesbox/issues/new?assignees=mantou132&labels=&template=add_nes.md&title=%E4%BF%AE%E6%94%B9%E6%A0%87%E9%A2%98%E4%B8%BA%E6%B8%B8%E6%88%8F%E5%90%8D%E7%A7%B0',
+    );
+  };
+
   render = () => {
     const topData = store.topGameIds?.map((id) => ({
       onClick: () => history.push({ path: createPath(routes.game, { params: { [paramKeys.GAME_ID]: String(id) } }) }),
@@ -114,7 +136,12 @@ export class PGamesElement extends GemElement<State> {
         .data=${topData}
         @change=${({ detail }: CustomEvent<number>) => this.#onTopChange(detail, topData?.length)}
       ></dy-carousel>
-      <m-game-list class="list"></m-game-list>
+      <m-game-list class="list">
+        <div class="add" @click=${this.#addGame}>
+          <dy-use .element=${icons.add}></dy-use>
+          <span>${i18n.get('addGame')}</span>
+        </div>
+      </m-game-list>
     `;
   };
 }

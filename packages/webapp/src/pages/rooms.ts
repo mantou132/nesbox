@@ -8,14 +8,17 @@ import { icons } from 'src/icons';
 import { theme } from 'src/theme';
 
 import 'duoyun-ui/elements/result';
+import 'src/modules/game-list';
 import 'src/modules/room-list';
 
 const style = createCSSSheet(css`
   :host {
     display: block;
     min-height: 100vh;
-    margin-block-start: ${theme.gridGutter};
     padding-inline: ${theme.gridGutter};
+  }
+  dy-divider {
+    margin-block-end: ${theme.gridGutter};
   }
 `);
 
@@ -29,6 +32,7 @@ export class PRoomsElement extends GemElement {
 
   render = () => {
     return html`
+      <dy-divider></dy-divider>
       ${store.roomIds?.length === 0
         ? html`
             <dy-result style="height: 60vh" .illustrator=${icons.empty} .header=${i18n.get('notDataTitle')}></dy-result>

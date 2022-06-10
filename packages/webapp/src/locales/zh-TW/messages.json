@@ -1,0 +1,205 @@
+{
+  "title": {
+    "message": "NESBox"
+  },
+  "slogan": {
+    "message": "NESBox"
+  },
+  "sloganDesc": {
+    "message": "隔壁班的那個女孩\n怎麼還沒經過我的窗前\n嘴裏的零食手裏的漫畫\n心裏初戀的童年\n......"
+  },
+  "search": {
+    "message": "搜索"
+  },
+  "screencastMode": {
+    "message": "截屏模式"
+  },
+  "help": {
+    "message": "幫助"
+  },
+  "feedback": {
+    "message": "問題反饋"
+  },
+  "discord": {
+    "message": "和朋友一起玩"
+  },
+  "changeLanguage": {
+    "message": "切換語言"
+  },
+  "changeTheme": {
+    "message": "選擇主題"
+  },
+  "defaultTheme": {
+    "message": "默認主題"
+  },
+  "punkTheme": {
+    "message": "朋克主題"
+  },
+  "logoutAccount": {
+    "message": "登出 “$1”"
+  },
+  "close": {
+    "message": "關閉"
+  },
+  "addFriend": {
+    "message": "添加好友"
+  },
+  "deleteFriend": {
+    "message": "刪除好友"
+  },
+  "inviteFriend": {
+    "message": "邀請"
+  },
+  "sendTomeInvite": {
+    "message": "發來邀請"
+  },
+  "playing": {
+    "message": "正在玩《$1》"
+  },
+  "notPlaying": {
+    "message": "中場休息"
+  },
+  "deleteFriendConfirm": {
+    "message": "是否刪除好友？"
+  },
+  "notFoundTitle": {
+    "message": "未找到頁面"
+  },
+  "notFoundDetail": {
+    "message": "您訪問的頁面沒有找到，$1<點擊>返回首頁"
+  },
+  "notDataTitle": {
+    "message": "暫無數據"
+  },
+  "setting": {
+    "message": "設置"
+  },
+  "accountSetting": {
+    "message": "賬號設置"
+  },
+  "nickname": {
+    "message": "顯示名稱"
+  },
+  "changePassword": {
+    "message": "修改密碼"
+  },
+  "oldpassword": {
+    "message": "舊密碼"
+  },
+  "newpassword": {
+    "message": "新密碼"
+  },
+  "renewpassword": {
+    "message": "重複新密碼"
+  },
+  "renewpasswordNotMatch": {
+    "message": "不匹配新密碼"
+  },
+  "keySetting": {
+    "message": "按鍵設置"
+  },
+  "license": {
+    "message": "許可證"
+  },
+  "loginTitle": {
+    "message": "登錄"
+  },
+  "registerTitle": {
+    "message": "註冊"
+  },
+  "login": {
+    "message": "登錄"
+  },
+  "register": {
+    "message": "註冊"
+  },
+  "goLogin": {
+    "message": "已有賬號"
+  },
+  "goRegister": {
+    "message": "暫無賬號"
+  },
+  "bgCopyright": {
+    "message": "圖像版權"
+  },
+  "gamesTitle": {
+    "message": "所有遊戲"
+  },
+  "gameTitle": {
+    "message": "遊戲"
+  },
+  "favoritesTitle": {
+    "message": "我收藏的"
+  },
+  "roomsTitle": {
+    "message": "公開房間"
+  },
+  "roomTitle": {
+    "message": "遊戲"
+  },
+  "leaveRoom": {
+    "message": "離開房間"
+  },
+  "enterRoomMsg": {
+    "message": "$1進入房間"
+  },
+  "leaveRoomMsg": {
+    "message": "$1離開房間"
+  },
+  "roomEmptyRole": {
+    "message": "無"
+  },
+  "selectGame": {
+    "message": "更換遊戲"
+  },
+  "startGame": {
+    "message": "開始遊戲"
+  },
+  "addGame": {
+    "message": "添加遊戲"
+  },
+  "gameComment": {
+    "message": "用戶評論"
+  },
+  "noneComment": {
+    "message": "沒有評論"
+  },
+  "placeholderUsername": {
+    "message": "請輸入用戶名"
+  },
+  "placeholderPassword": {
+    "message": "請輸入密碼"
+  },
+  "placeholderMessage": {
+    "message": "輸入信息按 Enter 鍵發送"
+  },
+  "placeholderSearch": {
+    "message": "$1 搜索遊戲或者好友"
+  },
+  "placeholderSearchPlaying": {
+    "message": "$1 更改遊戲或者邀請好友"
+  },
+  "tipRoomCrowded": {
+    "message": "房間人數過多"
+  },
+  "tipChangePassword": {
+    "message": "修改密碼成功"
+  },
+  "tipIviteSuccess": {
+    "message": "邀請已經發送"
+  },
+  "tipRoomDeleted": {
+    "message": "房間已被主機已經被刪除"
+  },
+  "code404001": { "message": "用戶已存在" },
+  "code404002": { "message": "賬號或密碼錯誤" },
+  "code0": { "message": "當前網絡不穩定" },
+  "code400": { "message": "參數錯誤" },
+  "code401": { "message": "用戶信息不能通過驗證，嘗試重新登陸" },
+  "code403": { "message": "無權限操作" },
+  "code404": { "message": "資源未找到" },
+  "code409": { "message": "資源衝突" },
+  "code500": { "message": "服務器出小差了，請稍後再試" },
+  "code501": { "message": "暫未實現" },
+  "code504": { "message": "請求超時，請稍後再試" }
+}

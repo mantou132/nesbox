@@ -25,7 +25,7 @@ import {
 } from 'src/configure';
 import { routes, locationStore } from 'src/routes';
 import { getAccount, getFriends, getGames, subscribeEvent } from 'src/services/api';
-import { paramKeys } from 'src/constants';
+import { isTauriApp, paramKeys } from 'src/constants';
 import { i18n } from 'src/i18n';
 
 import 'duoyun-ui/elements/input-capture';
@@ -88,7 +88,7 @@ export class AppRootElement extends GemElement {
   };
 
   mounted = () => {
-    if (navigator.platform === 'darwin') {
+    if (isTauriApp) {
       import('src/modules/titlebar');
     }
 
@@ -106,7 +106,7 @@ export class AppRootElement extends GemElement {
 
   render = () => {
     return html`
-      ${navigator.platform === 'darwin' ? html`<m-titlebar style="height: 38px"></m-titlebar>` : ''}
+      ${isTauriApp ? html`<m-titlebar style="height: 38px"></m-titlebar>` : ''}
 
       <m-nav></m-nav>
       <div class="content" ref=${this.contentRef.ref}>
@@ -117,8 +117,8 @@ export class AppRootElement extends GemElement {
             .routes=${routes}
             .locationStore=${locationStore}
           >
-            <div style="height: 100vh"></div
-          ></dy-route>
+            <div style="height: 100vh"></div>
+          </dy-route>
         </main>
         <m-footer></m-footer>
       </div>

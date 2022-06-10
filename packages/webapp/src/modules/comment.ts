@@ -4,6 +4,7 @@ import { Time } from 'duoyun-ui/lib/time';
 import { Comment } from 'src/store';
 import { theme } from 'src/theme';
 import { configure } from 'src/configure';
+import { i18n } from 'src/i18n';
 
 import 'duoyun-ui/elements/help-text';
 
@@ -18,6 +19,10 @@ const style = createCSSSheet(css`
   }
   .body {
     white-space: pre;
+  }
+  .none {
+    white-space: normal;
+    font-style: italic;
   }
 `);
 
@@ -45,7 +50,9 @@ export class MCommentElement extends GemElement {
       <dy-help-text>
         [${new Time().relativeTimeFormat(this.comment.updatedAt)}] ${this.#isSelf ? '我' : this.comment.user.nickname}:
       </dy-help-text>
-      <div class="body">${this.comment.body || 'No content'}</div>
+      ${this.comment.body
+        ? html`<div class="body">${this.comment.body}</div>`
+        : html`<dy-help-text class="none">${i18n.get('noneComment')}</dy-help-text>`}
     `;
   };
 }
