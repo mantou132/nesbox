@@ -31,7 +31,7 @@ const style = createCSSSheet(css`
   :host(:where(:--room, [data-room])) {
     position: absolute;
     z-index: 1;
-    top: ${theme.titleBarHeight};
+    top: 0;
     width: 100%;
     background-color: black;
     background-image: linear-gradient(${theme.lightBackgroundColor} -60%, transparent);
@@ -52,7 +52,7 @@ const style = createCSSSheet(css`
     line-height: 1.5;
     border-bottom: 3px solid transparent;
     text-transform: uppercase;
-    font-size: 1.25em;
+    font-size: 1.125em;
   }
   .link:where(:--active, [data-active]) {
     border-bottom-color: currentColor;

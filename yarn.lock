@@ -3237,8 +3237,10 @@ dset@^3.1.0:
   resolved "https://registry.yarnpkg.com/dset/-/dset-3.1.2.tgz#89c436ca6450398396dc6538ea00abc0c54cd45a"
   integrity sha512-g/M9sqy3oHe477Ar4voQxWtaPIFw1jTdKZuomOjhCcBx9nHUNn0pu6NopuFFrTh/TRZIKEj+76vLWFu9BNKk+Q==
 
-"duoyun-ui@file:../gem/packages/duoyun-ui":
-  version "0.0.32"
+duoyun-ui@^0.0.33:
+  version "0.0.33"
+  resolved "https://registry.yarnpkg.com/duoyun-ui/-/duoyun-ui-0.0.33.tgz#33b0bbb5db0145600d0d5699edaeafe98356d60e"
+  integrity sha512-oVDgkgobXOxopW2GVg7v2U6ObCnsM7os1EnqjNQ/7DH02Wl2rizBym/CIkXvaI+GCd1Ij6Eqswz7wamOfrnFuA==
   dependencies:
     d3-geo "^3.0.1"
     elkjs "^0.7.1"

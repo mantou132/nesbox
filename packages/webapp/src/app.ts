@@ -25,7 +25,7 @@ import {
 } from 'src/configure';
 import { routes, locationStore } from 'src/routes';
 import { getAccount, getFriends, getGames, subscribeEvent } from 'src/services/api';
-import { isTauriApp, paramKeys } from 'src/constants';
+import { paramKeys } from 'src/constants';
 import { i18n } from 'src/i18n';
 
 import 'duoyun-ui/elements/input-capture';
@@ -41,7 +41,9 @@ import 'src/modules/footer';
 
 const style = createCSSSheet(css`
   :host {
-    height: 100vh;
+    position: relative;
+    height: 0;
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
   }
@@ -49,8 +51,19 @@ const style = createCSSSheet(css`
     height: 0;
     flex-grow: 1;
     display: block;
-    overflow: auto;
+    overflow-y: auto;
+    overflow-y: overlay;
     scrollbar-width: thin;
+  }
+  .content::-webkit-scrollbar {
+    width: 0.7em;
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.4);
   }
 `);
 
@@ -88,10 +101,6 @@ export class AppRootElement extends GemElement {
   };
 
   mounted = () => {
-    if (isTauriApp) {
-      import('src/modules/titlebar');
-    }
-
     this.effect(this.#enterRoom, () => [configure.user?.playing?.id]);
     this.effect(this.#enterRoom, () => [history.getParams().path]);
     forever(getAccount);
@@ -106,8 +115,6 @@ export class AppRootElement extends GemElement {
 
   render = () => {
     return html`
-      ${isTauriApp ? html`<m-titlebar style="height: 38px"></m-titlebar>` : ''}
-
       <m-nav></m-nav>
       <div class="content" ref=${this.contentRef.ref}>
         <main style="display: centents">

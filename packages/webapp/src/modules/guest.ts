@@ -3,18 +3,18 @@ import { icons } from 'duoyun-ui/lib/icons';
 import { commonHandle } from 'duoyun-ui/lib/hotkeys';
 import { ContextMenu } from 'duoyun-ui/elements/menu';
 import type { GemUseElement } from '@mantou/gem/elements/use';
+import { waitLoading } from 'duoyun-ui/elements/wait';
 
 import { i18n, langNames } from 'src/i18n';
 import { ThemeName, themeNames, changeTheme, theme } from 'src/theme';
 import { configure, toggoleScreencaseMode } from 'src/configure';
-import { NesboxWaitElement } from 'src/elements/wait';
 
 import 'duoyun-ui/elements/input-capture';
 import 'duoyun-ui/elements/use';
 
 const style = createCSSSheet(css`
   .menu {
-    position: fixed;
+    position: absolute;
     inset-inline-end: 1em;
     inset-block-start: 1em;
     width: 1.5em;
@@ -42,7 +42,7 @@ export class ModuleGuestElement extends GemElement {
           menu: Object.keys(i18n.resources).map((code) => ({
             selected: i18n.currentLanguage === code,
             text: langNames[code],
-            handle: () => NesboxWaitElement.wait(i18n.setLanguage(code)),
+            handle: () => waitLoading(i18n.setLanguage(code)),
           })),
         },
         {

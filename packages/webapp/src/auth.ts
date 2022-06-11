@@ -15,12 +15,16 @@ export const gotoRedirectUri = () => {
   }
 };
 
-export const logout = () => {
+export const logout = (replaceState = false) => {
   deleteUser();
-  // reload store
-  window.location.replace(
-    `${createPath(routes.login)}${new QueryString({ [queryKeys.REDIRECT_URI]: window.location.href })}`,
-  );
+  const path = createPath(routes.login);
+  const query = new QueryString({ [queryKeys.REDIRECT_URI]: window.location.href });
+  if (replaceState) {
+    history.replace({ path, query });
+  } else {
+    // reload store
+    window.location.replace(`${path}${query}`);
+  }
 };
 
 export const isExpiredProfile = (profile: Profile) => {

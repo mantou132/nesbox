@@ -43,7 +43,6 @@ const defaultTheme = {
   popupZIndex: '2147483646',
   timingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
   timingEasingFunction: 'cubic-bezier(0.16, 1, 0.29, 0.99)',
-  titleBarHeight: '0px',
 };
 
 const punkTheme = {
@@ -78,7 +77,3 @@ export function changeTheme(name: ThemeName) {
 }
 
 changeTheme(configure.theme);
-
-export function updatePartialTheme(t: Partial<typeof defaultTheme>) {
-  updateTheme(theme, t);
-}

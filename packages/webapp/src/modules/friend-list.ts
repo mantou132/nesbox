@@ -16,7 +16,6 @@ import 'src/modules/friend-item';
 const style = createCSSSheet(css`
   :host {
     height: 100%;
-    padding-block-start: ${theme.titleBarHeight};
     box-sizing: border-box;
     background-color: ${theme.backgroundColor};
     display: flex;

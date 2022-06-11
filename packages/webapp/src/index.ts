@@ -5,7 +5,7 @@ import { matchPath } from 'duoyun-ui/elements/route';
 
 import { theme } from 'src/theme';
 import { configure } from 'src/configure';
-import { COMMAND, RELEASE } from 'src/constants';
+import { COMMAND, isTauriMacApp, isTauriWinApp, RELEASE } from 'src/constants';
 import { logger } from 'src/logger';
 import { routes } from 'src/routes';
 import { gotoRedirectUri, isExpiredProfile, logout } from 'src/auth';
@@ -25,7 +25,7 @@ if (
     gotoRedirectUri();
   }
 } else if (!configure.profile || isExpiredProfile(configure.profile)) {
-  logout();
+  logout(true);
 }
 
 render(
@@ -42,6 +42,8 @@ render(
         overflow: hidden;
       }
       body {
+        display: flex;
+        flex-direction: column;
         height: 100%;
         margin: 0;
         padding: 0;
@@ -61,6 +63,8 @@ render(
       }
     </style>
     <m-meta></m-meta>
+    ${isTauriWinApp ? html`<m-titlebar style="height: 32px"></m-titlebar>` : ''}
+    ${isTauriMacApp ? html`<m-titlebar style="height: 38px"></m-titlebar>` : ''}
     <dy-route
       @contextmenu=${(e: Event) => e.preventDefault()}
       .routes=${[
@@ -80,6 +84,10 @@ render(
   document.body,
 );
 
+if (isTauriWinApp || isTauriWinApp) {
+  import('src/modules/titlebar');
+}
+
 let unloading = false;
 window.addEventListener('beforeunload', () => {
   unloading = true;
@@ -90,8 +98,6 @@ function printError(err: Error | ErrorEvent) {
     // chrome
     'ResizeObserver',
     'Script error.',
-    // firefox
-    'error loading dynamically imported module',
   ];
   if (unloading || ignoreError.some((msg) => err.message?.startsWith(msg))) return;
   Toast.open('error', err.message || String(err));
@@ -118,7 +124,7 @@ addEventListener('load', () => {
 
 // https://github.com/tauri-apps/tauri/issues/2626#issuecomment-1151090395
 addEventListener('keypress', (event) => {
-  if (window.__TAURI__ && !isInputElement(event)) {
+  if (isTauriMacApp && !isInputElement(event)) {
     event.preventDefault();
   }
 });

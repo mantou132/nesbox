@@ -21,6 +21,7 @@ import { createRoom } from 'src/services/api';
 import { theme, themeStore } from 'src/theme';
 import { i18n } from 'src/i18n';
 import { icons } from 'src/icons';
+import { open } from 'src/utils';
 
 import 'duoyun-ui/elements/carousel';
 import 'src/modules/game-list';
@@ -109,7 +110,7 @@ export class PGamesElement extends GemElement<State> {
   };
 
   #addGame = () => {
-    window.open(
+    open(
       'https://github.com/mantou132/nesbox/issues/new?assignees=mantou132&labels=&template=add_nes.md&title=%E4%BF%AE%E6%94%B9%E6%A0%87%E9%A2%98%E4%B8%BA%E6%B8%B8%E6%88%8F%E5%90%8D%E7%A7%B0',
     );
   };

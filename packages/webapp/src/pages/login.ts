@@ -20,7 +20,6 @@ import { gotoRedirectUri } from 'src/auth';
 import { i18n } from 'src/i18n';
 import { routes } from 'src/routes';
 import { login, register } from 'src/services/guest-api';
-import { isInputElement } from 'src/utils';
 
 import 'duoyun-ui/elements/form';
 import 'duoyun-ui/elements/link';
@@ -32,8 +31,10 @@ import 'src/modules/guest';
 
 const style = createCSSSheet(css`
   :host {
+    position: relative;
+    height: 0;
+    flex-grow: 1;
     display: flex;
-    height: 100%;
     align-items: stretch;
     justify-content: flex-end;
     color: ${theme.textColor};
@@ -116,17 +117,6 @@ type State = {
 export class PLoginElement extends GemElement<State> {
   @refobject formRef: RefObject<DuoyunFormElement>;
   @boolattribute register: boolean;
-
-  constructor() {
-    super();
-    this.addEventListener('mousedown', (event) => {
-      if (!isInputElement(event)) {
-        // `:active`
-        // https://github.com/tauri-apps/tauri/issues/4059
-        window.__TAURI__?.window.appWindow.startDragging();
-      }
-    });
-  }
 
   state: State = {
     username: '',

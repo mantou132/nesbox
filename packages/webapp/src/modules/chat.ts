@@ -74,8 +74,11 @@ const style = createCSSSheet(css`
     flex-direction: column;
     gap: 0.2em;
     overflow: auto;
-    scrollbar-width: none;
     overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+  .list::-webkit-scrollbar {
+    display: none;
   }
   .input {
     width: auto;
