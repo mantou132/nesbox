@@ -49,7 +49,7 @@ fn main() {
     let builder = tauri::Builder::default();
 
     #[cfg(target_os = "macos")]
-    builder.menu(get_default_menu());
+    let builder = builder.menu(get_default_menu());
 
     builder
         .setup(|app| {

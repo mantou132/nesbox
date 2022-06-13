@@ -17,10 +17,10 @@ impl<R: Runtime> Plugin<R> for PreloadPlugin<R> {
         "preload"
     }
 
-    #[cfg(target_os = "macos")]
     fn initialization_script(&self) -> Option<String> {
-        Some(String::from(
-            "Object.defineProperty(navigator, 'appName', {value: 'tauriapp', configurable: true});",
+        Some(format!(
+            r#"Object.defineProperty(navigator, 'appName', {{value: 'nesbox-{}', configurable: true}});"#,
+            std::env::consts::OS
         ))
     }
 

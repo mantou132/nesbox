@@ -84,7 +84,7 @@ render(
   document.body,
 );
 
-if (isTauriWinApp || isTauriWinApp) {
+if (isTauriWinApp || isTauriMacApp) {
   import('src/modules/titlebar');
 }
 

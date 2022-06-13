@@ -2,8 +2,8 @@ export const RELEASE = Number(process.env.RELEASE);
 // https://vitejs.dev/guide/api-javascript.html#resolveconfig
 export const COMMAND = process.env.COMMAND as 'serve' | 'build';
 
-export const isTauriMacApp = navigator.appName === 'tauriapp';
-export const isTauriWinApp = window.__TAURI__ && !isTauriMacApp;
+export const isTauriMacApp = navigator.appName === 'nesbox-macos';
+export const isTauriWinApp = navigator.appName === 'nesbox-windows';
 
 export const paramKeys = {
   ROOM_ID: 'rid',
