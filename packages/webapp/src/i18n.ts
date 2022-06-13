@@ -24,7 +24,7 @@ export const i18n = new I18n<typeof zhCN>({
     'zh-TW': twURI,
     en: enURI,
   },
-  onChange: async (code: keyof typeof langNames) => {
+  onChange: async (code) => {
     switch (code) {
       case 'en':
         return updateLocale(import('duoyun-ui/locales/en'));

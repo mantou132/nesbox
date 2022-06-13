@@ -3250,6 +3250,7 @@ dependencies = [
  "openssl",
  "openssl-probe",
  "pulldown-cmark",
+ "regex",
  "ring",
  "serde",
  "serde_derive",

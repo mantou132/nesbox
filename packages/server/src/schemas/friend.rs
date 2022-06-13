@@ -40,16 +40,16 @@ pub struct ScFriend {
     unread_message_count: i32,
 }
 
-fn convert_status_to_string(status: ScFriendStatus) -> String {
+fn convert_status_to_str(status: &ScFriendStatus) -> &'static str {
     match status {
-        ScFriendStatus::Accept => String::from("accept"),
-        ScFriendStatus::Pending => String::from("pending"),
-        ScFriendStatus::Deny => String::from("deny"),
+        ScFriendStatus::Accept => "accept",
+        ScFriendStatus::Pending => "pending",
+        ScFriendStatus::Deny => "deny",
     }
 }
 
-fn convert_status_to_enum(status: String) -> ScFriendStatus {
-    match status.as_str() {
+fn convert_status_to_enum(status: &str) -> ScFriendStatus {
+    match status {
         "accept" => ScFriendStatus::Accept,
         "pending" => ScFriendStatus::Pending,
         _ => ScFriendStatus::Deny,
@@ -60,7 +60,7 @@ fn convert_to_sc_friend(conn: &PgConnection, friend: &Friend) -> ScFriend {
     ScFriend {
         user: get_user_basic(conn, friend.target_id).unwrap(),
         created_at: friend.created_at.timestamp_millis() as f64,
-        status: convert_status_to_enum(friend.status.clone()),
+        status: convert_status_to_enum(&friend.status),
         unread_message_count: get_messages_count(
             conn,
             friend.user_id,
@@ -75,7 +75,7 @@ pub fn get_friends(conn: &PgConnection, uid: i32) -> Vec<ScFriend> {
 
     friends
         .filter(user_id.eq(uid))
-        .filter(status.ne(convert_status_to_string(ScFriendStatus::Deny)))
+        .filter(status.ne(convert_status_to_str(&ScFriendStatus::Deny)))
         .load::<Friend>(conn)
         .unwrap()
         .iter()
@@ -88,7 +88,7 @@ pub fn get_friend_ids(conn: &PgConnection, uid: i32) -> Vec<i32> {
 
     friends
         .filter(user_id.eq(uid))
-        .filter(status.eq(convert_status_to_string(ScFriendStatus::Accept)))
+        .filter(status.eq(convert_status_to_str(&ScFriendStatus::Accept)))
         .load::<Friend>(conn)
         .unwrap()
         .iter()
@@ -101,7 +101,7 @@ pub fn apply_friend(conn: &PgConnection, uid: i32, tid: i32) -> FieldResult<ScFr
         user_id: tid,
         target_id: uid,
         created_at: Utc::now().naive_utc(),
-        status: &convert_status_to_string(ScFriendStatus::Pending),
+        status: convert_status_to_str(&ScFriendStatus::Pending),
     };
 
     let friend = diesel::insert_into(friends::table)
@@ -115,14 +115,14 @@ pub fn accept_friend(conn: &PgConnection, uid: i32, tid: i32) -> FieldResult<ScF
     use self::friends::dsl::*;
 
     diesel::update(friends.filter(user_id.eq(uid)).filter(target_id.eq(tid)))
-        .set(status.eq(&convert_status_to_string(ScFriendStatus::Accept)))
+        .set(status.eq(convert_status_to_str(&ScFriendStatus::Accept)))
         .execute(conn)?;
 
     let new_friend = NewFriend {
         user_id: tid,
         target_id: uid,
         created_at: Utc::now().naive_utc(),
-        status: &convert_status_to_string(ScFriendStatus::Accept),
+        status: convert_status_to_str(&ScFriendStatus::Accept),
     };
 
     let friend = diesel::insert_into(friends)

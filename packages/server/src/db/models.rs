@@ -45,6 +45,7 @@ pub struct Game {
     pub updated_at: NaiveDateTime,
     pub rom: String,
     pub screenshots: Option<String>,
+    pub lang: String,
 }
 
 #[derive(Insertable)]
@@ -58,6 +59,7 @@ pub struct NewGame<'a> {
     pub updated_at: NaiveDateTime,
     pub rom: &'a str,
     pub screenshots: Option<&'a str>,
+    pub lang: &'a str,
 }
 
 #[derive(Queryable)]

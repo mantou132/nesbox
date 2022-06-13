@@ -1,10 +1,17 @@
 use chrono::Utc;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
-use juniper::{FieldResult, GraphQLInputObject, GraphQLObject};
+use juniper::{FieldResult, GraphQLEnum, GraphQLInputObject, GraphQLObject};
 
 use crate::db::models::{Game, NewGame};
 use crate::db::schema::games;
+
+#[derive(GraphQLEnum, Debug, Clone, PartialEq)]
+pub enum ScGameLang {
+    Zh,
+    En,
+    Ja,
+}
 
 #[derive(GraphQLObject, Debug, Clone)]
 pub struct ScGame {
@@ -16,6 +23,7 @@ pub struct ScGame {
     updated_at: f64,
     rom: String,
     screenshots: Vec<String>,
+    lang: ScGameLang,
 }
 
 #[derive(GraphQLInputObject, Debug, PartialEq)]
@@ -25,6 +33,24 @@ pub struct ScNewGame {
     pub preview: String,
     pub rom: String,
     pub screenshots: Vec<String>,
+    pub lang: ScGameLang,
+}
+
+fn convert_lang_to_str(status: &ScGameLang) -> &'static str {
+    match status {
+        ScGameLang::Zh => "zh",
+        ScGameLang::En => "en",
+        ScGameLang::Ja => "ja",
+    }
+}
+
+pub fn convert_lang_to_enum(status: &str) -> ScGameLang {
+    match status {
+        "zh" => ScGameLang::Zh,
+        "en" => ScGameLang::En,
+        "ja" => ScGameLang::Ja,
+        _ => ScGameLang::Zh,
+    }
 }
 
 fn convert_to_sc_game(game: &Game) -> ScGame {
@@ -34,6 +60,7 @@ fn convert_to_sc_game(game: &Game) -> ScGame {
         description: game.description.clone(),
         preview: game.preview.clone(),
         rom: game.rom.clone(),
+        lang: convert_lang_to_enum(&game.lang),
         created_at: game.created_at.timestamp_millis() as f64,
         updated_at: game.updated_at.timestamp_millis() as f64,
         screenshots: game
@@ -80,6 +107,7 @@ pub fn create_game(conn: &PgConnection, req: &ScNewGame) -> FieldResult<ScGame> 
         created_at: Utc::now().naive_utc(),
         updated_at: Utc::now().naive_utc(),
         screenshots: Some(screenshots_str),
+        lang: convert_lang_to_str(&req.lang),
     };
 
     let game = diesel::insert_into(games::table)
