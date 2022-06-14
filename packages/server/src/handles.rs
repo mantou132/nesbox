@@ -134,7 +134,7 @@ pub async fn webhook(
             if sc_game.rom.is_empty() {
                 log::debug!("Not rom");
             } else {
-                match get_game_from_name(conn, &payload.issue.title) {
+                match get_game_from_name(conn, &sc_game.name) {
                     Some(game) => {
                         update_game(conn, game.id, &sc_game).ok();
                     }

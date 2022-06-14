@@ -1,6 +1,7 @@
 import { updateStore } from '@mantou/gem';
 import { Toast } from 'duoyun-ui/elements/toast';
 import { debounce } from 'duoyun-ui/lib/utils';
+import { isNotNullish } from 'duoyun-ui/lib/types';
 
 import {
   AcceptFriend,
@@ -57,6 +58,7 @@ import {
   ReadMessageMutation,
   ReadMessageMutationVariables,
   ScFriendStatus,
+  ScGame,
   ScNewComment,
   ScNewRoom,
   ScUpdatePassword,
@@ -82,16 +84,26 @@ import { i18n } from 'src/i18n';
 import { logout } from 'src/auth';
 import { documentVisible } from 'src/utils';
 
+const jaDescriptionReg = /(\p{sc=Katakana}|\p{sc=Hiragana}){5}/gu;
+const zhReg = /\p{sc=Han}/u;
+const isCurrentLang = (game: ScGame) => {
+  const lang =
+    Number(game.description.match(jaDescriptionReg)?.length) > 2 ? 'ja' : zhReg.test(game.name) ? 'zh' : 'en';
+  return lang === i18n.currentLanguage.split('-').shift()?.toLowerCase();
+};
+
 export const getGames = async () => {
   const { games, topGames, favorites } = await request<GetGamesQuery, GetGamesQueryVariables>(GetGames, {});
-  const gameIds = games.map((e) => {
-    store.games[e.id] = e;
-    return e.id;
-  });
+  const gameIds = games
+    .map((e) => {
+      store.games[e.id] = e;
+      if (isCurrentLang(e)) return e.id;
+    })
+    .filter(isNotNullish);
   updateStore(store, {
     gameIds,
-    favoriteIds: favorites,
-    topGameIds: (topGames.length ? topGames : gameIds).splice(0, 5),
+    favoriteIds: favorites.filter((id) => isCurrentLang(store.games[id]!)),
+    topGameIds: [...new Set([...topGames, ...gameIds])].filter((id) => isCurrentLang(store.games[id]!)).splice(0, 5),
   });
 };
 
@@ -323,14 +335,17 @@ export const subscribeEvent = () => {
 
       if (newGame) {
         store.games[newGame.id] = newGame;
-        updateStore(store, {
-          gameIds: [...(store.gameIds || []), newGame.id],
-        });
+        if (isCurrentLang(newGame)) {
+          updateStore(store, {
+            gameIds: [...(store.gameIds || []), newGame.id],
+          });
+        }
       }
 
       if (updateRoom) {
-        if (store.rooms[updateRoom.id]) {
-          Object.assign(store.rooms[updateRoom.id], updateRoom);
+        const originRoom = store.rooms[updateRoom.id];
+        if (originRoom) {
+          Object.assign(originRoom, updateRoom);
           updateStore(store);
         }
         if (configure.user?.playing?.id === updateRoom.id) {
