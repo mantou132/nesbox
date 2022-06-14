@@ -39,7 +39,6 @@ table! {
         updated_at -> Timestamp,
         rom -> Varchar,
         screenshots -> Nullable<Text>,
-        lang -> Varchar,
     }
 }
 

@@ -7,7 +7,6 @@ fragment ScGamePart on ScGame {
   updatedAt
   rom
   screenshots
-  lang
 }
 
 fragment ScMessagePart on ScMessage {

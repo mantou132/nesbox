@@ -1,1 +1,0 @@
-ALTER TABLE games ADD COLUMN lang varchar(10) NOT NULL DEFAULT 'zh';

@@ -1,9 +1,8 @@
 use actix_web::HttpRequest;
 use data_encoding::HEXLOWER;
 use pulldown_cmark::{Event, Options, Parser, Tag};
-use regex::Regex;
 
-use crate::schemas::game::{convert_lang_to_enum, ScNewGame};
+use crate::schemas::game::ScNewGame;
 use ring::hmac::{verify, Key, HMAC_SHA256};
 
 pub fn validate(req: &HttpRequest, secret: &str, data: &[u8]) -> bool {
@@ -55,15 +54,6 @@ impl GithubPayload {
     }
 }
 
-pub fn get_title_lang(title: &str) -> (&str, &str) {
-    let title_reg = Regex::new(r"^(?P<name>.+?)(\[(?P<lang>\w{2})\])?$").unwrap();
-    let match_result = title_reg.captures(title).unwrap();
-    (
-        match_result.name("name").unwrap().as_str(),
-        match_result.name("lang").map_or_else(|| "", |m| m.as_str()),
-    )
-}
-
 pub fn get_sc_new_game(payload: &GithubPayload) -> ScNewGame {
     let parser = Parser::new_ext(&payload.issue.body, Options::all());
 
@@ -87,10 +77,8 @@ pub fn get_sc_new_game(payload: &GithubPayload) -> ScNewGame {
             _ => (),
         }
     }
-    let (name, lang) = get_title_lang(&payload.issue.title);
     ScNewGame {
-        name: name.into(),
-        lang: convert_lang_to_enum(lang),
+        name: payload.issue.title.clone(),
         description: payload.issue.body.clone(),
         preview,
         rom,
@@ -101,30 +89,9 @@ pub fn get_sc_new_game(payload: &GithubPayload) -> ScNewGame {
 #[cfg(test)]
 mod tests {
     use crate::{
-        github::{
-            get_sc_new_game, get_title_lang, GithubIssue, GithubPayload, GithubRepo, GithubUser,
-        },
-        schemas::game::{ScGameLang, ScNewGame},
+        github::{get_sc_new_game, GithubIssue, GithubPayload, GithubRepo, GithubUser},
+        schemas::game::ScNewGame,
     };
-
-    #[test]
-    fn issue_title_reg() {
-        let (name, lang) = get_title_lang("english[en]");
-        assert_eq!(name, "english");
-        assert_eq!(lang, "en");
-        let (name, lang) = get_title_lang("english title[en]");
-        assert_eq!(name, "english title");
-        assert_eq!(lang, "en");
-        let (name, lang) = get_title_lang("中文[zh]");
-        assert_eq!(name, "中文");
-        assert_eq!(lang, "zh");
-        let (name, lang) = get_title_lang("中 文[zh]");
-        assert_eq!(name, "中 文");
-        assert_eq!(lang, "zh");
-        let (name, lang) = get_title_lang("中 文");
-        assert_eq!(name, "中 文");
-        assert_eq!(lang, "");
-    }
 
     #[test]
     fn parse_github_payload() {
@@ -142,7 +109,6 @@ mod tests {
         assert_eq!(
             get_sc_new_game(&payload),
             ScNewGame {
-                lang: ScGameLang::Zh,
                 name: "name".into(),
                 description: "![NekketsuKakutouDensetsu_frontcover](https://user-images.githubusercontent.com/3841872/168952574-26de855e-b7cd-43fe-ab94-093a2903832d.png)\r\n\r\nゲームモードは、ストーリーにそって闘いを進めていく「ストーリーモード」と最高4人でどたばたと闘い合う「バトルモード」の2種類のモードがあるぞ！\r\n![ABUIABACGAAg9eiD9gUo_I7-uQYwmgM4mgM](https://user-images.githubusercontent.com/3841872/168967700-44131eb9-6e33-48d0-9f3d-e71e9fcdb51b.jpg)\r\n[legend.nes.zip](https://github.com/mantou132/nesbox/files/8713065/legend.nes.zip)\r\n".into(),
                 preview: "https://user-images.githubusercontent.com/3841872/168952574-26de855e-b7cd-43fe-ab94-093a2903832d.png".into(),

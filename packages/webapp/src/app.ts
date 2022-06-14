@@ -103,12 +103,8 @@ export class AppRootElement extends GemElement {
   mounted = () => {
     this.effect(this.#enterRoom, () => [configure.user?.playing?.id]);
     this.effect(this.#enterRoom, () => [history.getParams().path]);
-    this.effect(
-      () => forever(getGames),
-      () => [i18n.currentLanguage],
-    );
     forever(getAccount);
-    getFriends();
+    forever(getGames).then(getFriends);
     addEventListener('keydown', this.#globalShortcut);
     const subscription = subscribeEvent();
     return () => {
