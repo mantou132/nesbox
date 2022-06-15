@@ -13,15 +13,17 @@ import { createPath } from 'duoyun-ui/elements/route';
 import { HexColor, hslToRgb, parseHexColor, rgbToHexColor, rgbToHsl } from 'duoyun-ui/lib/color';
 import { marked } from 'marked';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
+import { waitLoading } from 'duoyun-ui/elements/wait';
+import { Modal } from 'duoyun-ui/elements/modal';
 
 import { store } from 'src/store';
 import { routes } from 'src/routes';
-import { paramKeys } from 'src/constants';
+import { githubIssue, paramKeys } from 'src/constants';
 import { createRoom } from 'src/services/api';
 import { theme, themeStore } from 'src/theme';
 import { i18n } from 'src/i18n';
 import { icons } from 'src/icons';
-import { open } from 'src/utils';
+import { getCorsSrc, getGithubGames, open } from 'src/utils';
 
 import 'duoyun-ui/elements/carousel';
 import 'src/modules/game-list';
@@ -76,13 +78,10 @@ const style = createCSSSheet(css`
     justify-content: center;
     aspect-ratio: 503/348;
     gap: 1em;
-    border: 1px dashed ${theme.borderColor};
+    border: 1px dashed currentColor;
   }
   .add dy-use {
     width: 3em;
-  }
-  .add:hover {
-    border-color: currentColor;
   }
 `);
 
@@ -110,10 +109,38 @@ export class PGamesElement extends GemElement<State> {
     });
   };
 
-  #addGame = () => {
-    open(
-      'https://github.com/mantou132/nesbox/issues/new?assignees=mantou132&labels=&template=add_nes.md&title=%E4%BF%AE%E6%94%B9%E6%A0%87%E9%A2%98%E4%B8%BA%E6%B8%B8%E6%88%8F%E5%90%8D%E7%A7%B0',
+  #addGame = async () => {
+    // 重名添加 `（中文/日本語）`
+    const map = new Map(store.allGames.map((e) => [e.name.replace(/（.*）$/, ''), e.id]));
+    await Modal.confirm(
+      html`<div style="width:min(400px, 100vw)">
+        ${i18n.get(
+          'addGameDetail',
+          (e) => html`<a target="_blank" href="https://github.com/mantou132/nesbox/releases/tag/0.0.1">${e}</a>`,
+        )}
+      </div>`,
     );
+    const list: any[] = await waitLoading(
+      (await fetch(getCorsSrc('https://github.com/mantou132/nesbox/releases/download/0.0.1/matedata.json'))).json(),
+    );
+    const find = async (list: any[]): Promise<any> => {
+      const index = list.findIndex((e) => !map.has(e.title) && e.title !== '马力欧兄弟/水管马力欧');
+      const item = list[index];
+      if (!item) return;
+      const link = (await getGithubGames(item.title)).find((e) => e.textContent === e.title);
+      return link ? await find(list.slice(index, list.length)) : item;
+    };
+    const item = await waitLoading(find(list));
+    if (item) {
+      open(
+        `${githubIssue}/new?${new URLSearchParams({
+          title: item.title,
+          body: item.description,
+          labels: 'game',
+          assignees: 'mantou132',
+        })}`,
+      );
+    }
   };
 
   render = () => {

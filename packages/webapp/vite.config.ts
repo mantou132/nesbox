@@ -31,17 +31,6 @@ const config = async ({ command }: any) => {
     server: {
       host: true,
       port: 3003,
-      proxy: {
-        '/api/subscriptions': {
-          target: `http://localhost:8080`,
-          changeOrigin: true,
-          ws: true,
-        },
-        '/api': {
-          target: `http://localhost:8080`,
-          changeOrigin: true,
-        },
-      },
     },
   });
 };

@@ -24,6 +24,7 @@ const close = `<svg viewBox="0 0 10 10" fill="currentColor"><polygon points="10.
 
 const style = createCSSSheet(css`
   :host {
+    cursor: default;
     -webkit-user-select: none;
     user-select: none;
     display: flex;
@@ -77,7 +78,7 @@ export class MTitlebarElement extends GemElement<State> {
   };
 
   get #window() {
-    return window.__TAURI__?.window.appWindow;
+    return window.__TAURI__?.window.getCurrent();
   }
 
   #isMaximized = () => {
@@ -86,8 +87,10 @@ export class MTitlebarElement extends GemElement<State> {
 
   constructor() {
     super();
-    this.addEventListener('mousedown', () => {
+    this.addEventListener('mousedown', (event) => {
       this.#window?.startDragging();
+      // https://github.com/tauri-apps/tauri/issues/4059#issuecomment-1154360504
+      event.preventDefault();
     });
     this.addEventListener('dblclick', async () => {
       this.#window?.toggleMaximize();

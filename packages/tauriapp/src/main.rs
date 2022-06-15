@@ -13,43 +13,18 @@ extern crate objc;
 use preload::PreloadPlugin;
 use tauri::Manager;
 #[cfg(target_os = "macos")]
-use tauri::{Menu, MenuItem, Submenu};
+use tauri::Menu;
 #[cfg(target_os = "macos")]
 use window_ext::WindowExt;
 
 mod preload;
 mod window_ext;
 
-#[cfg(target_os = "macos")]
-fn get_default_menu() -> Menu {
-    Menu::new()
-        .add_submenu(Submenu::new(
-            "NESBox",
-            Menu::new()
-                .add_native_item(MenuItem::Hide)
-                .add_native_item(MenuItem::HideOthers)
-                .add_native_item(MenuItem::ShowAll)
-                .add_native_item(MenuItem::Quit),
-        ))
-        .add_submenu(Submenu::new(
-            "Edit",
-            Menu::new()
-                .add_native_item(MenuItem::Copy)
-                .add_native_item(MenuItem::Cut)
-                .add_native_item(MenuItem::Paste)
-                .add_native_item(MenuItem::Separator)
-                .add_native_item(MenuItem::Undo)
-                .add_native_item(MenuItem::Redo)
-                .add_native_item(MenuItem::Separator)
-                .add_native_item(MenuItem::SelectAll),
-        ))
-}
-
 fn main() {
     let builder = tauri::Builder::default();
 
     #[cfg(target_os = "macos")]
-    let builder = builder.menu(get_default_menu());
+    let builder = builder.menu(Menu::os_default("NESBox"));
 
     builder
         .setup(|app| {

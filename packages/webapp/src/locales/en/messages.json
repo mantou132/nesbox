@@ -158,6 +158,9 @@
   "addGame": {
     "message": "Add Game"
   },
+  "addGameDetail": {
+    "message": "Create GitHub Issue, fill in the title, Introduction or gameplay, and upload the screenshot (the first one as the cover) and the .nes files of the .zip file, after the closure, the game will be added to NESBox. screenshots and NES references can be downloaded at $1<here> download"
+  },
   "gameComment": {
     "message": "Comment"
   },

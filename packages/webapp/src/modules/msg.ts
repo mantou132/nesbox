@@ -9,13 +9,11 @@ import {
   state,
   boolattribute,
 } from '@mantou/gem';
-import { Time } from 'duoyun-ui/lib/time';
 
 import { configure } from 'src/configure';
 import { Message } from 'src/store';
 import { theme } from 'src/theme';
-
-import 'duoyun-ui/elements/tooltip';
+import { formatTime } from 'src/utils';
 
 const style = createCSSSheet(css`
   :host {
@@ -82,12 +80,10 @@ export class MMsgElement extends GemElement {
     this.self = this.msg?.userId === configure.user?.id;
 
     return html`
-      ${this.time ? html`<div class="time">${new Time(this.msg.createdAt).format('HH:mm:ss')}</div>` : ''}
-      <dy-tooltip .position=${'left'} .content=${new Time(this.msg.createdAt).format()}>
-        <div class="body">
-          <div>${this.msg.body}</div>
-        </div>
-      </dy-tooltip>
+      ${this.time ? html`<div class="time">${formatTime(this.msg.createdAt)}</div>` : ''}
+      <div class="body">
+        <div>${this.msg.body}</div>
+      </div>
     `;
   };
 }

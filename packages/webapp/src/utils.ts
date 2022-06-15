@@ -1,7 +1,18 @@
 import { render, TemplateResult } from '@mantou/gem';
+import { Time } from 'duoyun-ui/lib/time';
+
+import { githubIssue } from 'src/constants';
 
 export const getCorsSrc = (url: string) => {
   return `https://files.xianqiao.wang/${url}`;
+};
+
+export const getGithubGames = async (s: string) => {
+  const search = `${githubIssue}?q=is%3Aissue+label%3Agame+${s.replaceAll(' ', '+')}`;
+  const text = await (await fetch(getCorsSrc(search))).text();
+  const domparse = new DOMParser();
+  const doc = domparse.parseFromString(text, 'text/html');
+  return [...doc.querySelectorAll('[aria-label=Issues] a[id^=issue]')] as HTMLAnchorElement[];
 };
 
 export const getTempText = (html: TemplateResult) => {
@@ -26,4 +37,15 @@ export const open = (uri: string) => {
   } else {
     window.open(uri);
   }
+};
+
+export const formatTime = (timestamp: number) => {
+  const time = new Time(timestamp);
+  if (new Time().isSome(time, 'd')) {
+    return time.format('HH:mm:ss');
+  }
+  if (new Time().isSome(time, 'Y')) {
+    return time.format('MM-DD HH:mm:ss');
+  }
+  return time.format();
 };

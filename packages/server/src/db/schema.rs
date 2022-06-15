@@ -110,5 +110,13 @@ joinable!(rooms -> games (game_id));
 joinable!(rooms -> users (host));
 
 allow_tables_to_appear_in_same_query!(
-    comments, favorites, friends, games, invites, messages, playing, rooms, users,
+    comments,
+    favorites,
+    friends,
+    games,
+    invites,
+    messages,
+    playing,
+    rooms,
+    users,
 );

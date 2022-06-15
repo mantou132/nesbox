@@ -1,0 +1,1 @@
+ALTER TABLE games ALTER COLUMN name TYPE varchar(100);

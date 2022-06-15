@@ -11,6 +11,7 @@ import {
 } from '@mantou/gem';
 import { Modal } from 'duoyun-ui/elements/modal';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
+import { waitLoading } from 'duoyun-ui/elements/wait';
 
 import { createComment, createRoom, getComments } from 'src/services/api';
 import { store } from 'src/store';
@@ -18,6 +19,8 @@ import { icons } from 'src/icons';
 import { configure } from 'src/configure';
 import { theme } from 'src/theme';
 import { i18n } from 'src/i18n';
+import { getGithubGames, open } from 'src/utils';
+import { githubIssue } from 'src/constants';
 
 import 'duoyun-ui/elements/button';
 import 'duoyun-ui/elements/input';
@@ -71,6 +74,13 @@ const style = createCSSSheet(css`
     flex-grow: 1;
     margin: 0;
   }
+  .icon {
+    width: 1.5rem;
+    padding: 0.3rem;
+  }
+  .icon:hover {
+    background-color: ${theme.hoverBackgroundColor};
+  }
   .preview {
     width: 100%;
     aspect-ratio: 503/348;
@@ -101,6 +111,10 @@ const style = createCSSSheet(css`
 @connectStore(store)
 export class PGameElement extends GemElement {
   @numattribute gameId: number;
+
+  get #game() {
+    return store.games[this.gameId];
+  }
 
   get #comments() {
     return store.comment[this.gameId]?.comments;
@@ -138,12 +152,25 @@ export class PGameElement extends GemElement {
     createComment({ gameId: this.gameId, like, body: input.value });
   };
 
+  #edit = async () => {
+    if (this.#game) {
+      const { name } = this.#game;
+      const links = await waitLoading(getGithubGames(name));
+      const link = links.find((e) => e.textContent === name);
+      if (link) {
+        open(new URL(githubIssue).origin + new URL(link.href).pathname);
+      } else {
+        open(githubIssue);
+      }
+    }
+  };
+
   mounted = () => {
     getComments(this.gameId);
   };
 
   render = () => {
-    const game = store.games[this.gameId];
+    const game = this.#game;
 
     let likedCount = 0;
 
@@ -163,7 +190,10 @@ export class PGameElement extends GemElement {
       <div class="info">
         <m-screenshots .links=${game?.screenshots}></m-screenshots>
         <div class="header">
-          <dy-heading lv="1" class="title">${game?.name}</dy-heading>
+          <dy-heading lv="1" class="title">
+            ${game?.name}
+            <dy-use class="icon" @click=${this.#edit} .element=${icons.edit}></dy-use>
+          </dy-heading>
           <dy-button @click=${() => game && createRoom({ gameId: game.id, private: false })}>
             ${i18n.get('startGame')}
           </dy-button>

@@ -55,12 +55,12 @@ export class MGameListElement extends GemElement {
 
   render = () => {
     return html`
+      <slot></slot>
       ${this.#data?.map(
         (id) =>
           store.games[id] &&
           html`<m-game-item .game=${store.games[id]!} .favorited=${this.#favSet.has(id)}></m-game-item>`,
       )}
-      <slot></slot>
     `;
   };
 }

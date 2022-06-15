@@ -5,6 +5,8 @@ export const COMMAND = process.env.COMMAND as 'serve' | 'build';
 export const isTauriMacApp = navigator.appName === 'nesbox-macos';
 export const isTauriWinApp = navigator.appName === 'nesbox-windows';
 
+export const githubIssue = 'https://github.com/mantou132/nesbox/issues';
+
 export const paramKeys = {
   ROOM_ID: 'rid',
   GAME_ID: 'gid',
