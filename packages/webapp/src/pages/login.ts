@@ -20,6 +20,7 @@ import { gotoRedirectUri } from 'src/auth';
 import { i18n } from 'src/i18n';
 import { routes } from 'src/routes';
 import { login, register } from 'src/services/guest-api';
+import { open } from 'src/utils';
 
 import 'duoyun-ui/elements/form';
 import 'duoyun-ui/elements/link';
@@ -60,6 +61,7 @@ const style = createCSSSheet(css`
     color: ${theme.highlightColor};
     vertical-align: middle;
     padding-inline: 0.2em 0.4em;
+    border-radius: ${theme.normalRound};
   }
   .slogan h1 {
     font-size: 2.7em;
@@ -150,7 +152,9 @@ export class PLoginElement extends GemElement<State> {
       <m-guest></m-guest>
       <div class="bg-copyright">
         <nesbox-tooltip .content=${i18n.get('bgCopyright')}>
-          <dy-link href="https://dribbble.com/shots/10244007-Old-tech-devices-2">@Tanner Wayment</dy-link>
+          <dy-link @click=${() => open('https://dribbble.com/shots/10244007-Old-tech-devices-2')}>
+            @Tanner Wayment
+          </dy-link>
         </nesbox-tooltip>
       </div>
       <div class="slogan">

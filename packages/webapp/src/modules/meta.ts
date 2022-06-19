@@ -19,7 +19,7 @@ const style = createCSSSheet(css`
 export class ModuleMetaElement extends GemElement {
   render = () => {
     return html`
-      <dy-title suffix=${mediaQuery.isPWA ? '' : ` | ${i18n.get('title')}`}></dy-title>
+      <dy-title suffix=${mediaQuery.isPWA ? '' : ` - ${i18n.get('title')}`}></dy-title>
       <dy-reflect>
         <meta name="theme-color" content="${themeStore.titleBarColor}" />
       </dy-reflect>

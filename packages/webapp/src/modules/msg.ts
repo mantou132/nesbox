@@ -30,6 +30,7 @@ const style = createCSSSheet(css`
     line-height: 1.3;
     max-width: 80%;
     background-color: ${theme.noticeColor};
+    border-radius: ${theme.smallRound};
   }
   :host(:where(:--self, [data-self])) .body {
     background-color: ${theme.describeColor};

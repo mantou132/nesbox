@@ -85,20 +85,18 @@ const style = createCSSSheet(css`
     width: 100%;
     aspect-ratio: 503/348;
     object-fit: cover;
+    border-radius: ${theme.normalRound};
   }
-  .buttons {
+  .comment-title {
     display: flex;
     align-items: center;
   }
-  .buttons > * {
+  .comment-title > * {
     margin: 0;
     flex-grow: 1;
   }
-  .buttons dy-button {
-    width: 0;
-  }
-  .buttons dy-button:last-child {
-    margin-inline-start: -1px;
+  .comment-title dy-button {
+    width: 4em;
   }
 `);
 
@@ -202,24 +200,26 @@ export class PGameElement extends GemElement {
       </div>
       <div class="aside">
         <img class="preview" src=${game?.preview || ''} />
-        <div class="buttons">
+        <div class="comment-title">
           <dy-heading lv="3">${i18n.get('gameComment')}</dy-heading>
-          <dy-button
-            color=${theme.textColor}
-            @click=${() => this.#changeComment(true)}
-            .icon=${this.#isSelfLike ? icons.likeSolid : icons.like}
-            type=${this.#isSelfLike ? 'solid' : 'reverse'}
-          >
-            ${formatPercentage(true)}
-          </dy-button>
-          <dy-button
-            color=${theme.textColor}
-            @click=${() => this.#changeComment(false)}
-            .icon=${this.#isSelfUnLike ? icons.unlikeSolid : icons.unlike}
-            type=${this.#isSelfUnLike ? 'solid' : 'reverse'}
-          >
-            ${formatPercentage(false)}
-          </dy-button>
+          <dy-input-group>
+            <dy-button
+              color=${theme.textColor}
+              @click=${() => this.#changeComment(true)}
+              .icon=${this.#isSelfLike ? icons.likeSolid : icons.like}
+              type=${this.#isSelfLike ? 'solid' : 'reverse'}
+            >
+              ${formatPercentage(true)}
+            </dy-button>
+            <dy-button
+              color=${theme.textColor}
+              @click=${() => this.#changeComment(false)}
+              .icon=${this.#isSelfUnLike ? icons.unlikeSolid : icons.unlike}
+              type=${this.#isSelfUnLike ? 'solid' : 'reverse'}
+            >
+              ${formatPercentage(false)}
+            </dy-button>
+          </dy-input-group>
         </div>
         ${commentList}
       </div>

@@ -101,7 +101,6 @@ export const getGames = async () => {
     })
     .filter(isNotNullish);
   updateStore(store, {
-    allGames: games,
     gameIds,
     favoriteIds: favorites.filter((id) => isCurrentLang(store.games[id]!)),
     topGameIds: [...new Set([...topGames, ...gameIds])].filter((id) => isCurrentLang(store.games[id]!)).splice(0, 5),

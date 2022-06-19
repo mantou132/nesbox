@@ -5,13 +5,11 @@ import {
   customElement,
   createCSSSheet,
   css,
-  connectStore,
   classMap,
+  attribute,
+  connectStore,
+  titleStore,
 } from '@mantou/gem';
-
-import { i18n } from 'src/i18n';
-import { theme } from 'src/theme';
-import { isTauriWinApp } from 'src/constants';
 
 import 'duoyun-ui/elements/title';
 import 'duoyun-ui/elements/reflect';
@@ -29,12 +27,15 @@ const style = createCSSSheet(css`
     user-select: none;
     display: flex;
     align-items: center;
-    justify-content: ${isTauriWinApp ? 'space-between' : 'center'};
     height: var(--titlebar-area-height, 0);
-    background-color: ${theme.titleBarColor};
     font-size: 0.75em;
-    z-index: calc(${theme.popupZIndex} + 1);
+    background: black;
     color: white;
+    z-index: 2147483647;
+    justify-content: center;
+  }
+  :host([type='win']) {
+    justify-content: space-between;
   }
   .title {
     padding-inline: 1em;
@@ -67,15 +68,28 @@ type State = {
 
 /**
  * @customElement m-titlebar
+ * @attr type
+ * @attr header
  */
 @customElement('m-titlebar')
 @adoptedStyle(style)
-@connectStore(i18n.store)
+@connectStore(titleStore)
 export class MTitlebarElement extends GemElement<State> {
+  @attribute header: string;
+  @attribute type: 'win' | 'mac';
+
   state: State = {
     maximized: false,
     blur: false,
   };
+
+  get #type() {
+    return this.type || 'mac';
+  }
+
+  get #isWin() {
+    return this.#type === 'win';
+  }
 
   get #window() {
     return window.__TAURI__?.window.getCurrent();
@@ -101,6 +115,13 @@ export class MTitlebarElement extends GemElement<State> {
 
     this.#window?.listen('tauri://blur', () => this.setState({ blur: true }));
     this.#window?.listen('tauri://focus', () => this.setState({ blur: false }));
+
+    this.#window?.listen('tauri://close-requested', () => {
+      dispatchEvent(new CustomEvent('pagehide'));
+      dispatchEvent(new CustomEvent('beforeunload'));
+      dispatchEvent(new CustomEvent('unload'));
+      this.#window?.close();
+    });
   }
 
   render = () => {
@@ -108,12 +129,13 @@ export class MTitlebarElement extends GemElement<State> {
       <dy-reflect>
         <style>
           :root {
-            --titlebar-area-height: ${this.style.height};
+            /* similar env */
+            --titlebar-area-height: ${this.#isWin ? '32px' : '38px'};
           }
         </style>
       </dy-reflect>
-      <div class="title">${i18n.get('title')} - <dy-title></dy-title></div>
-      ${isTauriWinApp
+      <div class="title">${document.title}</div>
+      ${this.#isWin
         ? // https://codepen.io/agrimsrud/pen/WGgRPP?editors=1100
           html`
             <div

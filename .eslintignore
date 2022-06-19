@@ -3,3 +3,4 @@ packages/*/bin
 packages/*/coverage
 packages/*/extension
 generated
+public

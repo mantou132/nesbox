@@ -21,7 +21,6 @@ import { routes } from 'src/routes';
 import {
   ChannelMessage,
   ChannelMessageType,
-  getButton,
   KeyDownMsg,
   KeyUpMsg,
   Role,
@@ -34,6 +33,7 @@ import { store } from 'src/store';
 import { i18n } from 'src/i18n';
 import type { MRoomChatElement } from 'src/modules/room-chat';
 import { getCorsSrc } from 'src/utils';
+import { events } from 'src/constants';
 
 import 'duoyun-ui/elements/input';
 import 'src/modules/room-player-list';
@@ -176,7 +176,7 @@ export class PRoomElement extends GemElement<State> {
     const zip = await (await fetch(getCorsSrc(this.#rom!))).arrayBuffer();
     const folder = await JSZip.loadAsync(zip);
     const buffer = await Object.values(folder.files)
-      .find((e) => e.name.endsWith('.nes'))!
+      .find((e) => e.name.toLowerCase().endsWith('.nes'))!
       .async('arraybuffer');
     this.#nes = WasmNes.new();
     this.#nes.set_rom(new Uint8Array(buffer));
@@ -217,14 +217,29 @@ export class PRoomElement extends GemElement<State> {
     }
   };
 
-  #onKeyDown = (event: KeyboardEvent) => {
-    const button = getButton(event);
-    if (!button) {
-      hotkeys({
-        enter: () => this.chatRef.element?.focus(),
-      })(event);
-      return;
-    }
+  #getButton = (event: KeyboardEvent) => {
+    const { keybinding } = configure.user!.settings;
+    const map: Record<string, Button> = {
+      [keybinding.Up]: Button.Joypad1Up,
+      [keybinding.Left]: Button.Joypad1Left,
+      [keybinding.Down]: Button.Joypad1Down,
+      [keybinding.Right]: Button.Joypad1Right,
+      [keybinding.A]: Button.Joypad1A,
+      [keybinding.B]: Button.Joypad1B,
+      [keybinding.Select]: Button.Select,
+      [keybinding.Start]: Button.Start,
+
+      [keybinding.Up_2]: Button.Joypad2Up,
+      [keybinding.Left_2]: Button.Joypad2Left,
+      [keybinding.Down_2]: Button.Joypad2Down,
+      [keybinding.Right_2]: Button.Joypad2Right,
+      [keybinding.A_2]: Button.Joypad2A,
+      [keybinding.B_2]: Button.Joypad2B,
+    };
+    return map[event.key.toLowerCase()];
+  };
+
+  #pressButton = (button: Button) => {
     if (button !== Button.Reset) this.#enableAudio();
     if (this.#isHost) {
       this.#nes?.press_button(button);
@@ -233,14 +248,37 @@ export class PRoomElement extends GemElement<State> {
     }
   };
 
-  #onKeyUp = (event: KeyboardEvent) => {
-    const button = getButton(event);
-    if (!button) return;
+  #onPressButton = (event: CustomEvent<Button>) => {
+    this.#pressButton(event.detail);
+  };
+
+  #onKeyDown = (event: KeyboardEvent) => {
+    const button = this.#getButton(event);
+    if (!button) {
+      hotkeys({
+        enter: () => this.chatRef.element?.focus(),
+      })(event);
+      return;
+    }
+    this.#pressButton(button);
+  };
+
+  #releaseButton = (button: Button) => {
     if (this.#isHost) {
       this.#nes?.release_button(button);
     } else {
       this.#rtc?.send(new KeyUpMsg(button));
     }
+  };
+
+  #onReleaseButton = (event: CustomEvent<Button>) => {
+    this.#releaseButton(event.detail);
+  };
+
+  #onKeyUp = (event: KeyboardEvent) => {
+    const button = this.#getButton(event);
+    if (!button) return;
+    this.#releaseButton(button);
   };
 
   mounted = () => {
@@ -274,13 +312,17 @@ export class PRoomElement extends GemElement<State> {
       () => [this.#playing?.id, this.#rom],
     );
 
-    window.addEventListener('keydown', this.#onKeyDown);
-    window.addEventListener('keyup', this.#onKeyUp);
+    addEventListener('keydown', this.#onKeyDown);
+    addEventListener('keyup', this.#onKeyUp);
+    addEventListener(events.PRESS_BUTTON, this.#onPressButton);
+    addEventListener(events.RELEASE_BUTTON, this.#onReleaseButton);
     return () => {
       this.#audioContext?.close();
       this.#rtc?.destroy();
-      window.removeEventListener('keydown', this.#onKeyDown);
-      window.removeEventListener('keyup', this.#onKeyUp);
+      removeEventListener('keydown', this.#onKeyDown);
+      removeEventListener('keyup', this.#onKeyUp);
+      removeEventListener(events.PRESS_BUTTON, this.#onPressButton);
+      removeEventListener(events.RELEASE_BUTTON, this.#onReleaseButton);
     };
   };
 

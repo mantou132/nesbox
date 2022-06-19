@@ -20,6 +20,8 @@ import 'duoyun-ui/elements/options';
 
 const style = createCSSSheet(css`
   :host {
+    border-radius: ${theme.normalRound};
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     width: min(100vw, 30em);
@@ -33,6 +35,7 @@ const style = createCSSSheet(css`
   .input {
     width: 100%;
     font-size: 1.125em;
+    border-radius: ${theme.smallRound};
   }
   .result {
     min-height: 0;
@@ -77,7 +80,7 @@ export class MSearchElement extends GemElement<State> {
           options.push({
             icon: icons.game,
             label: game.name,
-            tag: playing ? html`<dy-use .element=${icons.received}></dy-use>` : undefined,
+            tag: playing ? html`<dy-use .element=${icons.received} style="width: 1.5em"></dy-use>` : undefined,
             onClick: async () => {
               if (playing) {
                 updateRoom({
@@ -107,7 +110,7 @@ export class MSearchElement extends GemElement<State> {
         options.push({
           icon: icons.person,
           label: friend.user.nickname,
-          tag: playing ? html`<dy-use .element=${icons.share}></dy-use>` : undefined,
+          tag: playing ? html`<dy-use .element=${icons.share} style="width: 1.5em"></dy-use>` : undefined,
           onClick: async () => {
             if (playing) {
               await createInvite(friend.user.id, playing.id);

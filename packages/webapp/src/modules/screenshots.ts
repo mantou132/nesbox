@@ -22,6 +22,8 @@ const style = createCSSSheet(css`
     display: block;
     width: 100%;
     box-sizing: border-box;
+    border-radius: ${theme.normalRound};
+    overflow: hidden;
   }
   .carousel {
     aspect-ratio: 503/348;
@@ -47,6 +49,7 @@ const style = createCSSSheet(css`
     background: ${theme.borderColor};
     padding: 0.4em 0.7em;
     border: 1px solid ${theme.textColor};
+    border-radius: ${theme.smallRound};
   }
   .preview .current {
     position: relative;

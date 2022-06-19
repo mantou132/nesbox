@@ -1,6 +1,7 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, connectStore } from '@mantou/gem';
 import { ContextMenu } from 'duoyun-ui/elements/menu';
 import { waitLoading } from 'duoyun-ui/elements/wait';
+import { commonHandle } from 'duoyun-ui/lib/hotkeys';
 
 import { configure, getShortcut, toggoleScreencaseMode, toggoleSettingsState } from 'src/configure';
 import { logout } from 'src/auth';
@@ -41,6 +42,8 @@ export class MAvatarElement extends GemElement {
   constructor() {
     super();
     this.addEventListener('click', this.#onClick);
+    this.tabIndex = 0;
+    this.addEventListener('keydown', commonHandle);
   }
 
   #onClick = (event: Event) => {

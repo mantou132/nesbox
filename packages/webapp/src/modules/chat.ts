@@ -36,11 +36,12 @@ const style = createCSSSheet(css`
     display: flex;
     flex-direction: column;
     width: 20em;
-    height: 24em;
+    height: min(24em, calc(100vh - 2em));
     background-color: ${theme.lightBackgroundColor};
     border: 1px solid ${theme.borderColor};
     box-shadow: 0 5px 10px rgba(0, 0, 0, calc(${theme.maskAlpha} - 0.15));
     box-sizing: border-box;
+    border-radius: ${theme.normalRound};
   }
   @media ${mediaQuery.PHONE} {
     :host {
@@ -63,6 +64,7 @@ const style = createCSSSheet(css`
     padding: 0.3em;
     width: 1.2em;
     margin: 0.5em;
+    border-radius: ${theme.smallRound};
   }
   .close:hover {
     background-color: ${theme.hoverBackgroundColor};
@@ -84,6 +86,7 @@ const style = createCSSSheet(css`
     width: auto;
     margin: 0.5em;
     flex-shrink: 0;
+    border-radius: ${theme.smallRound};
   }
 `);
 

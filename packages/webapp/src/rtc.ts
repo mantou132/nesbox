@@ -7,6 +7,7 @@ import { logger } from 'src/logger';
 import { sendSignal } from 'src/services/api';
 import { getTempText } from 'src/utils';
 
+// https://github.com/takahirox/nes-rust/issues/98
 const buttonMap: Record<Button, Record<string, Button | undefined>> = {
   [Button.Joypad1Up]: { '2': Button.Joypad2Up },
   [Button.Joypad1Left]: { '2': Button.Joypad2Left },
@@ -18,21 +19,6 @@ const buttonMap: Record<Button, Record<string, Button | undefined>> = {
   [Button.Start]: { '2': undefined },
   [Button.Reset]: { '2': undefined },
 };
-
-export function getButton(event: KeyboardEvent) {
-  const { keybinding } = configure.user!.settings;
-  const map: Record<string, Button> = {
-    [keybinding.Up]: Button.Joypad1Up,
-    [keybinding.Left]: Button.Joypad1Left,
-    [keybinding.Down]: Button.Joypad1Down,
-    [keybinding.Right]: Button.Joypad1Right,
-    [keybinding.A]: Button.Joypad1A,
-    [keybinding.B]: Button.Joypad1B,
-    [keybinding.Select]: Button.Select,
-    [keybinding.Start]: Button.Start,
-  };
-  return map[event.key.toLowerCase()];
-}
 
 export enum ChannelMessageType {
   CHAT_TEXT,
@@ -318,7 +304,7 @@ export class RTC extends EventTarget {
       data: conn.localDescription,
     });
     this.#restartTimer = window.setTimeout(() => this.#restart(), 2000);
-    window.addEventListener(events.SINGAL, () => clearTimeout(this.#restartTimer), { once: true });
+    addEventListener(events.SINGAL, () => clearTimeout(this.#restartTimer), { once: true });
   };
 
   #restart = () => {
@@ -341,12 +327,12 @@ export class RTC extends EventTarget {
       this.#startClient();
     }
 
-    window.addEventListener(events.SINGAL, this.#onSignal);
+    addEventListener(events.SINGAL, this.#onSignal);
   };
 
   destroy = () => {
     this.#connMap.forEach((_, id) => this.#deleteUser(id));
-    window.removeEventListener(events.SINGAL, this.#onSignal);
+    removeEventListener(events.SINGAL, this.#onSignal);
     clearTimeout(this.#restartTimer);
   };
 

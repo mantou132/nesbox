@@ -106,7 +106,7 @@ export function subscribe<Result, InputVar = Record<string, any>>(
     },
   );
 
-  window.addEventListener('unload', () => client.close());
+  addEventListener('unload', () => client.close());
 
   let deferred: {
     resolve: (done: boolean) => void;

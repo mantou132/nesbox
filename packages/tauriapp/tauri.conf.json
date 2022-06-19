@@ -59,7 +59,8 @@
         "width": 1024,
         "height": 640,
         "fullscreen": false,
-        "resizable": true
+        "resizable": true,
+        "visible": false
       }
     ]
   }

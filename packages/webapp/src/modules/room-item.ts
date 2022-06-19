@@ -4,6 +4,7 @@ import { Room, store } from 'src/store';
 import { theme } from 'src/theme';
 
 import 'duoyun-ui/elements/avatar';
+import 'duoyun-ui/elements/heading';
 
 const style = createCSSSheet(css`
   :host {
@@ -12,6 +13,8 @@ const style = createCSSSheet(css`
     align-items: center;
     gap: 1em;
     border: 1px solid ${theme.borderColor};
+    border-radius: ${theme.normalRound};
+    overflow: hidden;
   }
   :host(:hover) {
     background-color: ${theme.lightBackgroundColor};
@@ -25,6 +28,9 @@ const style = createCSSSheet(css`
     display: flex;
     flex-direction: column;
     gap: 1em;
+  }
+  .heading {
+    margin: 0;
   }
 `);
 
@@ -40,9 +46,9 @@ export class MRoomItemElement extends GemElement {
     const game = store.games[this.room.gameId || 0];
 
     return html`
-      <img class="cover" src=${game?.preview || ''} />
+      <img class="cover" loading="lazy" src=${game?.preview || ''} />
       <div class="info">
-        <div>${game?.name}</div>
+        <dy-heading lv="4" class="heading">${game?.name}</dy-heading>
         <dy-avatar-group
           class="users"
           max="9"

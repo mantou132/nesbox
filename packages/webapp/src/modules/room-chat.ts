@@ -53,6 +53,7 @@ const style = createCSSSheet(css`
   }
   .input {
     flex-shrink: 0;
+    border-radius: ${theme.smallRound};
   }
   .input.silent {
     display: none;

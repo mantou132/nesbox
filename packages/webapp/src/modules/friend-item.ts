@@ -1,6 +1,7 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, property } from '@mantou/gem';
 import { ContextMenu } from 'duoyun-ui/elements/menu';
 import { Toast } from 'duoyun-ui/elements/toast';
+import { commonHandle } from 'duoyun-ui/lib/hotkeys';
 
 import { Friend, Invite, store } from 'src/store';
 import { theme } from 'src/theme';
@@ -27,10 +28,10 @@ const style = createCSSSheet(css`
     border-width: 1px;
     border-style: solid;
   }
-  :host(:where(:--active, [data-active], :hover)) {
+  :host(:where(:--active, [data-active], :hover, :focus)) {
     background-color: ${theme.lightBackgroundColor};
   }
-  :host .action:where(:--active, [data-active], :hover) {
+  :host .action:where(:--active, [data-active], :hover, :focus) {
     background-color: ${theme.hoverBackgroundColor};
   }
   .avatar {
@@ -54,6 +55,7 @@ const style = createCSSSheet(css`
     text-overflow: ellipsis;
   }
   .action {
+    border-radius: ${theme.smallRound};
     width: 1.5em;
     padding: 0.2em;
   }
@@ -101,6 +103,8 @@ export class MFriendItemElement extends GemElement {
   constructor() {
     super();
     this.addEventListener('click', this.#onClick);
+    this.tabIndex = 0;
+    this.addEventListener('keydown', commonHandle);
   }
 
   #deleteFriend = async (id: number, activeElement: HTMLElement) => {

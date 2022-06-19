@@ -16,6 +16,7 @@ const style = createCSSSheet(css`
     width: 100%;
     box-sizing: border-box;
     padding: 1em;
+    border-radius: ${theme.normalRound};
   }
   .body {
     white-space: pre;

@@ -18,6 +18,7 @@ import { createRoom, favoriteGame } from 'src/services/api';
 import { routes } from 'src/routes';
 import { paramKeys } from 'src/constants';
 import { i18n } from 'src/i18n';
+import { theme } from 'src/theme';
 
 import 'duoyun-ui/elements/use';
 import 'duoyun-ui/elements/button';
@@ -27,14 +28,17 @@ const style = createCSSSheet(css`
   :host {
     position: relative;
     display: flex;
+    border-radius: ${theme.normalRound};
+    overflow: hidden;
   }
   .play {
     position: absolute;
     top: 0.5em;
     right: 0.5em;
+    border-radius: ${theme.smallRound};
   }
-  :host(:not(:hover)) .play {
-    display: none;
+  :host(:not(:hover):not(:focus)) .play {
+    opacity: 0;
   }
   .cover {
     cursor: pointer;
@@ -103,7 +107,7 @@ export class MGameItemElement extends GemElement {
 
   render = () => {
     return html`
-      <img class="cover" @click=${this.#onMoreClick} src=${this.game.preview} />
+      <img class="cover" loading="lazy" @click=${this.#onMoreClick} src=${this.game.preview} />
       ${this.silent
         ? ''
         : html`<dy-button class="play" small @click=${this.#onGameClick}>${i18n.get('startGame')}</dy-button>`}

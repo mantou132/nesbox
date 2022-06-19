@@ -28,6 +28,7 @@ const style = createCSSSheet(css`
   }
   .tabs::part(current-tab) {
     background-color: ${theme.hoverBackgroundColor};
+    border-radius: ${`${theme.smallRound} 0 0 ${theme.smallRound}`};
   }
   .tabs::part(marker) {
     display: none;
@@ -61,7 +62,7 @@ export class MSettingsElement extends GemElement<State> {
             tab: i18n.get('accountSetting'),
             getContent() {
               return html`
-                <dy-tab-panel>
+                <dy-tab-panel style="scrollbar-width: none">
                   <m-account-settings></m-account-settings>
                 </dy-tab-panel>
               `;
@@ -71,7 +72,7 @@ export class MSettingsElement extends GemElement<State> {
             tab: i18n.get('keySetting'),
             getContent() {
               return html`
-                <dy-tab-panel>
+                <dy-tab-panel style="scrollbar-width: none">
                   <m-keybinding></m-keybinding>
                 </dy-tab-panel>
               `;
@@ -81,7 +82,7 @@ export class MSettingsElement extends GemElement<State> {
             tab: i18n.get('license'),
             getContent() {
               return html`
-                <dy-tab-panel>
+                <dy-tab-panel style="scrollbar-width: none">
                   MIT License Copyright (c) 2021-present Permission is hereby granted, free of charge, to any person
                   obtaining a copy of this software and associated documentation files (the "Software"), to deal in the
                   Software without restriction, including without limitation the rights to use, copy, modify, merge,

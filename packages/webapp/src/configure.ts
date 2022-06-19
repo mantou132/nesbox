@@ -17,6 +17,13 @@ const defaultKeybinding = {
   B: 'k',
   Select: 'u',
   Start: 'i',
+
+  Up_2: 'arrowup',
+  Left_2: 'arrowleft',
+  Down_2: 'arrowdown',
+  Right_2: 'arrowright',
+  A_2: '5',
+  B_2: '6',
 };
 
 export type Settings = {
@@ -61,7 +68,7 @@ interface Configure {
   };
 }
 
-export const [configure, storeConfigure] = createCacheStore<Configure>(localStorageKeys.CONFIGURE_LOCAL_STORAGE_KEY, {
+export const [configure] = createCacheStore<Configure>(localStorageKeys.CONFIGURE_LOCAL_STORAGE_KEY, {
   theme: 'default',
   shortcuts: {
     OPEN_SEARCH: {

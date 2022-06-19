@@ -14,6 +14,8 @@ export const paramKeys = {
 
 export const events = {
   SINGAL: 'singal',
+  PRESS_BUTTON: 'pressbutton',
+  RELEASE_BUTTON: 'releasebutton',
 };
 
 export const queryKeys = {

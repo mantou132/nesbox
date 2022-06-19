@@ -36,6 +36,9 @@ const style = createCSSSheet(css`
     gap: 1em;
     padding: 1em;
   }
+  .button {
+    border-radius: ${theme.smallRound};
+  }
 `);
 
 /**
@@ -93,7 +96,13 @@ export class MFriendListElement extends GemElement {
             )}
       </div>
       <div class="actions">
-        <dy-button color=${theme.textColor} @click=${this.#addFriend} type="reverse" .icon=${icons.addPerson}>
+        <dy-button
+          class="button"
+          color=${theme.textColor}
+          @click=${this.#addFriend}
+          type="reverse"
+          .icon=${icons.addPerson}
+        >
           ${i18n.get('addFriend')}
         </dy-button>
       </div>

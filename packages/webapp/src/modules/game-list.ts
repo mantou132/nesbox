@@ -9,7 +9,6 @@ import {
   boolattribute,
 } from '@mantou/gem';
 
-import { theme } from 'src/theme';
 import { store } from 'src/store';
 
 import 'duoyun-ui/elements/use';
@@ -20,7 +19,7 @@ const style = createCSSSheet(css`
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(12em, 1fr));
     grid-template-rows: max-content;
-    grid-gap: ${theme.gridGutter};
+    grid-gap: 2rem;
   }
 `);
 

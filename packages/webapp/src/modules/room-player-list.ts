@@ -11,6 +11,7 @@ import {
   boolattribute,
   connectStore,
 } from '@mantou/gem';
+import { commonHandle } from 'duoyun-ui/lib/hotkeys';
 
 import { theme } from 'src/theme';
 import { configure } from 'src/configure';
@@ -59,6 +60,8 @@ const itemStyle = createCSSSheet(css`
     background-color: ${theme.lightBackgroundColor};
     width: 8em;
     flex-shrink: 0;
+    border-radius: ${theme.smallRound};
+    overflow: hidden;
   }
   :host(:hover) {
     background-color: ${theme.hoverBackgroundColor};
@@ -69,6 +72,9 @@ const itemStyle = createCSSSheet(css`
   .avatar {
     flex-shrink: 0;
     width: calc(2.2em + 2px);
+  }
+  .avatar::part(avatar) {
+    border-radius: 0;
   }
   .username {
     display: flex;
@@ -82,6 +88,9 @@ const itemStyle = createCSSSheet(css`
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
+  }
+  .icon {
+    width: 1.5em;
   }
 `);
 
@@ -102,6 +111,7 @@ export class MRoomPlayerItemElement extends GemElement {
   constructor() {
     super();
     this.addEventListener('click', this.#onClick);
+    this.addEventListener('keydown', commonHandle);
   }
 
   get #isSelf() {
@@ -146,7 +156,9 @@ export class MRoomPlayerItemElement extends GemElement {
         </style>
         <dy-avatar class="avatar" square src=${`https://ui-avatars.com/api/?name=P${this.roleType}`}></dy-avatar>
         <div class="username">
-          ${this.#isJoinable ? html`<dy-use .element=${icons.received}></dy-use>` : i18n.get('roomEmptyRole')}
+          ${this.#isJoinable
+            ? html`<dy-use class="icon" tabindex="0" .element=${icons.received}></dy-use>`
+            : i18n.get('roomEmptyRole')}
         </div>
       `;
     }

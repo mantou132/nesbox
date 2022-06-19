@@ -15,6 +15,7 @@ import { marked } from 'marked';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { waitLoading } from 'duoyun-ui/elements/wait';
 import { Modal } from 'duoyun-ui/elements/modal';
+import { isNotNullish } from 'duoyun-ui/lib/types';
 
 import { store } from 'src/store';
 import { routes } from 'src/routes';
@@ -26,6 +27,8 @@ import { icons } from 'src/icons';
 import { getCorsSrc, getGithubGames, open } from 'src/utils';
 
 import 'duoyun-ui/elements/carousel';
+import 'duoyun-ui/elements/link';
+import 'duoyun-ui/elements/paragraph';
 import 'src/modules/game-list';
 
 const domParser = new DOMParser();
@@ -34,7 +37,7 @@ const style = createCSSSheet(css`
   :host {
     display: flex;
     flex-direction: column;
-    gap: 1.5em;
+    gap: 2rem;
     min-height: 100vh;
   }
   .top {
@@ -43,9 +46,12 @@ const style = createCSSSheet(css`
   }
   .top::part(img) {
     --mask-range: 0;
-    right: 3em;
-    width: min(40%, 30em);
-    object-fit: contain;
+    inset: 0 3em 0 auto;
+    margin: auto;
+    width: auto;
+    max-height: calc(100% - 6em);
+    object-fit: cover;
+    border-radius: ${theme.normalRound};
   }
   .list {
     padding-inline: ${theme.gridGutter};
@@ -55,9 +61,9 @@ const style = createCSSSheet(css`
       aspect-ratio: 2/1;
     }
     .top::part(img) {
-      right: 0;
+      inset: 0;
       width: 100%;
-      object-fit: cover;
+      max-height: 100%;
     }
     .top::part(title) {
       text-shadow: 0 0.1em 0.3em rgba(0, 0, 0, ${theme.maskAlpha});
@@ -79,6 +85,7 @@ const style = createCSSSheet(css`
     aspect-ratio: 503/348;
     gap: 1em;
     border: 1px dashed currentColor;
+    border-radius: ${theme.normalRound};
   }
   .add dy-use {
     width: 3em;
@@ -111,20 +118,31 @@ export class PGamesElement extends GemElement<State> {
 
   #addGame = async () => {
     // 重名添加 `（中文/日本語）`
-    const map = new Map(store.allGames.map((e) => [e.name.replace(/（.*）$/, ''), e.id]));
+    const map = new Map(
+      Object.values(store.games)
+        .filter(isNotNullish)
+        .map((e) => [e.name.replace(/（.*）$/, ''), e.id]),
+    );
     await Modal.confirm(
-      html`<div style="width:min(400px, 100vw)">
-        ${i18n.get(
-          'addGameDetail',
-          (e) => html`<a target="_blank" href="https://github.com/mantou132/nesbox/releases/tag/0.0.1">${e}</a>`,
-        )}
-      </div>`,
+      html`
+        <dy-paragraph style="width:min(400px, 100vw)">
+          ${i18n.get(
+            'addGameDetail',
+            (e) =>
+              html`
+                <dy-link @click=${() => open('https://github.com/mantou132/nesbox/releases/tag/0.0.1')}>${e}</dy-link>
+              `,
+          )}
+        </dy-paragraph>
+      `,
     );
     const list: any[] = await waitLoading(
       (await fetch(getCorsSrc('https://github.com/mantou132/nesbox/releases/download/0.0.1/matedata.json'))).json(),
     );
     const find = async (list: any[]): Promise<any> => {
-      const index = list.findIndex((e) => !map.has(e.title) && e.title !== '马力欧兄弟/水管马力欧');
+      const index = list.findIndex(
+        (e) => !map.has(e.title) && !['马力欧兄弟/水管马力欧', '忍者神龟 街机版'].includes(e.title),
+      );
       const item = list[index];
       if (!item) return;
       const link = (await getGithubGames(item.title)).find((e) => e.textContent === e.title);

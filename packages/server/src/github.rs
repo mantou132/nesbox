@@ -24,22 +24,33 @@ pub fn validate(req: &HttpRequest, secret: &str, data: &[u8]) -> bool {
     is_ok
 }
 
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
+pub struct GithubUser {
+    login: String,
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GithubIssue {
     pub title: String,
     pub body: String,
-    pub author_association: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GithubRepo {
+    pub owner: GithubUser,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GithubPayload {
     pub action: String,
     pub issue: GithubIssue,
+    pub repository: GithubRepo,
+    pub sender: GithubUser,
 }
 
 impl GithubPayload {
     pub fn is_owner(self: &Self) -> bool {
-        self.issue.author_association == "OWNER" || self.issue.author_association == "COLLABORATOR"
+        self.sender.login == self.repository.owner.login
     }
 }
 
@@ -78,7 +89,7 @@ pub fn get_sc_new_game(payload: &GithubPayload) -> ScNewGame {
 #[cfg(test)]
 mod tests {
     use crate::{
-        github::{get_sc_new_game, GithubIssue, GithubPayload},
+        github::{get_sc_new_game, GithubIssue, GithubPayload, GithubRepo, GithubUser},
         schemas::game::ScNewGame,
     };
 
@@ -87,10 +98,13 @@ mod tests {
         let payload = GithubPayload {
             action: "".into(),
             issue: GithubIssue {
-                author_association: "".into(),
                 title: "name".into(),
                 body: "![NekketsuKakutouDensetsu_frontcover](https://user-images.githubusercontent.com/3841872/168952574-26de855e-b7cd-43fe-ab94-093a2903832d.png)\r\n\r\nゲームモードは、ストーリーにそって闘いを進めていく「ストーリーモード」と最高4人でどたばたと闘い合う「バトルモード」の2種類のモードがあるぞ！\r\n![ABUIABACGAAg9eiD9gUo_I7-uQYwmgM4mgM](https://user-images.githubusercontent.com/3841872/168967700-44131eb9-6e33-48d0-9f3d-e71e9fcdb51b.jpg)\r\n[legend.nes.zip](https://github.com/mantou132/nesbox/files/8713065/legend.nes.zip)\r\n".into(),
-            }
+            },
+            repository: GithubRepo {
+                owner: GithubUser { login: "".into() },
+            },
+            sender: GithubUser { login: "".into() },
         };
         assert_eq!(
             get_sc_new_game(&payload),

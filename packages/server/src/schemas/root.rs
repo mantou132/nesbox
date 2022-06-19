@@ -173,31 +173,33 @@ impl MutationRoot {
     }
     fn accept_invite(context: &Context, input: ScUpdateInvite) -> FieldResult<String> {
         let conn = context.dbpool.get().unwrap();
-        if input.accept {
-            let invite = get_invite(&conn, context.user_id, input.invite_id)?;
+        let invite = get_invite(&conn, context.user_id, input.invite_id)?;
 
-            match get_playing(&conn, context.user_id) {
-                Some(room) => {
-                    delete_playing_with_room(&conn, room.id);
-                    delete_room(&conn, room.id);
+        if input.accept {
+            let (room_id, room_host) = get_playing(&conn, context.user_id)
+                .map(|room| (room.id, room.host))
+                .unwrap_or((0, 0));
+
+            if room_id != invite.room.id {
+                if room_host == context.user_id {
+                    delete_playing_with_room(&conn, room_id);
+                    delete_room(&conn, room_id);
                     notify_all(
                         ScNotifyMessageBuilder::default()
-                            .delete_room(room.id)
+                            .delete_room(room_id)
                             .build()
                             .unwrap(),
-                    )
+                    );
                 }
-                None => (),
+                enter_room(&conn, context.user_id, invite.room.id);
+                notify_ids(
+                    get_friend_ids(&conn, context.user_id),
+                    ScNotifyMessageBuilder::default()
+                        .update_user(get_user_basic(&conn, context.user_id)?)
+                        .build()
+                        .unwrap(),
+                );
             }
-
-            enter_room(&conn, context.user_id, invite.room.id);
-            notify_ids(
-                get_friend_ids(&conn, context.user_id),
-                ScNotifyMessageBuilder::default()
-                    .update_user(get_user_basic(&conn, context.user_id)?)
-                    .build()
-                    .unwrap(),
-            );
         } else {
             delete_invite_by_id(&conn, context.user_id, input.invite_id);
         }

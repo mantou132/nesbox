@@ -11,7 +11,7 @@ import 'src/modules/room-item';
 const style = createCSSSheet(css`
   :host {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(30em, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(25em, 1fr));
     grid-template-rows: max-content;
     grid-gap: ${theme.gridGutter};
   }

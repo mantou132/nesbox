@@ -52,18 +52,10 @@ const style = createCSSSheet(css`
     flex-grow: 1;
     display: block;
     overflow-y: auto;
-    overflow-y: overlay;
-    scrollbar-width: thin;
+    scrollbar-width: none;
   }
   .content::-webkit-scrollbar {
-    width: 0.7em;
-    background: transparent;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.2);
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.4);
+    width: 0;
   }
 `);
 
@@ -134,6 +126,8 @@ export class AppRootElement extends GemElement {
         <m-footer></m-footer>
       </div>
 
+      ${configure.friendChatState ? html`<m-chat .friendId=${configure.friendChatState}></m-chat>` : ''}
+
       <dy-drawer
         customize
         .open=${!!configure.friendListState}
@@ -141,9 +135,6 @@ export class AppRootElement extends GemElement {
         .body=${html`<m-friend-list style=${styleMap({ width: '15em' })}></m-friend-list>`}
       >
       </dy-drawer>
-
-      ${configure.friendChatState ? html`<m-chat .friendId=${configure.friendChatState}></m-chat>` : ''}
-      ${configure.screencastMode ? html`<dy-input-capture></dy-input-capture>` : ''}
 
       <dy-modal
         .header=${i18n.get('setting')}
@@ -163,6 +154,8 @@ export class AppRootElement extends GemElement {
         .body=${html`<m-search></m-search>`}
       >
       </dy-modal>
+
+      ${configure.screencastMode ? html`<dy-input-capture></dy-input-capture>` : ''}
     `;
   };
 }

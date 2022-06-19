@@ -1,4 +1,4 @@
-import { html, render, history } from '@mantou/gem';
+import { html, render, history, styleMap } from '@mantou/gem';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { Toast } from 'duoyun-ui/elements/toast';
 import { matchPath } from 'duoyun-ui/elements/route';
@@ -10,8 +10,11 @@ import { logger } from 'src/logger';
 import { routes } from 'src/routes';
 import { gotoRedirectUri, isExpiredProfile, logout } from 'src/auth';
 import { isInputElement } from 'src/utils';
+import { listener } from 'src/gamepad';
 
 import 'src/modules/meta';
+
+listener();
 
 logger.info('MODE\t', import.meta.env.MODE);
 logger.info('RELEASE\t', RELEASE);
@@ -32,7 +35,6 @@ render(
   html`
     <style>
       :root {
-        color-scheme: dark;
         font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
           'Noto Sans', 'PingFang SC', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
           'Noto Color Emoji';
@@ -63,8 +65,14 @@ render(
       }
     </style>
     <m-meta></m-meta>
-    ${isTauriWinApp ? html`<m-titlebar style="height: 32px"></m-titlebar>` : ''}
-    ${isTauriMacApp ? html`<m-titlebar style="height: 38px"></m-titlebar>` : ''}
+    ${isTauriWinApp || isTauriMacApp
+      ? html`
+          <m-titlebar
+            style=${styleMap({ background: theme.titleBarColor })}
+            type=${isTauriWinApp ? 'win' : 'mac'}
+          ></m-titlebar>
+        `
+      : ''}
     <dy-route
       @contextmenu=${(e: Event) => e.preventDefault()}
       .routes=${[
@@ -85,11 +93,11 @@ render(
 );
 
 if (isTauriWinApp || isTauriMacApp) {
-  import('src/modules/titlebar');
+  import('src/elements/titlebar');
 }
 
 let unloading = false;
-window.addEventListener('beforeunload', () => {
+addEventListener('beforeunload', () => {
   unloading = true;
   setTimeout(() => (unloading = false), 1000);
 });

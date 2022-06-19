@@ -1,1 +1,208 @@
-{}
+{
+  "title": {
+    "message": "NESBox"
+  },
+  "slogan": {
+    "message": "NESBox"
+  },
+  "sloganDesc": {
+    "message": "女の子の隣のクラス\nなぜ私の窓をまだ通過していないのですか？\n口の中のスナックの漫画\n私の心の子供時代\n......"
+  },
+  "search": {
+    "message": "探す"
+  },
+  "screencastMode": {
+    "message": "スクリーンショットモード"
+  },
+  "help": {
+    "message": "ヘルプ"
+  },
+  "feedback": {
+    "message": "フィードバック"
+  },
+  "discord": {
+    "message": "Discord"
+  },
+  "changeLanguage": {
+    "message": "スイッチ言語"
+  },
+  "changeTheme": {
+    "message": "トピックを選択します"
+  },
+  "defaultTheme": {
+    "message": "デフォルトのテーマ"
+  },
+  "punkTheme": {
+    "message": "パンクテーマ"
+  },
+  "logoutAccount": {
+    "message": "サインアウト “$1”"
+  },
+  "close": {
+    "message": "閉鎖"
+  },
+  "addFriend": {
+    "message": "友人を追加する"
+  },
+  "deleteFriend": {
+    "message": "友達を削除します"
+  },
+  "inviteFriend": {
+    "message": "招待"
+  },
+  "sendTomeInvite": {
+    "message": "送信招待"
+  },
+  "playing": {
+    "message": "演奏《$1》"
+  },
+  "notPlaying": {
+    "message": "ミッドフィールダー"
+  },
+  "deleteFriendConfirm": {
+    "message": "友達を削除しますか？"
+  },
+  "notFoundTitle": {
+    "message": "ページはありません"
+  },
+  "notFoundDetail": {
+    "message": "あなたが訪れたページは見つかりませんでした、$1<クリックしました>ホームページを返します"
+  },
+  "notDataTitle": {
+    "message": "データなし"
+  },
+  "setting": {
+    "message": "設定"
+  },
+  "accountSetting": {
+    "message": "アカウント設定"
+  },
+  "nickname": {
+    "message": "名前を表示します"
+  },
+  "changePassword": {
+    "message": "パスワードを変更する"
+  },
+  "oldpassword": {
+    "message": "以前のパスワード"
+  },
+  "newpassword": {
+    "message": "新しいパスワード"
+  },
+  "renewpassword": {
+    "message": "新しいパスワードを繰り返します"
+  },
+  "renewpasswordNotMatch": {
+    "message": "新しいパスワードを一致させない"
+  },
+  "keySetting": {
+    "message": "キー設定"
+  },
+  "license": {
+    "message": "ライセンス"
+  },
+  "loginTitle": {
+    "message": "ログイン"
+  },
+  "registerTitle": {
+    "message": "登録"
+  },
+  "login": {
+    "message": "ログイン"
+  },
+  "register": {
+    "message": "登録"
+  },
+  "goLogin": {
+    "message": "既存のアカウント"
+  },
+  "goRegister": {
+    "message": "アカウントなし"
+  },
+  "bgCopyright": {
+    "message": "画像著作権"
+  },
+  "gamesTitle": {
+    "message": "すべてのゲーム"
+  },
+  "gameTitle": {
+    "message": "ゲーム"
+  },
+  "favoritesTitle": {
+    "message": "私は収集します"
+  },
+  "roomsTitle": {
+    "message": "オープンルーム"
+  },
+  "roomTitle": {
+    "message": "ゲーム"
+  },
+  "leaveRoom": {
+    "message": "部屋を出ます"
+  },
+  "enterRoomMsg": {
+    "message": "$1部屋に入ります"
+  },
+  "leaveRoomMsg": {
+    "message": "$1部屋を出ます"
+  },
+  "roomEmptyRole": {
+    "message": "なし"
+  },
+  "selectGame": {
+    "message": "ゲームを交換します"
+  },
+  "startGame": {
+    "message": "ゲームを始める"
+  },
+  "addGame": {
+    "message": "ゲームを追加します"
+  },
+  "addGameDetail": {
+    "message": "创建 Github issue，填写好标题，简介或者玩法，并上传截图（第一张为封面）和 .nes 文件的 zip 压缩包后等待维护者关闭，关闭后游戏将添加到 NESBox。截图和 nes 参考可以在$1<这里>下载"
+  },
+  "gameComment": {
+    "message": "ユーザーコメント"
+  },
+  "noneComment": {
+    "message": "コメントはありません"
+  },
+  "placeholderUsername": {
+    "message": "ユーザー名を入力してください"
+  },
+  "placeholderPassword": {
+    "message": "パスワードを入力してください"
+  },
+  "placeholderMessage": {
+    "message": "情報 Enter キーを押します"
+  },
+  "placeholderSearch": {
+    "message": "$1 ゲームや友達を検索します"
+  },
+  "placeholderSearchPlaying": {
+    "message": "$1 ゲームを変更するか、友達を招待します"
+  },
+  "tipRoomCrowded": {
+    "message": "部屋にはあまりにも多くの人がいます"
+  },
+  "tipChangePassword": {
+    "message": "パスワードが更新されました"
+  },
+  "tipIviteSuccess": {
+    "message": "招待状が送信されました"
+  },
+  "tipRoomDeleted": {
+    "message": "部屋はホストによって削除されました"
+  },
+  "code404001": { "message": "ユーザーが存在します" },
+  "code404002": { "message": "ユーザーネームまたはパスワードが違います" },
+  "code0": { "message": "現在のネットワークは不安定です" },
+  "code400": { "message": "パラメーターエラー" },
+  "code401": { "message": "ユーザー情報を確認できません。もう一度ログインしてみてください" },
+  "code403": { "message": "採算不可能な操作" },
+  "code404": { "message": "リソースは見つかりません" },
+  "code409": { "message": "リソースの競合" },
+  "code500": { "message": "サーバーは小さいので、後でもう一度やり直してください" },
+  "code501": { "message": "実現していません" },
+  "code504": { "message": "リクエストタイムアウト、後でもう一度やり直してください" }
+}

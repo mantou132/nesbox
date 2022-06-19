@@ -1,6 +1,7 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, connectStore, state } from '@mantou/gem';
 import type { RouteItem } from 'duoyun-ui/elements/route';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
+import { commonHandle } from 'duoyun-ui/lib/hotkeys';
 
 import { locationStore, routes } from 'src/routes';
 import { i18n } from 'src/i18n';
@@ -50,12 +51,20 @@ const style = createCSSSheet(css`
   }
   .link {
     line-height: 1.5;
-    border-bottom: 3px solid transparent;
     text-transform: uppercase;
     font-size: 1.125em;
   }
-  .link:where(:--active, [data-active]) {
-    border-bottom-color: currentColor;
+  .link::after {
+    content: '';
+    display: block;
+    background: transparent;
+    height: 3px;
+    width: 80%;
+    margin: auto;
+    border-radius: ${theme.normalRound};
+  }
+  .link:where(:--active, [data-active])::after {
+    background: currentColor;
   }
   .title {
     font-size: 1.5em;
@@ -66,6 +75,7 @@ const style = createCSSSheet(css`
   .icon {
     width: 3em;
     box-sizing: border-box;
+    border-radius: ${theme.normalRound};
   }
   dy-use.icon {
     padding: 0.5em;
@@ -107,19 +117,32 @@ export class MNavElement extends GemElement<State> {
         ${this.room
           ? html`
               <nesbox-tooltip .position=${'bottom'} .content=${i18n.get('leaveRoom')}>
-                <dy-use class="icon" .element=${icons.left} @click=${leaveRoom}></dy-use>
+                <dy-use
+                  class="icon"
+                  tabindex="0"
+                  @keydown=${commonHandle}
+                  .element=${icons.left}
+                  @click=${leaveRoom}
+                ></dy-use>
               </nesbox-tooltip>
               ${playing?.host !== configure.user?.id
                 ? html`<div class="title">${store.games[gameId || 0]?.name}</div>`
                 : html`
                     <nesbox-tooltip .position=${'bottom'} .content=${i18n.get('selectGame')}>
-                      <dy-action-text class="title" @click=${() => this.setState({ select: true })}>
+                      <dy-action-text
+                        class="title"
+                        tabindex="0"
+                        @keydown=${commonHandle}
+                        @click=${() => this.setState({ select: true })}
+                      >
                         ${store.games[gameId || 0]?.name}
                       </dy-action-text>
                     </nesbox-tooltip>
                   `}
               <dy-use
                 class="icon"
+                tabindex="0"
+                @keydown=${commonHandle}
                 .element=${favorited ? icons.favorited : icons.favorite}
                 @click=${() => favoriteGame(gameId, !favorited)}
               ></dy-use>
@@ -144,8 +167,20 @@ export class MNavElement extends GemElement<State> {
               <dy-active-link class="link" .route=${routes.rooms as RouteItem}>${routes.rooms.title}</dy-active-link>
             `}
         <span style="flex-grow: 1;"></span>
-        <dy-use class="icon" .element=${icons.search} @click=${toggoleSearchState}></dy-use>
-        <dy-use class="icon" .element=${icons.group} @click=${toggoleFriendListState}>
+        <dy-use
+          class="icon"
+          tabindex="0"
+          @keydown=${commonHandle}
+          .element=${icons.search}
+          @click=${toggoleSearchState}
+        ></dy-use>
+        <dy-use
+          class="icon"
+          tabindex="0"
+          @keydown=${commonHandle}
+          .element=${icons.group}
+          @click=${toggoleFriendListState}
+        >
           <m-badge></m-badge>
         </dy-use>
         <m-avatar class="icon"></m-avatar>

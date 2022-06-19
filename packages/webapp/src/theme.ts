@@ -28,7 +28,7 @@ const defaultTheme = {
   borderColor: '#313131',
   disabledColor: '#5b5b5b',
   titleBarColor: '#000',
-  maskAlpha: '0.5',
+  maskAlpha: '0.6',
   // same of light/dark
   // https://spectrum.adobe.com/page/color/#Semantic-colors
   informativeColor: '#2680eb',
@@ -37,8 +37,8 @@ const defaultTheme = {
   noticeColor: '#e68619',
   negativeColor: '#e34850',
   focusColor: '#2680eb',
-  normalRound: '0px',
-  smallRound: '0px',
+  normalRound: '6px',
+  smallRound: '2px',
   gridGutter: '24px',
   popupZIndex: '2147483646',
   timingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',

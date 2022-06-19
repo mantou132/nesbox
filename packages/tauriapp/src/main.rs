@@ -10,7 +10,6 @@ use window_shadows::set_shadow;
 #[macro_use]
 extern crate objc;
 
-use preload::PreloadPlugin;
 use tauri::Manager;
 #[cfg(target_os = "macos")]
 use tauri::Menu;
@@ -22,13 +21,14 @@ mod window_ext;
 
 fn main() {
     let builder = tauri::Builder::default();
+    let context = tauri::generate_context!();
 
     #[cfg(target_os = "macos")]
-    let builder = builder.menu(Menu::os_default("NESBox"));
+    let builder = builder.menu(Menu::os_default(&context.package_info().name));
 
     builder
         .setup(|app| {
-            let win = app.get_window("main").unwrap();
+            let main_window = app.get_window("main").unwrap();
             #[cfg(target_os = "windows")]
             {
                 win.set_decorations(false).ok();
@@ -37,12 +37,13 @@ fn main() {
             #[cfg(target_os = "macos")]
             {
                 // https://github.com/tauri-apps/tauri/issues/2663#issuecomment-1151240533
-                win.set_transparent_titlebar(true, false);
+                main_window.set_transparent_titlebar(true, false);
             }
+
             // win.open_devtools();
             Ok(())
         })
-        .plugin(PreloadPlugin::new())
-        .run(tauri::generate_context!())
+        .plugin(preload::PreloadPlugin::new())
+        .run(context)
         .expect("error while running tauri application");
 }

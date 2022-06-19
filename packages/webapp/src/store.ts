@@ -22,7 +22,6 @@ export type Message = ElementOf<GetMessagesQuery['messages']>;
 interface Store {
   games: Record<number, Game | undefined>;
   gameIds?: number[];
-  allGames: Game[];
   comment: Record<
     number, // gameId
     | {
@@ -41,7 +40,6 @@ export const [store] = createCacheStore<Store>(
   localStorageKeys.STORE_LOCAL_STORAGE_KEY,
   {
     games: {},
-    allGames: [],
     comment: {},
     rooms: {},
   },

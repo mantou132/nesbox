@@ -6,5 +6,4 @@
 
 ## TODO
 
-- Tauri(e.g https://github.com/DiscordTauri/discord-tauri)
-- Mobile/GamePad adaptation
+- Mobile adaptation
