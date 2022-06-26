@@ -31,8 +31,8 @@ fn main() {
             let main_window = app.get_window("main").unwrap();
             #[cfg(target_os = "windows")]
             {
-                win.set_decorations(false).ok();
-                set_shadow(&win, true).ok();
+                main_window.set_decorations(false).ok();
+                set_shadow(&main_window, true).ok();
             }
             #[cfg(target_os = "macos")]
             {
@@ -40,7 +40,7 @@ fn main() {
                 main_window.set_transparent_titlebar(true, false);
             }
 
-            // win.open_devtools();
+            // main_window.open_devtools();
             Ok(())
         })
         .plugin(preload::PreloadPlugin::new())

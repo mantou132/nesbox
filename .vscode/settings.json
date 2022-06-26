@@ -19,5 +19,5 @@
     "editor.tabSize": 4,
     "editor.defaultFormatter": "rust-lang.rust-analyzer"
   },
-  "files.eol": "\n"
+  "files.eol": "\r\n"
 }
