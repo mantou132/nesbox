@@ -18,6 +18,7 @@ import { configure } from 'src/configure';
 import { Role, RoleOffer } from 'src/rtc';
 import { icons } from 'src/icons';
 import { i18n } from 'src/i18n';
+import { getAvatar } from 'src/utils';
 
 import 'duoyun-ui/elements/avatar';
 import 'duoyun-ui/elements/use';
@@ -59,6 +60,8 @@ const itemStyle = createCSSSheet(css`
     align-items: center;
     background-color: ${theme.lightBackgroundColor};
     width: 8em;
+    height: calc(2.2em + 2px);
+    box-sizing: border-box;
     flex-shrink: 0;
     border-radius: ${theme.smallRound};
     overflow: hidden;
@@ -71,7 +74,7 @@ const itemStyle = createCSSSheet(css`
   }
   .avatar {
     flex-shrink: 0;
-    width: calc(2.2em + 2px);
+    height: 100%;
   }
   .avatar::part(avatar) {
     border-radius: 0;
@@ -169,7 +172,7 @@ export class MRoomPlayerItemElement extends GemElement {
           cursor: ${this.#isHostRole ? 'not-allowed' : 'default'};
         }
       </style>
-      <dy-avatar class="avatar" square src=${`https://joeschmoe.io/api/v1/${this.role?.username}`}></dy-avatar>
+      <dy-avatar class="avatar" square src=${getAvatar(this.role?.username)}></dy-avatar>
       <div class="username">
         <span>${this.role.username}</span>
       </div>

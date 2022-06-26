@@ -168,7 +168,7 @@ export class PGamesElement extends GemElement<State> {
         .parseFromString(marked.parse(store.games[id]?.description || ''), 'text/html')
         .body.textContent?.trim()
         .slice(0, 150),
-      img: store.games[id]?.preview || '',
+      img: getCorsSrc(store.games[id]?.preview || ''),
       title: store.games[id]?.name,
       action: {
         text: i18n.get('startGame'),

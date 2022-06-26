@@ -99,15 +99,20 @@ export class MTitlebarElement extends GemElement<State> {
     this.#window?.isMaximized().then((maximized) => this.setState({ maximized }));
   };
 
+  #toggleMaximize = () => {
+    this.#window?.toggleMaximize();
+  };
+
   constructor() {
     super();
     this.addEventListener('mousedown', (event) => {
       this.#window?.startDragging();
       // https://github.com/tauri-apps/tauri/issues/4059#issuecomment-1154360504
       event.preventDefault();
-    });
-    this.addEventListener('dblclick', async () => {
-      this.#window?.toggleMaximize();
+
+      // dblclick
+      this.addEventListener('mousedown', this.#toggleMaximize);
+      setTimeout(() => this.removeEventListener('mousedown', this.#toggleMaximize), 300);
     });
 
     this.#isMaximized();
@@ -122,6 +127,8 @@ export class MTitlebarElement extends GemElement<State> {
       dispatchEvent(new CustomEvent('unload'));
       this.#window?.close();
     });
+    // allow drag
+    new MutationObserver(() => (this.inert = false)).observe(this, { attributeFilter: ['inert'] });
   }
 
   render = () => {

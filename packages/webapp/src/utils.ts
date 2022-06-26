@@ -7,6 +7,11 @@ export const getCorsSrc = (url: string) => {
   return `https://files.xianqiao.wang/${url}`;
 };
 
+export const getAvatar = (username?: string) => {
+  if (!username) return '';
+  return getCorsSrc(`joeschmoe.io/api/v1/${username}`);
+};
+
 export const getGithubGames = async (s: string) => {
   const search = `${githubIssue}?q=is%3Aissue+label%3Agame+${s.replaceAll(' ', '+')}`;
   const text = await (await fetch(getCorsSrc(search))).text();

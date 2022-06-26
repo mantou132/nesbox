@@ -1,31 +1,46 @@
 name: Publish
 
 on:
-  release:
-    types:
-      - published
+  push:
+    branches:
+      - release
 
 jobs:
-  publish:
-    name: Publish for ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-
+  publish-tauri:
     strategy:
+      fail-fast: false
       matrix:
-        include:
-          - os: windows-latest
-            artifact_name: app.exe
-            asset_name: app-windows.exe
+        platform: [macos-latest, ubuntu-latest, windows-latest]
 
+    runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v2
-      - name: Build
-        run: cargo build --release -p app
-      - name: Upload binaries to release
-        uses: svenstaro/upload-release-action@v2
+
+      - name: setup node
+        uses: actions/setup-node@v1
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: target/release/${{ matrix.artifact_name }}
-          asset_name: ${{ matrix.asset_name }}
-          tag: ${{ github.ref }}
-          overwrite: true
+          node-version: 16
+
+      - name: install Rust stable
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: install dependencies (ubuntu only)
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev webkit2gtk-4.0 libappindicator3-dev librsvg2-dev patchelf
+
+      - name: install app dependencies and build it
+        run: npx @tauri-apps/cli build
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: v__VERSION__
+          releaseName: v__VERSION__
+          releaseBody: ''
+          releaseDraft: true
+          prerelease: false

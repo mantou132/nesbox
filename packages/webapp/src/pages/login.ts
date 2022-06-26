@@ -20,7 +20,7 @@ import { gotoRedirectUri } from 'src/auth';
 import { i18n } from 'src/i18n';
 import { routes } from 'src/routes';
 import { login, register } from 'src/services/guest-api';
-import { open } from 'src/utils';
+import { getCorsSrc, open } from 'src/utils';
 
 import 'duoyun-ui/elements/form';
 import 'duoyun-ui/elements/link';
@@ -29,6 +29,10 @@ import 'duoyun-ui/elements/heading';
 import 'duoyun-ui/elements/action-text';
 import 'src/elements/tooltip';
 import 'src/modules/guest';
+
+const bgUrl = getCorsSrc(
+  'http://cdn.dribbble.com/users/870476/screenshots/10244007/media/ba3b0d812068691f20b835e7381284b1.jpg',
+);
 
 const style = createCSSSheet(css`
   :host {
@@ -39,8 +43,7 @@ const style = createCSSSheet(css`
     align-items: stretch;
     justify-content: flex-end;
     color: ${theme.textColor};
-    background: url(https://cdn.dribbble.com/users/870476/screenshots/10244007/media/ba3b0d812068691f20b835e7381284b1.jpg)
-      center center / cover no-repeat fixed;
+    background: url(${bgUrl}) center center / cover no-repeat fixed;
   }
   .bg-copyright {
     position: fixed;

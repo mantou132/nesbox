@@ -10,6 +10,7 @@ import { icons } from 'src/icons';
 import { acceptFriend, acceptInvite, createInvite, deleteFriend } from 'src/services/api';
 import { configure, toggoleFriendChatState, toggoleFriendListState } from 'src/configure';
 import { i18n } from 'src/i18n';
+import { getAvatar } from 'src/utils';
 
 import 'duoyun-ui/elements/avatar';
 import 'duoyun-ui/elements/help-text';
@@ -176,7 +177,7 @@ export class MFriendItemElement extends GemElement {
       <dy-avatar
         class="avatar"
         status=${this.#isOnline ? 'positive' : 'default'}
-        src="https://joeschmoe.io/api/v1/${username}"
+        src=${getAvatar(username)}
       ></dy-avatar>
       <div class="content">
         <div class="nickname">${nickname}</div>

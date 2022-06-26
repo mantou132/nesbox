@@ -34,7 +34,7 @@ const style = createCSSSheet(css`
   }
   .input {
     width: 100%;
-    font-size: 1.125em;
+    font-size: 1.075em;
     border-radius: ${theme.smallRound};
   }
   .result {

@@ -45,14 +45,17 @@ export class MGameSelectorElement extends GemElement {
   };
 
   render = () => {
+    const { gameId } = configure.user!.playing!;
     return html`
-      ${store.gameIds?.map(
-        (id) =>
-          store.games[id] &&
-          html`
-            <m-game-item .silent=${true} .game=${store.games[id]!} @click=${() => this.#onSelect(id)}></m-game-item>
-          `,
-      )}
+      ${store.gameIds
+        ?.sort((id) => (gameId === id ? -1 : 0))
+        .map(
+          (id) =>
+            store.games[id] &&
+            html`
+              <m-game-item .silent=${true} .game=${store.games[id]!} @click=${() => this.#onSelect(id)}></m-game-item>
+            `,
+        )}
     `;
   };
 }

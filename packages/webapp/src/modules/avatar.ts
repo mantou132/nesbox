@@ -8,7 +8,7 @@ import { logout } from 'src/auth';
 import { changeTheme, theme, ThemeName, themeNames } from 'src/theme';
 import { i18n, langNames } from 'src/i18n';
 import { icons } from 'src/icons';
-import { open } from 'src/utils';
+import { getAvatar, open } from 'src/utils';
 
 import 'duoyun-ui/elements/avatar';
 import 'duoyun-ui/elements/options';
@@ -108,8 +108,6 @@ export class MAvatarElement extends GemElement {
   };
 
   render = () => {
-    return html`
-      <dy-avatar class="avatar" src=${`https://joeschmoe.io/api/v1/${configure.user?.username}`}></dy-avatar>
-    `;
+    return html` <dy-avatar class="avatar" src=${getAvatar(configure.user?.username)}></dy-avatar> `;
   };
 }
