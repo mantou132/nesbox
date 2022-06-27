@@ -40,6 +40,7 @@ const style = createCSSSheet(css`
     flex-grow: 1;
     min-height: 0;
     overflow: auto;
+    font-size: 0.875em;
   }
   .message.silent {
     opacity: 0.5;

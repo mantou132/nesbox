@@ -4,6 +4,15 @@
 
 ![](screenshots/homepage.png)
 
+## Feature
+
+- Supports playing many popular nes games
+- Support multiplayer online
+- Support gamepad
+- Friend system, chat, invite
+- Game review
+- Internationalization
+
 ## TODO
 
 - Mobile adaptation

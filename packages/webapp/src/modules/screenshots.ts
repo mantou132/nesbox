@@ -40,8 +40,8 @@ const style = createCSSSheet(css`
   }
   .preview {
     position: absolute;
-    right: 1em;
-    bottom: 1em;
+    right: 0.75em;
+    bottom: 0.75em;
     display: flex;
     gap: 0.5em;
   }

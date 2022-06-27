@@ -45,6 +45,7 @@ export const [store] = createCacheStore<Store>(
   },
   {
     prefix: configure.user!.username,
+    cacheExcludeKeys: ['roomIds', 'rooms'],
   },
 );
 

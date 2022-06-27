@@ -113,7 +113,7 @@ export class MGameItemElement extends GemElement {
         ? ''
         : html`<dy-button class="play" small @click=${this.#onGameClick}>${i18n.get('startGame')}</dy-button>`}
       <div class="footer">
-        <span class="title">${this.game.name}</span>
+        <span class="title" title=${this.game.name}>${this.game.name}</span>
         ${this.silent
           ? ''
           : html`

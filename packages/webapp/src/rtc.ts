@@ -50,6 +50,7 @@ export abstract class ChannelMessageBase {
   toSystemRole() {
     this.userId = 0;
     this.username = '系统';
+    return this;
   }
 
   toString() {
@@ -121,7 +122,7 @@ export class RTC extends EventTarget {
   #createRTCPeerConnection = (userId: number) => {
     this.#deleteUser(userId);
     const conn = new RTCPeerConnection({
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }],
+      iceServers: [{ urls: 'stun:stun.services.mozilla.com' }, { urls: 'stun:stun3.l.google.com:19302' }],
     });
     this.#stream.getTracks().forEach((track) => conn.addTrack(track, this.#stream));
     this.#connMap.set(userId, conn);
@@ -190,8 +191,7 @@ export class RTC extends EventTarget {
         this.#roles = this.#roles.map((role) => (role?.userId === userId ? undefined : role));
         this.#emitAnswer();
 
-        const textMsg = new TextMsg(getTempText(i18n.get('leaveRoomMsg', username)));
-        textMsg.toSystemRole();
+        const textMsg = new TextMsg(getTempText(i18n.get('leaveRoomMsg', username))).toSystemRole();
         this.#channelMap.forEach((channel) => channel.send(textMsg.toString()));
         this.#emitMessage(textMsg);
       };
@@ -211,11 +211,6 @@ export class RTC extends EventTarget {
           }
           break;
         case ChannelMessageType.ROLE_OFFER:
-          const textMsg = new TextMsg(getTempText(i18n.get('enterRoomMsg', msg.username)));
-          textMsg.toSystemRole();
-          this.#channelMap.forEach((channel) => channel.send(textMsg.toString()));
-          this.#emitMessage(textMsg);
-
           this.#setRoles(userId, msg as RoleOffer);
           this.#emitAnswer();
           break;
@@ -254,7 +249,11 @@ export class RTC extends EventTarget {
         break;
       // both
       case SingalType.NEW_ICE_CANDIDATE:
-        this.#connMap.get(this.#isHost ? userId : configure.user!.id)?.addIceCandidate(singal.data);
+        try {
+          await this.#connMap.get(this.#isHost ? userId : configure.user!.id)?.addIceCandidate(singal.data);
+        } catch {
+          // No remoteDescription. etc.
+        }
         break;
     }
   };
@@ -264,12 +263,16 @@ export class RTC extends EventTarget {
 
     const channel = conn.createDataChannel('msg');
     channel.onopen = () => {
+      clearTimeout(this.#restartTimer);
       // `deleteUser` assign `null`
       channel.onclose = () => {
         this.#restart();
       };
       this.#channelMap.set(conn, channel);
       this.send(new RoleOffer(this.#roles.findIndex((role) => role?.userId === configure.user!.id)));
+
+      const textMsg = new TextMsg(getTempText(i18n.get('enterRoomMsg', configure.user!.nickname))).toSystemRole();
+      this.send(textMsg);
     };
     channel.onmessage = ({ data }: MessageEvent<string>) => {
       const msg = JSON.parse(data) as ChannelMessage;
@@ -304,7 +307,6 @@ export class RTC extends EventTarget {
       data: conn.localDescription,
     });
     this.#restartTimer = window.setTimeout(() => this.#restart(), 2000);
-    addEventListener(events.SINGAL, () => clearTimeout(this.#restartTimer), { once: true });
   };
 
   #restart = () => {

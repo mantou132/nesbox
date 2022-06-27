@@ -31,7 +31,7 @@ import 'src/elements/tooltip';
 import 'src/modules/guest';
 
 const bgUrl = getCorsSrc(
-  'http://cdn.dribbble.com/users/870476/screenshots/10244007/media/ba3b0d812068691f20b835e7381284b1.jpg',
+  'https://cdn.dribbble.com/users/870476/screenshots/10244007/media/ba3b0d812068691f20b835e7381284b1.jpg',
 );
 
 const style = createCSSSheet(css`
@@ -63,18 +63,19 @@ const style = createCSSSheet(css`
     background-color: ${theme.backgroundColor};
     color: ${theme.highlightColor};
     vertical-align: middle;
-    padding-inline: 0.2em 0.4em;
-    border-radius: ${theme.normalRound};
+    border-radius: ${theme.smallRound};
   }
   .slogan h1 {
     font-size: 2.7em;
     font-weight: bold;
     margin-block: -2em 0.3em;
+    padding-inline: 0.2em;
   }
   .slogan p {
     font-style: italic;
     font-size: 1.6em;
     line-height: 1.5;
+    padding-inline: 0.2em 0.4em;
     margin-block-end: 4px;
   }
   .content {
@@ -84,7 +85,7 @@ const style = createCSSSheet(css`
     justify-content: center;
     padding: 2em 1.6em;
     background: ${theme.backgroundColor};
-    width: min(24em, 100%);
+    width: min(22em, 100%);
     box-sizing: border-box;
   }
   .header {
@@ -94,7 +95,7 @@ const style = createCSSSheet(css`
     flex-grow: 0;
     font-variant-numeric: tabular-nums;
   }
-  .action {
+  .actions {
     display: flex;
     flex-direction: row-reverse;
     margin-block: 3em 1em;
@@ -184,7 +185,7 @@ export class PLoginElement extends GemElement<State> {
             .value=${password}
           ></dy-form-item>
         </dy-form>
-        <div class="action">
+        <div class="actions">
           <dy-button @click=${this.#onSubmit}>${this.register ? i18n.get('register') : i18n.get('login')}</dy-button>
           <dy-action-text @click=${this.#goto}>
             ${this.register ? i18n.get('goLogin') : i18n.get('goRegister')}

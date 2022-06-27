@@ -159,7 +159,9 @@ export class MRoomPlayerItemElement extends GemElement {
         </style>
         <dy-avatar class="avatar" square src=${`https://ui-avatars.com/api/?name=P${this.roleType}`}></dy-avatar>
         <div class="username">
-          ${this.#isJoinable
+          ${this.#isHostRole
+            ? html`<dy-use class="icon" .element=${icons.loading}></dy-use>`
+            : this.#isJoinable
             ? html`<dy-use class="icon" tabindex="0" .element=${icons.received}></dy-use>`
             : i18n.get('roomEmptyRole')}
         </div>

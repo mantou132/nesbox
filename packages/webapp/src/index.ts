@@ -1,7 +1,7 @@
 import { html, render, history, styleMap } from '@mantou/gem';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { Toast } from 'duoyun-ui/elements/toast';
-import { matchPath } from 'duoyun-ui/elements/route';
+import { matchPath, RouteItem } from 'duoyun-ui/elements/route';
 
 import { theme } from 'src/theme';
 import { configure } from 'src/configure';
@@ -20,13 +20,14 @@ logger.info('MODE\t', import.meta.env.MODE);
 logger.info('RELEASE\t', RELEASE);
 logger.info('COMMAND\t', COMMAND);
 
-if (
-  matchPath(routes.login.pattern, history.getParams().path) ||
-  matchPath(routes.register.pattern, history.getParams().path)
-) {
+const match = (route: RouteItem) => matchPath(route.pattern, history.getParams().path);
+
+if ([routes.login, routes.register].some(match)) {
   if (configure.profile) {
     gotoRedirectUri();
   }
+} else if ([routes.download].some(match)) {
+  //
 } else if (!configure.profile || isExpiredProfile(configure.profile)) {
   logout(true);
 }
@@ -78,6 +79,7 @@ render(
       .routes=${[
         routes.login,
         routes.register,
+        routes.download,
         {
           pattern: '*',
           getContent() {

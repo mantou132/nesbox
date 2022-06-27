@@ -51,7 +51,7 @@ const style = createCSSSheet(css`
     width: auto;
     max-height: calc(100% - 6em);
     object-fit: cover;
-    border-radius: ${theme.normalRound};
+    border-radius: calc(2 * ${theme.normalRound});
   }
   .list {
     padding-inline: ${theme.gridGutter};

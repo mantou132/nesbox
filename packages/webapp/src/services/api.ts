@@ -84,11 +84,16 @@ import { i18n } from 'src/i18n';
 import { logout } from 'src/auth';
 import { documentVisible } from 'src/utils';
 
+const jaReg = /\p{sc=Katakana}|\p{sc=Hiragana}/u;
 const jaDescriptionReg = /(\p{sc=Katakana}|\p{sc=Hiragana}){5}/gu;
 const zhReg = /\p{sc=Han}/u;
 const isCurrentLang = (game: ScGame) => {
   const lang =
-    Number(game.description.match(jaDescriptionReg)?.length) > 2 ? 'ja' : zhReg.test(game.name) ? 'zh' : 'en';
+    jaReg.test(game.name) || Number(game.description.match(jaDescriptionReg)?.length) > 2
+      ? 'ja'
+      : zhReg.test(game.name)
+      ? 'zh'
+      : 'en';
   return lang === i18n.currentLanguage.split('-').shift()?.toLowerCase();
 };
 

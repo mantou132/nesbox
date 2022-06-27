@@ -55,6 +55,14 @@ const getInitRoutes = () => {
         return html`<p-room id=${params[paramKeys.ROOM_ID]}></p-room>`;
       },
     },
+    download: {
+      title: '下载',
+      pattern: '/download',
+      async getContent(_params: Record<string, string>) {
+        await import('src/pages/download');
+        return html`<p-download></p-download>`;
+      },
+    },
     login: {
       title: i18n.get('loginTitle'),
       pattern: '/login',

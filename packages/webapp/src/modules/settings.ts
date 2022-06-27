@@ -26,7 +26,11 @@ const style = createCSSSheet(css`
   .tabs::part(tab) {
     padding: 0.5em;
   }
+  .tabs::part(tab):hover {
+    color: currentColor;
+  }
   .tabs::part(current-tab) {
+    color: currentColor;
     background-color: ${theme.hoverBackgroundColor};
     border-radius: ${`${theme.smallRound} 0 0 ${theme.smallRound}`};
   }
