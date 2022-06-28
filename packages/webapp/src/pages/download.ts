@@ -42,14 +42,19 @@ const style = createCSSSheet(css`
 @customElement('p-download')
 @adoptedStyle(style)
 export class PDownloadElement extends GemElement {
-  #download = () => {
-    open(
-      getCorsSrc(
-        isMac
-          ? 'https://github.com/mantou132/nesbox/releases/download/0.0.1/NESBox_0.1.0_x64.dmg'
-          : 'https://github.com/mantou132/nesbox/releases/download/0.0.1/NESBox_0.1.0_x64_en-US.msi',
-      ),
-    );
+  #download = async () => {
+    try {
+      const latest = await (
+        await fetch(
+          'https://files.xianqiao.wang/https://github.com/mantou132/nesbox/releases/latest/download/latest-version.json',
+        )
+      ).json();
+      const platforms = Object.entries(latest.platforms as Record<string, { url: string }>);
+      const url = platforms.find(([key]) => key.startsWith(isMac ? 'darwin' : 'windows'))![1].url;
+      open(getCorsSrc(url));
+    } catch {
+      open('https://github.com/mantou132/nesbox/releases/latest');
+    }
   };
 
   render = () => {
