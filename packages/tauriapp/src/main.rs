@@ -10,12 +10,15 @@ use window_shadows::set_shadow;
 #[macro_use]
 extern crate objc;
 
-use tauri::Manager;
 #[cfg(target_os = "macos")]
 use tauri::Menu;
+use tauri::{generate_handler, Manager};
 #[cfg(target_os = "macos")]
 use window_ext::WindowExt;
 
+use handler::play_sound;
+
+mod handler;
 mod preload;
 mod window_ext;
 
@@ -44,6 +47,7 @@ fn main() {
             Ok(())
         })
         .plugin(preload::PreloadPlugin::new())
+        .invoke_handler(generate_handler![play_sound])
         .run(context)
         .expect("error while running tauri application");
 }

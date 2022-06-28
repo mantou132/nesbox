@@ -6,7 +6,7 @@ import { i18n } from 'src/i18n';
 
 import 'duoyun-ui/elements/shortcut-record';
 
-const style = createCSSSheet(css`
+export const gridStyle = createCSSSheet(css`
   :host {
     display: flex;
     flex-direction: column;
@@ -18,13 +18,17 @@ const style = createCSSSheet(css`
     grid-template-columns: 1fr 4fr;
     gap: 0.5em;
   }
+  .grid div {
+    display: flex;
+    align-items: center;
+  }
 `);
 
 /**
  * @customElement m-keybinding
  */
 @customElement('m-keybinding')
-@adoptedStyle(style)
+@adoptedStyle(gridStyle)
 @connectStore(i18n.store)
 @connectStore(configure)
 export class MKeybindingElement extends GemElement {
@@ -36,10 +40,10 @@ export class MKeybindingElement extends GemElement {
         ${Object.entries(configure.user.settings.keybinding)
           .filter(([name]) => !name.endsWith('_2'))
           .map(
-            ([name, key]) => html`
+            ([name, value]) => html`
               <div>${name}</div>
               <dy-shortcut-record
-                .value=${[key]}
+                .value=${[value]}
                 @change=${({ detail }: CustomEvent<string[]>) =>
                   detail.length === 1 &&
                   updateAccount({

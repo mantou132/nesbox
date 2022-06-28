@@ -75,7 +75,7 @@
     "message": "设置"
   },
   "accountSetting": {
-    "message": "账号设置"
+    "message": "账号"
   },
   "nickname": {
     "message": "显示名称"
@@ -96,7 +96,16 @@
     "message": "不匹配新密码"
   },
   "keySetting": {
-    "message": "按键设置"
+    "message": "按键"
+  },
+  "soundSetting": {
+    "message": "声音"
+  },
+  "volumeSetting": {
+    "message": "音量"
+  },
+  "notificationVolume": {
+    "message": "通知"
   },
   "license": {
     "message": "许可证"

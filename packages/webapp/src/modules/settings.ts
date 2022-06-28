@@ -1,10 +1,12 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, connectStore } from '@mantou/gem';
+import { isNotNullish } from 'duoyun-ui/lib/types';
 
 import { theme } from 'src/theme';
 import { i18n } from 'src/i18n';
 
 import 'duoyun-ui/elements/tabs';
 import 'src/modules/keybinding';
+import 'src/modules/sound-settings';
 import 'src/modules/account-settings';
 
 type State = {
@@ -16,6 +18,8 @@ const style = createCSSSheet(css`
     display: flex;
     width: min(50vw, 50em);
     height: 50vh;
+    -webkit-user-select: none;
+    user-select: none;
   }
   .tabs {
     width: 100%;
@@ -82,6 +86,16 @@ export class MSettingsElement extends GemElement<State> {
               `;
             },
           },
+          window.__TAURI__ && {
+            tab: i18n.get('soundSetting'),
+            getContent() {
+              return html`
+                <dy-tab-panel style="scrollbar-width: none">
+                  <m-sound-settings></m-sound-settings>
+                </dy-tab-panel>
+              `;
+            },
+          },
           {
             tab: i18n.get('license'),
             getContent() {
@@ -102,7 +116,7 @@ export class MSettingsElement extends GemElement<State> {
               `;
             },
           },
-        ]}
+        ].filter(isNotNullish)}
       ></dy-tabs>
     `;
   };

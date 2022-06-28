@@ -75,7 +75,7 @@
     "message": "設置"
   },
   "accountSetting": {
-    "message": "賬號設置"
+    "message": "賬號"
   },
   "nickname": {
     "message": "顯示名稱"
@@ -96,7 +96,16 @@
     "message": "不匹配新密碼"
   },
   "keySetting": {
-    "message": "按鍵設置"
+    "message": "按鍵"
+  },
+  "soundSetting": {
+    "message": "聲音"
+  },
+  "volumeSetting": {
+    "message": "音量"
+  },
+  "notificationVolume": {
+    "message": "通知"
   },
   "license": {
     "message": "許可證"

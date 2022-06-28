@@ -26,8 +26,13 @@ const defaultKeybinding = {
   B_2: '6',
 };
 
+const defaultVolume = {
+  notification: 1,
+};
+
 export type Settings = {
   keybinding: typeof defaultKeybinding;
+  volume: typeof defaultVolume;
 };
 
 export type User = Modify<LoginMutation['login']['user'], { settings: Settings }>;
@@ -36,7 +41,11 @@ export const parseAccount = (account: GetAccountQuery['account']): User => {
   const settings = JSON.parse(account.settings || '{}');
   return {
     ...account,
-    settings: { ...settings, keybinding: { ...defaultKeybinding, ...settings.keybinding } },
+    settings: {
+      ...settings,
+      keybinding: { ...defaultKeybinding, ...settings.keybinding },
+      volume: { ...defaultVolume, ...settings.volume },
+    },
   };
 };
 

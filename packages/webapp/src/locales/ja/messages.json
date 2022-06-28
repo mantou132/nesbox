@@ -98,6 +98,15 @@
   "keySetting": {
     "message": "キー設定"
   },
+  "soundSetting": {
+    "message": "音"
+  },
+  "volumeSetting": {
+    "message": "音量"
+  },
+  "notificationVolume": {
+    "message": "通知"
+  },
   "license": {
     "message": "ライセンス"
   },

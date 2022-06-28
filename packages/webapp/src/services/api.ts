@@ -82,7 +82,7 @@ import { configure, parseAccount, Settings } from 'src/configure';
 import { events, Singal, SingalEvent } from 'src/constants';
 import { i18n } from 'src/i18n';
 import { logout } from 'src/auth';
-import { documentVisible } from 'src/utils';
+import { documentVisible, playSound } from 'src/utils';
 
 const jaReg = /\p{sc=Katakana}|\p{sc=Hiragana}/u;
 const jaDescriptionReg = /(\p{sc=Katakana}|\p{sc=Hiragana}){5}/gu;
@@ -336,6 +336,7 @@ export const subscribeEvent = () => {
           documentVisible().then(() => readMessage(newMessage.userId));
         }
         updateStore(friendStore);
+        playSound('new_message');
       }
 
       if (newGame) {
@@ -376,6 +377,7 @@ export const subscribeEvent = () => {
         updateStore(friendStore, {
           inviteIds: [...(friendStore.inviteIds || []), newInvite.id],
         });
+        playSound('new_invite');
       }
 
       if (deleteInvite) {
@@ -388,6 +390,7 @@ export const subscribeEvent = () => {
         updateStore(friendStore, {
           friendIds: [...(friendStore.friendIds || []), applyFriend.user.id],
         });
+        playSound('apply_friend');
       }
 
       if (acceptFriend) {

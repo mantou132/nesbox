@@ -1,6 +1,7 @@
 import { render, TemplateResult } from '@mantou/gem';
 import { Time } from 'duoyun-ui/lib/time';
 
+import { configure } from 'src/configure';
 import { githubIssue } from 'src/constants';
 
 export const getCorsSrc = (url: string) => {
@@ -41,6 +42,17 @@ export const open = (uri: string) => {
     window.__TAURI__.shell.open(uri);
   } else {
     window.open(uri);
+  }
+};
+
+export const playSound = async (kind: string) => {
+  try {
+    window.__TAURI__?.tauri.invoke('play_sound', {
+      kind,
+      volume: configure.user?.settings.volume.notification || 0,
+    });
+  } catch {
+    //
   }
 };
 

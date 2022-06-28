@@ -98,6 +98,15 @@
   "keySetting": {
     "message": "Key Binding"
   },
+  "soundSetting": {
+    "message": "Sound"
+  },
+  "volumeSetting": {
+    "message": "Volume"
+  },
+  "notificationVolume": {
+    "message": "Notification"
+  },
   "license": {
     "message": "License"
   },
