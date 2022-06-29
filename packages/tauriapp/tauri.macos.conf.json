@@ -1,0 +1,11 @@
+{
+  "tauri": {
+    "windows": [
+      {
+        "width": 1024,
+        "height": 640,
+        "visible": false
+      }
+    ]
+  }
+}

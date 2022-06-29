@@ -12,7 +12,7 @@ extern crate objc;
 
 #[cfg(target_os = "macos")]
 use tauri::Menu;
-use tauri::{generate_handler, Manager};
+use tauri::{generate_handler, Manager, Window};
 #[cfg(target_os = "macos")]
 use window_ext::WindowExt;
 
@@ -45,6 +45,7 @@ fn main() {
             // main_window.open_devtools();
             Ok(())
         })
+        .on_page_load(|w: Window, _| w.get_window("main").unwrap().show().unwrap())
         .plugin(preload::PreloadPlugin::new())
         .invoke_handler(generate_handler![play_sound, set_badge])
         .run(context)

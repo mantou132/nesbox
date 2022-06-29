@@ -9,7 +9,7 @@
   },
   "package": {
     "productName": "NESBox",
-    "version": "0.1.2"
+    "version": "1.0.0"
   },
   "tauri": {
     "allowlist": {
@@ -60,11 +60,8 @@
     },
     "windows": [
       {
-        "title": "NESBox",
         "width": 1024,
         "height": 640,
-        "fullscreen": false,
-        "resizable": true,
         "visible": true
       }
     ]
