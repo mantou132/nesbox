@@ -12,7 +12,7 @@ extern crate objc;
 
 #[cfg(target_os = "macos")]
 use tauri::Menu;
-use tauri::{generate_handler, Manager, Window};
+use tauri::{generate_handler, Manager, Window, WindowEvent};
 #[cfg(target_os = "macos")]
 use window_ext::WindowExt;
 
@@ -44,6 +44,16 @@ fn main() {
 
             // main_window.open_devtools();
             Ok(())
+        })
+        .on_window_event(|event| match event.event() {
+            #[cfg(target_os = "macos")]
+            WindowEvent::Resized(size) => {
+                // https://github.com/tauri-apps/tauri/issues/4519
+                let monitor = event.window().current_monitor().unwrap().unwrap();
+                let screen = monitor.size();
+                event.window().set_toolbar_visible(size != screen);
+            }
+            _ => {}
         })
         .on_page_load(|w: Window, _| w.get_window("main").unwrap().show().unwrap())
         .plugin(preload::PreloadPlugin::new())

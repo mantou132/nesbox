@@ -62,6 +62,7 @@ const style = createCSSSheet(css`
 `);
 
 type State = {
+  fullscreen: boolean;
   maximized: boolean;
   blur: boolean;
 };
@@ -79,6 +80,7 @@ export class MTitlebarElement extends GemElement<State> {
   @attribute type: 'win' | 'mac';
 
   state: State = {
+    fullscreen: false,
     maximized: false,
     blur: false,
   };
@@ -95,8 +97,10 @@ export class MTitlebarElement extends GemElement<State> {
     return window.__TAURI__?.window.getCurrent();
   }
 
-  #isMaximized = () => {
-    this.#window?.isMaximized().then((maximized) => this.setState({ maximized }));
+  #onResize = async () => {
+    const maximized = await this.#window?.isMaximized();
+    // https://github.com/tauri-apps/tauri/issues/4519
+    this.setState({ maximized, fullscreen: innerWidth === screen.width && innerHeight === screen.height });
   };
 
   #toggleMaximize = () => {
@@ -115,8 +119,8 @@ export class MTitlebarElement extends GemElement<State> {
       setTimeout(() => this.removeEventListener('mousedown', this.#toggleMaximize), 300);
     });
 
-    this.#isMaximized();
-    this.#window?.listen('tauri://resize', this.#isMaximized);
+    this.#onResize();
+    this.#window?.listen('tauri://resize', this.#onResize);
 
     this.#window?.listen('tauri://blur', () => this.setState({ blur: true }));
     this.#window?.listen('tauri://focus', () => this.setState({ blur: false }));
@@ -132,6 +136,8 @@ export class MTitlebarElement extends GemElement<State> {
   }
 
   render = () => {
+    if (this.state.fullscreen) return html``;
+
     return html`
       <dy-reflect>
         <style>

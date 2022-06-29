@@ -3,6 +3,8 @@ use tauri::Window;
 pub trait WindowExt {
     #[cfg(target_os = "macos")]
     fn set_window_style(&self, title_transparent: bool, remove_toolbar: bool);
+    #[cfg(target_os = "macos")]
+    fn set_toolbar_visible(&self, visible: bool);
 }
 
 impl WindowExt for Window {
@@ -61,6 +63,22 @@ impl WindowExt for Window {
 
             // https://github.com/tauri-apps/tauri/issues/2663#issuecomment-1151240533
             id.setToolbar_(msg_send![class!(NSToolbar), new]);
+        }
+    }
+
+    #[cfg(target_os = "macos")]
+    fn set_toolbar_visible(&self, visible: bool) {
+        use cocoa::appkit::NSWindow;
+
+        unsafe {
+            let id = self.ns_window().unwrap() as cocoa::base::id;
+
+            let v = if visible {
+                cocoa::base::YES
+            } else {
+                cocoa::base::NO
+            };
+            let _: cocoa::base::id = msg_send![id.toolbar(), setVisible: v];
         }
     }
 }
