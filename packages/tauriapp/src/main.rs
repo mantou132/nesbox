@@ -39,8 +39,7 @@ fn main() {
             }
             #[cfg(target_os = "macos")]
             {
-                // https://github.com/tauri-apps/tauri/issues/2663#issuecomment-1151240533
-                main_window.set_transparent_titlebar(true, false);
+                main_window.set_window_style(true, false);
             }
 
             // main_window.open_devtools();
