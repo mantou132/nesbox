@@ -60,6 +60,7 @@
     },
     "windows": [
       {
+        "title": "NESBox",
         "width": 1024,
         "height": 640,
         "visible": true
