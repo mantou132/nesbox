@@ -12,4 +12,9 @@ declare global {
       tauri: typeof tauri;
     };
   }
+
+  interface Navigator {
+    // https://w3c.github.io/badging
+    setAppBadge?: (badge?: number) => void;
+  }
 }

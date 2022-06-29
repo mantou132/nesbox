@@ -16,7 +16,7 @@ use tauri::{generate_handler, Manager};
 #[cfg(target_os = "macos")]
 use window_ext::WindowExt;
 
-use handler::play_sound;
+use handler::{play_sound, set_badge};
 
 mod handler;
 mod preload;
@@ -47,7 +47,7 @@ fn main() {
             Ok(())
         })
         .plugin(preload::PreloadPlugin::new())
-        .invoke_handler(generate_handler![play_sound])
+        .invoke_handler(generate_handler![play_sound, set_badge])
         .run(context)
         .expect("error while running tauri application");
 }

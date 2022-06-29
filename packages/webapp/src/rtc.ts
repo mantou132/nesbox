@@ -238,23 +238,25 @@ export class RTC extends EventTarget {
 
   #onSignal = async (event: CustomEvent<SingalEvent>) => {
     const { userId, singal } = event.detail;
-    switch (singal.type) {
-      // host
-      case SingalType.OFFER:
-        this.#onOffer(event.detail);
-        break;
-      // client
-      case SingalType.ANSWER:
-        await this.#connMap.get(configure.user!.id)?.setRemoteDescription(new RTCSessionDescription(singal.data));
-        break;
-      // both
-      case SingalType.NEW_ICE_CANDIDATE:
-        try {
+    try {
+      switch (singal.type) {
+        // host
+        case SingalType.OFFER:
+          this.#onOffer(event.detail);
+          break;
+        // client
+        case SingalType.ANSWER:
+          await this.#connMap.get(configure.user!.id)?.setRemoteDescription(new RTCSessionDescription(singal.data));
+          break;
+        // both
+        case SingalType.NEW_ICE_CANDIDATE:
           await this.#connMap.get(this.#isHost ? userId : configure.user!.id)?.addIceCandidate(singal.data);
-        } catch {
-          // No remoteDescription. etc.
-        }
-        break;
+          break;
+      }
+    } catch (err) {
+      // No remoteDescription.
+      // Set remote anser error
+      logger.error(err);
     }
   };
 
@@ -310,6 +312,7 @@ export class RTC extends EventTarget {
   };
 
   #restart = () => {
+    logger.info('rtc restarting...');
     this.destroy();
     // logout / leave
     if (configure.user?.playing) {

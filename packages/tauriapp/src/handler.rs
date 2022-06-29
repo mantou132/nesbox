@@ -2,6 +2,9 @@ use rodio::{Decoder, OutputStream, Sink};
 use std::io::Cursor;
 use tauri::command;
 
+#[cfg(target_os = "macos")]
+use cocoa::{appkit::NSApp, base::nil, foundation::NSString};
+
 #[command]
 pub async fn play_sound(kind: &str, volume: f32) -> Result<(), String> {
     if volume < 0.03 {
@@ -22,4 +25,18 @@ pub async fn play_sound(kind: &str, volume: f32) -> Result<(), String> {
     sink.sleep_until_end();
 
     Ok(())
+}
+
+#[command]
+pub fn set_badge(count: i32) {
+    #[cfg(target_os = "macos")]
+    unsafe {
+        let label = if count == 0 {
+            nil
+        } else {
+            NSString::alloc(nil).init_str(&format!("{}", count))
+        };
+        let dock_tile: cocoa::base::id = msg_send![NSApp(), dockTile];
+        let _: cocoa::base::id = msg_send![dock_tile, setBadgeLabel: label];
+    }
 }

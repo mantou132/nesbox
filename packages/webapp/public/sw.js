@@ -12,6 +12,29 @@ self.addEventListener('install', () => {
   });
 });
 
+self.addEventListener('push', function (event) {
+  let payload = {};
+  try {
+    payload = event.data.json();
+  } catch (e) {
+    payload = { title: event.data.text() };
+  }
+  event.waitUntil(
+    self.registration.showNotification(payload.title, {
+      icon: '/logo-144.png',
+      body: payload.body,
+      data: payload.data,
+    }),
+  );
+});
+
+self.addEventListener('notificationclick', function (event) {
+  if (event.notification.data?.url) {
+    self.clients.openWindow(event.notification.data.url);
+  }
+  event.notification.close();
+});
+
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const requestUrl = new URL(request.url);

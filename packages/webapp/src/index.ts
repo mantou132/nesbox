@@ -126,11 +126,6 @@ function handleRejection({ reason }: PromiseRejectionEvent) {
 
 addEventListener('error', printError);
 addEventListener('unhandledrejection', handleRejection);
-addEventListener('load', () => {
-  if (COMMAND === 'build') {
-    navigator.serviceWorker?.register('/sw.js', { type: 'module' });
-  }
-});
 
 // https://github.com/tauri-apps/tauri/issues/2626#issuecomment-1151090395
 addEventListener('keypress', (event) => {
@@ -138,3 +133,9 @@ addEventListener('keypress', (event) => {
     event.preventDefault();
   }
 });
+
+if (COMMAND === 'build') {
+  navigator.serviceWorker?.register('/sw.js', { type: 'module' });
+} else {
+  navigator.serviceWorker.getRegistration().then((reg) => reg?.unregister());
+}

@@ -1,8 +1,9 @@
 import { render, TemplateResult } from '@mantou/gem';
+import { UserAttentionType } from '@tauri-apps/api/window';
 import { Time } from 'duoyun-ui/lib/time';
 
 import { configure } from 'src/configure';
-import { githubIssue } from 'src/constants';
+import { githubIssue, isTauriMacApp, isTauriWinApp } from 'src/constants';
 
 export const getCorsSrc = (url: string) => {
   return `https://files.xianqiao.wang/${url}`;
@@ -45,14 +46,26 @@ export const open = (uri: string) => {
   }
 };
 
-export const playSound = async (kind: string) => {
-  try {
-    window.__TAURI__?.tauri.invoke('play_sound', {
+export const playSound = (kind: string) => {
+  window.__TAURI__?.tauri
+    .invoke('play_sound', {
       kind,
       volume: configure.user?.settings.volume.notification || 0,
+    })
+    .catch(() => {
+      //
     });
-  } catch {
-    //
+};
+
+export const setAppBadge = (count: number) => {
+  if (isTauriWinApp) {
+    window.__TAURI__?.window.getCurrent().requestUserAttention(UserAttentionType.Informational);
+  } else if (isTauriMacApp) {
+    window.__TAURI__?.tauri.invoke('set_badge', { count }).catch(() => {
+      //
+    });
+  } else {
+    navigator.setAppBadge?.(count);
   }
 };
 
