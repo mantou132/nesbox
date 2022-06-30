@@ -59,7 +59,7 @@ export const playSound = (kind: string) => {
 
 export const setAppBadge = (count: number) => {
   if (isTauriWinApp) {
-    window.__TAURI__?.window.getCurrent().requestUserAttention(UserAttentionType.Informational);
+    if (count) window.__TAURI__?.window.getCurrent().requestUserAttention(UserAttentionType.Informational);
   } else if (isTauriMacApp) {
     window.__TAURI__?.tauri.invoke('set_badge', { count }).catch(() => {
       //
