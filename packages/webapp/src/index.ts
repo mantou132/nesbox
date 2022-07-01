@@ -1,7 +1,7 @@
-import { html, render, history, styleMap } from '@mantou/gem';
+import { html, render, styleMap } from '@mantou/gem';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { Toast } from 'duoyun-ui/elements/toast';
-import { matchPath, RouteItem } from 'duoyun-ui/elements/route';
+import { DuoyunDropAreaElement } from 'duoyun-ui/elements/drop-area';
 
 import { theme } from 'src/theme';
 import { configure } from 'src/configure';
@@ -9,8 +9,9 @@ import { COMMAND, isTauriMacApp, isTauriWinApp, RELEASE } from 'src/constants';
 import { logger } from 'src/logger';
 import { routes } from 'src/routes';
 import { gotoRedirectUri, isExpiredProfile, logout } from 'src/auth';
-import { isInputElement } from 'src/utils';
+import { isInputElement, matchRoute } from 'src/utils';
 import { listener } from 'src/gamepad';
+import { dropHandler } from 'src/drop';
 
 import 'src/modules/meta';
 
@@ -20,14 +21,12 @@ logger.info('MODE\t', import.meta.env.MODE);
 logger.info('RELEASE\t', RELEASE);
 logger.info('COMMAND\t', COMMAND);
 
-const match = (route: RouteItem) => matchPath(route.pattern, history.getParams().path);
-
-if ([routes.login, routes.register].some(match)) {
+if ([routes.login, routes.register].some(matchRoute)) {
   if (configure.profile) {
     gotoRedirectUri();
   }
-} else if ([routes.download].some(match)) {
-  //
+} else if ([routes.download, routes.emulator].some(matchRoute)) {
+  logger.info('Welcome!');
 } else if (!configure.profile || isExpiredProfile(configure.profile)) {
   logout(true);
 }
@@ -54,6 +53,11 @@ render(
         color: ${theme.textColor};
         background-color: ${theme.backgroundColor};
       }
+      dy-drop-area {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+      }
       @media ${mediaQuery.DESKTOP} {
         body {
           font-size: 1.1rem;
@@ -74,22 +78,27 @@ render(
           ></m-titlebar>
         `
       : ''}
-    <dy-route
-      @contextmenu=${(e: Event) => e.preventDefault()}
-      .routes=${[
-        routes.login,
-        routes.register,
-        routes.download,
-        {
-          pattern: '*',
-          getContent() {
-            import('src/app');
-            return html`<app-root></app-root>`;
-          },
-        },
-      ]}
+    <dy-drop-area
+      @change=${(evt: CustomEvent<File[]>) => evt.target instanceof DuoyunDropAreaElement && dropHandler(evt.detail)}
     >
-    </dy-route>
+      <dy-route
+        @contextmenu=${(e: Event) => e.preventDefault()}
+        .routes=${[
+          routes.login,
+          routes.register,
+          routes.download,
+          routes.emulator,
+          {
+            pattern: '*',
+            getContent() {
+              import('src/app');
+              return html`<app-root></app-root>`;
+            },
+          },
+        ]}
+      >
+      </dy-route>
+    </dy-drop-area>
   `,
   document.body,
 );

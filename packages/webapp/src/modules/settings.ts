@@ -70,7 +70,7 @@ export class MSettingsElement extends GemElement<State> {
             tab: i18n.get('accountSetting'),
             getContent() {
               return html`
-                <dy-tab-panel style="scrollbar-width: none">
+                <dy-tab-panel>
                   <m-account-settings></m-account-settings>
                 </dy-tab-panel>
               `;
@@ -80,7 +80,7 @@ export class MSettingsElement extends GemElement<State> {
             tab: i18n.get('keySetting'),
             getContent() {
               return html`
-                <dy-tab-panel style="scrollbar-width: none">
+                <dy-tab-panel>
                   <m-keybinding></m-keybinding>
                 </dy-tab-panel>
               `;
@@ -90,7 +90,7 @@ export class MSettingsElement extends GemElement<State> {
             tab: i18n.get('soundSetting'),
             getContent() {
               return html`
-                <dy-tab-panel style="scrollbar-width: none">
+                <dy-tab-panel>
                   <m-sound-settings></m-sound-settings>
                 </dy-tab-panel>
               `;
@@ -100,7 +100,7 @@ export class MSettingsElement extends GemElement<State> {
             tab: i18n.get('license'),
             getContent() {
               return html`
-                <dy-tab-panel style="scrollbar-width: none">
+                <dy-tab-panel>
                   MIT License Copyright (c) 2021-present Permission is hereby granted, free of charge, to any person
                   obtaining a copy of this software and associated documentation files (the "Software"), to deal in the
                   Software without restriction, including without limitation the rights to use, copy, modify, merge,

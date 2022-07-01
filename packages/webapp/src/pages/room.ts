@@ -114,6 +114,11 @@ export class PRoomElement extends GemElement<State> {
     return document.visibilityState === 'visible';
   }
 
+  constructor() {
+    super();
+    this.addEventListener('dragover', (e) => e.stopPropagation());
+  }
+
   #nes?: WasmNes;
   #imageData?: ImageData;
   #audioContext?: AudioContext;

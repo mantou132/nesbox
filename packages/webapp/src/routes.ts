@@ -23,6 +23,14 @@ const getInitRoutes = () => {
         return html`<p-games></p-games>`;
       },
     },
+    emulator: {
+      title: '模拟器',
+      pattern: '/emulator',
+      async getContent(_params: Record<string, string>) {
+        await import('src/pages/emulator');
+        return html`<p-emulator></p-emulator>`;
+      },
+    },
     game: {
       title: i18n.get('gameTitle'),
       pattern: `/game/:${paramKeys.GAME_ID}`,

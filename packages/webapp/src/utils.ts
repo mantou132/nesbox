@@ -1,5 +1,6 @@
-import { render, TemplateResult } from '@mantou/gem';
+import { history, render, TemplateResult } from '@mantou/gem';
 import { UserAttentionType } from '@tauri-apps/api/window';
+import { matchPath, RouteItem } from 'duoyun-ui/elements/route';
 import { Time } from 'duoyun-ui/lib/time';
 
 import { configure } from 'src/configure';
@@ -79,3 +80,5 @@ export const formatTime = (timestamp: number) => {
   }
   return time.format();
 };
+
+export const matchRoute = (route: RouteItem) => matchPath(route.pattern, history.getParams().path);

@@ -8,7 +8,7 @@ import { localStorageKeys } from 'src/constants';
 import type { ThemeName } from 'src/theme';
 import { GetAccountQuery } from 'src/generated/graphql';
 
-const defaultKeybinding = {
+export const defaultKeybinding = {
   Up: 'w',
   Left: 'a',
   Down: 's',
@@ -70,6 +70,7 @@ interface Configure {
   searchState?: boolean;
   friendChatState?: number;
   usedRelease?: number;
+  openNesFile?: File;
   theme: ThemeName;
   shortcuts: {
     OPEN_SEARCH: Shortcut;
@@ -77,19 +78,23 @@ interface Configure {
   };
 }
 
-export const [configure] = createCacheStore<Configure>(localStorageKeys.CONFIGURE_LOCAL_STORAGE_KEY, {
-  theme: 'default',
-  shortcuts: {
-    OPEN_SEARCH: {
-      win: ['ctrl', 'k'],
-      mac: ['command', 'k'],
-    },
-    OPEN_SETTINGS: {
-      win: ['esc'],
-      mac: ['esc'],
+export const [configure] = createCacheStore<Configure>(
+  localStorageKeys.CONFIGURE_LOCAL_STORAGE_KEY,
+  {
+    theme: 'default',
+    shortcuts: {
+      OPEN_SEARCH: {
+        win: ['ctrl', 'k'],
+        mac: ['command', 'k'],
+      },
+      OPEN_SETTINGS: {
+        win: ['esc'],
+        mac: ['esc'],
+      },
     },
   },
-});
+  { cacheExcludeKeys: ['openNesFile'] },
+);
 
 export function getShortcut(command: keyof Configure['shortcuts'], isDisplay = false) {
   const keys = configure.shortcuts[command][isMac ? 'mac' : 'win'];
@@ -119,4 +124,8 @@ export const toggoleSettingsState = () => {
 
 export const toggoleSearchState = () => {
   updateStore(configure, { searchState: !configure.searchState });
+};
+
+export const setNesFile = (file?: File) => {
+  updateStore(configure, { openNesFile: file });
 };

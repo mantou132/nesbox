@@ -11,7 +11,7 @@
   "display": "standalone",
   "file_handlers": [
     {
-      "action": "/",
+      "action": "/emulator",
       "name": "NES file",
       "accept": {
         "application/octet-stream": [".nes"]

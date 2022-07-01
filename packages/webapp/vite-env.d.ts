@@ -11,6 +11,7 @@ declare global {
       shell: typeof shell;
       tauri: typeof tauri;
     };
+    launchQueue?: any;
   }
 
   interface Navigator {
