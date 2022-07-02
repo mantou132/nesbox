@@ -11,10 +11,10 @@ import {
   RefObject,
 } from '@mantou/gem';
 import { createPath } from 'duoyun-ui/elements/route';
-import { Button, WasmNes } from 'nes_rust_wasm';
 import JSZip from 'jszip';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { waitLoading } from 'duoyun-ui/elements/wait';
+import init, { Nes, Button } from '@nesbox/nes';
 
 import { configure } from 'src/configure';
 import { routes } from 'src/routes';
@@ -119,17 +119,15 @@ export class PRoomElement extends GemElement<State> {
     this.addEventListener('dragover', (e) => e.stopPropagation());
   }
 
-  #nes?: WasmNes;
+  #nes?: Nes;
   #imageData?: ImageData;
   #audioContext?: AudioContext;
-
+  #streamDestination?: MediaStreamAudioDestinationNode;
   #rtc?: RTC;
 
   #enableAudio = () => {
     if (this.#isHost) {
-      if (this.#audioContext?.state === 'suspended') {
-        this.#audioContext.resume();
-      }
+      this.#nes?.set_sound(true);
     } else {
       this.videoRef.element!.muted = false;
     }
@@ -141,51 +139,57 @@ export class PRoomElement extends GemElement<State> {
     const ctx = this.canvasRef.element!.getContext('2d')!;
     stream.addTrack(ctx.canvas.captureStream(60).getVideoTracks()[0]);
 
-    this.#audioContext = new AudioContext({ sampleRate: 44100 });
-    this.#audioContext.suspend();
-    const streamDestination = this.#audioContext.createMediaStreamDestination();
-    stream.addTrack(streamDestination.stream.getAudioTracks()[0]);
-
-    if (this.#isHost) {
-      const scriptProcessor = this.#audioContext.createScriptProcessor(4096, 0, 1);
-      scriptProcessor.connect(this.#audioContext.destination);
-      scriptProcessor.connect(streamDestination);
-      scriptProcessor.onaudioprocess = (e) => {
-        if (this.#isVisible) {
-          const data = e.outputBuffer.getChannelData(0);
-          this.#nes?.update_sample_buffer(data);
-        }
-      };
-    }
-
+    this.#audioContext = new AudioContext({ sampleRate: 48000 });
+    this.#streamDestination = this.#audioContext.createMediaStreamDestination();
+    stream.addTrack(this.#streamDestination.stream.getAudioTracks()[0]);
     return stream;
   };
 
-  #renderCanvas = () => {
-    if (this.#isHost && this.#nes && this.#imageData && this.#isVisible) {
-      const ctx = this.canvasRef.element!.getContext('2d')!;
-      this.#nes.step_frame();
-      this.#nes.update_pixels(new Uint8Array(this.#imageData.data.buffer));
-      ctx.putImageData(this.#imageData, 0, 0);
+  #nextStartTime = 0;
+  #loop = () => {
+    if (this.isConnected) {
+      requestAnimationFrame(this.#loop);
     }
 
-    if (this.isConnected) {
-      requestAnimationFrame(this.#renderCanvas);
-    }
+    if (!this.#isHost || !this.#nes || !this.#imageData || !this.#isVisible) return;
+    this.#nes.clock_seconds(1 / 60);
+
+    const memory = Nes.memory();
+
+    const frameLen = this.#nes.frame_len();
+    const framePtr = this.#nes.frame();
+    new Uint8Array(this.#imageData.data.buffer).set(new Uint8Array(memory.buffer, framePtr, frameLen));
+    this.canvasRef.element!.getContext('2d')!.putImageData(this.#imageData, 0, 0);
+
+    if (!this.#nes.sound() || !this.#audioContext || !this.#streamDestination) return;
+    const bufferSize = this.#nes.buffer_capacity();
+    const sampleRate = this.#nes.sample_rate();
+    const samplesPtr = this.#nes.samples();
+    const audioBuffer = this.#audioContext.createBuffer(1, bufferSize, sampleRate);
+    audioBuffer.getChannelData(0).set(new Float32Array(memory.buffer, samplesPtr, bufferSize));
+    const node = this.#audioContext.createBufferSource();
+    node.connect(this.#audioContext.destination);
+    node.connect(this.#streamDestination);
+    node.buffer = audioBuffer;
+    const start = Math.max(this.#nextStartTime || 0, this.#audioContext.currentTime + bufferSize / sampleRate);
+    node.start(start);
+    this.#nextStartTime = start + bufferSize / sampleRate;
   };
 
   #initNes = async () => {
     if (!this.#isHost) return;
     const ctx = this.canvasRef.element!.getContext('2d')!;
     this.#imageData = ctx.createImageData(ctx.canvas.width, ctx.canvas.height);
+
     const zip = await (await fetch(getCorsSrc(this.#rom!))).arrayBuffer();
     const folder = await JSZip.loadAsync(zip);
     const buffer = await Object.values(folder.files)
       .find((e) => e.name.toLowerCase().endsWith('.nes'))!
       .async('arraybuffer');
-    this.#nes = WasmNes.new();
-    this.#nes.set_rom(new Uint8Array(buffer));
-    this.#nes.bootup();
+
+    await init();
+    this.#nes = Nes.new(48000, 800, 0.02);
+    this.#nes.load_rom(new Uint8Array(buffer));
   };
 
   #onMessage = ({ detail }: CustomEvent<ChannelMessage>) => {
@@ -200,11 +204,11 @@ export class PRoomElement extends GemElement<State> {
         break;
       // host
       case ChannelMessageType.KEYDOWN:
-        this.#nes?.press_button((detail as KeyDownMsg).button);
+        this.#nes?.handle_event((detail as KeyDownMsg).button, true, false);
         break;
       // host
       case ChannelMessageType.KEYUP:
-        this.#nes?.release_button((detail as KeyUpMsg).button);
+        this.#nes?.handle_event((detail as KeyUpMsg).button, false, false);
         break;
     }
   };
@@ -247,7 +251,7 @@ export class PRoomElement extends GemElement<State> {
   #pressButton = (button: Button) => {
     if (button !== Button.Reset) this.#enableAudio();
     if (this.#isHost) {
-      this.#nes?.press_button(button);
+      this.#nes?.handle_event(button, true, false);
     } else {
       this.#rtc?.send(new KeyDownMsg(button));
     }
@@ -270,7 +274,7 @@ export class PRoomElement extends GemElement<State> {
 
   #releaseButton = (button: Button) => {
     if (this.#isHost) {
-      this.#nes?.release_button(button);
+      this.#nes?.handle_event(button, false, false);
     } else {
       this.#rtc?.send(new KeyUpMsg(button));
     }
@@ -288,7 +292,7 @@ export class PRoomElement extends GemElement<State> {
 
   mounted = () => {
     if (this.#isHost) {
-      requestAnimationFrame(this.#renderCanvas);
+      requestAnimationFrame(this.#loop);
     }
 
     this.effect(

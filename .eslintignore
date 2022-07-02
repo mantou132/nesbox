@@ -4,3 +4,4 @@ packages/*/coverage
 packages/*/extension
 generated
 public
+nes-pkg

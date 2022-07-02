@@ -1,5 +1,4 @@
 import { history, render, TemplateResult } from '@mantou/gem';
-import { UserAttentionType } from '@tauri-apps/api/window';
 import { matchPath, RouteItem } from 'duoyun-ui/elements/route';
 import { Time } from 'duoyun-ui/lib/time';
 
@@ -60,7 +59,7 @@ export const playSound = (kind: string) => {
 
 export const setAppBadge = (count: number) => {
   if (isTauriWinApp) {
-    if (count) window.__TAURI__?.window.getCurrent().requestUserAttention(UserAttentionType.Informational);
+    if (count) window.__TAURI__?.window.getCurrent().requestUserAttention(2);
   } else if (isTauriMacApp) {
     window.__TAURI__?.tauri.invoke('set_badge', { count }).catch(() => {
       //

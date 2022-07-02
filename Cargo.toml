@@ -1,5 +1,11 @@
 [workspace]
 members = [
+  "packages/nes",
   "packages/server",
   "packages/tauriapp"
 ]
+
+[profile.release.package.nes]
+# Tell `rustc` to optimize for small code size.
+opt-level = "s"
+debug = true

@@ -1,4 +1,4 @@
-import { Button } from 'nes_rust_wasm';
+import { Button } from '@nesbox/nes';
 
 import { configure } from 'src/configure';
 import { events, SingalEvent, SingalType } from 'src/constants';

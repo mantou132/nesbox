@@ -1,8 +1,6 @@
 import 'dotenv/config';
 import { resolve } from 'path';
 
-import wasm from 'vite-plugin-wasm';
-import topLevelAwait from 'vite-plugin-top-level-await';
 import { defineConfig } from 'vite';
 
 const config = async ({ command }: any) => {
@@ -27,7 +25,6 @@ const config = async ({ command }: any) => {
       'process.env.COMMAND': JSON.stringify(command),
       'process.env.API_BASE': JSON.stringify(process.env.API_BASE),
     },
-    plugins: [wasm({}), topLevelAwait()],
     server: {
       host: true,
       port: 3003,

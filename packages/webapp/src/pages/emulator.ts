@@ -10,7 +10,7 @@ import {
   RefObject,
 } from '@mantou/gem';
 import { locale } from 'duoyun-ui/lib/locale';
-import { Button, WasmNes } from 'nes_rust_wasm';
+import init, { Button, Nes } from '@nesbox/nes';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { Modal } from 'duoyun-ui/elements/modal';
 
@@ -25,6 +25,7 @@ const style = createCSSSheet(css`
     height: 100%;
     object-fit: contain;
     background-color: black;
+    image-rendering: pixelated;
   }
   .nodata {
     position: absolute;
@@ -52,14 +53,12 @@ export class PEmulatorElement extends GemElement {
     return document.visibilityState === 'visible';
   }
 
-  #nes?: WasmNes;
+  #nes?: Nes;
   #imageData?: ImageData;
   #audioContext?: AudioContext;
 
   #enableAudio = () => {
-    if (this.#audioContext?.state === 'suspended') {
-      this.#audioContext.resume();
-    }
+    this.#nes?.set_sound(true);
   };
 
   #getButton = (event: KeyboardEvent) => {
@@ -88,37 +87,43 @@ export class PEmulatorElement extends GemElement {
       return;
     }
     if (button !== Button.Reset) this.#enableAudio();
-    this.#nes?.press_button(button);
+    this.#nes?.handle_event(button, true, event.repeat);
   };
 
   #onKeyUp = (event: KeyboardEvent) => {
     const button = this.#getButton(event);
     if (!button) return;
-    this.#nes?.release_button(button);
+    this.#nes?.handle_event(button, false, event.repeat);
   };
 
-  #renderCanvas = () => {
+  #nextStartTime = 0;
+  #loop = () => {
     if (this.isConnected) {
-      requestAnimationFrame(this.#renderCanvas);
+      requestAnimationFrame(this.#loop);
     }
 
-    if (!this.#nes || !this.#imageData) return;
-    this.#nes.step_frame();
-    this.#nes.update_pixels(new Uint8Array(this.#imageData.data.buffer));
-    this.canvasRef.element!.getContext('2d')!.putImageData(this.#imageData, 0, 0);
-  };
+    if (!this.#nes || !this.#imageData || !this.#isVisible) return;
+    this.#nes.clock_seconds(1 / 60);
 
-  #initAudio = () => {
-    this.#audioContext = new AudioContext({ sampleRate: 44100 });
-    this.#audioContext.suspend();
-    const scriptProcessor = this.#audioContext.createScriptProcessor(4096, 0, 1);
-    scriptProcessor.connect(this.#audioContext.destination);
-    scriptProcessor.onaudioprocess = (e) => {
-      if (this.#isVisible) {
-        const data = e.outputBuffer.getChannelData(0);
-        this.#nes?.update_sample_buffer(data);
-      }
-    };
+    const memory = Nes.memory();
+
+    const frameLen = this.#nes.frame_len();
+    const framePtr = this.#nes.frame();
+    new Uint8Array(this.#imageData.data.buffer).set(new Uint8Array(memory.buffer, framePtr, frameLen));
+    this.canvasRef.element!.getContext('2d')!.putImageData(this.#imageData, 0, 0);
+
+    if (!this.#nes.sound() || !this.#audioContext) return;
+    const bufferSize = this.#nes.buffer_capacity();
+    const sampleRate = this.#nes.sample_rate();
+    const samplesPtr = this.#nes.samples();
+    const audioBuffer = this.#audioContext.createBuffer(1, bufferSize, sampleRate);
+    audioBuffer.getChannelData(0).set(new Float32Array(memory.buffer, samplesPtr, bufferSize));
+    const node = this.#audioContext.createBufferSource();
+    node.connect(this.#audioContext.destination);
+    node.buffer = audioBuffer;
+    const start = Math.max(this.#nextStartTime || 0, this.#audioContext.currentTime + bufferSize / sampleRate);
+    node.start(start);
+    this.#nextStartTime = start + bufferSize / sampleRate;
   };
 
   #initNes = async () => {
@@ -126,15 +131,17 @@ export class PEmulatorElement extends GemElement {
 
     const ctx = this.canvasRef.element!.getContext('2d')!;
     this.#imageData = ctx.createImageData(ctx.canvas.width, ctx.canvas.height);
+
     const buffer = await configure.openNesFile.arrayBuffer();
-    this.#nes = WasmNes.new();
-    this.#nes.set_rom(new Uint8Array(buffer));
-    this.#nes.bootup();
+
+    await init();
+    this.#nes = Nes.new(48000, 800, 0.02);
+    this.#nes.load_rom(new Uint8Array(buffer));
   };
 
   mounted = async () => {
-    this.#renderCanvas();
-    this.#initAudio();
+    this.#audioContext = new AudioContext({ sampleRate: 48000 });
+    requestAnimationFrame(this.#loop);
     this.effect(this.#initNes, () => [configure.openNesFile]);
     addEventListener('keydown', this.#onKeyDown);
     addEventListener('keyup', this.#onKeyUp);
