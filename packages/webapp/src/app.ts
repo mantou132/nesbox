@@ -78,10 +78,18 @@ export class AppRootElement extends GemElement {
 
   #globalShortcut = (evt: KeyboardEvent) => {
     hotkeys({
-      [getShortcut('OPEN_SEARCH')]: toggoleSearchState,
-      [getShortcut('OPEN_SETTINGS')]: toggoleSettingsState,
+      [getShortcut('OPEN_SEARCH')]: () => {
+        toggoleSearchState();
+        evt.preventDefault();
+      },
+      [getShortcut('OPEN_SETTINGS')]: () => {
+        toggoleSettingsState();
+        evt.preventDefault();
+      },
     })(evt);
   };
+
+  #stopPropagation = (e: DragEvent) => e.stopPropagation();
 
   #enterRoom = () => {
     const rid = configure.user?.playing?.id;
@@ -89,12 +97,14 @@ export class AppRootElement extends GemElement {
       history.replace({
         path: createPath(routes.room, { params: { [paramKeys.ROOM_ID]: String(rid) } }),
       });
+
+      this.addEventListener('dragover', this.#stopPropagation);
+      return () => this.removeEventListener('dragover', this.#stopPropagation);
     }
   };
 
   mounted = () => {
-    this.effect(this.#enterRoom, () => [configure.user?.playing?.id]);
-    this.effect(this.#enterRoom, () => [history.getParams().path]);
+    this.effect(this.#enterRoom, () => [configure.user?.playing?.id, history.getParams().path]);
     this.effect(
       () => forever(getGames),
       () => [i18n.currentLanguage],
@@ -142,8 +152,8 @@ export class AppRootElement extends GemElement {
         .cancelText=${i18n.get('close')}
         .open=${!!configure.settingsState}
         @close=${toggoleSettingsState}
+        .body=${html`<m-settings></m-settings>`}
       >
-        <m-settings slot="body"></m-settings>
       </dy-modal>
 
       <dy-modal

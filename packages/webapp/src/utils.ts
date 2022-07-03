@@ -33,11 +33,6 @@ export const documentVisible = async () => {
   await new Promise((res) => document.addEventListener('visibilitychange', res, { once: true }));
 };
 
-export const isInputElement = (event: Event) => {
-  const ele = event.composedPath()[0];
-  return ele instanceof HTMLInputElement || ele instanceof HTMLAreaElement;
-};
-
 export const open = (uri: string) => {
   if (window.__TAURI__) {
     window.__TAURI__.shell.open(uri);

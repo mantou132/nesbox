@@ -12,6 +12,7 @@
 - Friend system, chat, invite
 - Game review
 - Internationalization
+- As a local emulator
 
 ## TODO
 

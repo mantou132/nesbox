@@ -9,7 +9,7 @@ import { COMMAND, isTauriMacApp, isTauriWinApp, RELEASE } from 'src/constants';
 import { logger } from 'src/logger';
 import { routes } from 'src/routes';
 import { gotoRedirectUri, isExpiredProfile, logout } from 'src/auth';
-import { isInputElement, matchRoute } from 'src/utils';
+import { matchRoute } from 'src/utils';
 import { listener } from 'src/gamepad';
 import { dropHandler } from 'src/drop';
 
@@ -137,11 +137,19 @@ addEventListener('error', printError);
 addEventListener('unhandledrejection', handleRejection);
 
 // https://github.com/tauri-apps/tauri/issues/2626#issuecomment-1151090395
-addEventListener('keypress', (event) => {
-  if (isTauriMacApp && !isInputElement(event)) {
-    event.preventDefault();
-  }
-});
+addEventListener(
+  'keydown',
+  (event) => {
+    if (isTauriMacApp && event.key !== 'Tab') {
+      const ele = event.composedPath()[0];
+      const isInput = ele instanceof HTMLInputElement || ele instanceof HTMLTextAreaElement;
+      if (!ele || !isInput || event.key === 'Escape') {
+        event.preventDefault();
+      }
+    }
+  },
+  { capture: true },
+);
 
 if (COMMAND === 'build') {
   navigator.serviceWorker?.register('/sw.js', { type: 'module' });
