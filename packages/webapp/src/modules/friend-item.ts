@@ -127,7 +127,7 @@ export class MFriendItemElement extends GemElement {
           text: i18n.get('inviteFriend'),
           disabled: !configure.user?.playing,
           handle: async () => {
-            await createInvite(this.friend.user.id, configure.user!.playing!.id);
+            await createInvite({ targetId: this.friend.user.id, roomId: configure.user!.playing!.id });
             Toast.open('success', i18n.get('tipIviteSuccess'));
           },
         },

@@ -60,6 +60,7 @@ import {
   ScFriendStatus,
   ScGame,
   ScNewComment,
+  ScNewInvite,
   ScNewRoom,
   ScUpdatePassword,
   ScUpdateRoom,
@@ -213,8 +214,8 @@ export const deleteFriend = async (targetId: number) => {
   });
 };
 
-export const createInvite = async (targetId: number, roomId: number) => {
-  await request<CreateInviteMutation, CreateInviteMutationVariables>(CreateInvite, { input: { targetId, roomId } });
+export const createInvite = async (input: ScNewInvite) => {
+  await request<CreateInviteMutation, CreateInviteMutationVariables>(CreateInvite, { input });
 };
 
 export const acceptInvite = async (inviteId: number, accept: boolean) => {

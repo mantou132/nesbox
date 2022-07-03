@@ -9,12 +9,17 @@ import {
   history,
   refobject,
   RefObject,
+  QueryString,
 } from '@mantou/gem';
 import { createPath } from 'duoyun-ui/elements/route';
 import JSZip from 'jszip';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { waitLoading } from 'duoyun-ui/elements/wait';
 import init, { Nes, Button } from '@nesbox/nes';
+import { ContextMenu } from 'duoyun-ui/elements/menu';
+import { Modal } from 'duoyun-ui/elements/modal';
+import { DuoyunInputElement } from 'duoyun-ui/elements/input';
+import { isNotBoolean } from 'duoyun-ui/lib/types';
 
 import { configure } from 'src/configure';
 import { routes } from 'src/routes';
@@ -29,13 +34,13 @@ import {
   RTC,
   TextMsg,
 } from 'src/rtc';
-import { store } from 'src/store';
+import { friendStore, store } from 'src/store';
 import { i18n } from 'src/i18n';
 import type { MRoomChatElement } from 'src/modules/room-chat';
 import { getCorsSrc } from 'src/utils';
-import { events } from 'src/constants';
+import { events, queryKeys } from 'src/constants';
+import { createInvite } from 'src/services/api';
 
-import 'duoyun-ui/elements/input';
 import 'src/modules/room-player-list';
 import 'src/modules/room-chat';
 import 'src/modules/nav';
@@ -285,6 +290,57 @@ export class PRoomElement extends GemElement<State> {
     this.#releaseButton(button);
   };
 
+  #onContextMenu = (event: MouseEvent) => {
+    if (!this.#playing) return;
+    ContextMenu.open(
+      [
+        !!friendStore.friendIds?.length && {
+          text: '邀请好友',
+          menu: friendStore.friendIds?.map((id) => ({
+            text: friendStore.friends[id]?.user.nickname || '',
+            handle: () => createInvite({ roomId: this.#playing!.id, targetId: id }),
+          })),
+        },
+        {
+          text: '邀请',
+          handle: async () => {
+            const input = await Modal.open<DuoyunInputElement>({
+              header: '邀请',
+              body: html`
+                <dy-input
+                  autofocus
+                  style="width: 100%"
+                  placeholder=${i18n.get('placeholderUsername')}
+                  @change=${(e: any) => (e.target.value = e.detail)}
+                ></dy-input>
+              `,
+            });
+            createInvite({ roomId: this.#playing!.id, targetId: 0, tryUsername: input.value });
+          },
+        },
+        {
+          text: '分享',
+          handle: () => {
+            navigator
+              .share({
+                url: `${location.origin}${createPath(routes.games)}${new QueryString({
+                  [queryKeys.JOIN_ROOM]: this.#playing!.id,
+                })}`,
+                text: `一起来玩 ${store.games[this.#playing!.gameId]?.name}`,
+              })
+              .catch(() => {
+                //
+              });
+          },
+        },
+      ].filter(isNotBoolean),
+      {
+        x: event.clientX,
+        y: event.clientY,
+      },
+    );
+  };
+
   mounted = () => {
     if (this.#isHost) {
       requestAnimationFrame(this.#loop);
@@ -296,6 +352,7 @@ export class PRoomElement extends GemElement<State> {
           history.replace({
             path: createPath(routes.games),
           });
+          ContextMenu.close();
         }
       },
       () => [this.#playing],
@@ -315,6 +372,8 @@ export class PRoomElement extends GemElement<State> {
       },
       () => [this.#playing?.id, this.#rom],
     );
+
+    this.addEventListener('contextmenu', this.#onContextMenu);
 
     addEventListener('keydown', this.#onKeyDown);
     addEventListener('keyup', this.#onKeyUp);

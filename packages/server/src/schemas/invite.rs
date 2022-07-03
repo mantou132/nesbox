@@ -5,6 +5,7 @@ use juniper::{FieldResult, GraphQLInputObject, GraphQLObject};
 
 use crate::db::models::{Invite, NewInvite};
 use crate::db::schema::invites;
+use crate::schemas::user::get_user_by_username;
 
 use super::room::{get_room, ScRoomBasic};
 
@@ -20,8 +21,9 @@ pub struct ScInvite {
 
 #[derive(GraphQLInputObject)]
 pub struct ScNewInvite {
-    room_id: i32,
+    pub room_id: i32,
     pub target_id: i32,
+    pub try_username: Option<String>,
 }
 
 #[derive(GraphQLInputObject)]
@@ -82,18 +84,20 @@ pub fn get_invite(conn: &PgConnection, uid: i32, iid: i32) -> FieldResult<ScInvi
 pub fn create_invite(conn: &PgConnection, uid: i32, req: &ScNewInvite) -> FieldResult<ScInvite> {
     use self::invites::dsl::*;
 
-    diesel::delete(
-        invites
-            .filter(user_id.eq(uid))
-            .filter(target_id.eq(req.target_id)),
-    )
-    .execute(conn)
-    .unwrap();
+    let tid = if let Some(username) = &req.try_username {
+        get_user_by_username(&conn, username)?.id
+    } else {
+        req.target_id
+    };
+
+    diesel::delete(invites.filter(user_id.eq(uid)).filter(target_id.eq(tid)))
+        .execute(conn)
+        .unwrap();
 
     let new_invite = NewInvite {
         user_id: uid,
         room_id: req.room_id,
-        target_id: req.target_id,
+        target_id: tid,
         deleted_at: None,
         created_at: Utc::now().naive_utc(),
         updated_at: Utc::now().naive_utc(),

@@ -113,7 +113,7 @@ export class MSearchElement extends GemElement<State> {
           tag: playing ? html`<dy-use .element=${icons.share} style="width: 1.5em"></dy-use>` : undefined,
           onClick: async () => {
             if (playing) {
-              await createInvite(friend.user.id, playing.id);
+              await createInvite({ targetId: friend.user.id, roomId: playing.id });
               Toast.open('success', i18n.get('tipIviteSuccess'));
             } else {
               toggoleFriendChatState(friend.user.id);

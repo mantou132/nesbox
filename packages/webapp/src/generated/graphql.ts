@@ -220,6 +220,7 @@ export type ScNewGame = {
 export type ScNewInvite = {
   roomId: Scalars['Int'];
   targetId: Scalars['Int'];
+  tryUsername?: InputMaybe<Scalars['String']>;
 };
 
 export type ScNewMessage = {

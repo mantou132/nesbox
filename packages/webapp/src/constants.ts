@@ -20,6 +20,7 @@ export const events = {
 
 export const queryKeys = {
   REDIRECT_URI: 'redirect_uri',
+  JOIN_ROOM: 'join_room',
 };
 
 // clean outdate cache data

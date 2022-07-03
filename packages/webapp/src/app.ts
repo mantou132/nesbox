@@ -24,8 +24,8 @@ import {
   toggoleSettingsState,
 } from 'src/configure';
 import { routes, locationStore } from 'src/routes';
-import { getAccount, getFriends, getGames, subscribeEvent } from 'src/services/api';
-import { paramKeys } from 'src/constants';
+import { enterPubRoom, getAccount, getFriends, getGames, subscribeEvent } from 'src/services/api';
+import { paramKeys, queryKeys } from 'src/constants';
 import { i18n } from 'src/i18n';
 
 import 'duoyun-ui/elements/input-capture';
@@ -67,6 +67,10 @@ const style = createCSSSheet(css`
 export class AppRootElement extends GemElement {
   @refobject contentRef: RefObject<HTMLDivElement>;
 
+  get #joinRoom() {
+    return Number(history.getParams().query.get(queryKeys.JOIN_ROOM));
+  }
+
   #onLoading = () => {
     Loadbar.start();
   };
@@ -104,6 +108,11 @@ export class AppRootElement extends GemElement {
   };
 
   mounted = () => {
+    if (this.#joinRoom) {
+      history.replace({ ...history.getParams(), query: '' });
+      enterPubRoom(this.#joinRoom);
+    }
+
     this.effect(this.#enterRoom, () => [configure.user?.playing?.id, history.getParams().path]);
     this.effect(
       () => forever(getGames),
