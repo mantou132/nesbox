@@ -56,9 +56,6 @@ const style = createCSSSheet(css`
     flex-shrink: 0;
     border-radius: ${theme.smallRound};
   }
-  .input.silent {
-    display: none;
-  }
   @media ${mediaQuery.PHONE} {
     :host {
       display: none;
@@ -134,6 +131,11 @@ export class MRoomChatElement extends GemElement<State> {
       () => [this.messages],
     );
 
+    this.effect(
+      () => this.inputRef.element?.blur(),
+      () => [this.state.silent],
+    );
+
     let timer = 0;
     this.effect(() => {
       clearTimeout(timer);
@@ -163,15 +165,19 @@ export class MRoomChatElement extends GemElement<State> {
           `,
         )}
       </div>
-      <dy-input
-        ref=${this.inputRef.ref}
-        class=${classMap({ input: true, silent: this.state.silent })}
-        placeholder=${i18n.get('placeholderMessage')}
-        @keydown=${this.#onKeyDown}
-        @keyup=${this.#stopPropagation}
-        @change=${this.#onChange}
-        .value=${this.state.input}
-      ></dy-input>
+      ${this.state.silent
+        ? ''
+        : html`
+            <dy-input
+              ref=${this.inputRef.ref}
+              class=${classMap({ input: true })}
+              placeholder=${i18n.get('placeholderMessage')}
+              @keydown=${this.#onKeyDown}
+              @keyup=${this.#stopPropagation}
+              @change=${this.#onChange}
+              .value=${this.state.input}
+            ></dy-input>
+          `}
     `;
   };
 }
