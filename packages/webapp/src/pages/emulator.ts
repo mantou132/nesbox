@@ -10,7 +10,7 @@ import {
   RefObject,
 } from '@mantou/gem';
 import { locale } from 'duoyun-ui/lib/locale';
-import init, { Button, Nes } from '@nesbox/nes';
+import init, { Button, Nes } from '@mantou/nes';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { Modal } from 'duoyun-ui/elements/modal';
 

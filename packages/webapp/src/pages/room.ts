@@ -16,7 +16,7 @@ import { createPath } from 'duoyun-ui/elements/route';
 import JSZip from 'jszip';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { waitLoading } from 'duoyun-ui/elements/wait';
-import init, { Nes, Button } from '@nesbox/nes';
+import init, { Nes, Button } from '@mantou/nes';
 import { ContextMenu } from 'duoyun-ui/elements/menu';
 import { Modal } from 'duoyun-ui/elements/modal';
 import { DuoyunInputElement } from 'duoyun-ui/elements/input';

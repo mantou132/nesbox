@@ -12,8 +12,8 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@nesbox/nes": "^0.1.0",
     "@mantou/gem": "^1.6.0",
+    "@mantou/nes": "^0.1.0",
     "duoyun-ui": "^0.0.39",
     "graphql": "^16.2.0",
     "jszip": "^3.10.0",

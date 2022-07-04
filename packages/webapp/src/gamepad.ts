@@ -1,5 +1,5 @@
 import { isNotNullish } from 'duoyun-ui/lib/types';
-import { Button } from '@nesbox/nes';
+import { Button } from '@mantou/nes';
 
 import { events } from 'src/constants';
 
