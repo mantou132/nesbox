@@ -1,12 +1,13 @@
 // ref: https://github.com/lukexor/tetanes/blob/main/tetanes-web/src/lib.rs
 
+use qoi::{decode_to_vec, encode_to_vec};
 use tetanes::{
     audio::{Audio, NesAudioCallback},
     common::{NesRegion, Powered},
     control_deck::ControlDeck,
     input::GamepadSlot,
     memory::RamState,
-    ppu::{VideoFilter, RENDER_SIZE},
+    ppu::{VideoFilter, RENDER_HEIGHT, RENDER_SIZE, RENDER_WIDTH},
 };
 use wasm_bindgen::prelude::*;
 
@@ -65,6 +66,8 @@ pub struct Nes {
     sound: bool,
     dynamic_rate_control: bool,
     dynamic_rate_delta: f32,
+    qoi_buffer: Vec<u8>,
+    qoi_decode_buffer: Vec<u8>,
 }
 
 #[wasm_bindgen]
@@ -90,6 +93,8 @@ impl Nes {
             sound: false,
             dynamic_rate_control: true,
             dynamic_rate_delta: max_delta,
+            qoi_buffer: Vec::new(),
+            qoi_decode_buffer: Vec::new(),
         }
     }
 
@@ -111,6 +116,29 @@ impl Nes {
 
     pub fn frame_len(&self) -> usize {
         RENDER_SIZE as usize
+    }
+
+    pub fn qoi_frame(&mut self) -> *const u8 {
+        self.qoi_buffer = encode_to_vec(
+            &self.control_deck.ppu().frame.output_buffer,
+            RENDER_WIDTH,
+            RENDER_HEIGHT,
+        )
+        .unwrap();
+        self.qoi_buffer.as_ptr()
+    }
+
+    pub fn qoi_frame_len(&self) -> usize {
+        self.qoi_buffer.len()
+    }
+
+    pub fn decode_qoi(&mut self, bytes: &[u8]) -> *const u8 {
+        self.qoi_decode_buffer = decode_to_vec(bytes).unwrap().1;
+        self.qoi_decode_buffer.as_ptr()
+    }
+
+    pub fn decode_qoi_len(&self) -> usize {
+        self.qoi_decode_buffer.len()
     }
 
     pub fn samples(&mut self) -> *const f32 {

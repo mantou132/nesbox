@@ -128,6 +128,10 @@ export class PRoomElement extends GemElement<State> {
     return document.visibilityState === 'visible';
   }
 
+  get #ctx() {
+    return this.canvasRef.element?.getContext('2d');
+  }
+
   #nes?: Nes;
   #imageData?: ImageData;
   #audioContext?: AudioContext;
@@ -146,8 +150,7 @@ export class PRoomElement extends GemElement<State> {
   #createStream = () => {
     const stream = new MediaStream();
 
-    const ctx = this.canvasRef.element!.getContext('2d')!;
-    stream.addTrack(ctx.canvas.captureStream(60).getVideoTracks()[0]);
+    stream.addTrack(this.#ctx!.canvas.captureStream(60).getVideoTracks()[0]);
 
     this.#audioContext = new AudioContext({ sampleRate: 48000 });
     this.#streamDestination = this.#audioContext.createMediaStreamDestination();
@@ -164,15 +167,23 @@ export class PRoomElement extends GemElement<State> {
       requestAnimationFrame(this.#loop);
     }
 
-    if (!this.#isHost || !this.#nes || !this.#imageData || !this.#isVisible) return;
+    if (!this.#nes || !this.#imageData || !this.#isVisible) return;
     this.#nes.clock_seconds(1 / 60);
 
     const memory = Nes.memory();
 
-    const frameLen = this.#nes.frame_len();
     const framePtr = this.#nes.frame();
-    new Uint8Array(this.#imageData.data.buffer).set(new Uint8Array(memory.buffer, framePtr, frameLen));
-    this.canvasRef.element!.getContext('2d')!.putImageData(this.#imageData, 0, 0);
+    const frameLen = this.#nes.frame_len();
+    const frame = new Uint8Array(memory.buffer, framePtr, frameLen);
+    new Uint8Array(this.#imageData.data.buffer).set(frame);
+    this.#ctx!.putImageData(this.#imageData, 0, 0);
+
+    if (this.#rtc?.needSendFrame()) {
+      const qoiFramePtr = this.#nes.qoi_frame();
+      const qoiFrameLen = this.#nes.qoi_frame_len();
+      const qoiFrame = new Uint8Array(memory.buffer, qoiFramePtr, qoiFrameLen);
+      this.#rtc?.sendFrame(qoiFrame);
+    }
 
     if (!this.#nes.sound() || !this.#audioContext || !this.#streamDestination || !this.#gainNode) return;
     const bufferSize = this.#nes.buffer_capacity();
@@ -191,22 +202,32 @@ export class PRoomElement extends GemElement<State> {
 
   #romBuffer?: ArrayBuffer;
   #initNes = async () => {
+    await init();
+    this.#nes = Nes.new(48000, 800, 0.02);
+    this.#imageData = this.#ctx!.createImageData(this.#ctx!.canvas.width, this.#ctx!.canvas.height);
+
     if (!this.#isHost) return;
-    const ctx = this.canvasRef.element!.getContext('2d')!;
-    this.#imageData = ctx.createImageData(ctx.canvas.width, ctx.canvas.height);
 
     const zip = await (await fetch(getCorsSrc(this.#rom!))).arrayBuffer();
     const folder = await JSZip.loadAsync(zip);
     this.#romBuffer = await Object.values(folder.files)
       .find((e) => e.name.toLowerCase().endsWith('.nes'))!
       .async('arraybuffer');
-
-    await init();
-    this.#nes = Nes.new(48000, 800, 0.02);
     this.#nes.load_rom(new Uint8Array(this.#romBuffer));
   };
 
-  #onMessage = ({ detail }: CustomEvent<ChannelMessage>) => {
+  #onMessage = ({ detail }: CustomEvent<ChannelMessage | ArrayBuffer>) => {
+    if (detail instanceof ArrayBuffer) {
+      if (this.#imageData && this.#nes) {
+        const memory = Nes.memory();
+        const framePtr = this.#nes.decode_qoi(new Uint8Array(detail));
+        const frameLen = this.#nes.decode_qoi_len();
+        const frame = new Uint8Array(memory.buffer, framePtr, frameLen);
+        new Uint8Array(this.#imageData.data.buffer).set(new Uint8Array(frame));
+        this.#ctx!.putImageData(this.#imageData, 0, 0);
+      }
+      return;
+    }
     switch (detail.type) {
       // both
       case ChannelMessageType.CHAT_TEXT:
@@ -469,8 +490,8 @@ export class PRoomElement extends GemElement<State> {
     const { messages, roles } = this.state;
 
     return html`
-      <canvas class="canvas" width="256" height="240" ?hidden=${!this.#isHost} ref=${this.canvasRef.ref}></canvas>
-      <video class="canvas" ?hidden=${this.#isHost} ref=${this.videoRef.ref}></video>
+      <canvas class="canvas" width="256" height="240" ref=${this.canvasRef.ref}></canvas>
+      <video class="canvas" hidden ref=${this.videoRef.ref}></video>
       <m-room-chat
         class="chat"
         ref=${this.chatRef.ref}

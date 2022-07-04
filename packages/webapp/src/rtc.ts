@@ -114,7 +114,7 @@ export class RTC extends EventTarget {
   #stream: MediaStream;
   #video: HTMLVideoElement;
 
-  #emitMessage = (detail: ChannelMessage) => {
+  #emitMessage = (detail: ChannelMessage | ArrayBuffer) => {
     this.dispatchEvent(new CustomEvent('message', { detail }));
   };
 
@@ -263,6 +263,7 @@ export class RTC extends EventTarget {
     const conn = this.#createRTCPeerConnection(configure.user!.id);
 
     const channel = conn.createDataChannel('msg');
+    channel.binaryType = 'arraybuffer';
     channel.onopen = () => {
       clearTimeout(this.#restartTimer);
       // `deleteUser` assign `null`
@@ -275,9 +276,13 @@ export class RTC extends EventTarget {
       const textMsg = new TextMsg(getTempText(i18n.get('enterRoomMsg', configure.user!.nickname))).toSystemRole();
       this.send(textMsg);
     };
-    channel.onmessage = ({ data }: MessageEvent<string>) => {
-      const msg = JSON.parse(data) as ChannelMessage;
-      this.#emitMessage(msg);
+    channel.onmessage = ({ data }: MessageEvent<string | ArrayBuffer>) => {
+      if (typeof data === 'string') {
+        const msg = JSON.parse(data) as ChannelMessage;
+        this.#emitMessage(msg);
+      } else {
+        this.#emitMessage(data);
+      }
     };
 
     conn.addEventListener('icecandidate', (event) => {
@@ -343,6 +348,14 @@ export class RTC extends EventTarget {
   send = (data: ChannelMessage) => {
     this.#channelMap.forEach((c) => c.send(data.toString()));
     this.#emitMessage(data);
+  };
+
+  needSendFrame = () => {
+    return !!this.#channelMap.size;
+  };
+
+  sendFrame = (frame: ArrayBuffer) => {
+    this.#channelMap.forEach((c) => c.send(frame));
   };
 
   kickoutRole = (userId: number) => {
