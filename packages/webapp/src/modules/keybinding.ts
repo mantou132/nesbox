@@ -16,7 +16,7 @@ export const gridStyle = createCSSSheet(css`
   }
   .grid {
     display: grid;
-    grid-template-columns: 1fr 4fr;
+    grid-template-columns: 2fr 6fr;
     gap: 0.5em;
   }
   .grid div {
@@ -39,9 +39,11 @@ export class MKeybindingElement extends GemElement {
     const labelMap: Record<keyof Settings['shortcuts'], string> = {
       OPEN_SEARCH: '搜索',
       OPEN_SETTINGS: '设置',
+      SAVE_GAME_STATE: '保存状态',
+      LOAD_GAME_STATE: '恢复状态',
     };
 
-    const getJoypadKey = (keys: string[]) => keys.find((e) => e.length === 1) || '';
+    const getJoypadKey = (keys: string[]) => keys.find((e) => e.length === 1 || e.startsWith('arrow')) || '';
 
     return html`
       <dy-heading class="heading" lv="4">Joypad 1</dy-heading>

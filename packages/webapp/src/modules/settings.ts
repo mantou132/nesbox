@@ -1,5 +1,4 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, connectStore } from '@mantou/gem';
-import { isNotNullish } from 'duoyun-ui/lib/types';
 
 import { theme } from 'src/theme';
 import { i18n } from 'src/i18n';
@@ -86,7 +85,7 @@ export class MSettingsElement extends GemElement<State> {
               `;
             },
           },
-          window.__TAURI__ && {
+          {
             tab: i18n.get('soundSetting'),
             getContent() {
               return html`
@@ -116,7 +115,7 @@ export class MSettingsElement extends GemElement<State> {
               `;
             },
           },
-        ].filter(isNotNullish)}
+        ]}
       ></dy-tabs>
     `;
   };

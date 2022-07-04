@@ -9,6 +9,7 @@
 - Supports playing many popular nes games
 - Support multiplayer online
 - Support gamepad
+- Support game state restore
 - Friend system, chat, invite
 - Game review
 - Internationalization

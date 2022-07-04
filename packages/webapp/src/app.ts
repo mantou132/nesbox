@@ -27,6 +27,7 @@ import { routes, locationStore } from 'src/routes';
 import { enterPubRoom, getAccount, getFriends, getGames, subscribeEvent } from 'src/services/api';
 import { paramKeys, queryKeys } from 'src/constants';
 import { i18n } from 'src/i18n';
+import { preventDefault } from 'src/utils';
 
 import 'duoyun-ui/elements/input-capture';
 import 'duoyun-ui/elements/drawer';
@@ -82,14 +83,8 @@ export class AppRootElement extends GemElement {
 
   #globalShortcut = (evt: KeyboardEvent) => {
     hotkeys({
-      [getShortcut('OPEN_SEARCH')]: () => {
-        toggoleSearchState();
-        evt.preventDefault();
-      },
-      [getShortcut('OPEN_SETTINGS')]: () => {
-        toggoleSettingsState();
-        evt.preventDefault();
-      },
+      [getShortcut('OPEN_SEARCH')]: preventDefault(toggoleSearchState),
+      [getShortcut('OPEN_SETTINGS')]: preventDefault(toggoleSettingsState),
     })(evt);
   };
 

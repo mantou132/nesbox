@@ -41,6 +41,14 @@ const defaultShortcuts = {
     win: ['esc'],
     mac: ['esc'],
   },
+  SAVE_GAME_STATE: {
+    win: ['ctrl', 's'],
+    mac: ['command', 's'],
+  },
+  LOAD_GAME_STATE: {
+    win: ['ctrl', 'l'],
+    mac: ['command', 'l'],
+  },
 };
 
 export type Settings = {

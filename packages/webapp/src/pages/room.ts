@@ -10,6 +10,7 @@ import {
   refobject,
   RefObject,
   QueryString,
+  styleMap,
 } from '@mantou/gem';
 import { createPath } from 'duoyun-ui/elements/route';
 import JSZip from 'jszip';
@@ -20,8 +21,11 @@ import { ContextMenu } from 'duoyun-ui/elements/menu';
 import { Modal } from 'duoyun-ui/elements/modal';
 import { DuoyunInputElement } from 'duoyun-ui/elements/input';
 import { isNotBoolean } from 'duoyun-ui/lib/types';
+import { Toast } from 'duoyun-ui/elements/toast';
+import { hash } from 'duoyun-ui/lib/encode';
+import { Time } from 'duoyun-ui/lib/time';
 
-import { configure } from 'src/configure';
+import { configure, getShortcut } from 'src/configure';
 import { routes } from 'src/routes';
 import {
   ChannelMessage,
@@ -37,10 +41,11 @@ import {
 import { friendStore, store } from 'src/store';
 import { i18n } from 'src/i18n';
 import type { MRoomChatElement } from 'src/modules/room-chat';
-import { getCorsSrc } from 'src/utils';
+import { getCorsSrc, preventDefault } from 'src/utils';
 import { events, queryKeys } from 'src/constants';
 import { createInvite } from 'src/services/api';
 
+import 'duoyun-ui/elements/options';
 import 'src/modules/room-player-list';
 import 'src/modules/room-chat';
 import 'src/modules/nav';
@@ -184,6 +189,7 @@ export class PRoomElement extends GemElement<State> {
     this.#nextStartTime = start + bufferSize / sampleRate;
   };
 
+  #romBuffer?: ArrayBuffer;
   #initNes = async () => {
     if (!this.#isHost) return;
     const ctx = this.canvasRef.element!.getContext('2d')!;
@@ -191,13 +197,13 @@ export class PRoomElement extends GemElement<State> {
 
     const zip = await (await fetch(getCorsSrc(this.#rom!))).arrayBuffer();
     const folder = await JSZip.loadAsync(zip);
-    const buffer = await Object.values(folder.files)
+    this.#romBuffer = await Object.values(folder.files)
       .find((e) => e.name.toLowerCase().endsWith('.nes'))!
       .async('arraybuffer');
 
     await init();
     this.#nes = Nes.new(48000, 800, 0.02);
-    this.#nes.load_rom(new Uint8Array(buffer));
+    this.#nes.load_rom(new Uint8Array(this.#romBuffer));
   };
 
   #onMessage = ({ detail }: CustomEvent<ChannelMessage>) => {
@@ -275,11 +281,58 @@ export class PRoomElement extends GemElement<State> {
     this.#pressButton(event.detail);
   };
 
+  #save = async () => {
+    if (!this.#romBuffer) return;
+    const memory = Nes.memory();
+    const cache = await caches.open('');
+    const key = await hash(this.#romBuffer);
+    await cache.put(`/${key}?t=${Date.now()}`, new Response(new Blob([memory.buffer])));
+    Toast.open('success', `已保存状态，${new Time().format()}`);
+  };
+
+  #load = async () => {
+    if (!this.#romBuffer) return;
+    const memory = Nes.memory();
+    const cache = await caches.open('');
+    const key = await hash(this.#romBuffer);
+    const reqs = await cache.keys(`/${key}`, { ignoreSearch: true });
+    if (reqs.length === 0) {
+      Toast.open('default', '没有保存的状态');
+    } else {
+      Modal.open({
+        header: '选择想要回到的状态',
+        body: html`
+          <dy-options
+            style=${styleMap({ width: 'min(80vw, 20em)', minHeight: '10em' })}
+            .options=${reqs
+              .map((req) => [req, new Time(Number(new URL(req.url).searchParams.get('t')))] as const)
+              .sort((a, b) => Number(b[1]) - Number(a[1]))
+              .map(([req, time]) => ({
+                label: time.format(),
+                onClick: async (evt: PointerEvent) => {
+                  const res = await cache.match(req);
+                  if (!res) return;
+                  new Uint8Array(memory.buffer).set(new Uint8Array(await res.arrayBuffer()));
+                  evt.target?.dispatchEvent(new CustomEvent('close', { composed: true }));
+                  Toast.open('success', `加载${time.format()}成功`);
+                },
+              })) as { label: string }[]}
+          ></dy-options>
+        `,
+        disableDefualtCancelBtn: true,
+        disableDefualtOKBtn: true,
+        maskCloseable: true,
+      });
+    }
+  };
+
   #onKeyDown = (event: KeyboardEvent) => {
     const button = this.#getButton(event);
     if (!button) {
       hotkeys({
         enter: () => this.chatRef.element?.focus(),
+        [getShortcut('SAVE_GAME_STATE')]: preventDefault(this.#save),
+        [getShortcut('LOAD_GAME_STATE')]: preventDefault(this.#load),
       })(event);
       return;
     }

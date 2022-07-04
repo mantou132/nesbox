@@ -1,7 +1,7 @@
 import { GemElement, html, adoptedStyle, customElement, connectStore } from '@mantou/gem';
 import { throttle } from 'duoyun-ui/lib/utils';
 
-import { configure } from 'src/configure';
+import { configure, Settings } from 'src/configure';
 import { i18n } from 'src/i18n';
 import { gridStyle } from 'src/modules/keybinding';
 import { updateAccount } from 'src/services/api';
@@ -32,7 +32,7 @@ export class MSoundSettingsElement extends GemElement {
   render = () => {
     if (!configure.user) return html``;
 
-    const volumeLabelMap: Record<string, string> = {
+    const volumeLabelMap: Record<keyof Settings['volume'], string> = {
       notification: i18n.get('notificationVolume'),
       game: '游戏',
     };
@@ -42,7 +42,7 @@ export class MSoundSettingsElement extends GemElement {
       <div class="grid">
         ${Object.entries(configure.user.settings.volume).map(
           ([name, value]) => html`
-            <div>${volumeLabelMap[name]}</div>
+            <div>${volumeLabelMap[name as keyof Settings['volume']]}</div>
             <dy-slider
               .value=${value * 100}
               @change=${(evt: CustomEvent<number>) => {

@@ -76,3 +76,10 @@ export const formatTime = (timestamp: number) => {
 };
 
 export const matchRoute = (route: RouteItem) => matchPath(route.pattern, history.getParams().path);
+
+export const preventDefault = (fn: () => void) => {
+  return (event: KeyboardEvent) => {
+    event.preventDefault();
+    fn();
+  };
+};
