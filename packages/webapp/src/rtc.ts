@@ -7,17 +7,16 @@ import { logger } from 'src/logger';
 import { sendSignal } from 'src/services/api';
 import { getTempText } from 'src/utils';
 
-// https://github.com/takahirox/nes-rust/issues/98
 const buttonMap: Record<Button, Record<string, Button | undefined>> = {
-  [Button.Joypad1Up]: { '2': Button.Joypad2Up },
-  [Button.Joypad1Left]: { '2': Button.Joypad2Left },
-  [Button.Joypad1Down]: { '2': Button.Joypad2Down },
-  [Button.Joypad1Right]: { '2': Button.Joypad2Right },
-  [Button.Joypad1A]: { '2': Button.Joypad2A },
-  [Button.Joypad1B]: { '2': Button.Joypad2B },
-  [Button.Select]: { '2': undefined },
-  [Button.Start]: { '2': undefined },
-  [Button.Reset]: { '2': undefined },
+  [Button.Joypad1Up]: { '2': Button.Joypad2Up, '3': Button.Joypad3Up, '4': Button.Joypad4Up },
+  [Button.Joypad1Left]: { '2': Button.Joypad2Left, '3': Button.Joypad3Left, '4': Button.Joypad4Left },
+  [Button.Joypad1Down]: { '2': Button.Joypad2Down, '3': Button.Joypad3Down, '4': Button.Joypad4Down },
+  [Button.Joypad1Right]: { '2': Button.Joypad2Right, '3': Button.Joypad3Right, '4': Button.Joypad4Right },
+  [Button.Joypad1A]: { '2': Button.Joypad2A, '3': Button.Joypad3A, '4': Button.Joypad4A },
+  [Button.Joypad1B]: { '2': Button.Joypad2B, '3': Button.Joypad3B, '4': Button.Joypad4B },
+  [Button.Select]: {},
+  [Button.Start]: {},
+  [Button.Reset]: {},
 };
 
 export enum ChannelMessageType {
