@@ -409,16 +409,19 @@ export class PRoomElement extends GemElement<State> {
         {
           text: '分享',
           handle: () => {
-            navigator
-              .share({
-                url: `${location.origin}${createPath(routes.games)}${new QueryString({
-                  [queryKeys.JOIN_ROOM]: this.#playing!.id,
-                })}`,
-                text: `一起来玩 ${store.games[this.#playing!.gameId]?.name}`,
-              })
-              .catch(() => {
-                //
-              });
+            const url = `${location.origin}${createPath(routes.games)}${new QueryString({
+              [queryKeys.JOIN_ROOM]: this.#playing!.id,
+            })}`;
+            navigator.share
+              ? navigator
+                  .share({
+                    url,
+                    text: `一起来玩 ${store.games[this.#playing!.gameId]?.name}`,
+                  })
+                  .catch(() => {
+                    //
+                  })
+              : navigator.clipboard.writeText(url);
           },
         },
       ].filter(isNotBoolean),
