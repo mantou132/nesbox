@@ -41,11 +41,11 @@ export const open = (uri: string) => {
   }
 };
 
-export const playSound = (kind: string) => {
+export const playSound = (kind: string, volume = configure.user?.settings.volume.notification) => {
   window.__TAURI__?.tauri
     .invoke('play_sound', {
       kind,
-      volume: configure.user?.settings.volume.notification || 0,
+      volume: volume || 0,
     })
     .catch(() => {
       //

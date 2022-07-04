@@ -1,3 +1,5 @@
+// ref: https://github.com/lukexor/tetanes/blob/main/tetanes-web/src/lib.rs
+
 use tetanes::{
     audio::{Audio, NesAudioCallback},
     common::{NesRegion, Powered},
@@ -19,6 +21,8 @@ pub enum Button {
 
     Joypad1A,
     Joypad1B,
+    Joypad1TurboA,
+    Joypad1TurboB,
     Joypad1Up,
     Joypad1Down,
     Joypad1Left,
@@ -26,6 +30,8 @@ pub enum Button {
 
     Joypad2A,
     Joypad2B,
+    Joypad2TurboA,
+    Joypad2TurboB,
     Joypad2Up,
     Joypad2Down,
     Joypad2Left,
@@ -33,6 +39,8 @@ pub enum Button {
 
     Joypad3A,
     Joypad3B,
+    Joypad3TurboA,
+    Joypad3TurboB,
     Joypad3Up,
     Joypad3Down,
     Joypad3Left,
@@ -40,6 +48,8 @@ pub enum Button {
 
     Joypad4A,
     Joypad4B,
+    Joypad4TurboA,
+    Joypad4TurboB,
     Joypad4Up,
     Joypad4Down,
     Joypad4Left,
@@ -48,7 +58,6 @@ pub enum Button {
 
 #[wasm_bindgen]
 pub struct Nes {
-    paused: bool,
     control_deck: ControlDeck,
     audio: Audio,
     buffer: Vec<f32>,
@@ -74,7 +83,6 @@ impl Nes {
         let buffer = vec![0.0; buffer_size];
         let callback = audio.open_callback().expect("valid callback");
         Self {
-            paused: false,
             control_deck,
             audio,
             buffer,
@@ -83,14 +91,6 @@ impl Nes {
             dynamic_rate_control: true,
             dynamic_rate_delta: max_delta,
         }
-    }
-
-    pub fn pause(&mut self, val: bool) {
-        self.paused = val;
-    }
-
-    pub fn paused(&self) -> bool {
-        self.paused
     }
 
     pub fn sound(&mut self) -> bool {
@@ -142,7 +142,6 @@ impl Nes {
         self.control_deck
             .load_rom("ROM", &mut bytes)
             .expect("valid rom");
-        self.pause(false);
     }
 
     pub fn handle_event(&mut self, button: Button, pressed: bool, repeat: bool) -> bool {
@@ -151,25 +150,25 @@ impl Nes {
         }
         let mut matched = true;
 
-        let gamepad = &mut self.control_deck.gamepad_mut(GamepadSlot::One);
+        let gamepad1 = &mut self.control_deck.gamepad_mut(GamepadSlot::One);
         match button {
-            Button::Start => gamepad.start = pressed,
-            Button::Select => gamepad.select = pressed,
-            // Button::Joypad1A => gamepad.turbo_a = pressed,
-            // Button::Joypad1B => gamepad.turbo_b = pressed,
-            Button::Joypad1A => gamepad.a = pressed,
-            Button::Joypad1B => gamepad.b = pressed,
-            Button::Joypad1Up => gamepad.up = pressed,
-            Button::Joypad1Down => gamepad.down = pressed,
-            Button::Joypad1Left => gamepad.left = pressed,
-            Button::Joypad1Right => gamepad.right = pressed,
+            Button::Start => gamepad1.start = pressed,
+            Button::Select => gamepad1.select = pressed,
+            Button::Joypad1A => gamepad1.a = pressed,
+            Button::Joypad1B => gamepad1.b = pressed,
+            Button::Joypad1TurboA => gamepad1.turbo_a = pressed,
+            Button::Joypad1TurboB => gamepad1.turbo_b = pressed,
+            Button::Joypad1Up => gamepad1.up = pressed,
+            Button::Joypad1Down => gamepad1.down = pressed,
+            Button::Joypad1Left => gamepad1.left = pressed,
+            Button::Joypad1Right => gamepad1.right = pressed,
             _ => {
                 let gamepad2 = &mut self.control_deck.gamepad_mut(GamepadSlot::Two);
                 match button {
-                    // Button::Joypad2A => gamepad.turbo_a = pressed,
-                    // Button::Joypad2B => gamepad.turbo_b = pressed,
                     Button::Joypad2A => gamepad2.a = pressed,
                     Button::Joypad2B => gamepad2.b = pressed,
+                    Button::Joypad2TurboA => gamepad2.turbo_a = pressed,
+                    Button::Joypad2TurboB => gamepad2.turbo_b = pressed,
                     Button::Joypad2Up => gamepad2.up = pressed,
                     Button::Joypad2Down => gamepad2.down = pressed,
                     Button::Joypad2Left => gamepad2.left = pressed,
@@ -177,10 +176,10 @@ impl Nes {
                     _ => {
                         let gamepad3 = &mut self.control_deck.gamepad_mut(GamepadSlot::Three);
                         match button {
-                            // Button::Joypad3A => gamepad3.turbo_a = pressed,
-                            // Button::Joypad3B => gamepad3.turbo_b = pressed,
                             Button::Joypad3A => gamepad3.a = pressed,
                             Button::Joypad3B => gamepad3.b = pressed,
+                            Button::Joypad3TurboA => gamepad3.turbo_a = pressed,
+                            Button::Joypad3TurboB => gamepad3.turbo_b = pressed,
                             Button::Joypad3Up => gamepad3.up = pressed,
                             Button::Joypad3Down => gamepad3.down = pressed,
                             Button::Joypad3Left => gamepad3.left = pressed,
@@ -189,10 +188,10 @@ impl Nes {
                                 let gamepad4 =
                                     &mut self.control_deck.gamepad_mut(GamepadSlot::Four);
                                 match button {
-                                    // Button::Joypad4A => gamepad.turbo_a = pressed,
-                                    // Button::Joypad4B => gamepad.turbo_b = pressed,
                                     Button::Joypad4A => gamepad4.a = pressed,
                                     Button::Joypad4B => gamepad4.b = pressed,
+                                    Button::Joypad4TurboA => gamepad4.turbo_a = pressed,
+                                    Button::Joypad4TurboB => gamepad4.turbo_b = pressed,
                                     Button::Joypad4Up => gamepad4.up = pressed,
                                     Button::Joypad4Down => gamepad4.down = pressed,
                                     Button::Joypad4Left => gamepad4.left = pressed,
@@ -206,11 +205,5 @@ impl Nes {
             }
         }
         matched
-    }
-}
-
-impl Default for Nes {
-    fn default() -> Self {
-        Self::new(48_000.0, 4096, 0.005)
     }
 }

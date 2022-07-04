@@ -26,7 +26,7 @@ export class MSoundSettingsElement extends GemElement {
         },
       },
     });
-    playSound('');
+    playSound('', value);
   });
 
   render = () => {
@@ -34,6 +34,7 @@ export class MSoundSettingsElement extends GemElement {
 
     const volumeLabelMap: Record<string, string> = {
       notification: i18n.get('notificationVolume'),
+      game: '游戏',
     };
 
     return html`
@@ -45,7 +46,7 @@ export class MSoundSettingsElement extends GemElement {
             <dy-slider
               .value=${value * 100}
               @change=${(evt: CustomEvent<number>) => {
-                if (value * 100 !== evt.detail) {
+                if (Math.round(value * 100) !== evt.detail) {
                   (evt.target as any).value = evt.detail;
                   this.#throttleUpdateVolume(name, evt.detail / 100);
                 }

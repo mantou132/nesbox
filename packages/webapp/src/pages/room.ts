@@ -103,6 +103,10 @@ export class PRoomElement extends GemElement<State> {
     roles: [],
   };
 
+  get #settings() {
+    return configure.user?.settings;
+  }
+
   get #playing() {
     return configure.user?.playing;
   }
@@ -123,6 +127,7 @@ export class PRoomElement extends GemElement<State> {
   #imageData?: ImageData;
   #audioContext?: AudioContext;
   #streamDestination?: MediaStreamAudioDestinationNode;
+  #gainNode?: GainNode;
   #rtc?: RTC;
 
   #enableAudio = () => {
@@ -141,6 +146,9 @@ export class PRoomElement extends GemElement<State> {
 
     this.#audioContext = new AudioContext({ sampleRate: 48000 });
     this.#streamDestination = this.#audioContext.createMediaStreamDestination();
+    this.#gainNode = this.#audioContext.createGain();
+    this.#gainNode.gain.value = this.#settings?.volume.game || 1;
+    this.#gainNode.connect(this.#audioContext.destination);
     stream.addTrack(this.#streamDestination.stream.getAudioTracks()[0]);
     return stream;
   };
@@ -161,14 +169,14 @@ export class PRoomElement extends GemElement<State> {
     new Uint8Array(this.#imageData.data.buffer).set(new Uint8Array(memory.buffer, framePtr, frameLen));
     this.canvasRef.element!.getContext('2d')!.putImageData(this.#imageData, 0, 0);
 
-    if (!this.#nes.sound() || !this.#audioContext || !this.#streamDestination) return;
+    if (!this.#nes.sound() || !this.#audioContext || !this.#streamDestination || !this.#gainNode) return;
     const bufferSize = this.#nes.buffer_capacity();
     const sampleRate = this.#nes.sample_rate();
     const samplesPtr = this.#nes.samples();
     const audioBuffer = this.#audioContext.createBuffer(1, bufferSize, sampleRate);
     audioBuffer.getChannelData(0).set(new Float32Array(memory.buffer, samplesPtr, bufferSize));
     const node = this.#audioContext.createBufferSource();
-    node.connect(this.#audioContext.destination);
+    node.connect(this.#gainNode);
     node.connect(this.#streamDestination);
     node.buffer = audioBuffer;
     const start = Math.max(this.#nextStartTime || 0, this.#audioContext.currentTime + bufferSize / sampleRate);
@@ -227,7 +235,7 @@ export class PRoomElement extends GemElement<State> {
   };
 
   #getButton = (event: KeyboardEvent) => {
-    const { keybinding } = configure.user!.settings;
+    const { keybinding } = this.#settings!;
     const map: Record<string, Button> = {
       [keybinding.Up]: Button.Joypad1Up,
       [keybinding.Left]: Button.Joypad1Left,
@@ -345,6 +353,15 @@ export class PRoomElement extends GemElement<State> {
     if (this.#isHost) {
       requestAnimationFrame(this.#loop);
     }
+
+    this.effect(
+      () => {
+        if (this.#settings && this.#gainNode) {
+          this.#gainNode.gain.value = this.#settings.volume.game;
+        }
+      },
+      () => [this.#settings?.volume.game],
+    );
 
     this.effect(
       () => {

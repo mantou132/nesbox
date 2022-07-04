@@ -28,6 +28,7 @@ export const defaultKeybinding = {
 
 const defaultVolume = {
   notification: 1,
+  game: 1,
 };
 
 export type Settings = {
