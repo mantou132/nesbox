@@ -71,6 +71,7 @@ export class PEmulatorElement extends GemElement {
       [defaultKeybinding.B]: Button.Joypad1B,
       [defaultKeybinding.Select]: Button.Select,
       [defaultKeybinding.Start]: Button.Start,
+      [defaultKeybinding.Reset]: Button.Reset,
     };
     return map[event.key.toLowerCase()];
   };
@@ -86,7 +87,11 @@ export class PEmulatorElement extends GemElement {
       hotkeys({ esc: this.#quit })(event);
       return;
     }
-    if (button !== Button.Reset) this.#enableAudio();
+    if (button === Button.Reset) {
+      this.#nes?.power_cycle();
+    } else {
+      this.#enableAudio();
+    }
     this.#nes?.handle_event(button, true, event.repeat);
   };
 

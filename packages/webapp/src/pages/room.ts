@@ -246,6 +246,7 @@ export class PRoomElement extends GemElement<State> {
       [keybinding.B]: Button.Joypad1B,
       [keybinding.Select]: Button.Select,
       [keybinding.Start]: Button.Start,
+      [keybinding.Reset]: Button.Reset,
 
       [keybinding.Up_2]: Button.Joypad2Up,
       [keybinding.Left_2]: Button.Joypad2Left,
@@ -258,7 +259,11 @@ export class PRoomElement extends GemElement<State> {
   };
 
   #pressButton = (button: Button) => {
-    if (button !== Button.Reset) this.#enableAudio();
+    if (button === Button.Reset) {
+      this.#nes?.power_cycle();
+    } else {
+      this.#enableAudio();
+    }
     if (this.#isHost) {
       this.#nes?.handle_event(button, true, false);
     } else {

@@ -15,6 +15,7 @@ const buttonMap: Record<Button, Button[]> = {
   3: [Button.Joypad1B, Button.Joypad2B, Button.Joypad3B, Button.Joypad4B],
   8: [Button.Select],
   9: [Button.Start],
+  16: [Button.Reset],
 };
 
 const pressedButton = new Set<number>();

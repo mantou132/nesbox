@@ -41,6 +41,8 @@ export class MKeybindingElement extends GemElement {
       OPEN_SETTINGS: '设置',
     };
 
+    const getJoypadKey = (keys: string[]) => keys.find((e) => e.length === 1) || '';
+
     return html`
       <dy-heading class="heading" lv="4">Joypad 1</dy-heading>
       <div class="grid">
@@ -50,20 +52,17 @@ export class MKeybindingElement extends GemElement {
             ([name, value]) => html`
               <div>${name}</div>
               <dy-shortcut-record
-                .value=${[value]}
-                @change=${({ detail }: CustomEvent<string[]>) => {
-                  const key = detail.find((e) => e.length === 1);
-                  key &&
-                    updateAccount({
-                      settings: {
-                        ...configure.user!.settings,
-                        keybinding: {
-                          ...configure.user!.settings.keybinding,
-                          [name]: key,
-                        },
+                .value=${value ? [value] : undefined}
+                @change=${({ detail }: CustomEvent<string[]>) =>
+                  updateAccount({
+                    settings: {
+                      ...configure.user!.settings,
+                      keybinding: {
+                        ...configure.user!.settings.keybinding,
+                        [name]: getJoypadKey(detail),
                       },
-                    });
-                }}
+                    },
+                  })}
               ></dy-shortcut-record>
             `,
           )}
@@ -73,23 +72,20 @@ export class MKeybindingElement extends GemElement {
         ${Object.entries(configure.user.settings.keybinding)
           .filter(([name]) => name.endsWith('_2'))
           .map(
-            ([name, key]) => html`
+            ([name, value]) => html`
               <div>${name.replace('_2', '')}</div>
               <dy-shortcut-record
-                .value=${[key]}
-                @change=${({ detail }: CustomEvent<string[]>) => {
-                  const key = detail.find((e) => e.length === 1);
-                  key &&
-                    updateAccount({
-                      settings: {
-                        ...configure.user!.settings,
-                        keybinding: {
-                          ...configure.user!.settings.keybinding,
-                          [name]: key,
-                        },
+                .value=${value ? [value] : undefined}
+                @change=${({ detail }: CustomEvent<string[]>) =>
+                  updateAccount({
+                    settings: {
+                      ...configure.user!.settings,
+                      keybinding: {
+                        ...configure.user!.settings.keybinding,
+                        [name]: getJoypadKey(detail),
                       },
-                    });
-                }}
+                    },
+                  })}
               ></dy-shortcut-record>
             `,
           )}

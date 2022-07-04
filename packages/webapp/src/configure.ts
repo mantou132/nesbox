@@ -17,6 +17,7 @@ export const defaultKeybinding = {
   B: 'k',
   Select: 'u',
   Start: 'i',
+  Reset: 'r',
 
   Up_2: 'arrowup',
   Left_2: 'arrowleft',
