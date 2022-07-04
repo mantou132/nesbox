@@ -234,8 +234,9 @@ export class PRoomElement extends GemElement<State> {
     }
   };
 
-  #getButton = (event: KeyboardEvent) => {
+  #getButton = ({ key, metaKey, ctrlKey, shiftKey, altKey }: KeyboardEvent) => {
     const { keybinding } = this.#settings!;
+    if (metaKey || ctrlKey || shiftKey || altKey) return;
     const map: Record<string, Button> = {
       [keybinding.Up]: Button.Joypad1Up,
       [keybinding.Left]: Button.Joypad1Left,
@@ -253,7 +254,7 @@ export class PRoomElement extends GemElement<State> {
       [keybinding.A_2]: Button.Joypad2A,
       [keybinding.B_2]: Button.Joypad2B,
     };
-    return map[event.key.toLowerCase()];
+    return map[key.toLowerCase()];
   };
 
   #pressButton = (button: Button) => {

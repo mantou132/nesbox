@@ -1,6 +1,7 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, connectStore } from '@mantou/gem';
+import { isMac } from 'duoyun-ui/lib/hotkeys';
 
-import { configure } from 'src/configure';
+import { configure, Settings } from 'src/configure';
 import { updateAccount } from 'src/services/api';
 import { i18n } from 'src/i18n';
 
@@ -34,6 +35,12 @@ export const gridStyle = createCSSSheet(css`
 export class MKeybindingElement extends GemElement {
   render = () => {
     if (!configure.user) return html``;
+
+    const labelMap: Record<keyof Settings['shortcuts'], string> = {
+      OPEN_SEARCH: '搜索',
+      OPEN_SETTINGS: '设置',
+    };
+
     return html`
       <dy-heading class="heading" lv="4">Joypad 1</dy-heading>
       <div class="grid">
@@ -44,17 +51,19 @@ export class MKeybindingElement extends GemElement {
               <div>${name}</div>
               <dy-shortcut-record
                 .value=${[value]}
-                @change=${({ detail }: CustomEvent<string[]>) =>
-                  detail.length === 1 &&
-                  updateAccount({
-                    settings: {
-                      ...configure.user!.settings,
-                      keybinding: {
-                        ...configure.user!.settings.keybinding,
-                        [name]: detail[0],
+                @change=${({ detail }: CustomEvent<string[]>) => {
+                  const key = detail.find((e) => e.length === 1);
+                  key &&
+                    updateAccount({
+                      settings: {
+                        ...configure.user!.settings,
+                        keybinding: {
+                          ...configure.user!.settings.keybinding,
+                          [name]: key,
+                        },
                       },
-                    },
-                  })}
+                    });
+                }}
               ></dy-shortcut-record>
             `,
           )}
@@ -68,20 +77,46 @@ export class MKeybindingElement extends GemElement {
               <div>${name.replace('_2', '')}</div>
               <dy-shortcut-record
                 .value=${[key]}
-                @change=${({ detail }: CustomEvent<string[]>) =>
-                  detail.length === 1 &&
-                  updateAccount({
-                    settings: {
-                      ...configure.user!.settings,
-                      keybinding: {
-                        ...configure.user!.settings.keybinding,
-                        [name]: detail[0],
+                @change=${({ detail }: CustomEvent<string[]>) => {
+                  const key = detail.find((e) => e.length === 1);
+                  key &&
+                    updateAccount({
+                      settings: {
+                        ...configure.user!.settings,
+                        keybinding: {
+                          ...configure.user!.settings.keybinding,
+                          [name]: key,
+                        },
                       },
-                    },
-                  })}
+                    });
+                }}
               ></dy-shortcut-record>
             `,
           )}
+      </div>
+      <dy-heading class="heading" lv="4">快捷键</dy-heading>
+      <div class="grid">
+        ${Object.entries(configure.user.settings.shortcuts).map(
+          ([name, key]) => html`
+            <div>${labelMap[name as keyof Settings['shortcuts']]}</div>
+            <dy-shortcut-record
+              .value=${isMac ? key.mac : key.win}
+              @change=${({ detail }: CustomEvent<string[]>) =>
+                updateAccount({
+                  settings: {
+                    ...configure.user!.settings,
+                    shortcuts: {
+                      ...configure.user!.settings.shortcuts,
+                      [name]: {
+                        ...key,
+                        [isMac ? 'mac' : 'win']: detail,
+                      },
+                    },
+                  },
+                })}
+            ></dy-shortcut-record>
+          `,
+        )}
       </div>
     `;
   };

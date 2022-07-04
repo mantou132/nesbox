@@ -31,21 +31,34 @@ const defaultVolume = {
   game: 1,
 };
 
+const defaultShortcuts = {
+  OPEN_SEARCH: {
+    win: ['ctrl', 'k'],
+    mac: ['command', 'k'],
+  },
+  OPEN_SETTINGS: {
+    win: ['esc'],
+    mac: ['esc'],
+  },
+};
+
 export type Settings = {
   keybinding: typeof defaultKeybinding;
   volume: typeof defaultVolume;
+  shortcuts: typeof defaultShortcuts;
 };
 
 export type User = Modify<LoginMutation['login']['user'], { settings: Settings }>;
 
 export const parseAccount = (account: GetAccountQuery['account']): User => {
-  const settings = JSON.parse(account.settings || '{}');
+  const settings: Settings = JSON.parse(account.settings || '{}');
   return {
     ...account,
     settings: {
       ...settings,
       keybinding: { ...defaultKeybinding, ...settings.keybinding },
       volume: { ...defaultVolume, ...settings.volume },
+      shortcuts: { ...defaultShortcuts, ...settings.shortcuts },
     },
   };
 };
@@ -55,11 +68,6 @@ export interface Profile {
   exp: number;
   nickname: string;
   username: string;
-}
-
-interface Shortcut {
-  win: string[];
-  mac: string[];
 }
 
 interface Configure {
@@ -73,32 +81,19 @@ interface Configure {
   usedRelease?: number;
   openNesFile?: File;
   theme: ThemeName;
-  shortcuts: {
-    OPEN_SEARCH: Shortcut;
-    OPEN_SETTINGS: Shortcut;
-  };
 }
 
 export const [configure] = createCacheStore<Configure>(
   localStorageKeys.CONFIGURE_LOCAL_STORAGE_KEY,
   {
     theme: 'default',
-    shortcuts: {
-      OPEN_SEARCH: {
-        win: ['ctrl', 'k'],
-        mac: ['command', 'k'],
-      },
-      OPEN_SETTINGS: {
-        win: ['esc'],
-        mac: ['esc'],
-      },
-    },
   },
   { cacheExcludeKeys: ['openNesFile'] },
 );
 
-export function getShortcut(command: keyof Configure['shortcuts'], isDisplay = false) {
-  const keys = configure.shortcuts[command][isMac ? 'mac' : 'win'];
+export function getShortcut(command: keyof typeof defaultShortcuts, isDisplay = false) {
+  const keys = configure.user?.settings.shortcuts[command][isMac ? 'mac' : 'win'];
+  if (!keys) return '';
   if (isDisplay) return keys.map((key) => getDisplayKey(key)).join('+');
   return keys.join('+');
 }
