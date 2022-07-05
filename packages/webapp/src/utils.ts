@@ -6,7 +6,7 @@ import { configure } from 'src/configure';
 import { githubIssue, isTauriMacApp, isTauriWinApp } from 'src/constants';
 
 export const getCorsSrc = (url: string) => {
-  return `https://files.xianqiao.wang/${url}`;
+  return `https://nesbox-cdn.liuben.fun/${url}`;
 };
 
 export const getAvatar = (username?: string) => {
