@@ -59,15 +59,21 @@ export type Settings = {
 
 export type User = Modify<LoginMutation['login']['user'], { settings: Settings }>;
 
+const mergeSettings = <T extends Record<string, unknown>>(defaultValue: T, originValue: T) => {
+  return Object.entries(defaultValue).reduce(
+    (p, [k, v]) => Object.assign(p, { [k]: originValue && k in originValue ? originValue[k] : v }),
+    {} as T,
+  );
+};
 export const parseAccount = (account: GetAccountQuery['account']): User => {
   const settings: Settings = JSON.parse(account.settings || '{}');
   return {
     ...account,
     settings: {
       ...settings,
-      keybinding: { ...defaultKeybinding, ...settings.keybinding },
-      volume: { ...defaultVolume, ...settings.volume },
-      shortcuts: { ...defaultShortcuts, ...settings.shortcuts },
+      keybinding: mergeSettings(defaultKeybinding, settings.keybinding),
+      volume: mergeSettings(defaultVolume, settings.volume),
+      shortcuts: mergeSettings(defaultShortcuts, settings.shortcuts),
     },
   };
 };
