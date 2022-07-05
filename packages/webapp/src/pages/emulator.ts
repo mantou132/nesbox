@@ -72,6 +72,13 @@ export class PEmulatorElement extends GemElement {
       [defaultKeybinding.Select]: Button.Select,
       [defaultKeybinding.Start]: Button.Start,
       [defaultKeybinding.Reset]: Button.Reset,
+
+      [defaultKeybinding.Up_2]: Button.Joypad2Up,
+      [defaultKeybinding.Left_2]: Button.Joypad2Left,
+      [defaultKeybinding.Down_2]: Button.Joypad2Down,
+      [defaultKeybinding.Right_2]: Button.Joypad2Right,
+      [defaultKeybinding.A_2]: Button.Joypad2A,
+      [defaultKeybinding.B_2]: Button.Joypad2B,
     };
     return map[event.key.toLowerCase()];
   };
