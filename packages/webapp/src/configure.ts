@@ -4,7 +4,7 @@ import { Modify } from 'duoyun-ui/lib/types';
 import { createCacheStore } from 'duoyun-ui/lib/utils';
 
 import { LoginMutation } from 'src/generated/guestgraphql';
-import { localStorageKeys } from 'src/constants';
+import { localStorageKeys, VideoRenderMethod } from 'src/constants';
 import type { ThemeName } from 'src/theme';
 import { GetAccountQuery } from 'src/generated/graphql';
 
@@ -28,8 +28,8 @@ export const defaultKeybinding = {
 };
 
 const defaultVolume = {
-  notification: 1,
-  game: 1,
+  notification: 0.5,
+  game: 0.5,
 };
 
 const defaultShortcuts = {
@@ -51,10 +51,15 @@ const defaultShortcuts = {
   },
 };
 
+const defaultVideoSettings = {
+  render: VideoRenderMethod.PIXELATED,
+};
+
 export type Settings = {
   keybinding: typeof defaultKeybinding;
   volume: typeof defaultVolume;
   shortcuts: typeof defaultShortcuts;
+  video: typeof defaultVideoSettings;
 };
 
 export type User = Modify<LoginMutation['login']['user'], { settings: Settings }>;
@@ -74,6 +79,7 @@ export const parseAccount = (account: GetAccountQuery['account']): User => {
       keybinding: mergeSettings(defaultKeybinding, settings.keybinding),
       volume: mergeSettings(defaultVolume, settings.volume),
       shortcuts: mergeSettings(defaultShortcuts, settings.shortcuts),
+      video: mergeSettings(defaultVideoSettings, settings.video),
     },
   };
 };

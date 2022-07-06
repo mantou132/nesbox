@@ -44,3 +44,9 @@ export type SingalEvent = {
   userId: number;
   singal: Singal;
 };
+
+// https://developer.mozilla.org/en-US/docs/Web/CSS/image-rendering
+export const enum VideoRenderMethod {
+  PIXELATED = 'pixelated',
+  SMOOTH = 'smooth',
+}

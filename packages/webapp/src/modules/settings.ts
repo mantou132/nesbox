@@ -7,6 +7,7 @@ import 'duoyun-ui/elements/tabs';
 import 'src/modules/keybinding';
 import 'src/modules/sound-settings';
 import 'src/modules/account-settings';
+import 'src/modules/video-settings';
 
 type State = {
   tab: number;
@@ -91,6 +92,16 @@ export class MSettingsElement extends GemElement<State> {
               return html`
                 <dy-tab-panel>
                   <m-sound-settings></m-sound-settings>
+                </dy-tab-panel>
+              `;
+            },
+          },
+          {
+            tab: '视频',
+            getContent() {
+              return html`
+                <dy-tab-panel>
+                  <m-video-settings></m-video-settings>
                 </dy-tab-panel>
               `;
             },

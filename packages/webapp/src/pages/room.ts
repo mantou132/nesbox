@@ -66,7 +66,6 @@ const style = createCSSSheet(css`
     padding: 5em;
     object-fit: contain;
     background-color: black;
-    image-rendering: pixelated;
     pointer-events: none;
   }
   .chat {
@@ -499,7 +498,13 @@ export class PRoomElement extends GemElement<State> {
     const { messages, roles } = this.state;
 
     return html`
-      <canvas class="canvas" width="256" height="240" ref=${this.canvasRef.ref}></canvas>
+      <canvas
+        class="canvas"
+        width="256"
+        height="240"
+        ref=${this.canvasRef.ref}
+        style=${styleMap({ imageRendering: configure.user?.settings.video.render })}
+      ></canvas>
       <video class="canvas" hidden ref=${this.videoRef.ref}></video>
       <m-room-chat
         class="chat"

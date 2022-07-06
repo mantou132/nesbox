@@ -156,8 +156,8 @@ export class AppRootElement extends GemElement {
         .cancelText=${i18n.get('close')}
         .open=${!!configure.settingsState}
         @close=${toggoleSettingsState}
-        .body=${html`<m-settings></m-settings>`}
       >
+        <m-settings slot="body"></m-settings>
       </dy-modal>
 
       <dy-modal
