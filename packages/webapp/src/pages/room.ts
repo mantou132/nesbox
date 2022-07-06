@@ -44,8 +44,8 @@ import type { MRoomChatElement } from 'src/modules/room-chat';
 import { getCorsSrc, preventDefault } from 'src/utils';
 import { events, queryKeys } from 'src/constants';
 import { createInvite } from 'src/services/api';
+import { theme } from 'src/theme';
 
-import 'duoyun-ui/elements/options';
 import 'src/modules/room-player-list';
 import 'src/modules/room-chat';
 import 'src/modules/nav';
@@ -308,18 +308,22 @@ export class PRoomElement extends GemElement<State> {
   };
 
   #save = async () => {
-    if (!this.#romBuffer) return;
-    const memory = Nes.memory();
-    const cache = await caches.open('');
+    if (!this.#romBuffer || !this.#ctx) return;
+    const { buffer } = Nes.memory();
+    const cache = await caches.open('state_v1');
     const key = await hash(this.#romBuffer);
-    await cache.put(`/${key}?t=${Date.now()}`, new Response(new Blob([memory.buffer])));
+    const thumbnail = this.#ctx.canvas.toDataURL('image/png', 0.5);
+    await cache.put(
+      `/${key}?${new URLSearchParams({ timestamp: Date.now().toString(), thumbnail })}`,
+      new Response(new Blob([buffer])),
+    );
     Toast.open('success', `已保存状态，${new Time().format()}`);
   };
 
   #load = async () => {
     if (!this.#romBuffer) return;
-    const memory = Nes.memory();
-    const cache = await caches.open('');
+    const { buffer } = Nes.memory();
+    const cache = await caches.open('state_v1');
     const key = await hash(this.#romBuffer);
     const reqs = await cache.keys(`/${key}`, { ignoreSearch: true });
     if (reqs.length === 0) {
@@ -328,22 +332,60 @@ export class PRoomElement extends GemElement<State> {
       Modal.open({
         header: '选择想要回到的状态',
         body: html`
-          <dy-options
-            style=${styleMap({ width: 'min(80vw, 20em)', minHeight: '10em' })}
-            .options=${reqs
-              .map((req) => [req, new Time(Number(new URL(req.url).searchParams.get('t')))] as const)
+          <ul>
+            <style>
+              ul {
+                width: min(80vw, 20em);
+                min-height: 10em;
+                list-style: none;
+                padding: 0;
+                margin: 0;
+                display: flex;
+                flex-direction: column;
+                gap: 1px;
+              }
+              li {
+                display: flex;
+                gap: 1em;
+                align-items: center;
+                border-radius: ${theme.normalRound};
+                overflow: hidden;
+              }
+              li:hover {
+                background: ${theme.hoverBackgroundColor};
+              }
+              img {
+                border-radius: ${theme.normalRound};
+                width: 64px;
+              }
+            </style>
+            ${reqs
+              .map((req) => {
+                const { searchParams } = new URL(req.url);
+                return [
+                  req,
+                  new Time(Number(searchParams.get('timestamp'))),
+                  searchParams.get('thumbnail') || '',
+                ] as const;
+              })
               .sort((a, b) => Number(b[1]) - Number(a[1]))
-              .map(([req, time]) => ({
-                label: time.format(),
-                onClick: async (evt: PointerEvent) => {
-                  const res = await cache.match(req);
-                  if (!res) return;
-                  new Uint8Array(memory.buffer).set(new Uint8Array(await res.arrayBuffer()));
-                  evt.target?.dispatchEvent(new CustomEvent('close', { composed: true }));
-                  Toast.open('success', `加载${time.format()}成功`);
-                },
-              })) as { label: string }[]}
-          ></dy-options>
+              .map(
+                ([req, time, url]) => html`
+                  <li
+                    @click=${async (evt: PointerEvent) => {
+                      const res = await cache.match(req);
+                      if (!res) return;
+                      new Uint8Array(buffer).set(new Uint8Array(await res.arrayBuffer()));
+                      evt.target?.dispatchEvent(new CustomEvent('close', { composed: true }));
+                      Toast.open('success', `加载${time.format()}成功`);
+                    }}
+                  >
+                    <img src=${url} alt="" />
+                    <span>${time.format()}</span>
+                  </li>
+                `,
+              )}
+          </ul>
         `,
         disableDefualtCancelBtn: true,
         disableDefualtOKBtn: true,
