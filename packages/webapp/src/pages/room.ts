@@ -209,7 +209,7 @@ export class PRoomElement extends GemElement<State> {
   #romBuffer?: ArrayBuffer;
   #initNes = async () => {
     await init();
-    this.#nes = Nes.new(48000, 800, 0.02);
+    this.#nes = Nes.new();
     this.#imageData = this.#ctx!.createImageData(this.#ctx!.canvas.width, this.#ctx!.canvas.height);
 
     if (!this.#isHost) return;

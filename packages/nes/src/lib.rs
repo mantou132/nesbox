@@ -11,7 +11,17 @@ use tetanes::{
 };
 use wasm_bindgen::prelude::*;
 
-mod utils;
+#[wasm_bindgen(start)]
+pub fn run() {
+    #[cfg(debug_assertions)]
+    console_error_panic_hook::set_once();
+}
+
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(s: &str);
+}
 
 #[wasm_bindgen]
 pub enum Button {
@@ -64,8 +74,6 @@ pub struct Nes {
     buffer: Vec<f32>,
     callback: NesAudioCallback,
     sound: bool,
-    dynamic_rate_control: bool,
-    dynamic_rate_delta: f32,
     qoi_buffer: Vec<u8>,
     qoi_decode_buffer: Vec<u8>,
 }
@@ -76,14 +84,11 @@ impl Nes {
         wasm_bindgen::memory()
     }
 
-    pub fn new(output_sample_rate: f32, buffer_size: usize, max_delta: f32) -> Self {
-        utils::set_panic_hook();
-
+    pub fn new() -> Self {
         let mut control_deck = ControlDeck::new(NesRegion::Ntsc, RamState::default());
         control_deck.set_filter(VideoFilter::Pixellate);
-        let input_sample_rate = control_deck.apu().sample_rate();
-        let mut audio = Audio::new(input_sample_rate, output_sample_rate, 4096);
-        let buffer = vec![0.0; buffer_size];
+        let mut audio = Audio::new(control_deck.apu().sample_rate(), 48000.0, 4096);
+        let buffer = vec![0.0; 800];
         let callback = audio.open_callback().expect("valid callback");
         Self {
             control_deck,
@@ -91,8 +96,6 @@ impl Nes {
             buffer,
             callback,
             sound: false,
-            dynamic_rate_control: true,
-            dynamic_rate_delta: max_delta,
             qoi_buffer: Vec::new(),
             qoi_decode_buffer: Vec::new(),
         }
@@ -160,8 +163,7 @@ impl Nes {
             .expect("valid clock");
         if self.sound {
             let samples = self.control_deck.audio_samples();
-            self.audio
-                .output(samples, self.dynamic_rate_control, self.dynamic_rate_delta);
+            self.audio.output(samples, true, 0.02);
         }
         self.control_deck.clear_audio_samples();
     }

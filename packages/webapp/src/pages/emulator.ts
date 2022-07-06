@@ -147,7 +147,7 @@ export class PEmulatorElement extends GemElement {
     const buffer = await configure.openNesFile.arrayBuffer();
 
     await init();
-    this.#nes = Nes.new(48000, 800, 0.02);
+    this.#nes = Nes.new();
     this.#nes.load_rom(new Uint8Array(buffer));
   };
 
