@@ -346,7 +346,7 @@ export class RTC extends EventTarget {
   };
 
   send = (data: ChannelMessage) => {
-    this.#channelMap.forEach((c) => c.send(data.toString()));
+    this.#channelMap.forEach((c) => c.readyState === 'open' && c.send(data.toString()));
     this.#emitMessage(data);
   };
 
@@ -355,7 +355,7 @@ export class RTC extends EventTarget {
   };
 
   sendFrame = (frame: ArrayBuffer) => {
-    this.#channelMap.forEach((c) => c.send(frame));
+    this.#channelMap.forEach((c) => c.readyState === 'open' && c.send(frame));
   };
 
   kickoutRole = (userId: number) => {

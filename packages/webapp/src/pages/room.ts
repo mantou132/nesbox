@@ -49,6 +49,7 @@ import 'duoyun-ui/elements/options';
 import 'src/modules/room-player-list';
 import 'src/modules/room-chat';
 import 'src/modules/nav';
+import 'src/elements/fps';
 
 const style = createCSSSheet(css`
   :host {
@@ -82,6 +83,11 @@ const style = createCSSSheet(css`
     box-sizing: border-box;
     width: min(38em, 100vw);
     padding-inline: 1rem;
+  }
+  .fps {
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
   }
 `);
 
@@ -195,7 +201,7 @@ export class PRoomElement extends GemElement<State> {
     node.connect(this.#gainNode);
     node.connect(this.#streamDestination);
     node.buffer = audioBuffer;
-    const start = Math.max(this.#nextStartTime || 0, this.#audioContext.currentTime + bufferSize / sampleRate);
+    const start = Math.max(this.#nextStartTime, this.#audioContext.currentTime);
     node.start(start);
     this.#nextStartTime = start + bufferSize / sampleRate;
   };
@@ -508,6 +514,7 @@ export class PRoomElement extends GemElement<State> {
         @rolechange=${({ detail }: CustomEvent<RoleOffer>) => this.#rtc?.send(detail)}
         @kickout=${({ detail }: CustomEvent<number>) => this.#rtc?.kickoutRole(detail)}
       ></m-room-player-list>
+      <nesbox-fps class="fps"></nesbox-fps>
     `;
   };
 }
