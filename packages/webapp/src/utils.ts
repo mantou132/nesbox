@@ -33,6 +33,10 @@ export const documentVisible = async () => {
   await new Promise((res) => document.addEventListener('visibilitychange', res, { once: true }));
 };
 
+/**
+ * @deprecated
+ * use `window.open`
+ */
 export const open = (uri: string) => {
   if (window.__TAURI__) {
     window.__TAURI__.shell.open(uri);
@@ -52,6 +56,10 @@ export const playSound = (kind: string, volume = configure.user?.settings.volume
     });
 };
 
+/**
+ * @deprecated
+ * use `navigator.setAppBadge`
+ */
 export const setAppBadge = (count: number) => {
   if (isTauriWinApp) {
     if (count) window.__TAURI__?.window.getCurrent().requestUserAttention(2);
