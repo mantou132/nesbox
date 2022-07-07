@@ -85,7 +85,7 @@ const style = createCSSSheet(css`
     justify-content: center;
     padding: 2em 1.6em;
     background: ${theme.backgroundColor};
-    width: min(22em, 100%);
+    width: 22em;
     box-sizing: border-box;
   }
   .header {
@@ -106,6 +106,9 @@ const style = createCSSSheet(css`
     .bg-copyright,
     .slogan {
       display: none;
+    }
+    .content {
+      width: 100%;
     }
   }
 `);

@@ -15,6 +15,8 @@ export const defaultKeybinding = {
   Right: 'd',
   A: 'j',
   B: 'k',
+  TurboA: 'n',
+  TurboB: 'm',
   Select: 'u',
   Start: 'i',
   Reset: 'r',
@@ -25,6 +27,8 @@ export const defaultKeybinding = {
   Right_2: 'arrowright',
   A_2: '5',
   B_2: '6',
+  TurboA_2: '8',
+  TurboB_2: '9',
 };
 
 const defaultVolume = {

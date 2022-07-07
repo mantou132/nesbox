@@ -14,6 +14,8 @@ const buttonMap: Record<Button, Record<string, Button | undefined>> = {
   [Button.Joypad1Right]: { '2': Button.Joypad2Right, '3': Button.Joypad3Right, '4': Button.Joypad4Right },
   [Button.Joypad1A]: { '2': Button.Joypad2A, '3': Button.Joypad3A, '4': Button.Joypad4A },
   [Button.Joypad1B]: { '2': Button.Joypad2B, '3': Button.Joypad3B, '4': Button.Joypad4B },
+  [Button.Joypad1TurboA]: { '2': Button.Joypad2TurboA, '3': Button.Joypad3TurboA, '4': Button.Joypad4TurboA },
+  [Button.Joypad1TurboB]: { '2': Button.Joypad2TurboB, '3': Button.Joypad3TurboB, '4': Button.Joypad4TurboB },
   [Button.Select]: {},
   [Button.Start]: {},
   [Button.Reset]: {},

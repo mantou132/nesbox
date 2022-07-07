@@ -49,6 +49,7 @@ const style = createCSSSheet(css`
     inset: 0 3em 0 auto;
     margin: auto;
     width: auto;
+    max-width: 40%;
     max-height: calc(100% - 6em);
     object-fit: cover;
     border-radius: calc(2 * ${theme.normalRound});
@@ -63,6 +64,7 @@ const style = createCSSSheet(css`
     .top::part(img) {
       inset: 0;
       width: 100%;
+      max-width: none;
       max-height: 100%;
     }
     .top::part(title) {

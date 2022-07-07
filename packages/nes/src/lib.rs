@@ -87,6 +87,7 @@ impl Nes {
     pub fn new() -> Self {
         let mut control_deck = ControlDeck::new(NesRegion::Ntsc, RamState::default());
         control_deck.set_filter(VideoFilter::Pixellate);
+        control_deck.set_fourscore(true);
         let mut audio = Audio::new(control_deck.apu().sample_rate(), 48000.0, 4096);
         let buffer = vec![0.0; 800];
         let callback = audio.open_callback().expect("valid callback");
@@ -186,8 +187,14 @@ impl Nes {
             Button::Select => gamepad1.select = pressed,
             Button::Joypad1A => gamepad1.a = pressed,
             Button::Joypad1B => gamepad1.b = pressed,
-            Button::Joypad1TurboA => gamepad1.turbo_a = pressed,
-            Button::Joypad1TurboB => gamepad1.turbo_b = pressed,
+            Button::Joypad1TurboA => {
+                gamepad1.a = pressed;
+                gamepad1.turbo_a = pressed;
+            }
+            Button::Joypad1TurboB => {
+                gamepad1.b = pressed;
+                gamepad1.turbo_b = pressed;
+            }
             Button::Joypad1Up => gamepad1.up = pressed,
             Button::Joypad1Down => gamepad1.down = pressed,
             Button::Joypad1Left => gamepad1.left = pressed,
@@ -197,8 +204,14 @@ impl Nes {
                 match button {
                     Button::Joypad2A => gamepad2.a = pressed,
                     Button::Joypad2B => gamepad2.b = pressed,
-                    Button::Joypad2TurboA => gamepad2.turbo_a = pressed,
-                    Button::Joypad2TurboB => gamepad2.turbo_b = pressed,
+                    Button::Joypad2TurboA => {
+                        gamepad2.a = pressed;
+                        gamepad2.turbo_a = pressed;
+                    }
+                    Button::Joypad2TurboB => {
+                        gamepad2.b = pressed;
+                        gamepad2.turbo_b = pressed;
+                    }
                     Button::Joypad2Up => gamepad2.up = pressed,
                     Button::Joypad2Down => gamepad2.down = pressed,
                     Button::Joypad2Left => gamepad2.left = pressed,
@@ -208,8 +221,14 @@ impl Nes {
                         match button {
                             Button::Joypad3A => gamepad3.a = pressed,
                             Button::Joypad3B => gamepad3.b = pressed,
-                            Button::Joypad3TurboA => gamepad3.turbo_a = pressed,
-                            Button::Joypad3TurboB => gamepad3.turbo_b = pressed,
+                            Button::Joypad3TurboA => {
+                                gamepad3.a = pressed;
+                                gamepad3.turbo_a = pressed;
+                            }
+                            Button::Joypad3TurboB => {
+                                gamepad3.b = pressed;
+                                gamepad3.turbo_b = pressed;
+                            }
                             Button::Joypad3Up => gamepad3.up = pressed,
                             Button::Joypad3Down => gamepad3.down = pressed,
                             Button::Joypad3Left => gamepad3.left = pressed,
@@ -220,8 +239,14 @@ impl Nes {
                                 match button {
                                     Button::Joypad4A => gamepad4.a = pressed,
                                     Button::Joypad4B => gamepad4.b = pressed,
-                                    Button::Joypad4TurboA => gamepad4.turbo_a = pressed,
-                                    Button::Joypad4TurboB => gamepad4.turbo_b = pressed,
+                                    Button::Joypad4TurboA => {
+                                        gamepad4.a = pressed;
+                                        gamepad4.turbo_a = pressed;
+                                    }
+                                    Button::Joypad4TurboB => {
+                                        gamepad4.b = pressed;
+                                        gamepad4.turbo_b = pressed;
+                                    }
                                     Button::Joypad4Up => gamepad4.up = pressed,
                                     Button::Joypad4Down => gamepad4.down = pressed,
                                     Button::Joypad4Left => gamepad4.left = pressed,

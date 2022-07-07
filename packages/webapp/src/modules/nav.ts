@@ -73,6 +73,7 @@ const style = createCSSSheet(css`
     white-space: nowrap;
   }
   .icon {
+    flex-shrink: 0;
     width: 3em;
     box-sizing: border-box;
     border-radius: ${theme.normalRound};
@@ -84,6 +85,9 @@ const style = createCSSSheet(css`
     background-color: ${theme.hoverBackgroundColor};
   }
   @media ${mediaQuery.PHONE} {
+    .nav {
+      gap: 0.5em;
+    }
     .link {
       display: none;
     }

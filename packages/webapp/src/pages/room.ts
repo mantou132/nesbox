@@ -24,6 +24,7 @@ import { isNotBoolean } from 'duoyun-ui/lib/types';
 import { Toast } from 'duoyun-ui/elements/toast';
 import { hash } from 'duoyun-ui/lib/encode';
 import { Time } from 'duoyun-ui/lib/time';
+import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
 import { configure, getShortcut } from 'src/configure';
 import { routes } from 'src/routes';
@@ -87,6 +88,13 @@ const style = createCSSSheet(css`
     position: absolute;
     right: 1rem;
     bottom: 1rem;
+  }
+  @media ${mediaQuery.PHONE} {
+    .fps {
+      right: 0;
+      bottom: 0;
+      font-size: 0.15em;
+    }
   }
 `);
 
@@ -276,6 +284,8 @@ export class PRoomElement extends GemElement<State> {
       [keybinding.Right]: Button.Joypad1Right,
       [keybinding.A]: Button.Joypad1A,
       [keybinding.B]: Button.Joypad1B,
+      [keybinding.TurboA]: Button.Joypad1TurboA,
+      [keybinding.TurboB]: Button.Joypad1TurboB,
       [keybinding.Select]: Button.Select,
       [keybinding.Start]: Button.Start,
       [keybinding.Reset]: Button.Reset,
@@ -286,6 +296,8 @@ export class PRoomElement extends GemElement<State> {
       [keybinding.Right_2]: Button.Joypad2Right,
       [keybinding.A_2]: Button.Joypad2A,
       [keybinding.B_2]: Button.Joypad2B,
+      [keybinding.TurboA_2]: Button.Joypad2TurboA,
+      [keybinding.TurboB_2]: Button.Joypad2TurboB,
     };
     return map[key.toLowerCase()];
   };
@@ -307,8 +319,95 @@ export class PRoomElement extends GemElement<State> {
     this.#pressButton(event.detail);
   };
 
+  #onKeyDown = (event: KeyboardEvent) => {
+    if (event.repeat) return;
+    const button = this.#getButton(event);
+    if (!button) {
+      hotkeys({
+        enter: () => this.chatRef.element?.focus(),
+        [getShortcut('SAVE_GAME_STATE')]: preventDefault(this.#save),
+        [getShortcut('LOAD_GAME_STATE')]: preventDefault(this.#load),
+      })(event);
+      return;
+    }
+    this.#pressButton(button);
+  };
+
+  #releaseButton = (button: Button) => {
+    if (this.#isHost) {
+      this.#nes?.handle_event(button, false, false);
+    } else {
+      this.#rtc?.send(new KeyUpMsg(button));
+    }
+  };
+
+  #onReleaseButton = (event: CustomEvent<Button>) => {
+    this.#releaseButton(event.detail);
+  };
+
+  #onKeyUp = (event: KeyboardEvent) => {
+    if (event.repeat) return;
+    const button = this.#getButton(event);
+    if (!button) return;
+    this.#releaseButton(button);
+  };
+
+  #onContextMenu = (event: MouseEvent) => {
+    if (!this.#playing) return;
+    ContextMenu.open(
+      [
+        !!friendStore.friendIds?.length && {
+          text: '邀请好友',
+          menu: friendStore.friendIds?.map((id) => ({
+            text: friendStore.friends[id]?.user.nickname || '',
+            handle: () => createInvite({ roomId: this.#playing!.id, targetId: id }),
+          })),
+        },
+        {
+          text: '邀请',
+          handle: async () => {
+            const input = await Modal.open<DuoyunInputElement>({
+              header: '邀请',
+              body: html`
+                <dy-input
+                  autofocus
+                  style="width: 100%"
+                  placeholder=${i18n.get('placeholderUsername')}
+                  @change=${(e: any) => (e.target.value = e.detail)}
+                ></dy-input>
+              `,
+            });
+            createInvite({ roomId: this.#playing!.id, targetId: 0, tryUsername: input.value });
+          },
+        },
+        {
+          text: '分享',
+          handle: () => {
+            const url = `${location.origin}${createPath(routes.games)}${new QueryString({
+              [queryKeys.JOIN_ROOM]: this.#playing!.id,
+            })}`;
+            navigator.share
+              ? navigator
+                  .share({
+                    url,
+                    text: `一起来玩 ${store.games[this.#playing!.gameId]?.name}`,
+                  })
+                  .catch(() => {
+                    //
+                  })
+              : navigator.clipboard.writeText(url);
+          },
+        },
+      ].filter(isNotBoolean),
+      {
+        x: event.clientX,
+        y: event.clientY,
+      },
+    );
+  };
+
   #save = async () => {
-    if (!this.#romBuffer || !this.#ctx) return;
+    if (!this.#isHost || !this.#romBuffer || !this.#ctx) return;
     const { buffer } = Nes.memory();
     const cache = await caches.open('state_v1');
     const key = await hash(this.#romBuffer);
@@ -321,7 +420,7 @@ export class PRoomElement extends GemElement<State> {
   };
 
   #load = async () => {
-    if (!this.#romBuffer) return;
+    if (!this.#isHost || !this.#romBuffer) return;
     const { buffer } = Nes.memory();
     const cache = await caches.open('state_v1');
     const key = await hash(this.#romBuffer);
@@ -392,91 +491,6 @@ export class PRoomElement extends GemElement<State> {
         maskCloseable: true,
       });
     }
-  };
-
-  #onKeyDown = (event: KeyboardEvent) => {
-    const button = this.#getButton(event);
-    if (!button) {
-      hotkeys({
-        enter: () => this.chatRef.element?.focus(),
-        [getShortcut('SAVE_GAME_STATE')]: preventDefault(this.#save),
-        [getShortcut('LOAD_GAME_STATE')]: preventDefault(this.#load),
-      })(event);
-      return;
-    }
-    this.#pressButton(button);
-  };
-
-  #releaseButton = (button: Button) => {
-    if (this.#isHost) {
-      this.#nes?.handle_event(button, false, false);
-    } else {
-      this.#rtc?.send(new KeyUpMsg(button));
-    }
-  };
-
-  #onReleaseButton = (event: CustomEvent<Button>) => {
-    this.#releaseButton(event.detail);
-  };
-
-  #onKeyUp = (event: KeyboardEvent) => {
-    const button = this.#getButton(event);
-    if (!button) return;
-    this.#releaseButton(button);
-  };
-
-  #onContextMenu = (event: MouseEvent) => {
-    if (!this.#playing) return;
-    ContextMenu.open(
-      [
-        !!friendStore.friendIds?.length && {
-          text: '邀请好友',
-          menu: friendStore.friendIds?.map((id) => ({
-            text: friendStore.friends[id]?.user.nickname || '',
-            handle: () => createInvite({ roomId: this.#playing!.id, targetId: id }),
-          })),
-        },
-        {
-          text: '邀请',
-          handle: async () => {
-            const input = await Modal.open<DuoyunInputElement>({
-              header: '邀请',
-              body: html`
-                <dy-input
-                  autofocus
-                  style="width: 100%"
-                  placeholder=${i18n.get('placeholderUsername')}
-                  @change=${(e: any) => (e.target.value = e.detail)}
-                ></dy-input>
-              `,
-            });
-            createInvite({ roomId: this.#playing!.id, targetId: 0, tryUsername: input.value });
-          },
-        },
-        {
-          text: '分享',
-          handle: () => {
-            const url = `${location.origin}${createPath(routes.games)}${new QueryString({
-              [queryKeys.JOIN_ROOM]: this.#playing!.id,
-            })}`;
-            navigator.share
-              ? navigator
-                  .share({
-                    url,
-                    text: `一起来玩 ${store.games[this.#playing!.gameId]?.name}`,
-                  })
-                  .catch(() => {
-                    //
-                  })
-              : navigator.clipboard.writeText(url);
-          },
-        },
-      ].filter(isNotBoolean),
-      {
-        x: event.clientX,
-        y: event.clientY,
-      },
-    );
   };
 
   mounted = () => {
