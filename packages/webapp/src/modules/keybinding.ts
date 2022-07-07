@@ -17,7 +17,7 @@ export const gridStyle = createCSSSheet(css`
   .grid {
     display: grid;
     grid-template-columns: 2fr 6fr;
-    gap: 0.5em;
+    gap: 0.75em;
   }
   .grid div {
     display: flex;

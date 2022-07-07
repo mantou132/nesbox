@@ -4,7 +4,7 @@ import { Modify } from 'duoyun-ui/lib/types';
 import { createCacheStore } from 'duoyun-ui/lib/utils';
 
 import { LoginMutation } from 'src/generated/guestgraphql';
-import { localStorageKeys, VideoRenderMethod } from 'src/constants';
+import { localStorageKeys, VideoFilter, VideoRenderMethod } from 'src/constants';
 import type { ThemeName } from 'src/theme';
 import { GetAccountQuery } from 'src/generated/graphql';
 
@@ -57,6 +57,7 @@ const defaultShortcuts = {
 
 const defaultVideoSettings = {
   render: VideoRenderMethod.PIXELATED,
+  filter: VideoFilter.DEFAULT,
 };
 
 export type Settings = {

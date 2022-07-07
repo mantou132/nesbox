@@ -3,7 +3,7 @@ import { GemElement, html, adoptedStyle, customElement, connectStore } from '@ma
 import { configure, Settings } from 'src/configure';
 import { gridStyle } from 'src/modules/keybinding';
 import { updateAccount } from 'src/services/api';
-import { VideoRenderMethod } from 'src/constants';
+import { VideoFilter, VideoRenderMethod } from 'src/constants';
 
 import 'duoyun-ui/elements/select';
 
@@ -31,7 +31,7 @@ export class MVideoSettingsElement extends GemElement {
 
     return html`
       <div class="grid">
-        <div>渲染</div>
+        <div>渲染方法</div>
         <dy-select
           .value=${configure.user.settings.video.render}
           .options=${[
@@ -39,6 +39,15 @@ export class MVideoSettingsElement extends GemElement {
             { label: '平滑', value: VideoRenderMethod.SMOOTH },
           ]}
           @change=${(evt: CustomEvent<VideoRenderMethod>) => this.#updateVideoSetting('render', evt.detail)}
+        ></dy-select>
+        <div>过滤器</div>
+        <dy-select
+          .value=${configure.user.settings.video.filter}
+          .options=${[
+            { label: '默认', value: VideoFilter.DEFAULT },
+            { label: 'NTSC', value: VideoFilter.NTSC },
+          ]}
+          @change=${(evt: CustomEvent<VideoFilter>) => this.#updateVideoSetting('filter', evt.detail)}
         ></dy-select>
       </div>
     `;

@@ -50,3 +50,8 @@ export const enum VideoRenderMethod {
   PIXELATED = 'pixelated',
   SMOOTH = 'smooth',
 }
+
+export const enum VideoFilter {
+  DEFAULT = 'default',
+  NTSC = 'NTSC',
+}

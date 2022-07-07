@@ -534,6 +534,11 @@ export class PRoomElement extends GemElement<State> {
       () => [this.#playing?.id, this.#rom],
     );
 
+    this.effect(
+      () => this.#settings && this.#nes?.set_filter(this.#settings.video.filter),
+      () => [this.#nes, this.#settings],
+    );
+
     this.addEventListener('contextmenu', this.#onContextMenu);
 
     addEventListener('keydown', this.#onKeyDown);
