@@ -1,3 +1,4 @@
+/// Do not contain sensitive information, do not use `salt` encryption password
 use chrono::Utc;
 use data_encoding::HEXUPPER;
 use diesel::pg::PgConnection;

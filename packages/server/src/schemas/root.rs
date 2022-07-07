@@ -1,3 +1,5 @@
+use crate::db::root::DB_POOL;
+
 use super::comment::*;
 use super::favorite::*;
 use super::friend::*;
@@ -8,7 +10,6 @@ use super::notify::*;
 use super::playing::*;
 use super::room::*;
 use super::user::*;
-use crate::db::root::Pool;
 use futures::Stream;
 use juniper::{graphql_subscription, EmptySubscription, FieldError, FieldResult, RootNode};
 use std::pin::Pin;
@@ -17,40 +18,40 @@ pub struct QueryRoot;
 
 #[juniper::graphql_object(Context = Context)]
 impl QueryRoot {
-    fn games(context: &Context) -> FieldResult<Vec<ScGame>> {
-        let conn = context.dbpool.get().unwrap();
+    fn games(_context: &Context) -> FieldResult<Vec<ScGame>> {
+        let conn = DB_POOL.get().unwrap();
         Ok(get_games(&conn))
     }
-    fn top_games(context: &Context) -> FieldResult<Vec<i32>> {
-        let conn = context.dbpool.get().unwrap();
+    fn top_games(_context: &Context) -> FieldResult<Vec<i32>> {
+        let conn = DB_POOL.get().unwrap();
         Ok(get_top_ids(&conn))
     }
     fn favorites(context: &Context) -> FieldResult<Vec<i32>> {
-        let conn = context.dbpool.get().unwrap();
+        let conn = DB_POOL.get().unwrap();
         Ok(get_favorites(&conn, context.user_id))
     }
-    fn comments(context: &Context, input: ScCommentsReq) -> FieldResult<Vec<ScComment>> {
-        let conn = context.dbpool.get().unwrap();
+    fn comments(_context: &Context, input: ScCommentsReq) -> FieldResult<Vec<ScComment>> {
+        let conn = DB_POOL.get().unwrap();
         Ok(get_comments(&conn, input.game_id))
     }
     fn account(context: &Context) -> FieldResult<ScUser> {
-        let conn = context.dbpool.get().unwrap();
+        let conn = DB_POOL.get().unwrap();
         get_account(&conn, context.user_id)
     }
     fn messages(context: &Context, input: ScMessagesReq) -> FieldResult<Vec<ScMessage>> {
-        let conn = context.dbpool.get().unwrap();
+        let conn = DB_POOL.get().unwrap();
         Ok(get_messages(&conn, context.user_id, input.target_id))
     }
     fn friends(context: &Context) -> FieldResult<Vec<ScFriend>> {
-        let conn = context.dbpool.get().unwrap();
+        let conn = DB_POOL.get().unwrap();
         Ok(get_friends(&conn, context.user_id))
     }
-    fn rooms(context: &Context) -> FieldResult<Vec<ScRoom>> {
-        let conn = context.dbpool.get().unwrap();
+    fn rooms(_context: &Context) -> FieldResult<Vec<ScRoom>> {
+        let conn = DB_POOL.get().unwrap();
         Ok(get_rooms(&conn))
     }
     fn invites(context: &Context) -> FieldResult<Vec<ScInvite>> {
-        let conn = context.dbpool.get().unwrap();
+        let conn = DB_POOL.get().unwrap();
         Ok(get_invites(&conn, context.user_id))
     }
 }
@@ -73,15 +74,15 @@ impl MutationRoot {
         Ok("Ok".into())
     }
     fn update_account(context: &Context, input: ScUpdateUser) -> FieldResult<ScUser> {
-        let conn = context.dbpool.get().unwrap();
+        let conn = DB_POOL.get().unwrap();
         update_user(&conn, context.user_id, &input)
     }
     fn update_password(context: &Context, input: ScUpdatePassword) -> FieldResult<ScUser> {
-        let conn = context.dbpool.get().unwrap();
+        let conn = DB_POOL.get().unwrap();
         update_password(&conn, context.user_id, &input)
     }
-    fn create_game(context: &Context, input: ScNewGame) -> FieldResult<ScGame> {
-        let conn = context.dbpool.get().unwrap();
+    fn create_game(_context: &Context, input: ScNewGame) -> FieldResult<ScGame> {
+        let conn = DB_POOL.get().unwrap();
         let game = create_game(&conn, &input)?;
         notify_all(
             ScNotifyMessageBuilder::default()
@@ -92,11 +93,11 @@ impl MutationRoot {
         Ok(game)
     }
     fn create_comment(context: &Context, input: ScNewComment) -> FieldResult<ScComment> {
-        let conn = context.dbpool.get().unwrap();
+        let conn = DB_POOL.get().unwrap();
         create_comment(&conn, context.user_id, &input)
     }
     fn create_message(context: &Context, input: ScNewMessage) -> FieldResult<ScMessage> {
-        let conn = context.dbpool.get().unwrap();
+        let conn = DB_POOL.get().unwrap();
         let message = create_message(&conn, context.user_id, &input)?;
         notify(
             message.target_id,
@@ -108,11 +109,11 @@ impl MutationRoot {
         Ok(message)
     }
     fn read_message(context: &Context, input: ScReadMessage) -> FieldResult<ScFriend> {
-        let conn = context.dbpool.get().unwrap();
+        let conn = DB_POOL.get().unwrap();
         read_message(&conn, context.user_id, input.target_id)
     }
     fn favorite_game(context: &Context, input: ScNewFavorite) -> FieldResult<String> {
-        let conn = context.dbpool.get().unwrap();
+        let conn = DB_POOL.get().unwrap();
         if input.favorite {
             create_favorite(&conn, context.user_id, input.game_id).ok();
         } else {
@@ -121,7 +122,7 @@ impl MutationRoot {
         Ok("Ok".into())
     }
     fn apply_friend(context: &Context, input: ScNewFriend) -> FieldResult<String> {
-        let conn = context.dbpool.get().unwrap();
+        let conn = DB_POOL.get().unwrap();
         if let Ok(target_user) = get_user_by_username(&conn, &input.username) {
             if let Ok(friend) = apply_friend(&conn, context.user_id, target_user.id) {
                 notify(
@@ -136,7 +137,7 @@ impl MutationRoot {
         Ok("Ok".into())
     }
     fn accept_friend(context: &Context, input: ScUpdateFriend) -> FieldResult<String> {
-        let conn = context.dbpool.get().unwrap();
+        let conn = DB_POOL.get().unwrap();
         if input.accept {
             if let Ok(friend) = accept_friend(&conn, context.user_id, input.target_id) {
                 notify(
@@ -160,7 +161,7 @@ impl MutationRoot {
         Ok("Ok".into())
     }
     fn create_invite(context: &Context, input: ScNewInvite) -> FieldResult<ScInvite> {
-        let conn = context.dbpool.get().unwrap();
+        let conn = DB_POOL.get().unwrap();
         let invite = create_invite(&conn, context.user_id, &input)?;
         notify(
             input.target_id,
@@ -172,7 +173,7 @@ impl MutationRoot {
         Ok(invite)
     }
     fn accept_invite(context: &Context, input: ScUpdateInvite) -> FieldResult<String> {
-        let conn = context.dbpool.get().unwrap();
+        let conn = DB_POOL.get().unwrap();
         let invite = get_invite(&conn, context.user_id, input.invite_id)?;
 
         if input.accept {
@@ -206,7 +207,7 @@ impl MutationRoot {
         Ok("Ok".into())
     }
     fn create_room(context: &Context, input: ScNewRoom) -> FieldResult<ScRoomBasic> {
-        let conn = context.dbpool.get().unwrap();
+        let conn = DB_POOL.get().unwrap();
         let room = create_room(&conn, context.user_id, &input)?;
         notify_ids(
             get_friend_ids(&conn, context.user_id),
@@ -218,7 +219,7 @@ impl MutationRoot {
         Ok(room)
     }
     fn update_room(context: &Context, input: ScUpdateRoom) -> FieldResult<ScRoomBasic> {
-        let conn = context.dbpool.get().unwrap();
+        let conn = DB_POOL.get().unwrap();
         let room = update_room(&conn, context.user_id, &input)?;
         notify_ids(
             get_friend_ids(&conn, context.user_id),
@@ -238,7 +239,7 @@ impl MutationRoot {
         Ok(room)
     }
     fn enter_pub_room(context: &Context, input: ScUpdatePlaying) -> FieldResult<ScRoomBasic> {
-        let conn = context.dbpool.get().unwrap();
+        let conn = DB_POOL.get().unwrap();
         let room = get_room(&conn, input.room_id)?;
         if room.private {
             return Err("private room".into());
@@ -254,7 +255,7 @@ impl MutationRoot {
         Ok(room)
     }
     fn leave_room(context: &Context) -> FieldResult<String> {
-        let conn = context.dbpool.get().unwrap();
+        let conn = DB_POOL.get().unwrap();
         let room = get_playing(&conn, context.user_id).unwrap();
         if context.user_id == room.host {
             delete_playing_with_room(&conn, room.id);
@@ -300,12 +301,12 @@ impl Subscription {
         let mut rx = get_receiver(context.user_id);
         let stream = async_stream::stream! {
             loop {
-                let result = rx.recv().await.unwrap();
+                let result = rx.0.recv().await.unwrap();
                 yield Ok(result)
             }
         };
 
-        let conn = context.dbpool.get().unwrap();
+        let conn = DB_POOL.get().unwrap();
         if let Ok(user) = get_user_basic(&conn, context.user_id) {
             notify_ids(
                 get_friend_ids(&conn, context.user_id),
@@ -321,7 +322,6 @@ impl Subscription {
 }
 
 pub struct Context {
-    pub dbpool: Pool,
     pub user_id: i32,
 }
 
@@ -334,7 +334,6 @@ pub fn create_schema() -> Schema {
 }
 
 pub struct GuestContext {
-    pub dbpool: Pool,
     pub secret: String,
 }
 
@@ -354,12 +353,12 @@ impl juniper::Context for GuestContext {}
 #[juniper::graphql_object(Context = GuestContext)]
 impl GuestMutationRoot {
     fn register(context: &GuestContext, input: ScLoginReq) -> FieldResult<ScLoginResp> {
-        let conn = context.dbpool.get().unwrap();
+        let conn = DB_POOL.get().unwrap();
         register(&conn, input, &context.secret)
     }
 
     fn login(context: &GuestContext, input: ScLoginReq) -> FieldResult<ScLoginResp> {
-        let conn = context.dbpool.get().unwrap();
+        let conn = DB_POOL.get().unwrap();
         let resp = login(&conn, input, &context.secret)?;
         notify(
             resp.user.id,

@@ -154,5 +154,5 @@ addEventListener(
 if (COMMAND === 'build') {
   navigator.serviceWorker?.register('/sw.js', { type: 'module' });
 } else {
-  navigator.serviceWorker.getRegistration().then((reg) => reg?.unregister());
+  navigator.serviceWorker?.getRegistration().then((reg) => reg?.unregister());
 }

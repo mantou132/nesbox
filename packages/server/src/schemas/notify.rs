@@ -1,4 +1,4 @@
-use crate::db::root::Pool;
+use crate::db::root::DB_POOL;
 
 use super::{
     friend::get_friend_ids, friend::ScFriend, game::ScGame, invite::ScInvite, message::ScMessage,
@@ -63,46 +63,53 @@ pub fn notify_all(msg: ScNotifyMessage) {
     }
 }
 
-pub fn get_receiver(user_id: i32) -> Receiver<ScNotifyMessage> {
-    NOTIFY_MAP
-        .write()
-        .unwrap()
-        .entry(user_id)
-        .or_insert_with(|| {
-            log::debug!("{} is online", user_id);
-            broadcast::channel(5).0
-        })
-        .subscribe()
-}
-
 pub fn has_user(user_id: i32) -> bool {
     let map = NOTIFY_MAP.read().unwrap();
     map.contains_key(&user_id)
 }
 
-pub fn check_user(pool: &Pool) {
-    let mut ids = Vec::new();
+pub struct NoyifyReceiver(pub Receiver<ScNotifyMessage>, pub i32);
 
-    // Temporary value release write lock
-    NOTIFY_MAP.write().unwrap().retain(|user_id, tx| {
-        let is_ok = tx.receiver_count() > 0;
-        if !is_ok {
+pub fn get_receiver(user_id: i32) -> NoyifyReceiver {
+    NoyifyReceiver(
+        NOTIFY_MAP
+            .write()
+            .unwrap()
+            .entry(user_id)
+            .or_insert_with(|| {
+                log::debug!("{} is online", user_id);
+                broadcast::channel(5).0
+            })
+            .subscribe(),
+        user_id,
+    )
+}
+
+impl Drop for NoyifyReceiver {
+    fn drop(&mut self) {
+        let user_id = NOTIFY_MAP.read().unwrap().get(&self.1).and_then(|tx| {
+            if tx.receiver_count() <= 1 {
+                Some(self.1)
+            } else {
+                None
+            }
+        });
+
+        if let Some(user_id) = user_id {
             log::debug!("{} is offline", user_id);
-            ids.push(*user_id);
-        }
-        is_ok
-    });
+            // Temporary value release write lock
+            NOTIFY_MAP.write().unwrap().remove(&user_id);
 
-    let conn = pool.get().unwrap();
-    for id in ids {
-        if let Ok(user) = get_user_basic(&conn, id) {
-            notify_ids(
-                get_friend_ids(&conn, id),
-                ScNotifyMessageBuilder::default()
-                    .update_user(user)
-                    .build()
-                    .unwrap(),
-            );
+            let conn = DB_POOL.get().unwrap();
+            if let Ok(user) = get_user_basic(&conn, user_id) {
+                notify_ids(
+                    get_friend_ids(&conn, user_id),
+                    ScNotifyMessageBuilder::default()
+                        .update_user(user)
+                        .build()
+                        .unwrap(),
+                );
+            }
         }
     }
 }

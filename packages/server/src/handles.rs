@@ -21,7 +21,6 @@ use crate::{
 pub async fn subscriptions(
     req: HttpRequest,
     schema: web::Data<Schema>,
-    pool: web::Data<Pool>,
     secret: web::Data<String>,
     stream: web::Payload,
 ) -> Result<HttpResponse, Error> {
@@ -40,10 +39,7 @@ pub async fn subscriptions(
             Some(id) => id,
             None => return Err(error::ErrorUnauthorized("Unauthorized")),
         };
-        let ctx = Context {
-            user_id,
-            dbpool: pool.get_ref().to_owned(),
-        };
+        let ctx = Context { user_id };
         let config = ConnectionConfig::new(ctx).with_keep_alive_interval(Duration::from_secs(15));
         Ok(config) as Result<ConnectionConfig<Context>, Error>
     })
@@ -53,7 +49,6 @@ pub async fn subscriptions(
 pub async fn graphql(
     req: HttpRequest,
     schema: web::Data<Schema>,
-    pool: web::Data<Pool>,
     secret: web::Data<String>,
     data: web::Json<GraphQLRequest>,
 ) -> impl Responder {
@@ -61,10 +56,7 @@ pub async fn graphql(
         Some(id) => id,
         None => return HttpResponse::Unauthorized().finish(),
     };
-    let ctx = Context {
-        user_id,
-        dbpool: pool.get_ref().to_owned(),
-    };
+    let ctx = Context { user_id };
     let res = data.execute(&schema, &ctx).await;
     if res.is_ok() {
         HttpResponse::Ok().json(res)
@@ -73,24 +65,19 @@ pub async fn graphql(
     }
 }
 
-pub async fn graphqlschema(schema: web::Data<Schema>, pool: web::Data<Pool>) -> impl Responder {
-    let ctx = Context {
-        user_id: 0,
-        dbpool: pool.get_ref().to_owned(),
-    };
+pub async fn graphqlschema(schema: web::Data<Schema>) -> impl Responder {
+    let ctx = Context { user_id: 0 };
     let result = introspect(&schema, &ctx, IntrospectionFormat::default());
     HttpResponse::Ok().json(GraphQLResponse::from_result(result))
 }
 
 pub async fn guestgraphql(
     schema: web::Data<GuestSchema>,
-    pool: web::Data<Pool>,
     secret: web::Data<String>,
     data: web::Json<GraphQLRequest>,
 ) -> impl Responder {
     let ctx = GuestContext {
         secret: secret.to_string(),
-        dbpool: pool.get_ref().to_owned(),
     };
     let res = data.execute(&schema, &ctx).await;
     if res.is_ok() {
@@ -100,13 +87,9 @@ pub async fn guestgraphql(
     }
 }
 
-pub async fn guestgraphqlschema(
-    schema: web::Data<GuestSchema>,
-    pool: web::Data<Pool>,
-) -> impl Responder {
+pub async fn guestgraphqlschema(schema: web::Data<GuestSchema>) -> impl Responder {
     let ctx = GuestContext {
         secret: String::new(),
-        dbpool: pool.get_ref().to_owned(),
     };
     let result = introspect(&schema, &ctx, IntrospectionFormat::default());
     HttpResponse::Ok().json(GraphQLResponse::from_result(result))

@@ -11,3 +11,7 @@ pub fn get_db_pool() -> Pool {
         .build(manager)
         .expect("could not build connection pool")
 }
+
+lazy_static! {
+    pub static ref DB_POOL: Pool = get_db_pool();
+}

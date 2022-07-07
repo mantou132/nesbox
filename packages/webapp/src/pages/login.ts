@@ -156,7 +156,6 @@ export class PLoginElement extends GemElement<State> {
   render = () => {
     const { username, password } = this.state;
     return html`
-      <m-guest></m-guest>
       <div class="bg-copyright">
         <nesbox-tooltip .content=${i18n.get('bgCopyright')}>
           <dy-link @click=${() => open('https://dribbble.com/shots/10244007-Old-tech-devices-2')}>
@@ -195,6 +194,7 @@ export class PLoginElement extends GemElement<State> {
           </dy-action-text>
         </div>
       </div>
+      <m-guest></m-guest>
     `;
   };
 }
