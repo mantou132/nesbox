@@ -1,5 +1,7 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, styleMap } from '@mantou/gem';
 import { isMac } from 'duoyun-ui/lib/hotkeys';
+import { mediaQuery } from '@mantou/gem/helper/mediaquery';
+import { Toast } from 'duoyun-ui/elements/toast';
 
 import { getCorsSrc, open } from 'src/utils';
 
@@ -21,6 +23,7 @@ const style = createCSSSheet(css`
     margin: auto;
     display: flex;
     align-items: center;
+    justify-content: center;
     width: min(80vw, 90em);
     gap: 1em;
   }
@@ -34,6 +37,16 @@ const style = createCSSSheet(css`
   main img {
     width: 100%;
   }
+  @media ${mediaQuery.PHONE} {
+    main {
+      margin: 0;
+      width: 100%;
+      flex-direction: column-reverse;
+    }
+    .content {
+      width: 80%;
+    }
+  }
 `);
 
 /**
@@ -43,6 +56,10 @@ const style = createCSSSheet(css`
 @adoptedStyle(style)
 export class PDownloadElement extends GemElement {
   #download = async () => {
+    if (mediaQuery.isPhone) {
+      Toast.open('warning', '暂不支持移动端');
+      return;
+    }
     try {
       const latest = await (
         await fetch(
