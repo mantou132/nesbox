@@ -147,7 +147,7 @@ export class RTC extends EventTarget {
   #getButton = (userId: number, button: Button) => {
     if (userId === configure.user!.id) return button;
     const index = this.#roles.findIndex((role) => role?.userId === userId);
-    return buttonMap[button][index];
+    return buttonMap[button]?.[index];
   };
 
   #setRoles = (userId: number, msg: RoleOffer) => {

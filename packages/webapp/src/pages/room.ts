@@ -165,7 +165,7 @@ export class PRoomElement extends GemElement<State> {
 
     stream.addTrack(this.#ctx!.canvas.captureStream(60).getVideoTracks()[0]);
 
-    this.#audioContext = new AudioContext({ sampleRate: 48000 });
+    this.#audioContext = new AudioContext({ sampleRate: this.#sampleRate });
     this.#streamDestination = this.#audioContext.createMediaStreamDestination();
     this.#gainNode = this.#audioContext.createGain();
     this.#gainNode.gain.value = this.#settings?.volume.game || 1;
@@ -174,6 +174,8 @@ export class PRoomElement extends GemElement<State> {
     return stream;
   };
 
+  #sampleRate = 44100;
+  #bufferSize = 735;
   #nextStartTime = 0;
   #loop = () => {
     if (this.isConnected) {
@@ -181,17 +183,18 @@ export class PRoomElement extends GemElement<State> {
     }
 
     if (!this.#nes || !this.#imageData || !this.#isVisible) return;
-    this.#nes.clock_seconds(1 / 60);
+    this.#nes.clock_frame();
 
     const memory = Nes.memory();
 
-    const framePtr = this.#nes.frame();
+    const qoiEnable = !!this.#rtc?.needSendFrame();
+    const framePtr = this.#nes.frame(qoiEnable);
     const frameLen = this.#nes.frame_len();
     const frame = new Uint8Array(memory.buffer, framePtr, frameLen);
     new Uint8Array(this.#imageData.data.buffer).set(frame);
     this.#ctx!.putImageData(this.#imageData, 0, 0);
 
-    if (this.#rtc?.needSendFrame()) {
+    if (qoiEnable) {
       const qoiFramePtr = this.#nes.qoi_frame();
       const qoiFrameLen = this.#nes.qoi_frame_len();
       const qoiFrame = new Uint8Array(memory.buffer, qoiFramePtr, qoiFrameLen);
@@ -199,24 +202,22 @@ export class PRoomElement extends GemElement<State> {
     }
 
     if (!this.#nes.sound() || !this.#audioContext || !this.#streamDestination || !this.#gainNode) return;
-    const bufferSize = this.#nes.buffer_capacity();
-    const sampleRate = this.#nes.sample_rate();
-    const samplesPtr = this.#nes.samples();
-    const audioBuffer = this.#audioContext.createBuffer(1, bufferSize, sampleRate);
-    audioBuffer.getChannelData(0).set(new Float32Array(memory.buffer, samplesPtr, bufferSize));
+    const audioBuffer = this.#audioContext.createBuffer(1, this.#bufferSize, this.#sampleRate);
+    this.#nes.audio_callback(audioBuffer.getChannelData(0));
     const node = this.#audioContext.createBufferSource();
     node.connect(this.#gainNode);
     node.connect(this.#streamDestination);
     node.buffer = audioBuffer;
     const start = Math.max(this.#nextStartTime, this.#audioContext.currentTime);
     node.start(start);
-    this.#nextStartTime = start + bufferSize / sampleRate;
+    this.#nextStartTime = start + this.#bufferSize / this.#sampleRate;
   };
 
   #romBuffer?: ArrayBuffer;
   #initNes = async () => {
     await init();
-    this.#nes = Nes.new();
+    this.#nes = Nes.new(this.#sampleRate);
+    this.#setVideoFilter();
     this.#imageData = this.#ctx!.createImageData(this.#ctx!.canvas.width, this.#ctx!.canvas.height);
 
     if (!this.#isHost) return;
@@ -304,7 +305,7 @@ export class PRoomElement extends GemElement<State> {
 
   #pressButton = (button: Button) => {
     if (button === Button.Reset) {
-      this.#nes?.power_cycle();
+      this.#nes?.reset();
     } else {
       this.#enableAudio();
     }
@@ -493,6 +494,10 @@ export class PRoomElement extends GemElement<State> {
     }
   };
 
+  #setVideoFilter = () => {
+    this.#settings && this.#nes?.set_filter(this.#settings.video.filter);
+  };
+
   mounted = () => {
     if (this.#isHost) {
       requestAnimationFrame(this.#loop);
@@ -534,10 +539,7 @@ export class PRoomElement extends GemElement<State> {
       () => [this.#playing?.id, this.#rom],
     );
 
-    this.effect(
-      () => this.#settings && this.#nes?.set_filter(this.#settings.video.filter),
-      () => [this.#nes, this.#settings],
-    );
+    this.effect(this.#setVideoFilter, () => [this.#nes, this.#settings?.video]);
 
     this.addEventListener('contextmenu', this.#onContextMenu);
 

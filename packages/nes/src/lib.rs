@@ -2,8 +2,8 @@
 
 use qoi::{decode_to_vec, encode_to_vec};
 use tetanes::{
-    audio::{Audio, NesAudioCallback},
-    common::{NesRegion, Powered},
+    audio::{AudioMixer, NesAudioCallback},
+    common::{Kind, Reset},
     control_deck::ControlDeck,
     input::GamepadSlot,
     memory::RamState,
@@ -70,8 +70,7 @@ pub enum Button {
 #[wasm_bindgen]
 pub struct Nes {
     control_deck: ControlDeck,
-    audio: Audio,
-    buffer: Vec<f32>,
+    audio: AudioMixer,
     callback: NesAudioCallback,
     sound: bool,
     qoi_buffer: Vec<u8>,
@@ -84,17 +83,15 @@ impl Nes {
         wasm_bindgen::memory()
     }
 
-    pub fn new() -> Self {
-        let mut control_deck = ControlDeck::new(NesRegion::Ntsc, RamState::default());
+    pub fn new(output_sample_rate: f32) -> Self {
+        let mut control_deck = ControlDeck::new(RamState::default());
         control_deck.set_filter(VideoFilter::Pixellate);
         control_deck.set_fourscore(true);
-        let mut audio = Audio::new(control_deck.apu().sample_rate(), 48000.0, 4096);
-        let buffer = vec![0.0; 800];
+        let mut audio = AudioMixer::new(control_deck.sample_rate(), output_sample_rate, 4096);
         let callback = audio.open_callback().expect("valid callback");
         Self {
             control_deck,
             audio,
-            buffer,
             callback,
             sound: false,
             qoi_buffer: Vec::new(),
@@ -117,12 +114,16 @@ impl Nes {
         self.sound = enabled;
     }
 
-    pub fn power_cycle(&mut self) {
-        self.control_deck.power_cycle();
+    pub fn reset(&mut self) {
+        self.control_deck.reset(Kind::Hard);
     }
 
-    pub fn frame(&mut self) -> *const u8 {
-        self.control_deck.frame_buffer().as_ptr()
+    pub fn frame(&mut self, qoi: bool) -> *const u8 {
+        let buffer = self.control_deck.frame_buffer();
+        if qoi {
+            self.qoi_buffer = encode_to_vec(buffer, RENDER_WIDTH, RENDER_HEIGHT).unwrap();
+        }
+        buffer.as_ptr()
     }
 
     pub fn frame_len(&self) -> usize {
@@ -130,12 +131,6 @@ impl Nes {
     }
 
     pub fn qoi_frame(&mut self) -> *const u8 {
-        self.qoi_buffer = encode_to_vec(
-            &self.control_deck.ppu().frame.output_buffer,
-            RENDER_WIDTH,
-            RENDER_HEIGHT,
-        )
-        .unwrap();
         self.qoi_buffer.as_ptr()
     }
 
@@ -152,26 +147,15 @@ impl Nes {
         self.qoi_decode_buffer.len()
     }
 
-    pub fn samples(&mut self) -> *const f32 {
-        self.callback.read(&mut self.buffer);
-        self.buffer.as_ptr()
+    pub fn audio_callback(&mut self, out: &mut [f32]) {
+        self.callback.read(out);
     }
 
-    pub fn sample_rate(&self) -> f32 {
-        self.audio.output_frequency()
-    }
-
-    pub fn buffer_capacity(&self) -> usize {
-        self.buffer.capacity()
-    }
-
-    pub fn clock_seconds(&mut self, seconds: f32) {
-        self.control_deck
-            .clock_seconds(seconds)
-            .expect("valid clock");
+    pub fn clock_frame(&mut self) {
+        self.control_deck.clock_frame().expect("valid clock");
         if self.sound {
             let samples = self.control_deck.audio_samples();
-            self.audio.output(samples, true, 0.02);
+            self.audio.consume(samples, true, 0.02);
         }
         self.control_deck.clear_audio_samples();
     }

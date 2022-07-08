@@ -95,7 +95,7 @@ export class PEmulatorElement extends GemElement {
       return;
     }
     if (button === Button.Reset) {
-      this.#nes?.power_cycle();
+      this.#nes?.reset();
     } else {
       this.#enableAudio();
     }
@@ -108,6 +108,8 @@ export class PEmulatorElement extends GemElement {
     this.#nes?.handle_event(button, false, event.repeat);
   };
 
+  #sampleRate = 44100;
+  #bufferSize = 735;
   #nextStartTime = 0;
   #loop = () => {
     if (this.isConnected) {
@@ -115,27 +117,24 @@ export class PEmulatorElement extends GemElement {
     }
 
     if (!this.#nes || !this.#imageData || !this.#isVisible) return;
-    this.#nes.clock_seconds(1 / 60);
+    this.#nes.clock_frame();
 
     const memory = Nes.memory();
 
+    const framePtr = this.#nes.frame(false);
     const frameLen = this.#nes.frame_len();
-    const framePtr = this.#nes.frame();
     new Uint8Array(this.#imageData.data.buffer).set(new Uint8Array(memory.buffer, framePtr, frameLen));
     this.canvasRef.element!.getContext('2d')!.putImageData(this.#imageData, 0, 0);
 
     if (!this.#nes.sound() || !this.#audioContext) return;
-    const bufferSize = this.#nes.buffer_capacity();
-    const sampleRate = this.#nes.sample_rate();
-    const samplesPtr = this.#nes.samples();
-    const audioBuffer = this.#audioContext.createBuffer(1, bufferSize, sampleRate);
-    audioBuffer.getChannelData(0).set(new Float32Array(memory.buffer, samplesPtr, bufferSize));
+    const audioBuffer = this.#audioContext.createBuffer(1, this.#bufferSize, this.#sampleRate);
+    this.#nes.audio_callback(audioBuffer.getChannelData(0));
     const node = this.#audioContext.createBufferSource();
     node.connect(this.#audioContext.destination);
     node.buffer = audioBuffer;
-    const start = Math.max(this.#nextStartTime || 0, this.#audioContext.currentTime + bufferSize / sampleRate);
+    const start = Math.max(this.#nextStartTime, this.#audioContext.currentTime);
     node.start(start);
-    this.#nextStartTime = start + bufferSize / sampleRate;
+    this.#nextStartTime = start + this.#bufferSize / this.#sampleRate;
   };
 
   #initNes = async () => {
@@ -147,12 +146,12 @@ export class PEmulatorElement extends GemElement {
     const buffer = await configure.openNesFile.arrayBuffer();
 
     await init();
-    this.#nes = Nes.new();
+    this.#nes = Nes.new(this.#sampleRate);
     this.#nes.load_rom(new Uint8Array(buffer));
   };
 
   mounted = async () => {
-    this.#audioContext = new AudioContext({ sampleRate: 48000 });
+    this.#audioContext = new AudioContext({ sampleRate: this.#sampleRate });
     requestAnimationFrame(this.#loop);
     this.effect(this.#initNes, () => [configure.openNesFile]);
     addEventListener('keydown', this.#onKeyDown);
