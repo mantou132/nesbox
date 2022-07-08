@@ -160,6 +160,10 @@ export class PRoomElement extends GemElement<State> {
     }
   };
 
+  #disableAudio = () => {
+    this.#nes?.set_sound(false);
+  };
+
   #createStream = () => {
     const stream = new MediaStream();
 
@@ -175,7 +179,7 @@ export class PRoomElement extends GemElement<State> {
   };
 
   #sampleRate = 44100;
-  #bufferSize = 735;
+  #bufferSize = this.#sampleRate / 60;
   #nextStartTime = 0;
   #loop = () => {
     if (this.isConnected) {
@@ -201,14 +205,14 @@ export class PRoomElement extends GemElement<State> {
       this.#rtc?.sendFrame(qoiFrame);
     }
 
-    if (!this.#nes.sound() || !this.#audioContext || !this.#streamDestination || !this.#gainNode) return;
+    if (!this.#audioContext || !this.#streamDestination || !this.#gainNode) return;
     const audioBuffer = this.#audioContext.createBuffer(1, this.#bufferSize, this.#sampleRate);
     this.#nes.audio_callback(audioBuffer.getChannelData(0));
     const node = this.#audioContext.createBufferSource();
     node.connect(this.#gainNode);
     node.connect(this.#streamDestination);
     node.buffer = audioBuffer;
-    const start = Math.max(this.#nextStartTime, this.#audioContext.currentTime);
+    const start = Math.max(this.#nextStartTime, this.#audioContext.currentTime + 0.032);
     node.start(start);
     this.#nextStartTime = start + this.#bufferSize / this.#sampleRate;
   };
@@ -228,6 +232,7 @@ export class PRoomElement extends GemElement<State> {
       .find((e) => e.name.toLowerCase().endsWith('.nes'))!
       .async('arraybuffer');
     this.#nes.load_rom(new Uint8Array(this.#romBuffer));
+    this.#nextStartTime = 0;
   };
 
   #onMessage = ({ detail }: CustomEvent<ChannelMessage | ArrayBuffer>) => {
@@ -410,7 +415,7 @@ export class PRoomElement extends GemElement<State> {
   #save = async () => {
     if (!this.#isHost || !this.#romBuffer || !this.#ctx) return;
     const { buffer } = Nes.memory();
-    const cache = await caches.open('state_v1');
+    const cache = await caches.open('state_v2');
     const key = await hash(this.#romBuffer);
     const thumbnail = this.#ctx.canvas.toDataURL('image/png', 0.5);
     await cache.put(
@@ -423,7 +428,7 @@ export class PRoomElement extends GemElement<State> {
   #load = async () => {
     if (!this.#isHost || !this.#romBuffer) return;
     const { buffer } = Nes.memory();
-    const cache = await caches.open('state_v1');
+    const cache = await caches.open('state_v2');
     const key = await hash(this.#romBuffer);
     const reqs = await cache.keys(`/${key}`, { ignoreSearch: true });
     if (reqs.length === 0) {
@@ -547,6 +552,8 @@ export class PRoomElement extends GemElement<State> {
     addEventListener('keyup', this.#onKeyUp);
     addEventListener(events.PRESS_BUTTON, this.#onPressButton);
     addEventListener(events.RELEASE_BUTTON, this.#onReleaseButton);
+    addEventListener('focus', this.#enableAudio);
+    addEventListener('blur', this.#disableAudio);
     return () => {
       this.#audioContext?.close();
       this.#rtc?.destroy();
@@ -554,6 +561,8 @@ export class PRoomElement extends GemElement<State> {
       removeEventListener('keyup', this.#onKeyUp);
       removeEventListener(events.PRESS_BUTTON, this.#onPressButton);
       removeEventListener(events.RELEASE_BUTTON, this.#onReleaseButton);
+      removeEventListener('focus', this.#enableAudio);
+      removeEventListener('blur', this.#disableAudio);
     };
   };
 

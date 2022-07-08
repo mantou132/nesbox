@@ -61,6 +61,10 @@ export class PEmulatorElement extends GemElement {
     this.#nes?.set_sound(true);
   };
 
+  #disableAudio = () => {
+    this.#nes?.set_sound(false);
+  };
+
   #getButton = (event: KeyboardEvent) => {
     const map: Record<string, Button> = {
       [defaultKeybinding.Up]: Button.Joypad1Up,
@@ -109,7 +113,7 @@ export class PEmulatorElement extends GemElement {
   };
 
   #sampleRate = 44100;
-  #bufferSize = 735;
+  #bufferSize = this.#sampleRate / 60;
   #nextStartTime = 0;
   #loop = () => {
     if (this.isConnected) {
@@ -132,7 +136,7 @@ export class PEmulatorElement extends GemElement {
     const node = this.#audioContext.createBufferSource();
     node.connect(this.#audioContext.destination);
     node.buffer = audioBuffer;
-    const start = Math.max(this.#nextStartTime, this.#audioContext.currentTime);
+    const start = Math.max(this.#nextStartTime, this.#audioContext.currentTime + 0.032);
     node.start(start);
     this.#nextStartTime = start + this.#bufferSize / this.#sampleRate;
   };
@@ -148,20 +152,24 @@ export class PEmulatorElement extends GemElement {
     await init();
     this.#nes = Nes.new(this.#sampleRate);
     this.#nes.load_rom(new Uint8Array(buffer));
+    this.#nextStartTime = 0;
   };
 
-  mounted = async () => {
+  mounted = () => {
     this.#audioContext = new AudioContext({ sampleRate: this.#sampleRate });
     requestAnimationFrame(this.#loop);
     this.effect(this.#initNes, () => [configure.openNesFile]);
     addEventListener('keydown', this.#onKeyDown);
     addEventListener('keyup', this.#onKeyUp);
-  };
-
-  unmounted = () => {
-    this.#audioContext?.close();
-    removeEventListener('keydown', this.#onKeyDown);
-    removeEventListener('keyup', this.#onKeyUp);
+    addEventListener('focus', this.#enableAudio);
+    addEventListener('blur', this.#disableAudio);
+    return () => {
+      this.#audioContext?.close();
+      removeEventListener('keydown', this.#onKeyDown);
+      removeEventListener('keyup', this.#onKeyUp);
+      removeEventListener('focus', this.#enableAudio);
+      removeEventListener('blur', this.#disableAudio);
+    };
   };
 
   render = () => {
