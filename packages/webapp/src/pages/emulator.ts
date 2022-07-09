@@ -14,9 +14,11 @@ import init, { Button, Nes } from '@mantou/nes';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { Modal } from 'duoyun-ui/elements/modal';
 
+import type { NesboxRenderElement } from 'src/elements/render';
 import { configure, defaultKeybinding } from 'src/configure';
 
 import 'duoyun-ui/elements/heading';
+import 'src/elements/render';
 
 const style = createCSSSheet(css`
   .canvas {
@@ -47,14 +49,13 @@ const style = createCSSSheet(css`
 @adoptedStyle(style)
 @connectStore(configure)
 export class PEmulatorElement extends GemElement {
-  @refobject canvasRef: RefObject<HTMLCanvasElement>;
+  @refobject canvasRef: RefObject<NesboxRenderElement>;
 
   get #isVisible() {
     return document.visibilityState === 'visible';
   }
 
   #nes?: Nes;
-  #imageData?: ImageData;
   #audioContext?: AudioContext;
 
   #enableAudio = () => {
@@ -116,19 +117,16 @@ export class PEmulatorElement extends GemElement {
   #bufferSize = this.#sampleRate / 60;
   #nextStartTime = 0;
   #loop = () => {
-    if (this.isConnected) {
-      requestAnimationFrame(this.#loop);
-    }
+    if (this.isConnected) requestAnimationFrame(this.#loop);
 
-    if (!this.#nes || !this.#imageData || !this.#isVisible) return;
+    if (!this.#nes || !this.#isVisible) return;
     this.#nes.clock_frame();
 
     const memory = Nes.memory();
 
     const framePtr = this.#nes.frame(false);
     const frameLen = this.#nes.frame_len();
-    new Uint8Array(this.#imageData.data.buffer).set(new Uint8Array(memory.buffer, framePtr, frameLen));
-    this.canvasRef.element!.getContext('2d')!.putImageData(this.#imageData, 0, 0);
+    this.canvasRef.element!.paint(new Uint8Array(memory.buffer, framePtr, frameLen));
 
     if (!this.#nes.sound() || !this.#audioContext) return;
     const audioBuffer = this.#audioContext.createBuffer(1, this.#bufferSize, this.#sampleRate);
@@ -143,14 +141,10 @@ export class PEmulatorElement extends GemElement {
 
   #initNes = async () => {
     if (!configure.openNesFile) return;
-
-    const ctx = this.canvasRef.element!.getContext('2d')!;
-    this.#imageData = ctx.createImageData(ctx.canvas.width, ctx.canvas.height);
-
-    const buffer = await configure.openNesFile.arrayBuffer();
-
     await init();
     this.#nes = Nes.new(this.#sampleRate);
+
+    const buffer = await configure.openNesFile.arrayBuffer();
     this.#nes.load_rom(new Uint8Array(buffer));
     this.#nextStartTime = 0;
   };
@@ -174,7 +168,7 @@ export class PEmulatorElement extends GemElement {
 
   render = () => {
     return html`
-      <canvas class="canvas" width="256" height="240" ref=${this.canvasRef.ref}></canvas>
+      <nesbox-render class="canvas" ref=${this.canvasRef.ref}></nesbox-render>
       <div class="nodata" ?hidden=${!!configure.openNesFile}>
         <dy-heading lv="1">${locale.noData}</dy-heading>
       </div>

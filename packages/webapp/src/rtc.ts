@@ -114,7 +114,7 @@ export class RTC extends EventTarget {
   #roles: Role[] = [, { userId: configure.user!.id, username: configure.user!.nickname }];
 
   #stream: MediaStream;
-  #video: HTMLVideoElement;
+  #audio: HTMLAudioElement;
 
   #emitMessage = (detail: ChannelMessage | ArrayBuffer) => {
     this.dispatchEvent(new CustomEvent('message', { detail }));
@@ -300,10 +300,10 @@ export class RTC extends EventTarget {
     });
 
     conn.addEventListener('track', ({ streams }) => {
-      this.#video.srcObject = streams[0];
-      if (this.#video.paused) {
-        this.#video.muted = true;
-        this.#video.play().catch(() => {
+      this.#audio.srcObject = streams[0];
+      if (this.#audio.paused) {
+        this.#audio.muted = true;
+        this.#audio.play().catch(() => {
           //
         });
       }
@@ -322,12 +322,12 @@ export class RTC extends EventTarget {
     this.destroy();
     // logout / leave
     if (configure.user?.playing) {
-      this.start({ host: this.#host, stream: this.#stream, video: this.#video });
+      this.start({ host: this.#host, stream: this.#stream, audio: this.#audio });
     }
   };
 
-  start = async ({ host, stream, video }: { host: number; stream: MediaStream; video: HTMLVideoElement }) => {
-    this.#video = video;
+  start = async ({ host, stream, audio }: { host: number; stream: MediaStream; audio: HTMLAudioElement }) => {
+    this.#audio = audio;
     this.#stream = stream;
     this.#host = host;
     this.#isHost = host === configure.user!.id;

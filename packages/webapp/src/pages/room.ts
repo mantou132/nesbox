@@ -10,7 +10,6 @@ import {
   refobject,
   RefObject,
   QueryString,
-  styleMap,
 } from '@mantou/gem';
 import { createPath } from 'duoyun-ui/elements/route';
 import JSZip from 'jszip';
@@ -45,12 +44,14 @@ import type { MRoomChatElement } from 'src/modules/room-chat';
 import { getCorsSrc, preventDefault } from 'src/utils';
 import { events, queryKeys } from 'src/constants';
 import { createInvite } from 'src/services/api';
-import { theme } from 'src/theme';
+import type { NesboxRenderElement } from 'src/elements/render';
 
 import 'src/modules/room-player-list';
 import 'src/modules/room-chat';
 import 'src/modules/nav';
 import 'src/elements/fps';
+import 'src/elements/render';
+import 'src/elements/list';
 
 const style = createCSSSheet(css`
   :host {
@@ -112,8 +113,8 @@ type State = {
 @adoptedStyle(style)
 @connectStore(i18n.store)
 export class PRoomElement extends GemElement<State> {
-  @refobject canvasRef: RefObject<HTMLCanvasElement>;
-  @refobject videoRef: RefObject<HTMLVideoElement>;
+  @refobject canvasRef: RefObject<NesboxRenderElement>;
+  @refobject audioRef: RefObject<HTMLAudioElement>;
   @refobject chatRef: RefObject<MRoomChatElement>;
 
   state: State = {
@@ -141,40 +142,46 @@ export class PRoomElement extends GemElement<State> {
     return document.visibilityState === 'visible';
   }
 
-  get #ctx() {
-    return this.canvasRef.element?.getContext('2d');
-  }
-
   #nes?: Nes;
-  #imageData?: ImageData;
   #audioContext?: AudioContext;
-  #streamDestination?: MediaStreamAudioDestinationNode;
+  #audioStreamDestination?: MediaStreamAudioDestinationNode;
   #gainNode?: GainNode;
   #rtc?: RTC;
 
   #enableAudio = () => {
     if (this.#isHost) {
       this.#nes?.set_sound(true);
+      this.#setVolume();
     } else {
-      this.videoRef.element!.muted = false;
+      this.audioRef.element!.muted = false;
     }
   };
 
   #disableAudio = () => {
-    this.#nes?.set_sound(false);
+    if (this.#isHost) {
+      this.#setVolume(0);
+    } else {
+      this.audioRef.element!.muted = true;
+    }
+  };
+
+  #setVolume = (volume = this.#settings?.volume.game || 1) => {
+    if (this.#gainNode) {
+      this.#gainNode.gain.value = volume;
+    }
   };
 
   #createStream = () => {
     const stream = new MediaStream();
 
-    stream.addTrack(this.#ctx!.canvas.captureStream(60).getVideoTracks()[0]);
+    stream.addTrack(this.canvasRef.element!.captureStream());
 
     this.#audioContext = new AudioContext({ sampleRate: this.#sampleRate });
-    this.#streamDestination = this.#audioContext.createMediaStreamDestination();
+    this.#audioStreamDestination = this.#audioContext.createMediaStreamDestination();
     this.#gainNode = this.#audioContext.createGain();
     this.#gainNode.gain.value = this.#settings?.volume.game || 1;
     this.#gainNode.connect(this.#audioContext.destination);
-    stream.addTrack(this.#streamDestination.stream.getAudioTracks()[0]);
+    stream.addTrack(this.#audioStreamDestination.stream.getAudioTracks()[0]);
     return stream;
   };
 
@@ -182,35 +189,27 @@ export class PRoomElement extends GemElement<State> {
   #bufferSize = this.#sampleRate / 60;
   #nextStartTime = 0;
   #loop = () => {
-    if (this.isConnected) {
-      requestAnimationFrame(this.#loop);
-    }
+    if (this.isConnected) requestAnimationFrame(this.#loop);
 
-    if (!this.#nes || !this.#imageData || !this.#isVisible) return;
+    if (!this.#nes || !this.#isVisible) return;
     this.#nes.clock_frame();
 
     const memory = Nes.memory();
 
-    const qoiEnable = !!this.#rtc?.needSendFrame();
-    const framePtr = this.#nes.frame(qoiEnable);
+    const framePtr = this.#nes.frame(!!this.#rtc?.needSendFrame());
     const frameLen = this.#nes.frame_len();
-    const frame = new Uint8Array(memory.buffer, framePtr, frameLen);
-    new Uint8Array(this.#imageData.data.buffer).set(frame);
-    this.#ctx!.putImageData(this.#imageData, 0, 0);
+    this.canvasRef.element!.paint(new Uint8Array(memory.buffer, framePtr, frameLen));
 
-    if (qoiEnable) {
-      const qoiFramePtr = this.#nes.qoi_frame();
-      const qoiFrameLen = this.#nes.qoi_frame_len();
-      const qoiFrame = new Uint8Array(memory.buffer, qoiFramePtr, qoiFrameLen);
-      this.#rtc?.sendFrame(qoiFrame);
-    }
+    const qoiFramePtr = this.#nes.qoi_frame();
+    const qoiFrameLen = this.#nes.qoi_frame_len();
+    this.#rtc?.sendFrame(new Uint8Array(memory.buffer, qoiFramePtr, qoiFrameLen));
 
-    if (!this.#audioContext || !this.#streamDestination || !this.#gainNode) return;
+    if (!this.#nes.sound() || !this.#audioContext || !this.#audioStreamDestination || !this.#gainNode) return;
     const audioBuffer = this.#audioContext.createBuffer(1, this.#bufferSize, this.#sampleRate);
     this.#nes.audio_callback(audioBuffer.getChannelData(0));
     const node = this.#audioContext.createBufferSource();
     node.connect(this.#gainNode);
-    node.connect(this.#streamDestination);
+    node.connect(this.#audioStreamDestination);
     node.buffer = audioBuffer;
     const start = Math.max(this.#nextStartTime, this.#audioContext.currentTime + 0.032);
     node.start(start);
@@ -222,7 +221,6 @@ export class PRoomElement extends GemElement<State> {
     await init();
     this.#nes = Nes.new(this.#sampleRate);
     this.#setVideoFilter();
-    this.#imageData = this.#ctx!.createImageData(this.#ctx!.canvas.width, this.#ctx!.canvas.height);
 
     if (!this.#isHost) return;
 
@@ -237,13 +235,11 @@ export class PRoomElement extends GemElement<State> {
 
   #onMessage = ({ detail }: CustomEvent<ChannelMessage | ArrayBuffer>) => {
     if (detail instanceof ArrayBuffer) {
-      if (this.#imageData && this.#nes) {
+      if (this.#nes) {
         const memory = Nes.memory();
         const framePtr = this.#nes.decode_qoi(new Uint8Array(detail));
         const frameLen = this.#nes.decode_qoi_len();
-        const frame = new Uint8Array(memory.buffer, framePtr, frameLen);
-        new Uint8Array(this.#imageData.data.buffer).set(new Uint8Array(frame));
-        this.#ctx!.putImageData(this.#imageData, 0, 0);
+        this.canvasRef.element!.paint(new Uint8Array(memory.buffer, framePtr, frameLen));
       }
       return;
     }
@@ -274,7 +270,7 @@ export class PRoomElement extends GemElement<State> {
     if (this.#playing) {
       this.#rtc.start({
         host: this.#playing.host,
-        video: this.videoRef.element!,
+        audio: this.audioRef.element!,
         stream: this.#createStream(),
       });
     }
@@ -413,11 +409,11 @@ export class PRoomElement extends GemElement<State> {
   };
 
   #save = async () => {
-    if (!this.#isHost || !this.#romBuffer || !this.#ctx) return;
+    if (!this.#isHost || !this.#romBuffer) return;
     const { buffer } = Nes.memory();
     const cache = await caches.open('state_v2');
     const key = await hash(this.#romBuffer);
-    const thumbnail = this.#ctx.canvas.toDataURL('image/png', 0.5);
+    const thumbnail = this.canvasRef.element!.captureThumbnail();
     await cache.put(
       `/${key}?${new URLSearchParams({ timestamp: Date.now().toString(), thumbnail })}`,
       new Response(new Blob([buffer])),
@@ -437,34 +433,8 @@ export class PRoomElement extends GemElement<State> {
       Modal.open({
         header: '选择想要回到的状态',
         body: html`
-          <ul>
-            <style>
-              ul {
-                width: min(80vw, 20em);
-                min-height: 10em;
-                list-style: none;
-                padding: 0;
-                margin: 0;
-                display: flex;
-                flex-direction: column;
-                gap: 1px;
-              }
-              li {
-                display: flex;
-                gap: 1em;
-                align-items: center;
-                border-radius: ${theme.normalRound};
-                overflow: hidden;
-              }
-              li:hover {
-                background: ${theme.hoverBackgroundColor};
-              }
-              img {
-                border-radius: ${theme.normalRound};
-                width: 64px;
-              }
-            </style>
-            ${reqs
+          <nesbox-list
+            .data=${reqs
               .map((req) => {
                 const { searchParams } = new URL(req.url);
                 return [
@@ -474,23 +444,18 @@ export class PRoomElement extends GemElement<State> {
                 ] as const;
               })
               .sort((a, b) => Number(b[1]) - Number(a[1]))
-              .map(
-                ([req, time, url]) => html`
-                  <li
-                    @click=${async (evt: PointerEvent) => {
-                      const res = await cache.match(req);
-                      if (!res) return;
-                      new Uint8Array(buffer).set(new Uint8Array(await res.arrayBuffer()));
-                      evt.target?.dispatchEvent(new CustomEvent('close', { composed: true }));
-                      Toast.open('success', `加载${time.format()}成功`);
-                    }}
-                  >
-                    <img src=${url} alt="" />
-                    <span>${time.format()}</span>
-                  </li>
-                `,
-              )}
-          </ul>
+              .map(([req, time, url]) => ({
+                img: url,
+                label: time.format(),
+                onClick: async (evt: PointerEvent) => {
+                  const res = await cache.match(req);
+                  if (!res) return;
+                  new Uint8Array(buffer).set(new Uint8Array(await res.arrayBuffer()));
+                  Toast.open('success', `加载${time.format()}成功`);
+                  evt.target?.dispatchEvent(new CustomEvent('close', { composed: true }));
+                },
+              }))}
+          ></nesbox-list>
         `,
         disableDefualtCancelBtn: true,
         disableDefualtOKBtn: true,
@@ -504,16 +469,10 @@ export class PRoomElement extends GemElement<State> {
   };
 
   mounted = () => {
-    if (this.#isHost) {
-      requestAnimationFrame(this.#loop);
-    }
+    if (this.#isHost) requestAnimationFrame(this.#loop);
 
     this.effect(
-      () => {
-        if (this.#settings && this.#gainNode) {
-          this.#gainNode.gain.value = this.#settings.volume.game;
-        }
-      },
+      () => this.#setVolume,
       () => [this.#settings?.volume.game],
     );
 
@@ -570,14 +529,8 @@ export class PRoomElement extends GemElement<State> {
     const { messages, roles } = this.state;
 
     return html`
-      <canvas
-        class="canvas"
-        width="256"
-        height="240"
-        ref=${this.canvasRef.ref}
-        style=${styleMap({ imageRendering: configure.user?.settings.video.render })}
-      ></canvas>
-      <video class="canvas" hidden ref=${this.videoRef.ref}></video>
+      <nesbox-render class="canvas" ref=${this.canvasRef.ref}></nesbox-render>
+      <audio ref=${this.audioRef.ref} hidden></audio>
       <m-room-chat
         class="chat"
         ref=${this.chatRef.ref}
