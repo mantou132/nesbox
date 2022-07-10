@@ -98,6 +98,21 @@
   "keySetting": {
     "message": "按鍵"
   },
+  "shortcut": {
+    "message": "快捷键"
+  },
+  "shortcutSearch": {
+    "message": "搜索"
+  },
+  "shortcutSettings": {
+    "message": "設置"
+  },
+  "shortcutSave": {
+    "message": "保存狀態"
+  },
+  "shortcutLoad": {
+    "message": "加載狀態"
+  },
   "soundSetting": {
     "message": "聲音"
   },
@@ -106,6 +121,27 @@
   },
   "notificationVolume": {
     "message": "通知"
+  },
+  "gameVolume": {
+    "message": "遊戲"
+  },
+  "videoSetting": {
+    "message": "視頻"
+  },
+  "videoRender": {
+    "message": "渲染方法"
+  },
+  "videoRenderPixelated": {
+    "message": "像素化"
+  },
+  "videoRenderSmooth": {
+    "message": "平滑"
+  },
+  "videoFilter": {
+    "message": "過濾器"
+  },
+  "videoFilterDefault": {
+    "message": "默認"
   },
   "license": {
     "message": "許可證"
@@ -202,6 +238,18 @@
   },
   "tipRoomDeleted": {
     "message": "房間已被主機已經被刪除"
+  },
+  "tipGameStateMissing": {
+    "message": "沒有保存的狀態"
+  },
+  "tipGameStateSave": {
+    "message": "已保存狀態，$1"
+  },
+  "tipGameStateTitle": {
+    "message": "選擇想要回到的狀態"
+  },
+  "tipGameStateLoad": {
+    "message": "加載$1成功"
   },
   "code404001": { "message": "用戶已存在" },
   "code404002": { "message": "賬號或密碼錯誤" },

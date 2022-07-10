@@ -37,10 +37,10 @@ export class MKeybindingElement extends GemElement {
     if (!configure.user) return html``;
 
     const labelMap: Record<keyof Settings['shortcuts'], string> = {
-      OPEN_SEARCH: '搜索',
-      OPEN_SETTINGS: '设置',
-      SAVE_GAME_STATE: '保存状态',
-      LOAD_GAME_STATE: '恢复状态',
+      OPEN_SEARCH: i18n.get('shortcutSearch'),
+      OPEN_SETTINGS: i18n.get('shortcutSettings'),
+      SAVE_GAME_STATE: i18n.get('shortcutSave'),
+      LOAD_GAME_STATE: i18n.get('shortcutLoad'),
     };
 
     const getJoypadKey = (keys: string[]) => keys.find((e) => e.length === 1 || e.startsWith('arrow')) || '';
@@ -92,7 +92,7 @@ export class MKeybindingElement extends GemElement {
             `,
           )}
       </div>
-      <dy-heading class="heading" lv="4">快捷键</dy-heading>
+      <dy-heading class="heading" lv="4">${i18n.get('shortcut')}</dy-heading>
       <div class="grid">
         ${Object.entries(configure.user.settings.shortcuts).map(
           ([name, key]) => html`

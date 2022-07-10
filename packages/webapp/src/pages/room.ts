@@ -418,7 +418,7 @@ export class PRoomElement extends GemElement<State> {
       `/${key}?${new URLSearchParams({ timestamp: Date.now().toString(), thumbnail })}`,
       new Response(new Blob([buffer])),
     );
-    Toast.open('success', `已保存状态，${new Time().format()}`);
+    Toast.open('success', i18n.get('tipGameStateSave', new Time().format()));
   };
 
   #load = async () => {
@@ -428,10 +428,10 @@ export class PRoomElement extends GemElement<State> {
     const key = await hash(this.#romBuffer);
     const reqs = await cache.keys(`/${key}`, { ignoreSearch: true });
     if (reqs.length === 0) {
-      Toast.open('default', '没有保存的状态');
+      Toast.open('default', i18n.get('tipGameStateMissing'));
     } else {
       Modal.open({
-        header: '选择想要回到的状态',
+        header: i18n.get('tipGameStateTitle'),
         body: html`
           <nesbox-list
             .data=${reqs
@@ -451,7 +451,7 @@ export class PRoomElement extends GemElement<State> {
                   const res = await cache.match(req);
                   if (!res) return;
                   new Uint8Array(buffer).set(new Uint8Array(await res.arrayBuffer()));
-                  Toast.open('success', `加载${time.format()}成功`);
+                  Toast.open('success', i18n.get('tipGameStateLoad', time.format()));
                   evt.target?.dispatchEvent(new CustomEvent('close', { composed: true }));
                 },
               }))}

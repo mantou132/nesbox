@@ -102,6 +102,9 @@ const style = createCSSSheet(css`
     gap: 1em;
     align-items: center;
   }
+  dy-form-item::part(input) {
+    font-size: 1em;
+  }
   @media ${mediaQuery.PHONE} {
     .bg-copyright,
     .slogan {

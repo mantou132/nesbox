@@ -97,7 +97,7 @@ export class MSettingsElement extends GemElement<State> {
             },
           },
           {
-            tab: '视频',
+            tab: i18n.get('videoSetting'),
             getContent() {
               return html`
                 <dy-tab-panel>

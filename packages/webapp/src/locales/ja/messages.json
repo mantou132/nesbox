@@ -98,6 +98,21 @@
   "keySetting": {
     "message": "キー設定"
   },
+  "shortcut": {
+    "message": "ホットキー"
+  },
+  "shortcutSearch": {
+    "message": "探す"
+  },
+  "shortcutSettings": {
+    "message": "設定"
+  },
+  "shortcutSave": {
+    "message": "状態を保存"
+  },
+  "shortcutLoad": {
+    "message": "読み込み状態"
+  },
   "soundSetting": {
     "message": "音"
   },
@@ -106,6 +121,27 @@
   },
   "notificationVolume": {
     "message": "通知"
+  },
+  "gameVolume": {
+    "message": "ゲーム"
+  },
+  "videoSetting": {
+    "message": "ビデオ"
+  },
+  "videoRender": {
+    "message": "レンダリングメソッド"
+  },
+  "videoRenderPixelated": {
+    "message": "ピクセル化"
+  },
+  "videoRenderSmooth": {
+    "message": "スムーズ"
+  },
+  "videoFilter": {
+    "message": "フィルター"
+  },
+  "videoFilterDefault": {
+    "message": "デフォルト"
   },
   "license": {
     "message": "ライセンス"
@@ -202,6 +238,18 @@
   },
   "tipRoomDeleted": {
     "message": "部屋はホストによって削除されました"
+  },
+  "tipGameStateMissing": {
+    "message": "保存された状態はありません"
+  },
+  "tipGameStateSave": {
+    "message": "保存された状態$1"
+  },
+  "tipGameStateTitle": {
+    "message": "戻りたい状態を選択してください"
+  },
+  "tipGameStateLoad": {
+    "message": "$1の読み込みに成功しました"
   },
   "code404001": { "message": "ユーザーが存在します" },
   "code404002": { "message": "ユーザーネームまたはパスワードが違います" },

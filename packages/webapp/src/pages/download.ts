@@ -68,7 +68,7 @@ export class PDownloadElement extends GemElement {
       ).json();
       const platforms = Object.entries(latest.platforms as Record<string, { url: string }>);
       const url = platforms.find(([key]) => key.startsWith(isMac ? 'darwin' : 'windows'))![1].url;
-      open(getCorsSrc(url));
+      open(url);
     } catch {
       open('https://github.com/mantou132/nesbox/releases/latest');
     }

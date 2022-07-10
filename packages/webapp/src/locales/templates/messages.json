@@ -98,6 +98,21 @@
   "keySetting": {
     "message": "按键"
   },
+  "shortcut": {
+    "message": "快捷键"
+  },
+  "shortcutSearch": {
+    "message": "搜索"
+  },
+  "shortcutSettings": {
+    "message": "设置"
+  },
+  "shortcutSave": {
+    "message": "保存状态"
+  },
+  "shortcutLoad": {
+    "message": "加载状态"
+  },
   "soundSetting": {
     "message": "声音"
   },
@@ -106,6 +121,27 @@
   },
   "notificationVolume": {
     "message": "通知"
+  },
+  "gameVolume": {
+    "message": "游戏"
+  },
+  "videoSetting": {
+    "message": "视频"
+  },
+  "videoRender": {
+    "message": "渲染方法"
+  },
+  "videoRenderPixelated": {
+    "message": "像素化"
+  },
+  "videoRenderSmooth": {
+    "message": "平滑"
+  },
+  "videoFilter": {
+    "message": "过滤器"
+  },
+  "videoFilterDefault": {
+    "message": "默认"
   },
   "license": {
     "message": "许可证"
@@ -202,6 +238,18 @@
   },
   "tipRoomDeleted": {
     "message": "房间已被主机已经被删除"
+  },
+  "tipGameStateMissing": {
+    "message": "没有保存的状态"
+  },
+  "tipGameStateSave": {
+    "message": "已保存状态，$1"
+  },
+  "tipGameStateTitle": {
+    "message": "选择想要回到的状态"
+  },
+  "tipGameStateLoad": {
+    "message": "加载$1成功"
   },
   "code404001": { "message": "用户已存在" },
   "code404002": { "message": "账号或密码错误" },

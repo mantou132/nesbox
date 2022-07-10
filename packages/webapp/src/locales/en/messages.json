@@ -98,6 +98,21 @@
   "keySetting": {
     "message": "Key Binding"
   },
+  "shortcut": {
+    "message": "Shortcut"
+  },
+  "shortcutSearch": {
+    "message": "Search"
+  },
+  "shortcutSettings": {
+    "message": "Settings"
+  },
+  "shortcutSave": {
+    "message": "Save State"
+  },
+  "shortcutLoad": {
+    "message": "Load State"
+  },
   "soundSetting": {
     "message": "Sound"
   },
@@ -106,6 +121,27 @@
   },
   "notificationVolume": {
     "message": "Notification"
+  },
+  "gameVolume": {
+    "message": "Game"
+  },
+  "videoSetting": {
+    "message": "Video"
+  },
+  "videoRender": {
+    "message": "Render method"
+  },
+  "videoRenderPixelated": {
+    "message": "Pixelated"
+  },
+  "videoRenderSmooth": {
+    "message": "Smooth"
+  },
+  "videoFilter": {
+    "message": "Filter"
+  },
+  "videoFilterDefault": {
+    "message": "Default"
   },
   "license": {
     "message": "License"
@@ -202,6 +238,18 @@
   },
   "tipRoomDeleted": {
     "message": "The room has been deleted by the host"
+  },
+  "tipGameStateMissing": {
+    "message": "No saved state"
+  },
+  "tipGameStateSave": {
+    "message": "Saved state, $1"
+  },
+  "tipGameStateTitle": {
+    "message": "Choose the state you want to go back to"
+  },
+  "tipGameStateLoad": {
+    "message": "Loading $1 succeeded"
   },
   "code404001": { "message": "Users exist" },
   "code404002": { "message": "Incorrect username or password" },

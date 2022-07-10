@@ -34,7 +34,7 @@ export class MSoundSettingsElement extends GemElement {
 
     const volumeLabelMap: Record<keyof Settings['volume'], string> = {
       notification: i18n.get('notificationVolume'),
-      game: '游戏',
+      game: i18n.get('gameVolume'),
     };
 
     return html`
