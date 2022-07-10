@@ -50,12 +50,7 @@ function readGamepad() {
 }
 
 export const listener = () => {
-  if (
-    navigator
-      .getGamepads()
-      .filter(isNotNullish)
-      .filter((e) => e.connected).length > 0
-  ) {
+  if ([...navigator.getGamepads()].find((e) => e?.connected)) {
     readGamepad();
   } else {
     addEventListener('gamepadconnected', readGamepad);

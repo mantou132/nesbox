@@ -14,6 +14,7 @@ import {
 import type { DuoyunFormElement } from 'duoyun-ui/elements/form';
 import { createPath } from 'duoyun-ui/elements/route';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
+import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 
 import { theme } from 'src/theme';
 import { gotoRedirectUri } from 'src/auth';
@@ -175,7 +176,12 @@ export class PLoginElement extends GemElement<State> {
       </div>
       <div class="content">
         <dy-heading lv="1" class="header">${this.register ? routes.register.title : routes.login.title}</dy-heading>
-        <dy-form class="form" ref=${this.formRef.ref} @change=${this.#onChange}>
+        <dy-form
+          class="form"
+          ref=${this.formRef.ref}
+          @change=${this.#onChange}
+          @keydown=${hotkeys({ enter: this.#onSubmit })}
+        >
           <dy-form-item
             name="username"
             required
