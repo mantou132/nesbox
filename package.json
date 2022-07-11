@@ -3,7 +3,7 @@
   "name": "root",
   "version": "0.0.1",
   "scripts": {
-    "lint": "lerna exec --ignore @nesbox/config -- tsc --noEmit && eslint . --ext .ts,.js",
+    "lint": "lerna exec --ignore @nesbox/config --ignore @mantou/nes -- tsc --noEmit && eslint . --ext .ts,.js",
     "release": "lerna version",
     "preinstall": "npx wasm-pack build --out-dir ../nes-pkg --target web --scope mantou packages/nes",
     "prepare": "husky install"

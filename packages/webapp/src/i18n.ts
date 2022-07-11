@@ -1,6 +1,7 @@
 import { I18n } from '@mantou/gem/helper/i18n';
 import { updateLocale } from 'duoyun-ui/lib/locale';
 
+import { ScGame } from 'src/generated/graphql';
 import zhCN from 'src/locales/templates/messages.json';
 import enURI from 'src/locales/en/messages.json?url';
 import twURI from 'src/locales/zh-TW/messages.json?url';
@@ -38,3 +39,16 @@ export const i18n = new I18n<typeof zhCN>({
     }
   },
 });
+
+const jaRegExp = /\p{sc=Katakana}|\p{sc=Hiragana}/u;
+const jaDescRegExp = /(\p{sc=Katakana}|\p{sc=Hiragana}){5}/gu;
+const zhRegExp = /\p{sc=Han}/u;
+export const isCurrentLang = (game: Pick<ScGame, 'name' | 'description'>) => {
+  const lang =
+    jaRegExp.test(game.name) || Number(game.description.match(jaDescRegExp)?.length) > 2
+      ? 'ja'
+      : zhRegExp.test(game.name)
+      ? 'zh'
+      : 'en';
+  return lang === i18n.currentLanguage.split('-').shift()?.toLowerCase();
+};

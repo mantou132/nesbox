@@ -2,7 +2,7 @@ import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, pro
 
 import { Room, store } from 'src/store';
 import { theme } from 'src/theme';
-import { getAvatar, getCorsSrc } from 'src/utils';
+import { getAvatar, getCDNSrc } from 'src/utils';
 
 import 'duoyun-ui/elements/avatar';
 import 'duoyun-ui/elements/heading';
@@ -52,7 +52,7 @@ export class MRoomItemElement extends GemElement {
     const host = this.room.users.find((u) => this.room.host === u.id)?.nickname;
 
     return html`
-      <img class="cover" loading="lazy" src=${game ? getCorsSrc(game.preview) : ''} />
+      <img class="cover" loading="lazy" src=${game ? getCDNSrc(game.preview) : ''} />
       <div class="info">
         <dy-heading lv="4" class="heading">${host}-${game?.name}</dy-heading>
         <dy-avatar-group

@@ -3,20 +3,24 @@ import { matchPath, RouteItem } from 'duoyun-ui/elements/route';
 import { Time } from 'duoyun-ui/lib/time';
 
 import { configure } from 'src/configure';
-import { githubIssue, isTauriMacApp, isTauriWinApp } from 'src/constants';
+import { githubIssue } from 'src/constants';
 
-export const getCorsSrc = (url: string) => {
+export const getCorSrc = (url: string) => {
+  return `https://files.xianqiao.wang/${url}`;
+};
+
+export const getCDNSrc = (url: string) => {
   return `https://nesbox-cdn.liuben.fun/${url}`;
 };
 
 export const getAvatar = (username?: string) => {
   if (!username) return '';
-  return getCorsSrc(`joeschmoe.io/api/v1/${username}`);
+  return getCDNSrc(`joeschmoe.io/api/v1/${username}`);
 };
 
 export const getGithubGames = async (s: string) => {
-  const search = `${githubIssue}?q=is%3Aissue+label%3Agame+${s.replaceAll(' ', '+')}`;
-  const text = await (await fetch(getCorsSrc(search))).text();
+  const search = `${githubIssue}?q=is%3Aissue+label%3Agame+${encodeURIComponent(s.replaceAll(' ', '+'))}`;
+  const text = await (await fetch(getCorSrc(search))).text();
   const domparse = new DOMParser();
   const doc = domparse.parseFromString(text, 'text/html');
   return [...doc.querySelectorAll('[aria-label=Issues] a[id^=issue]')] as HTMLAnchorElement[];
@@ -33,18 +37,6 @@ export const documentVisible = async () => {
   await new Promise((res) => document.addEventListener('visibilitychange', res, { once: true }));
 };
 
-/**
- * @deprecated
- * use `window.open`
- */
-export const open = (uri: string) => {
-  if (window.__TAURI__) {
-    window.__TAURI__.shell.open(uri);
-  } else {
-    window.open(uri);
-  }
-};
-
 export const playSound = (kind: string, volume = configure.user?.settings.volume.notification) => {
   window.__TAURI__?.tauri
     .invoke('play_sound', {
@@ -54,22 +46,6 @@ export const playSound = (kind: string, volume = configure.user?.settings.volume
     .catch(() => {
       //
     });
-};
-
-/**
- * @deprecated
- * use `navigator.setAppBadge`
- */
-export const setAppBadge = (count: number) => {
-  if (isTauriWinApp) {
-    if (count) window.__TAURI__?.window.getCurrent().requestUserAttention(2);
-  } else if (isTauriMacApp) {
-    window.__TAURI__?.tauri.invoke('set_badge', { count }).catch(() => {
-      //
-    });
-  } else {
-    navigator.setAppBadge?.(count);
-  }
 };
 
 export const formatTime = (timestamp: number) => {

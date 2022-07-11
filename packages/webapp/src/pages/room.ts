@@ -41,7 +41,7 @@ import {
 import { friendStore, store } from 'src/store';
 import { i18n } from 'src/i18n';
 import type { MRoomChatElement } from 'src/modules/room-chat';
-import { getCorsSrc, preventDefault } from 'src/utils';
+import { getCDNSrc, preventDefault } from 'src/utils';
 import { events, queryKeys } from 'src/constants';
 import { createInvite } from 'src/services/api';
 import type { NesboxRenderElement } from 'src/elements/render';
@@ -224,12 +224,17 @@ export class PRoomElement extends GemElement<State> {
 
     if (!this.#isHost) return;
 
-    const zip = await (await fetch(getCorsSrc(this.#rom!))).arrayBuffer();
+    const zip = await (await fetch(getCDNSrc(this.#rom!))).arrayBuffer();
     const folder = await JSZip.loadAsync(zip);
     this.#romBuffer = await Object.values(folder.files)
       .find((e) => e.name.toLowerCase().endsWith('.nes'))!
       .async('arraybuffer');
-    this.#nes.load_rom(new Uint8Array(this.#romBuffer));
+    try {
+      this.#nes.load_rom(new Uint8Array(this.#romBuffer));
+    } catch {
+      this.#nes = undefined;
+      Toast.open('error', 'ROM 加载错误');
+    }
     this.#nextStartTime = 0;
   };
 

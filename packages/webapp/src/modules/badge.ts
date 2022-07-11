@@ -12,7 +12,6 @@ import {
 import { ScFriendStatus } from 'src/generated/graphql';
 import { friendStore } from 'src/store';
 import { theme } from 'src/theme';
-import { setAppBadge } from 'src/utils';
 
 const style = createCSSSheet(css`
   :host {
@@ -60,7 +59,7 @@ export class MBadgeElement extends GemElement {
 
     this.hidden = !count;
 
-    setAppBadge(count);
+    navigator.setAppBadge?.(count);
 
     return html`${count}`;
   };

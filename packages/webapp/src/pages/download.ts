@@ -3,7 +3,8 @@ import { isMac } from 'duoyun-ui/lib/hotkeys';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { Toast } from 'duoyun-ui/elements/toast';
 
-import { getCorsSrc, open } from 'src/utils';
+import { getCDNSrc, getCorSrc } from 'src/utils';
+import { githubRelease } from 'src/constants';
 
 import 'duoyun-ui/elements/heading';
 import 'duoyun-ui/elements/paragraph';
@@ -61,16 +62,12 @@ export class PDownloadElement extends GemElement {
       return;
     }
     try {
-      const latest = await (
-        await fetch(
-          'https://files.xianqiao.wang/https://github.com/mantou132/nesbox/releases/latest/download/latest-version.json',
-        )
-      ).json();
+      const latest = await (await fetch(getCorSrc(`${githubRelease}/latest/download/latest-version.json`))).json();
       const platforms = Object.entries(latest.platforms as Record<string, { url: string }>);
       const url = platforms.find(([key]) => key.startsWith(isMac ? 'darwin' : 'windows'))![1].url;
       open(url);
     } catch {
-      open('https://github.com/mantou132/nesbox/releases/latest');
+      open(`${githubRelease}/latest`);
     }
   };
 
@@ -78,7 +75,7 @@ export class PDownloadElement extends GemElement {
     return html`
       <img
         class="bg"
-        src=${getCorsSrc(
+        src=${getCDNSrc(
           'https://cdn.dribbble.com/users/870476/screenshots/10244007/media/ba3b0d812068691f20b835e7381284b1.jpg',
         )}
       />
@@ -90,7 +87,7 @@ export class PDownloadElement extends GemElement {
           </dy-paragraph>
           <dy-button style=${styleMap({ marginBlockStart: '1em' })} @click=${this.#download}>立即下载</dy-button>
         </div>
-        <img src=${getCorsSrc('https://raw.githubusercontent.com/mantou132/nesbox/master/screenshots/homepage.png')} />
+        <img src=${getCDNSrc('https://raw.githubusercontent.com/mantou132/nesbox/master/screenshots/homepage.png')} />
       </main>
     `;
   };

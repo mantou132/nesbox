@@ -2,6 +2,7 @@ import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, con
 import type { RouteItem } from 'duoyun-ui/elements/route';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { commonHandle } from 'duoyun-ui/lib/hotkeys';
+import { waitLoading } from 'duoyun-ui/elements/wait';
 
 import { locationStore, routes } from 'src/routes';
 import { i18n } from 'src/i18n';
@@ -126,7 +127,7 @@ export class MNavElement extends GemElement<State> {
                   tabindex="0"
                   @keydown=${commonHandle}
                   .element=${icons.left}
-                  @click=${leaveRoom}
+                  @click=${() => waitLoading(leaveRoom())}
                 ></dy-use>
               </nesbox-tooltip>
               ${playing?.host !== configure.user?.id

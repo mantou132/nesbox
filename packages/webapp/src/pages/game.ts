@@ -19,7 +19,7 @@ import { icons } from 'src/icons';
 import { configure } from 'src/configure';
 import { theme } from 'src/theme';
 import { i18n } from 'src/i18n';
-import { getCorsSrc, getGithubGames, open } from 'src/utils';
+import { getCDNSrc, getGithubGames } from 'src/utils';
 import { githubIssue } from 'src/constants';
 
 import 'duoyun-ui/elements/button';
@@ -199,7 +199,7 @@ export class PGameElement extends GemElement {
         <m-game-detail .md=${game?.description || ''}></m-game-detail>
       </div>
       <div class="aside">
-        <img class="preview" src=${game ? getCorsSrc(game.preview) : ''} />
+        <img class="preview" src=${game ? getCDNSrc(game.preview) : ''} />
         <div class="comment-title">
           <dy-heading lv="3">${i18n.get('gameComment')}</dy-heading>
           <dy-input-group>

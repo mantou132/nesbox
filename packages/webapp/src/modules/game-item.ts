@@ -19,7 +19,7 @@ import { routes } from 'src/routes';
 import { paramKeys } from 'src/constants';
 import { i18n } from 'src/i18n';
 import { theme } from 'src/theme';
-import { getCorsSrc } from 'src/utils';
+import { getCDNSrc } from 'src/utils';
 
 import 'duoyun-ui/elements/use';
 import 'duoyun-ui/elements/button';
@@ -108,7 +108,7 @@ export class MGameItemElement extends GemElement {
 
   render = () => {
     return html`
-      <img class="cover" loading="lazy" @click=${this.#onMoreClick} src=${getCorsSrc(this.game.preview)} />
+      <img class="cover" loading="lazy" @click=${this.#onMoreClick} src=${getCDNSrc(this.game.preview)} />
       ${this.silent
         ? ''
         : html`<dy-button class="play" small @click=${this.#onGameClick}>${i18n.get('startGame')}</dy-button>`}

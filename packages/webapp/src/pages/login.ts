@@ -21,7 +21,7 @@ import { gotoRedirectUri } from 'src/auth';
 import { i18n } from 'src/i18n';
 import { routes } from 'src/routes';
 import { login, register } from 'src/services/guest-api';
-import { getCorsSrc, open } from 'src/utils';
+import { getCDNSrc } from 'src/utils';
 
 import 'duoyun-ui/elements/form';
 import 'duoyun-ui/elements/link';
@@ -31,7 +31,7 @@ import 'duoyun-ui/elements/action-text';
 import 'src/elements/tooltip';
 import 'src/modules/guest';
 
-const bgUrl = getCorsSrc(
+const bgUrl = getCDNSrc(
   'https://cdn.dribbble.com/users/870476/screenshots/10244007/media/ba3b0d812068691f20b835e7381284b1.jpg',
 );
 

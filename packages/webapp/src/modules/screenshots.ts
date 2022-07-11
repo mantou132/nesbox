@@ -13,7 +13,7 @@ import {
 import type { DuoyunCarouselElement } from 'duoyun-ui/elements/carousel';
 
 import { theme } from 'src/theme';
-import { getCorsSrc } from 'src/utils';
+import { getCDNSrc } from 'src/utils';
 
 import 'duoyun-ui/elements/carousel';
 
@@ -82,7 +82,7 @@ export class MScreenshotsElement extends GemElement<State> {
         ref=${this.carouselRef.ref}
         @change=${({ detail }: CustomEvent<number>) => this.setState({ current: detail })}
         class="carousel"
-        .data=${this.links.map((img) => ({ img: getCorsSrc(img), title: '', description: '' }))}
+        .data=${this.links.map((img) => ({ img: getCDNSrc(img), title: '', description: '' }))}
       ></dy-carousel>
       <div class="preview">
         ${this.links.map(

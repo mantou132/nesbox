@@ -58,7 +58,6 @@ import {
   ReadMessageMutation,
   ReadMessageMutationVariables,
   ScFriendStatus,
-  ScGame,
   ScNewComment,
   ScNewInvite,
   ScNewRoom,
@@ -81,22 +80,9 @@ import { store, friendStore } from 'src/store';
 import { request, subscribe } from 'src/services';
 import { configure, parseAccount, Settings } from 'src/configure';
 import { events, Singal, SingalEvent } from 'src/constants';
-import { i18n } from 'src/i18n';
+import { i18n, isCurrentLang } from 'src/i18n';
 import { logout } from 'src/auth';
 import { documentVisible, playSound } from 'src/utils';
-
-const jaReg = /\p{sc=Katakana}|\p{sc=Hiragana}/u;
-const jaDescriptionReg = /(\p{sc=Katakana}|\p{sc=Hiragana}){5}/gu;
-const zhReg = /\p{sc=Han}/u;
-const isCurrentLang = (game: ScGame) => {
-  const lang =
-    jaReg.test(game.name) || Number(game.description.match(jaDescriptionReg)?.length) > 2
-      ? 'ja'
-      : zhReg.test(game.name)
-      ? 'zh'
-      : 'en';
-  return lang === i18n.currentLanguage.split('-').shift()?.toLowerCase();
-};
 
 export const getGames = async () => {
   const { games, topGames, favorites } = await request<GetGamesQuery, GetGamesQueryVariables>(GetGames, {});
