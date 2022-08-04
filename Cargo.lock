@@ -4586,7 +4586,6 @@ dependencies = [
 [[package]]
 name = "tetanes"
 version = "0.8.0"
-source = "git+https://github.com/lukexor/tetanes#bb43098501f960a903f17a2c2458f02a6ca603be"
 dependencies = [
  "anyhow",
  "bincode",

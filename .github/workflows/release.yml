@@ -17,6 +17,8 @@ jobs:
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v2
+        with:
+          submodules: recursive
 
       - name: setup node
         uses: actions/setup-node@v1

@@ -4,3 +4,10 @@ members = [
   "packages/server",
   "packages/tauriapp"
 ]
+
+exclude = ["deps/tetanes"]
+
+[profile.release.package.nes]
+# Tell `rustc` to optimize for small code size.
+opt-level = "s"
+debug = true

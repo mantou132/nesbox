@@ -1,0 +1,3 @@
+[submodule "deps/tetanes"]
+	path = deps/tetanes
+	url = https://github.com/mantou132/tetanes
