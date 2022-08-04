@@ -27,6 +27,7 @@ export enum ChannelMessageType {
   KEYUP,
   ROLE_OFFER,
   ROLE_ANSWER,
+  PING,
 }
 
 export type Role =
@@ -102,12 +103,17 @@ export class RoleAnswer extends ChannelMessageBase {
   }
 }
 
-export type ChannelMessage = TextMsg | KeyDownMsg | KeyUpMsg | RoleOffer | RoleAnswer;
+export class Ping extends ChannelMessageBase {
+  type = ChannelMessageType.PING;
+}
+
+export type ChannelMessage = TextMsg | KeyDownMsg | KeyUpMsg | RoleOffer | RoleAnswer | Ping;
 
 export class RTC extends EventTarget {
   #host = 0;
   #isHost = false;
   #restartTimer = 0;
+  #pingTimer = 0;
 
   #connMap = new Map<number, RTCPeerConnection>();
   #channelMap = new Map<RTCPeerConnection, RTCDataChannel>();
@@ -215,6 +221,9 @@ export class RTC extends EventTarget {
           this.#setRoles(userId, msg as RoleOffer);
           this.#emitAnswer();
           break;
+        case ChannelMessageType.PING:
+          channel.send(data);
+          break;
       }
     };
   };
@@ -283,6 +292,7 @@ export class RTC extends EventTarget {
         const msg = JSON.parse(data) as ChannelMessage;
         this.#emitMessage(msg);
       } else {
+        // compressed frame
         this.#emitMessage(data);
       }
     };
@@ -315,6 +325,8 @@ export class RTC extends EventTarget {
       data: conn.localDescription,
     });
     this.#restartTimer = window.setTimeout(() => this.#restart(), 2000);
+
+    this.#pingTimer = window.setInterval(() => this.send(new Ping()), 1000);
   };
 
   #restart = () => {
@@ -345,6 +357,7 @@ export class RTC extends EventTarget {
     this.#connMap.forEach((_, id) => this.#deleteUser(id));
     removeEventListener(events.SINGAL, this.#onSignal);
     clearTimeout(this.#restartTimer);
+    clearInterval(this.#pingTimer);
   };
 
   send = (data: ChannelMessage) => {

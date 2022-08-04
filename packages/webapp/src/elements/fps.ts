@@ -12,7 +12,7 @@ import {
 
 import { theme } from 'src/theme';
 
-const style = createCSSSheet(css`
+export const fpsStyle = createCSSSheet(css`
   :host {
     font-size: 0.875em;
     color: ${theme.describeColor};
@@ -66,7 +66,7 @@ const tick = () => {
  * @customElement nesbox-fps
  */
 @customElement('nesbox-fps')
-@adoptedStyle(style)
+@adoptedStyle(fpsStyle)
 @connectStore(store)
 export class NesboxFpsElement extends GemElement {
   static instanceSet: Set<NesboxFpsElement> = new Set();

@@ -45,6 +45,7 @@ import { getCDNSrc, preventDefault } from 'src/utils';
 import { events, queryKeys } from 'src/constants';
 import { createInvite } from 'src/services/api';
 import type { NesboxRenderElement } from 'src/elements/render';
+import { pingTick } from 'src/elements/ping';
 
 import 'src/modules/room-player-list';
 import 'src/modules/room-chat';
@@ -85,13 +86,13 @@ const style = createCSSSheet(css`
     width: min(38em, 100vw);
     padding-inline: 1rem;
   }
-  .fps {
+  .info {
     position: absolute;
     right: 1rem;
     bottom: 1rem;
   }
   @media ${mediaQuery.PHONE} {
-    .fps {
+    .info {
       right: 0;
       bottom: 0;
       font-size: 0.15em;
@@ -264,6 +265,10 @@ export class PRoomElement extends GemElement<State> {
       // host
       case ChannelMessageType.KEYUP:
         this.#nes?.handle_event((detail as KeyUpMsg).button, false, false);
+        break;
+      // client
+      case ChannelMessageType.PING:
+        pingTick(Date.now() - detail.timestamp);
         break;
     }
   };
@@ -549,7 +554,7 @@ export class PRoomElement extends GemElement<State> {
         @rolechange=${({ detail }: CustomEvent<RoleOffer>) => this.#rtc?.send(detail)}
         @kickout=${({ detail }: CustomEvent<number>) => this.#rtc?.kickoutRole(detail)}
       ></m-room-player-list>
-      <nesbox-fps class="fps"></nesbox-fps>
+      ${this.#isHost ? html`<nesbox-fps class="info"></nesbox-fps>` : html`<nesbox-ping class="info"></nesbox-ping>`}
     `;
   };
 }
