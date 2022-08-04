@@ -14,7 +14,7 @@ extern crate objc;
 use tauri::Menu;
 use tauri::{generate_handler, Manager, Window, WindowEvent};
 #[cfg(target_os = "macos")]
-use window_ext::WindowExt;
+use window_ext::{ToolbarThickness, WindowExt};
 
 use handler::{play_sound, set_badge};
 
@@ -39,21 +39,25 @@ fn main() {
             }
             #[cfg(target_os = "macos")]
             {
-                main_window.set_window_style(true, false);
+                main_window.set_transparent_titlebar(ToolbarThickness::Medium);
             }
 
             // main_window.open_devtools();
             Ok(())
         })
-        .on_window_event(|event| match event.event() {
-            #[cfg(target_os = "macos")]
-            WindowEvent::Resized(size) => {
-                // https://github.com/tauri-apps/tauri/issues/4519
-                let monitor = event.window().current_monitor().unwrap().unwrap();
-                let screen = monitor.size();
-                event.window().set_toolbar_visible(size != screen);
+        .on_window_event(|event| {
+            let size = &event.window().outer_size().unwrap();
+            match event.event() {
+                #[cfg(target_os = "macos")]
+                // bug: when enter fullscreen emit moved event
+                WindowEvent::Resized(_) | WindowEvent::Moved(_) => {
+                    // https://github.com/tauri-apps/tauri/issues/4519
+                    let monitor = event.window().current_monitor().unwrap().unwrap();
+                    let screen = monitor.size();
+                    event.window().set_toolbar_visible(size != screen);
+                }
+                _ => {}
             }
-            _ => {}
         })
         .on_page_load(|w: Window, _| w.get_window("main").unwrap().show().unwrap())
         .plugin(preload::PreloadPlugin::new())

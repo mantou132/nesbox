@@ -1,17 +1,44 @@
 use tauri::Window;
 
+#[cfg(target_os = "macos")]
+#[allow(dead_code)]
+pub enum ToolbarThickness {
+    Thick,
+    Medium,
+    Thin,
+}
+
+#[cfg(target_os = "macos")]
 pub trait WindowExt {
-    #[cfg(target_os = "macos")]
-    fn set_window_style(&self, title_transparent: bool, remove_toolbar: bool);
-    #[cfg(target_os = "macos")]
+    #[deprecated]
+    fn remove_buttons(&self);
+    fn set_transparent_titlebar(&self, thickness: ToolbarThickness);
     fn set_toolbar_visible(&self, visible: bool);
 }
 
+#[cfg(target_os = "macos")]
 impl WindowExt for Window {
-    #[cfg(target_os = "macos")]
-    fn set_window_style(&self, title_transparent: bool, remove_tool_bar: bool) {
+    fn remove_buttons(&self) {
+        use cocoa::appkit::{NSWindow, NSWindowStyleMask};
+
+        unsafe {
+            let id = self.ns_window().unwrap() as cocoa::base::id;
+
+            let mut style_mask = id.styleMask();
+
+            style_mask.remove(
+                NSWindowStyleMask::NSClosableWindowMask
+                    | NSWindowStyleMask::NSMiniaturizableWindowMask
+                    | NSWindowStyleMask::NSResizableWindowMask,
+            );
+
+            id.setStyleMask_(style_mask);
+        }
+    }
+
+    fn set_transparent_titlebar(&self, thickness: ToolbarThickness) {
         use cocoa::{
-            appkit::{NSColor, NSWindow, NSWindowStyleMask, NSWindowTitleVisibility},
+            appkit::{NSColor, NSWindow, NSWindowTitleVisibility},
             base::nil,
             foundation::NSString,
         };
@@ -33,40 +60,25 @@ impl WindowExt for Window {
             })
             .ok();
 
-            let mut style_mask = id.styleMask();
-            style_mask.set(
-                NSWindowStyleMask::NSFullSizeContentViewWindowMask,
-                title_transparent,
-            );
+            id.setTitlebarAppearsTransparent_(cocoa::base::YES);
 
-            if remove_tool_bar {
-                style_mask.remove(
-                    NSWindowStyleMask::NSClosableWindowMask
-                        | NSWindowStyleMask::NSMiniaturizableWindowMask
-                        | NSWindowStyleMask::NSResizableWindowMask,
-                );
+            match thickness {
+                ToolbarThickness::Thick => {
+                    self.set_title("").ok();
+                    // https://github.com/tauri-apps/tauri/issues/2663#issuecomment-1151240533
+                    id.setToolbar_(msg_send![class!(NSToolbar), new]);
+                }
+                ToolbarThickness::Medium => {
+                    id.setTitleVisibility_(NSWindowTitleVisibility::NSWindowTitleHidden);
+                    id.setToolbar_(msg_send![class!(NSToolbar), new]);
+                }
+                ToolbarThickness::Thin => {
+                    id.setTitleVisibility_(NSWindowTitleVisibility::NSWindowTitleHidden);
+                }
             }
-
-            id.setStyleMask_(style_mask);
-
-            id.setTitleVisibility_(if title_transparent {
-                NSWindowTitleVisibility::NSWindowTitleHidden
-            } else {
-                NSWindowTitleVisibility::NSWindowTitleVisible
-            });
-
-            id.setTitlebarAppearsTransparent_(if title_transparent {
-                cocoa::base::YES
-            } else {
-                cocoa::base::NO
-            });
-
-            // https://github.com/tauri-apps/tauri/issues/2663#issuecomment-1151240533
-            id.setToolbar_(msg_send![class!(NSToolbar), new]);
         }
     }
 
-    #[cfg(target_os = "macos")]
     fn set_toolbar_visible(&self, visible: bool) {
         use cocoa::appkit::NSWindow;
 
