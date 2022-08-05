@@ -436,7 +436,7 @@ export class PRoomElement extends GemElement<State> {
   };
 
   #uploadScreenshot = () => {
-    if (!this.#romBuffer) return;
+    if (!this.#romBuffer || !this.#isVisible) return;
     updateRoomScreenshot({
       id: this.#playing!.id,
       screenshot: this.canvasRef.element!.captureThumbnail(),
