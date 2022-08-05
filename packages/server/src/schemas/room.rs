@@ -1,4 +1,5 @@
 use chrono::Utc;
+use diesel::dsl::*;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use juniper::{FieldResult, GraphQLInputObject, GraphQLObject};
@@ -9,7 +10,6 @@ use super::playing::*;
 use super::user::*;
 use crate::db::models::{NewRoom, Room};
 use crate::db::schema::rooms;
-
 #[derive(GraphQLObject, Debug, Clone)]
 pub struct ScRoomBasic {
     pub id: i32,
@@ -86,6 +86,20 @@ pub fn get_room(conn: &PgConnection, rid: i32) -> FieldResult<ScRoomBasic> {
     let room = rooms.filter(id.eq(rid)).get_result::<Room>(conn)?;
 
     Ok(convert_to_sc_room_basic(&room))
+}
+
+pub fn get_outdated_rooms(conn: &PgConnection) -> Vec<ScRoomBasic> {
+    use self::rooms::dsl::*;
+
+    rooms
+        .filter(deleted_at.is_null())
+        .filter(updated_at.lt(now - 30.days()))
+        .load::<Room>(conn)
+        .unwrap()
+        .iter()
+        .map(|room| convert_to_sc_room_basic(&room))
+        .filter(|room| !has_user(room.host))
+        .collect()
 }
 
 pub fn get_rooms(conn: &PgConnection) -> Vec<ScRoom> {

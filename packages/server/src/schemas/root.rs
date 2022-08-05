@@ -262,40 +262,44 @@ impl MutationRoot {
         Ok(room)
     }
     fn leave_room(context: &Context) -> FieldResult<String> {
-        let conn = DB_POOL.get().unwrap();
-        let room = get_playing(&conn, context.user_id).unwrap();
-        if context.user_id == room.host {
-            delete_playing_with_room(&conn, room.id);
-        }
-        let invites = get_invites_with(&conn, context.user_id);
-        leave_room(&conn, context.user_id, room.id);
-        for invite in invites {
-            notify(
-                invite.target_id,
-                ScNotifyMessageBuilder::default()
-                    .delete_invite(invite.id)
-                    .build()
-                    .unwrap(),
-            );
-        }
-        notify_ids(
-            get_friend_ids(&conn, context.user_id),
+        leave_room_and_notify(context.user_id)
+    }
+}
+
+pub fn leave_room_and_notify(user_id: i32) -> FieldResult<String> {
+    let conn = DB_POOL.get().unwrap();
+    let room = get_playing(&conn, user_id).ok_or(format!("{} not playing", user_id))?;
+    if user_id == room.host {
+        delete_playing_with_room(&conn, room.id);
+    }
+    let invites = get_invites_with(&conn, user_id);
+    leave_room(&conn, user_id, room.id);
+    for invite in invites {
+        notify(
+            invite.target_id,
             ScNotifyMessageBuilder::default()
-                .update_user(get_user_basic(&conn, context.user_id)?)
+                .delete_invite(invite.id)
                 .build()
                 .unwrap(),
         );
-        if get_room_user_ids(&conn, room.id).len() == 0 {
-            delete_room(&conn, room.id);
-            notify_all(
-                ScNotifyMessageBuilder::default()
-                    .delete_room(room.id)
-                    .build()
-                    .unwrap(),
-            )
-        }
-        Ok("Ok".into())
     }
+    notify_ids(
+        get_friend_ids(&conn, user_id),
+        ScNotifyMessageBuilder::default()
+            .update_user(get_user_basic(&conn, user_id)?)
+            .build()
+            .unwrap(),
+    );
+    if get_room_user_ids(&conn, room.id).len() == 0 {
+        delete_room(&conn, room.id);
+        notify_all(
+            ScNotifyMessageBuilder::default()
+                .delete_room(room.id)
+                .build()
+                .unwrap(),
+        )
+    }
+    Ok("Ok".into())
 }
 
 pub struct Subscription;

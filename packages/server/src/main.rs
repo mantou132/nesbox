@@ -9,7 +9,7 @@ extern crate lazy_static;
 extern crate derive_builder;
 
 use dotenv::dotenv;
-use std::{env, io, sync::Arc};
+use std::{env, io, sync::Arc, time::Duration};
 
 use actix_cors::Cors;
 use actix_web::{
@@ -19,10 +19,15 @@ use actix_web::{
 };
 use actix_web_lab::respond::Html;
 use juniper::http::playground::playground_source;
+use tokio::time;
 
 use crate::{
+    db::root::DB_POOL,
     handles::*,
-    schemas::root::{create_guest_schema, create_schema},
+    schemas::{
+        room::get_outdated_rooms,
+        root::{create_guest_schema, create_schema, leave_room_and_notify},
+    },
 };
 
 mod auth;
@@ -49,6 +54,19 @@ async fn main() -> io::Result<()> {
 
     log::info!("playground: http://localhost:{}/playground", port);
     log::info!("guestplayground: http://localhost:{}/guestplayground", port);
+
+    tokio::spawn(async move {
+        let mut interval = time::interval(Duration::from_secs(60 * 60));
+        loop {
+            interval.tick().await;
+            let mut rooms = get_outdated_rooms(&DB_POOL.get().unwrap());
+            rooms.truncate(100);
+            rooms.iter().for_each(|room| {
+                leave_room_and_notify(room.host).ok();
+            });
+            log::warn!("Clean {} outdated rooms", rooms.len());
+        }
+    });
 
     HttpServer::new(move || {
         App::new()
