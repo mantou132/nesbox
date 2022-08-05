@@ -45,7 +45,7 @@ import { getCDNSrc, preventDefault } from 'src/utils';
 import { events, queryKeys } from 'src/constants';
 import { createInvite } from 'src/services/api';
 import type { NesboxRenderElement } from 'src/elements/render';
-import { pingTick } from 'src/elements/ping';
+import { clearRecentPing, pingTick } from 'src/elements/ping';
 
 import 'src/modules/room-player-list';
 import 'src/modules/room-chat';
@@ -265,6 +265,10 @@ export class PRoomElement extends GemElement<State> {
       // host
       case ChannelMessageType.KEYUP:
         this.#nes?.handle_event((detail as KeyUpMsg).button, false, false);
+        break;
+      // client
+      case ChannelMessageType.ROLE_OFFER:
+        clearRecentPing();
         break;
       // client
       case ChannelMessageType.PING:

@@ -8,6 +8,8 @@ const store = createStore({
   avgPing: 0,
 });
 
+export const clearRecentPing = () => (recentPing.length = 0);
+
 export const pingTick = (ping: number) => {
   recentPing.push(ping);
   if (recentPing.length > 10) {

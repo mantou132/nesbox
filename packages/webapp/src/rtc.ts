@@ -326,7 +326,7 @@ export class RTC extends EventTarget {
     });
     this.#restartTimer = window.setTimeout(() => this.#restart(), 2000);
 
-    this.#pingTimer = window.setInterval(() => this.send(new Ping()), 1000);
+    this.#pingTimer = window.setInterval(() => this.send(new Ping(), false), 1000);
   };
 
   #restart = () => {
@@ -360,9 +360,11 @@ export class RTC extends EventTarget {
     clearInterval(this.#pingTimer);
   };
 
-  send = (data: ChannelMessage) => {
+  send = (data: ChannelMessage, emit = true) => {
     this.#channelMap.forEach((c) => c.readyState === 'open' && c.send(data.toString()));
-    this.#emitMessage(data);
+    if (emit) {
+      this.#emitMessage(data);
+    }
   };
 
   needSendFrame = () => {
