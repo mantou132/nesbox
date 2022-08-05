@@ -238,6 +238,13 @@ impl MutationRoot {
 
         Ok(room)
     }
+    fn update_room_screenshot(
+        context: &Context,
+        input: ScUpdateRoomScreenshot,
+    ) -> FieldResult<ScRoomBasic> {
+        let conn = DB_POOL.get().unwrap();
+        Ok(update_room_screenshot(&conn, context.user_id, &input)?)
+    }
     fn enter_pub_room(context: &Context, input: ScUpdatePlaying) -> FieldResult<ScRoomBasic> {
         let conn = DB_POOL.get().unwrap();
         let room = get_room(&conn, input.room_id)?;

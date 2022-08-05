@@ -30,6 +30,7 @@ export type MutationRoot = {
   updateAccount: ScUser;
   updatePassword: ScUser;
   updateRoom: ScRoomBasic;
+  updateRoomScreenshot: ScRoomBasic;
 };
 
 
@@ -105,6 +106,11 @@ export type MutationRootUpdatePasswordArgs = {
 
 export type MutationRootUpdateRoomArgs = {
   input: ScUpdateRoom;
+};
+
+
+export type MutationRootUpdateRoomScreenshotArgs = {
+  input: ScUpdateRoomScreenshot;
 };
 
 export type QueryRoot = {
@@ -265,6 +271,7 @@ export type ScRoom = {
   host: Scalars['Int'];
   id: Scalars['Int'];
   private: Scalars['Boolean'];
+  screenshot?: Maybe<Scalars['String']>;
   updatedAt: Scalars['Float'];
   users: Array<ScUserBasic>;
 };
@@ -309,6 +316,11 @@ export type ScUpdateRoom = {
   host: Scalars['Int'];
   id: Scalars['Int'];
   private: Scalars['Boolean'];
+};
+
+export type ScUpdateRoomScreenshot = {
+  id: Scalars['Int'];
+  screenshot: Scalars['String'];
 };
 
 export type ScUpdateUser = {
@@ -358,7 +370,7 @@ export type ScUserBasicPartFragment = { __typename?: 'ScUserBasic', id: number, 
 
 export type ScAccountPartFragment = { __typename?: 'ScUser', id: number, username: string, nickname: string, settings?: string, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } };
 
-export type ScRoomPartFragment = { __typename?: 'ScRoom', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number, users: Array<{ __typename?: 'ScUserBasic', id: number, username: string, nickname: string, status: ScUserStatus, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } }> };
+export type ScRoomPartFragment = { __typename?: 'ScRoom', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number, screenshot?: string, users: Array<{ __typename?: 'ScUserBasic', id: number, username: string, nickname: string, status: ScUserStatus, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } }> };
 
 export type ScCommentPartFragment = { __typename?: 'ScComment', gameId: number, body: string, like: boolean, createdAt: number, updatedAt: number, user: { __typename?: 'ScUserBasic', id: number, username: string, nickname: string, status: ScUserStatus, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } } };
 
@@ -372,7 +384,7 @@ export type GetGamesQuery = { __typename?: 'QueryRoot', topGames: Array<number>,
 export type GetRoomsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetRoomsQuery = { __typename?: 'QueryRoot', rooms: Array<{ __typename?: 'ScRoom', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number, users: Array<{ __typename?: 'ScUserBasic', id: number, username: string, nickname: string, status: ScUserStatus, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } }> }> };
+export type GetRoomsQuery = { __typename?: 'QueryRoot', rooms: Array<{ __typename?: 'ScRoom', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number, screenshot?: string, users: Array<{ __typename?: 'ScUserBasic', id: number, username: string, nickname: string, status: ScUserStatus, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } }> }> };
 
 export type GetCommentsQueryVariables = Exact<{
   input: ScCommentsReq;
@@ -489,6 +501,13 @@ export type UpdateRoomMutationVariables = Exact<{
 
 export type UpdateRoomMutation = { __typename?: 'MutationRoot', updateRoom: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } };
 
+export type UpdateRoomScreenshotMutationVariables = Exact<{
+  input: ScUpdateRoomScreenshot;
+}>;
+
+
+export type UpdateRoomScreenshotMutation = { __typename?: 'MutationRoot', updateRoomScreenshot: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } };
+
 export type EnterPubRoomMutationVariables = Exact<{
   input: ScUpdatePlaying;
 }>;
@@ -583,6 +602,7 @@ export const ScRoomPart = `
   users {
     ...ScUserBasicPart
   }
+  screenshot
 }
     `;
 export const ScCommentPart = `
@@ -746,6 +766,13 @@ export const CreateRoom = `
 export const UpdateRoom = `
     mutation updateRoom($input: ScUpdateRoom!) {
   updateRoom(input: $input) {
+    ...ScRoomBasicPart
+  }
+}
+    ${ScRoomBasicPart}`;
+export const UpdateRoomScreenshot = `
+    mutation updateRoomScreenshot($input: ScUpdateRoomScreenshot!) {
+  updateRoomScreenshot(input: $input) {
     ...ScRoomBasicPart
   }
 }

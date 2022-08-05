@@ -29,6 +29,7 @@ pub struct ScRoom {
     created_at: f64,
     updated_at: f64,
     users: Vec<ScUserBasic>,
+    screenshot: Option<String>,
 }
 
 #[derive(GraphQLInputObject)]
@@ -43,6 +44,12 @@ pub struct ScUpdateRoom {
     pub game_id: i32,
     pub private: bool,
     pub host: i32,
+}
+
+#[derive(GraphQLInputObject)]
+pub struct ScUpdateRoomScreenshot {
+    pub id: i32,
+    pub screenshot: String,
 }
 
 pub fn convert_to_sc_room_basic(room: &Room) -> ScRoomBasic {
@@ -62,6 +69,7 @@ pub fn convert_to_sc_room(conn: &PgConnection, room: &Room) -> ScRoom {
         host: room.host,
         private: room.private,
         game_id: room.game_id,
+        screenshot: room.screenshot.clone(),
         created_at: room.created_at.timestamp_millis() as f64,
         updated_at: room.updated_at.timestamp_millis() as f64,
         users: get_room_user_ids(conn, room.id)
@@ -126,6 +134,28 @@ pub fn update_room(conn: &PgConnection, uid: i32, req: &ScUpdateRoom) -> FieldRe
         game_id.eq(req.game_id),
         host.eq(req.host),
         private.eq(req.private),
+        updated_at.eq(Utc::now().naive_utc()),
+    ))
+    .get_result::<Room>(conn)?;
+
+    Ok(convert_to_sc_room_basic(&room))
+}
+
+pub fn update_room_screenshot(
+    conn: &PgConnection,
+    uid: i32,
+    req: &ScUpdateRoomScreenshot,
+) -> FieldResult<ScRoomBasic> {
+    use self::rooms::dsl::*;
+
+    let room = diesel::update(
+        rooms
+            .filter(deleted_at.is_null())
+            .filter(id.eq(req.id))
+            .filter(host.eq(uid)),
+    )
+    .set((
+        screenshot.eq(req.screenshot.clone()),
         updated_at.eq(Utc::now().naive_utc()),
     ))
     .get_result::<Room>(conn)?;

@@ -130,6 +130,7 @@ pub struct Room {
     pub updated_at: NaiveDateTime,
     pub deleted_at: Option<NaiveDateTime>,
     pub host: i32,
+    pub screenshot: Option<String>,
 }
 
 #[derive(Insertable)]

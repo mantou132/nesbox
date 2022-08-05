@@ -83,6 +83,7 @@ table! {
         updated_at -> Timestamp,
         deleted_at -> Nullable<Timestamp>,
         host -> Int4,
+        screenshot -> Nullable<Text>,
     }
 }
 

@@ -68,6 +68,7 @@ fragment ScRoomPart on ScRoom {
   users {
     ...ScUserBasicPart
   }
+  screenshot
 }
 
 fragment ScCommentPart on ScComment {
@@ -195,6 +196,12 @@ mutation createRoom($input: ScNewRoom!) {
 
 mutation updateRoom($input: ScUpdateRoom!) {
   updateRoom(input: $input) {
+    ...ScRoomBasicPart
+  }
+}
+
+mutation updateRoomScreenshot($input: ScUpdateRoomScreenshot!) {
+  updateRoomScreenshot(input: $input) {
     ...ScRoomBasicPart
   }
 }

@@ -2,17 +2,17 @@ import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, pro
 
 import { Room, store } from 'src/store';
 import { theme } from 'src/theme';
-import { getAvatar, getCDNSrc } from 'src/utils';
+import { getCDNSrc } from 'src/utils';
+import { icons } from 'src/icons';
 
-import 'duoyun-ui/elements/avatar';
 import 'duoyun-ui/elements/heading';
+import 'duoyun-ui/elements/use';
 
 const style = createCSSSheet(css`
   :host {
     cursor: pointer;
     display: flex;
-    align-items: center;
-    gap: 1em;
+    flex-direction: column;
     border: 1px solid ${theme.borderColor};
     border-radius: ${theme.normalRound};
     overflow: hidden;
@@ -21,21 +21,43 @@ const style = createCSSSheet(css`
     background-color: ${theme.lightBackgroundColor};
   }
   .cover {
-    width: 10em;
-    aspect-ratio: 503/348;
+    width: 100%;
+    aspect-ratio: 256/240;
     object-fit: cover;
+    background: black;
   }
   .info {
     display: flex;
     flex-direction: column;
+    padding: 1em;
     gap: 1em;
-    min-width: 0px;
   }
-  .heading {
-    margin: 0;
+  .text {
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
+  }
+  .heading {
+    margin: 0;
+  }
+  .users {
+    display: flex;
+    align-items: center;
+    color: ${theme.describeColor};
+    font-size: 0.875em;
+  }
+  .icon {
+    display: flex;
+    align-items: center;
+  }
+  .icon {
+    width: 1.5em;
+    flex-shrink: 0;
+  }
+  .name {
+    min-width: 0;
+    flex-grow: 1;
+    padding-inline-end: 1em;
   }
 `);
 
@@ -49,21 +71,17 @@ export class MRoomItemElement extends GemElement {
 
   render = () => {
     const game = store.games[this.room.gameId || 0];
-    const host = this.room.users.find((u) => this.room.host === u.id)?.nickname;
-
+    const hostNickname = this.room.users.find((u) => this.room.host === u.id)?.nickname;
+    const preview = game ? getCDNSrc(game.preview) : '';
     return html`
-      <img class="cover" loading="lazy" src=${game ? getCDNSrc(game.preview) : ''} />
+      <img class="cover" loading="lazy" src=${this.room.screenshot || preview} />
       <div class="info">
-        <dy-heading lv="4" class="heading">${host}-${game?.name}</dy-heading>
-        <dy-avatar-group
-          class="users"
-          max="9"
-          .data=${this.room.users.map((e) => ({
-            src: getAvatar(e.username),
-            tooltip: e.nickname,
-          }))}
-        >
-        </dy-avatar-group>
+        <dy-heading lv="4" class="heading text">${game?.name}</dy-heading>
+        <div class="users">
+          <span class="name text">${hostNickname}</span>
+          <dy-use class="icon" .element=${icons.group}></dy-use>
+          <span>${this.room.users.length}</span>
+        </div>
       </div>
     `;
   };

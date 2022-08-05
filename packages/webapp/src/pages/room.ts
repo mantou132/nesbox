@@ -43,7 +43,7 @@ import { i18n } from 'src/i18n';
 import type { MRoomChatElement } from 'src/modules/room-chat';
 import { getCDNSrc, preventDefault } from 'src/utils';
 import { events, queryKeys } from 'src/constants';
-import { createInvite } from 'src/services/api';
+import { createInvite, updateRoomScreenshot } from 'src/services/api';
 import type { NesboxRenderElement } from 'src/elements/render';
 import { clearRecentPing, pingTick } from 'src/elements/ping';
 
@@ -435,6 +435,14 @@ export class PRoomElement extends GemElement<State> {
     Toast.open('success', i18n.get('tipGameStateSave', new Time().format()));
   };
 
+  #uploadScreenshot = () => {
+    if (!this.#romBuffer) return;
+    updateRoomScreenshot({
+      id: this.#playing!.id,
+      screenshot: this.canvasRef.element!.captureThumbnail(),
+    });
+  };
+
   #load = async () => {
     if (!this.#isHost || !this.#romBuffer) return;
     const { buffer } = Nes.memory();
@@ -497,6 +505,9 @@ export class PRoomElement extends GemElement<State> {
             path: createPath(routes.games),
           });
           ContextMenu.close();
+        } else {
+          const timer = window.setInterval(this.#uploadScreenshot, 10000);
+          return () => clearInterval(timer);
         }
       },
       () => [this.#playing],

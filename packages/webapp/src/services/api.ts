@@ -63,6 +63,7 @@ import {
   ScNewRoom,
   ScUpdatePassword,
   ScUpdateRoom,
+  ScUpdateRoomScreenshot,
   SendSignal,
   SendSignalMutation,
   SendSignalMutationVariables,
@@ -75,6 +76,9 @@ import {
   UpdateRoom,
   UpdateRoomMutation,
   UpdateRoomMutationVariables,
+  UpdateRoomScreenshot,
+  UpdateRoomScreenshotMutation,
+  UpdateRoomScreenshotMutationVariables,
 } from 'src/generated/graphql';
 import { store, friendStore } from 'src/store';
 import { request, subscribe } from 'src/services';
@@ -119,6 +123,12 @@ export const updateRoom = async (input: ScUpdateRoom) => {
   const { updateRoom } = await request<UpdateRoomMutation, UpdateRoomMutationVariables>(UpdateRoom, { input });
   configure.user!.playing = updateRoom;
   updateStore(configure);
+};
+
+export const updateRoomScreenshot = async (input: ScUpdateRoomScreenshot) => {
+  request<UpdateRoomScreenshotMutation, UpdateRoomScreenshotMutationVariables>(UpdateRoomScreenshot, {
+    input,
+  });
 };
 
 export const enterPubRoom = async (roomId: number) => {
