@@ -45,12 +45,12 @@ import { getCDNSrc, preventDefault } from 'src/utils';
 import { events, queryKeys } from 'src/constants';
 import { createInvite, updateRoomScreenshot } from 'src/services/api';
 import type { NesboxRenderElement } from 'src/elements/render';
-import { clearRecentPing, pingTick } from 'src/elements/ping';
 
 import 'src/modules/room-player-list';
 import 'src/modules/room-chat';
 import 'src/modules/nav';
 import 'src/elements/fps';
+import 'src/elements/ping';
 import 'src/elements/render';
 import 'src/elements/list';
 
@@ -175,8 +175,6 @@ export class PRoomElement extends GemElement<State> {
   #createStream = () => {
     const stream = new MediaStream();
 
-    stream.addTrack(this.canvasRef.element!.captureStream());
-
     this.#audioContext = new AudioContext({ sampleRate: this.#sampleRate });
     this.#audioStreamDestination = this.#audioContext.createMediaStreamDestination();
     this.#gainNode = this.#audioContext.createGain();
@@ -193,7 +191,7 @@ export class PRoomElement extends GemElement<State> {
     if (this.isConnected) requestAnimationFrame(this.#loop);
 
     if (!this.#nes || !this.#isVisible) return;
-    this.#nes.clock_frame();
+    const frameNum = this.#nes.clock_frame();
 
     const memory = Nes.memory();
 
@@ -203,7 +201,7 @@ export class PRoomElement extends GemElement<State> {
 
     const qoiFramePtr = this.#nes.qoi_frame();
     const qoiFrameLen = this.#nes.qoi_frame_len();
-    this.#rtc?.sendFrame(new Uint8Array(memory.buffer, qoiFramePtr, qoiFrameLen));
+    this.#rtc?.sendFrame(new Uint8Array(memory.buffer, qoiFramePtr, qoiFrameLen), frameNum);
 
     if (!this.#nes.sound() || !this.#audioContext || !this.#audioStreamDestination || !this.#gainNode) return;
     const audioBuffer = this.#audioContext.createBuffer(1, this.#bufferSize, this.#sampleRate);
@@ -265,14 +263,6 @@ export class PRoomElement extends GemElement<State> {
       // host
       case ChannelMessageType.KEYUP:
         this.#nes?.handle_event((detail as KeyUpMsg).button, false, false);
-        break;
-      // client
-      case ChannelMessageType.ROLE_OFFER:
-        clearRecentPing();
-        break;
-      // client
-      case ChannelMessageType.PING:
-        pingTick(Date.now() - detail.timestamp);
         break;
     }
   };

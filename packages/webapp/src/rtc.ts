@@ -1,3 +1,4 @@
+import { createStore, updateStore } from '@mantou/gem';
 import { Button } from '@mantou/nes';
 
 import { configure } from 'src/configure';
@@ -6,6 +7,22 @@ import { i18n } from 'src/i18n';
 import { logger } from 'src/logger';
 import { sendSignal } from 'src/services/api';
 import { getTempText } from 'src/utils';
+
+export const pingStore = createStore<{ avgPing?: number }>({});
+
+const recentPing: number[] = [];
+const pingTick = (ping: number) => {
+  recentPing.push(ping);
+  if (recentPing.length > 10) {
+    recentPing.shift();
+  }
+
+  if (recentPing.length > 3) {
+    updateStore(pingStore, {
+      avgPing: Math.round(recentPing.reduce((acc, val) => (acc += val)) / recentPing.length),
+    });
+  }
+};
 
 const buttonMap: Record<Button, Record<string, Button | undefined>> = {
   [Button.Joypad1Up]: { '2': Button.Joypad2Up, '3': Button.Joypad3Up, '4': Button.Joypad4Up },
@@ -105,6 +122,12 @@ export class RoleAnswer extends ChannelMessageBase {
 
 export class Ping extends ChannelMessageBase {
   type = ChannelMessageType.PING;
+
+  prevPing?: number;
+  constructor(prevPing?: number) {
+    super();
+    this.prevPing = prevPing;
+  }
 }
 
 export type ChannelMessage = TextMsg | KeyDownMsg | KeyUpMsg | RoleOffer | RoleAnswer | Ping;
@@ -223,6 +246,7 @@ export class RTC extends EventTarget {
           break;
         case ChannelMessageType.PING:
           channel.send(data);
+          channel.clientPrevPing = (msg as Ping).prevPing;
           break;
       }
     };
@@ -276,6 +300,8 @@ export class RTC extends EventTarget {
     const channel = conn.createDataChannel('msg');
     channel.binaryType = 'arraybuffer';
     channel.onopen = () => {
+      recentPing.length = 0;
+
       clearTimeout(this.#restartTimer);
       // `deleteUser` assign `null`
       channel.onclose = () => {
@@ -290,7 +316,14 @@ export class RTC extends EventTarget {
     channel.onmessage = ({ data }: MessageEvent<string | ArrayBuffer>) => {
       if (typeof data === 'string') {
         const msg = JSON.parse(data) as ChannelMessage;
-        this.#emitMessage(msg);
+        switch (msg.type) {
+          case ChannelMessageType.PING:
+            pingTick(Date.now() - msg.timestamp);
+            break;
+          default:
+            this.#emitMessage(msg);
+            break;
+        }
       } else {
         // compressed frame
         this.#emitMessage(data);
@@ -326,7 +359,7 @@ export class RTC extends EventTarget {
     });
     this.#restartTimer = window.setTimeout(() => this.#restart(), 2000);
 
-    this.#pingTimer = window.setInterval(() => this.send(new Ping(), false), 1000);
+    this.#pingTimer = window.setInterval(() => this.send(new Ping(pingStore.avgPing), false), 1000);
   };
 
   #restart = () => {
@@ -361,7 +394,11 @@ export class RTC extends EventTarget {
   };
 
   send = (data: ChannelMessage, emit = true) => {
-    this.#channelMap.forEach((c) => c.readyState === 'open' && c.send(data.toString()));
+    this.#channelMap.forEach((c) => {
+      if (c.readyState === 'open') {
+        c.send(data.toString());
+      }
+    });
     if (emit) {
       this.#emitMessage(data);
     }
@@ -371,8 +408,22 @@ export class RTC extends EventTarget {
     return !!this.#channelMap.size;
   };
 
-  sendFrame = (frame: ArrayBuffer) => {
-    this.#channelMap.forEach((c) => c.readyState === 'open' && c.send(frame));
+  sendFrame = (frame: ArrayBuffer, frameNum: number) => {
+    this.#channelMap.forEach((channel) => {
+      if (channel.readyState === 'open') {
+        if (!channel.clientPrevPing || channel.clientPrevPing < 30) {
+          channel.send(frame);
+        } else if (channel.clientPrevPing < 90) {
+          if (frameNum % 2 === 0) {
+            channel.send(frame);
+          }
+        } else {
+          if (frameNum % 3 === 0) {
+            channel.send(frame);
+          }
+        }
+      }
+    });
   };
 
   kickoutRole = (userId: number) => {

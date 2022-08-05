@@ -18,4 +18,8 @@ declare global {
     // https://w3c.github.io/badging
     setAppBadge?: (badge?: number) => void;
   }
+
+  interface RTCDataChannel {
+    clientPrevPing?: number;
+  }
 }

@@ -75,6 +75,7 @@ pub struct Nes {
     sound: bool,
     qoi_buffer: Vec<u8>,
     qoi_decode_buffer: Vec<u8>,
+    frame: i32,
 }
 
 #[wasm_bindgen]
@@ -96,6 +97,7 @@ impl Nes {
             sound: false,
             qoi_buffer: Vec::new(),
             qoi_decode_buffer: Vec::new(),
+            frame: 0,
         }
     }
 
@@ -151,13 +153,15 @@ impl Nes {
         self.callback.read(out);
     }
 
-    pub fn clock_frame(&mut self) {
+    pub fn clock_frame(&mut self) -> i32 {
         self.control_deck.clock_frame().expect("valid clock");
         if self.sound {
             let samples = self.control_deck.audio_samples();
             self.audio.consume(samples, true, 0.02);
         }
         self.control_deck.clear_audio_samples();
+        self.frame += 1;
+        self.frame
     }
 
     pub fn load_rom(&mut self, mut bytes: &[u8]) {
