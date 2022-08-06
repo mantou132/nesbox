@@ -32,6 +32,7 @@ export const defaultKeybinding = {
 };
 
 const defaultVolume = {
+  hint: 0.1,
   notification: 0.5,
   game: 0.5,
 };

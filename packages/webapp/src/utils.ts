@@ -48,6 +48,10 @@ export const playSound = (kind: string, volume = configure.user?.settings.volume
     });
 };
 
+export const playHintSound = (kind: string) => {
+  playSound(kind, configure.user!.settings.volume.hint);
+};
+
 export const formatTime = (timestamp: number) => {
   const time = new Time(timestamp);
   if (new Time().isSome(time, 'd')) {

@@ -119,6 +119,9 @@
   "volumeSetting": {
     "message": "音量"
   },
+  "hintVolume": {
+    "message": "提示"
+  },
   "notificationVolume": {
     "message": "通知"
   },

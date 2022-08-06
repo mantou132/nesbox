@@ -16,6 +16,9 @@ pub async fn play_sound(kind: &str, volume: f32) -> Result<(), String> {
 
     let file = match kind {
         "new_invite" => Cursor::new(include_bytes!("new_invite.aac").as_ref()),
+        "joined" => Cursor::new(include_bytes!("joined.aac").as_ref()),
+        "sended" => Cursor::new(include_bytes!("sended.aac").as_ref()),
+        "received" => Cursor::new(include_bytes!("received.aac").as_ref()),
         _ => Cursor::new(include_bytes!("new_message.aac").as_ref()),
     };
 

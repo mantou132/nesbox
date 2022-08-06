@@ -86,7 +86,7 @@ import { configure, parseAccount, Settings } from 'src/configure';
 import { events, Singal, SingalEvent } from 'src/constants';
 import { i18n, isCurrentLang } from 'src/i18n';
 import { logout } from 'src/auth';
-import { documentVisible, playSound } from 'src/utils';
+import { documentVisible, playHintSound, playSound } from 'src/utils';
 
 export const getGames = async () => {
   const { games, topGames, favorites } = await request<GetGamesQuery, GetGamesQueryVariables>(GetGames, {});
@@ -275,6 +275,7 @@ export const createMessage = async (targetId: number, body: string) => {
   friendStore.messageIds[targetId] = [...(friendStore.messageIds[targetId] || []), createMessage.id];
   friendStore.messages[createMessage.id] = createMessage;
   updateStore(friendStore);
+  playHintSound('sended');
 };
 
 export const favoriteGame = async (gameId: number, favorite: boolean) => {
@@ -329,11 +330,12 @@ export const subscribeEvent = () => {
               unreadMessageCount: friend.unreadMessageCount + 1,
             };
           }
+          playSound('new_message');
         } else {
           documentVisible().then(() => readMessage(newMessage.userId));
+          playHintSound('received');
         }
         updateStore(friendStore);
-        playSound('new_message');
       }
 
       if (newGame) {

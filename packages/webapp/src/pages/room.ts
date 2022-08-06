@@ -41,7 +41,7 @@ import {
 import { friendStore, store } from 'src/store';
 import { i18n } from 'src/i18n';
 import type { MRoomChatElement } from 'src/modules/room-chat';
-import { getCDNSrc, preventDefault } from 'src/utils';
+import { getCDNSrc, playHintSound, preventDefault } from 'src/utils';
 import { events, queryKeys } from 'src/constants';
 import { createInvite, updateRoomScreenshot } from 'src/services/api';
 import type { NesboxRenderElement } from 'src/elements/render';
@@ -131,8 +131,12 @@ export class PRoomElement extends GemElement<State> {
     return configure.user?.playing;
   }
 
+  get #userId() {
+    return configure.user?.id;
+  }
+
   get #isHost() {
-    return configure.user?.id === this.#playing?.host;
+    return this.#userId === this.#playing?.host;
   }
 
   get #rom() {
@@ -250,11 +254,19 @@ export class PRoomElement extends GemElement<State> {
     switch (detail.type) {
       // both
       case ChannelMessageType.CHAT_TEXT:
+        if (detail.userId) {
+          playHintSound(detail.userId === this.#userId ? 'sended' : 'received');
+        }
         this.setState({ messages: [detail as TextMsg, ...this.state.messages] });
         break;
       // both
       case ChannelMessageType.ROLE_ANSWER:
-        this.setState({ roles: (detail as RoleAnswer).roles });
+        const roleIds = new Set(this.state.roles.map((role) => role?.userId));
+        const newRoles = (detail as RoleAnswer).roles;
+        if (newRoles.some((role) => role && !roleIds.has(role.userId) && role.userId !== this.#userId)) {
+          playHintSound('joined');
+        }
+        this.setState({ roles: [...newRoles] });
         break;
       // host
       case ChannelMessageType.KEYDOWN:
