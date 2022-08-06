@@ -1,4 +1,14 @@
-import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, connectStore, state } from '@mantou/gem';
+import {
+  GemElement,
+  html,
+  adoptedStyle,
+  customElement,
+  createCSSSheet,
+  css,
+  connectStore,
+  state,
+  styleMap,
+} from '@mantou/gem';
 import type { RouteItem } from 'duoyun-ui/elements/route';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { commonHandle } from 'duoyun-ui/lib/hotkeys';
@@ -11,6 +21,7 @@ import { theme } from 'src/theme';
 import { favoriteGame, leaveRoom } from 'src/services/api';
 import { store } from 'src/store';
 import { icons } from 'src/icons';
+import { isTauriMacApp, isTauriWinApp } from 'src/constants';
 
 import 'duoyun-ui/elements/link';
 import 'duoyun-ui/elements/use';
@@ -162,7 +173,7 @@ export class MNavElement extends GemElement<State> {
               </dy-modal>
             `
           : html`
-              <dy-link style="display: contents" href="/">
+              <dy-link style=${styleMap({ display: isTauriMacApp || isTauriWinApp ? 'none' : 'contents' })} href="/">
                 <img class="icon" src="/logo-96.png" />
               </dy-link>
               <dy-active-link class="link" .route=${routes.games as RouteItem}>${routes.games.title}</dy-active-link>

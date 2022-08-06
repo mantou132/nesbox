@@ -154,15 +154,23 @@ export class PRoomElement extends GemElement<State> {
   #rtc?: RTC;
 
   #enableAudio = () => {
+    // enable audio state, work on host and client
+    this.#nes?.set_sound(true);
+
     if (this.#isHost) {
-      this.#nes?.set_sound(true);
       this.#setVolume();
     } else {
       this.audioRef.element!.muted = false;
     }
   };
 
-  #disableAudio = () => {
+  #resumeAudio = () => {
+    if (this.#nes?.sound()) {
+      this.#enableAudio();
+    }
+  };
+
+  #pauseAudio = () => {
     if (this.#isHost) {
       this.#setVolume(0);
     } else {
@@ -538,8 +546,8 @@ export class PRoomElement extends GemElement<State> {
     addEventListener('keyup', this.#onKeyUp);
     addEventListener(events.PRESS_BUTTON, this.#onPressButton);
     addEventListener(events.RELEASE_BUTTON, this.#onReleaseButton);
-    addEventListener('focus', this.#enableAudio);
-    addEventListener('blur', this.#disableAudio);
+    addEventListener('focus', this.#resumeAudio);
+    addEventListener('blur', this.#pauseAudio);
     return () => {
       this.#audioContext?.close();
       this.#rtc?.destroy();
@@ -547,8 +555,8 @@ export class PRoomElement extends GemElement<State> {
       removeEventListener('keyup', this.#onKeyUp);
       removeEventListener(events.PRESS_BUTTON, this.#onPressButton);
       removeEventListener(events.RELEASE_BUTTON, this.#onReleaseButton);
-      removeEventListener('focus', this.#enableAudio);
-      removeEventListener('blur', this.#disableAudio);
+      removeEventListener('focus', this.#resumeAudio);
+      removeEventListener('blur', this.#pauseAudio);
     };
   };
 

@@ -70,6 +70,7 @@ const style = createCSSSheet(css`
   }
   .favorite {
     width: 1.3em;
+    flex-shrink: 0;
   }
 `);
 

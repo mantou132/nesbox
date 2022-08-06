@@ -5,8 +5,10 @@ import { gridStyle } from 'src/modules/keybinding';
 import { updateAccount } from 'src/services/api';
 import { VideoFilter, VideoRenderMethod } from 'src/constants';
 import { i18n } from 'src/i18n';
+import { icons } from 'src/icons';
 
 import 'duoyun-ui/elements/select';
+import 'duoyun-ui/elements/use';
 
 /**
  * @customElement m-video-settings
@@ -42,7 +44,12 @@ export class MVideoSettingsElement extends GemElement {
           ]}
           @change=${(evt: CustomEvent<VideoRenderMethod>) => this.#updateVideoSetting('render', evt.detail)}
         ></dy-select>
-        <div>${i18n.get('videoFilter')}</div>
+        <div>
+          ${i18n.get('videoFilter')}
+          <dy-tooltip .content=${i18n.get('tipHostSetting')}>
+            <dy-use class="help" .element=${icons.help}></dy-use>
+          </dy-tooltip>
+        </div>
         <dy-select
           .value=${configure.user.settings.video.filter}
           .options=${[

@@ -98,8 +98,20 @@
   "keySetting": {
     "message": "按鍵"
   },
+  "keySettingJoypad1": {
+    "message": "手柄 1"
+  },
+  "keySettingJoypad2": {
+    "message": "手柄 2"
+  },
   "shortcut": {
     "message": "快捷键"
+  },
+  "shortcutGlobal": {
+    "message": "全局"
+  },
+  "shortcutHost": {
+    "message": "主機"
   },
   "shortcutReadMsg": {
     "message": "打開未讀消息"
@@ -256,6 +268,9 @@
   },
   "tipGameStateLoad": {
     "message": "加載$1成功"
+  },
+  "tipHostSetting": {
+    "message": "改選項只對主機有效"
   },
   "code404001": { "message": "用戶已存在" },
   "code404002": { "message": "賬號或密碼錯誤" },

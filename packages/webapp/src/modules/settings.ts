@@ -8,6 +8,7 @@ import 'src/modules/keybinding';
 import 'src/modules/sound-settings';
 import 'src/modules/account-settings';
 import 'src/modules/video-settings';
+import 'src/modules/shortcut-settings';
 
 type State = {
   tab: number;
@@ -67,21 +68,21 @@ export class MSettingsElement extends GemElement<State> {
         .value=${this.state.tab}
         .data=${[
           {
-            tab: i18n.get('accountSetting'),
-            getContent() {
-              return html`
-                <dy-tab-panel>
-                  <m-account-settings></m-account-settings>
-                </dy-tab-panel>
-              `;
-            },
-          },
-          {
             tab: i18n.get('keySetting'),
             getContent() {
               return html`
                 <dy-tab-panel>
                   <m-keybinding></m-keybinding>
+                </dy-tab-panel>
+              `;
+            },
+          },
+          {
+            tab: i18n.get('shortcut'),
+            getContent() {
+              return html`
+                <dy-tab-panel>
+                  <m-shortcut-settings></m-shortcut-settings>
                 </dy-tab-panel>
               `;
             },
@@ -102,6 +103,16 @@ export class MSettingsElement extends GemElement<State> {
               return html`
                 <dy-tab-panel>
                   <m-video-settings></m-video-settings>
+                </dy-tab-panel>
+              `;
+            },
+          },
+          {
+            tab: i18n.get('accountSetting'),
+            getContent() {
+              return html`
+                <dy-tab-panel>
+                  <m-account-settings></m-account-settings>
                 </dy-tab-panel>
               `;
             },

@@ -1,7 +1,6 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, connectStore } from '@mantou/gem';
-import { isMac } from 'duoyun-ui/lib/hotkeys';
 
-import { configure, Settings } from 'src/configure';
+import { configure } from 'src/configure';
 import { updateAccount } from 'src/services/api';
 import { i18n } from 'src/i18n';
 
@@ -18,10 +17,14 @@ export const gridStyle = createCSSSheet(css`
     display: grid;
     grid-template-columns: 4fr 11fr;
     gap: 0.75em;
+    width: 100%;
   }
   .grid div {
     display: flex;
     align-items: center;
+  }
+  .help {
+    width: 1em;
   }
 `);
 
@@ -36,18 +39,10 @@ export class MKeybindingElement extends GemElement {
   render = () => {
     if (!configure.user) return html``;
 
-    const labelMap: Record<keyof Settings['shortcuts'], string> = {
-      QUICK_REPLY: i18n.get('shortcutReadMsg'),
-      OPEN_SEARCH: i18n.get('shortcutSearch'),
-      OPEN_SETTINGS: i18n.get('shortcutSettings'),
-      SAVE_GAME_STATE: i18n.get('shortcutSave'),
-      LOAD_GAME_STATE: i18n.get('shortcutLoad'),
-    };
-
     const getJoypadKey = (keys: string[]) => keys.find((e) => e.length === 1 || e.startsWith('arrow')) || '';
 
     return html`
-      <dy-heading class="heading" lv="4">Joypad 1</dy-heading>
+      <dy-heading class="heading" lv="4">${i18n.get('keySettingJoypad1')}</dy-heading>
       <div class="grid">
         ${Object.entries(configure.user.settings.keybinding)
           .filter(([name]) => !name.endsWith('_2'))
@@ -70,7 +65,7 @@ export class MKeybindingElement extends GemElement {
             `,
           )}
       </div>
-      <dy-heading class="heading" lv="4">Joypad 2</dy-heading>
+      <dy-heading class="heading" lv="4">${i18n.get('keySettingJoypad2')}</dy-heading>
       <div class="grid">
         ${Object.entries(configure.user.settings.keybinding)
           .filter(([name]) => name.endsWith('_2'))
@@ -92,30 +87,6 @@ export class MKeybindingElement extends GemElement {
               ></dy-shortcut-record>
             `,
           )}
-      </div>
-      <dy-heading class="heading" lv="4">${i18n.get('shortcut')}</dy-heading>
-      <div class="grid">
-        ${Object.entries(configure.user.settings.shortcuts).map(
-          ([name, key]) => html`
-            <div>${labelMap[name as keyof Settings['shortcuts']]}</div>
-            <dy-shortcut-record
-              .value=${isMac ? key.mac : key.win}
-              @change=${({ detail }: CustomEvent<string[]>) =>
-                updateAccount({
-                  settings: {
-                    ...configure.user!.settings,
-                    shortcuts: {
-                      ...configure.user!.settings.shortcuts,
-                      [name]: {
-                        ...key,
-                        [isMac ? 'mac' : 'win']: detail,
-                      },
-                    },
-                  },
-                })}
-            ></dy-shortcut-record>
-          `,
-        )}
       </div>
     `;
   };

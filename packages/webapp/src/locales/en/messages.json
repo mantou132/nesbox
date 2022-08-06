@@ -98,8 +98,20 @@
   "keySetting": {
     "message": "Key Binding"
   },
+  "keySettingJoypad1": {
+    "message": "Joypad 1"
+  },
+  "keySettingJoypad2": {
+    "message": "Joypad 2"
+  },
   "shortcut": {
     "message": "Shortcut"
+  },
+  "shortcutGlobal": {
+    "message": "Global"
+  },
+  "shortcutHost": {
+    "message": "Host"
   },
   "shortcutReadMsg": {
     "message": "Open Unread Message"
@@ -135,7 +147,7 @@
     "message": "Video"
   },
   "videoRender": {
-    "message": "Render method"
+    "message": "Render Mode"
   },
   "videoRenderPixelated": {
     "message": "Pixelated"
@@ -256,6 +268,9 @@
   },
   "tipGameStateLoad": {
     "message": "Loading $1 succeeded"
+  },
+  "tipHostSetting": {
+    "message": "The change option is only effective for the host"
   },
   "code404001": { "message": "Users exist" },
   "code404002": { "message": "Incorrect username or password" },

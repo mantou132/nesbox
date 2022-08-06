@@ -96,10 +96,22 @@
     "message": "不匹配新密码"
   },
   "keySetting": {
-    "message": "按键"
+    "message": "游戏按键"
+  },
+  "keySettingJoypad1": {
+    "message": "手柄 1"
+  },
+  "keySettingJoypad2": {
+    "message": "手柄 2"
   },
   "shortcut": {
     "message": "快捷键"
+  },
+  "shortcutGlobal": {
+    "message": "全局"
+  },
+  "shortcutHost": {
+    "message": "主机"
   },
   "shortcutReadMsg": {
     "message": "打开未读消息"
@@ -256,6 +268,9 @@
   },
   "tipGameStateLoad": {
     "message": "加载$1成功"
+  },
+  "tipHostSetting": {
+    "message": "改选项只对主机有效"
   },
   "code404001": { "message": "用户已存在" },
   "code404002": { "message": "账号或密码错误" },

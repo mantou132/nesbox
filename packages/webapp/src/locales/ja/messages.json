@@ -98,8 +98,20 @@
   "keySetting": {
     "message": "キー設定"
   },
+  "keySettingJoypad1": {
+    "message": "Joypad 1"
+  },
+  "keySettingJoypad2": {
+    "message": "Joypad 2"
+  },
   "shortcut": {
     "message": "ホットキー"
+  },
+  "shortcutGlobal": {
+    "message": "グローバル"
+  },
+  "shortcutHost": {
+    "message": "ホスト"
   },
   "shortcutReadMsg": {
     "message": "未読メッセージを開く"
@@ -256,6 +268,9 @@
   },
   "tipGameStateLoad": {
     "message": "$1の読み込みに成功しました"
+  },
+  "tipHostSetting": {
+    "message": "変更オプションは、ホストにのみ有効です"
   },
   "code404001": { "message": "ユーザーが存在します" },
   "code404002": { "message": "ユーザーネームまたはパスワードが違います" },
