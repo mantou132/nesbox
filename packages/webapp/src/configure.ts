@@ -38,6 +38,10 @@ const defaultVolume = {
 };
 
 const defaultShortcuts = {
+  QUICK_REPLY: {
+    win: ['.'],
+    mac: ['.'],
+  },
   OPEN_SEARCH: {
     win: ['ctrl', 'k'],
     mac: ['command', 'k'],

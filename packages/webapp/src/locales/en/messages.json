@@ -101,6 +101,9 @@
   "shortcut": {
     "message": "Shortcut"
   },
+  "shortcutReadMsg": {
+    "message": "Open Unread Message"
+  },
   "shortcutSearch": {
     "message": "Search"
   },

@@ -101,6 +101,9 @@
   "shortcut": {
     "message": "ホットキー"
   },
+  "shortcutReadMsg": {
+    "message": "未読メッセージを開く"
+  },
   "shortcutSearch": {
     "message": "探す"
   },

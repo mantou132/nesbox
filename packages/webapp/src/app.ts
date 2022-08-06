@@ -19,6 +19,7 @@ import { forever } from 'duoyun-ui/lib/utils';
 import {
   configure,
   getShortcut,
+  toggoleFriendChatState,
   toggoleFriendListState,
   toggoleSearchState,
   toggoleSettingsState,
@@ -28,6 +29,7 @@ import { enterPubRoom, getAccount, getFriends, getGames, subscribeEvent } from '
 import { paramKeys, queryKeys } from 'src/constants';
 import { i18n } from 'src/i18n';
 import { preventDefault } from 'src/utils';
+import { friendStore } from 'src/store';
 
 import 'duoyun-ui/elements/input-capture';
 import 'duoyun-ui/elements/drawer';
@@ -81,10 +83,18 @@ export class AppRootElement extends GemElement {
     this.contentRef.element?.scrollTo(0, 0);
   };
 
+  #openUnReadMessage = () => {
+    const hasUnreadMsgUserId = friendStore.friendIds?.find((id) => friendStore.friends[id]?.unreadMessageCount);
+    if (hasUnreadMsgUserId) {
+      toggoleFriendChatState(hasUnreadMsgUserId);
+    }
+  };
+
   #globalShortcut = (evt: KeyboardEvent) => {
     hotkeys({
       [getShortcut('OPEN_SEARCH')]: preventDefault(toggoleSearchState),
       [getShortcut('OPEN_SETTINGS')]: preventDefault(toggoleSettingsState),
+      [getShortcut('QUICK_REPLY')]: preventDefault(this.#openUnReadMessage),
     })(evt);
   };
 

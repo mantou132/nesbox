@@ -101,6 +101,9 @@
   "shortcut": {
     "message": "快捷键"
   },
+  "shortcutReadMsg": {
+    "message": "打開未讀消息"
+  },
   "shortcutSearch": {
     "message": "搜索"
   },

@@ -16,7 +16,7 @@ export const gridStyle = createCSSSheet(css`
   }
   .grid {
     display: grid;
-    grid-template-columns: 2fr 6fr;
+    grid-template-columns: 4fr 11fr;
     gap: 0.75em;
   }
   .grid div {
@@ -37,6 +37,7 @@ export class MKeybindingElement extends GemElement {
     if (!configure.user) return html``;
 
     const labelMap: Record<keyof Settings['shortcuts'], string> = {
+      QUICK_REPLY: i18n.get('shortcutReadMsg'),
       OPEN_SEARCH: i18n.get('shortcutSearch'),
       OPEN_SETTINGS: i18n.get('shortcutSettings'),
       SAVE_GAME_STATE: i18n.get('shortcutSave'),
