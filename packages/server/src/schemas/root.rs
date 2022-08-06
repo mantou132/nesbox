@@ -162,7 +162,21 @@ impl MutationRoot {
     }
     fn create_invite(context: &Context, input: ScNewInvite) -> FieldResult<ScInvite> {
         let conn = DB_POOL.get().unwrap();
-        let invite = create_invite(&conn, context.user_id, &input)?;
+        let playing = get_playing(&conn, input.target_id).map(|room| room.id);
+        if Some(input.room_id) == playing {
+            return Err("can't invite".into());
+        }
+
+        let (deleted_invite, invite) = create_invite(&conn, context.user_id, &input)?;
+        if let Some(deleted_id) = deleted_invite {
+            notify(
+                input.target_id,
+                ScNotifyMessageBuilder::default()
+                    .delete_invite(deleted_id)
+                    .build()
+                    .unwrap(),
+            );
+        }
         notify(
             input.target_id,
             ScNotifyMessageBuilder::default()

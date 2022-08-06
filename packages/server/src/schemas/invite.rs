@@ -81,7 +81,11 @@ pub fn get_invite(conn: &PgConnection, uid: i32, iid: i32) -> FieldResult<ScInvi
     Ok(convert_to_sc_invite(conn, &invite))
 }
 
-pub fn create_invite(conn: &PgConnection, uid: i32, req: &ScNewInvite) -> FieldResult<ScInvite> {
+pub fn create_invite(
+    conn: &PgConnection,
+    uid: i32,
+    req: &ScNewInvite,
+) -> FieldResult<(Option<i32>, ScInvite)> {
     use self::invites::dsl::*;
 
     let tid = if let Some(username) = &req.try_username {
@@ -90,9 +94,10 @@ pub fn create_invite(conn: &PgConnection, uid: i32, req: &ScNewInvite) -> FieldR
         req.target_id
     };
 
-    diesel::delete(invites.filter(user_id.eq(uid)).filter(target_id.eq(tid)))
-        .execute(conn)
-        .unwrap();
+    let deleted_invite = diesel::delete(invites.filter(user_id.eq(uid)).filter(target_id.eq(tid)))
+        .get_result::<Invite>(conn)
+        .ok()
+        .map(|invite| invite.id);
 
     let new_invite = NewInvite {
         user_id: uid,
@@ -107,7 +112,7 @@ pub fn create_invite(conn: &PgConnection, uid: i32, req: &ScNewInvite) -> FieldR
         .values(&new_invite)
         .get_result::<Invite>(conn)?;
 
-    Ok(convert_to_sc_invite(conn, &invite))
+    Ok((deleted_invite, convert_to_sc_invite(conn, &invite)))
 }
 
 pub fn delete_invite_by_id(conn: &PgConnection, uid: i32, iid: i32) {
