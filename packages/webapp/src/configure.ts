@@ -108,6 +108,7 @@ interface Configure {
   friendListState?: boolean;
   settingsState?: boolean;
   searchState?: boolean;
+  recentFriendChat?: number;
   friendChatState?: number;
   usedRelease?: number;
   openNesFile?: File;
@@ -142,7 +143,10 @@ export const toggoleFriendListState = () => {
 };
 
 export const toggoleFriendChatState = (id?: number) => {
-  updateStore(configure, { friendChatState: id });
+  updateStore(configure, {
+    recentFriendChat: id || configure.friendChatState,
+    friendChatState: id,
+  });
 };
 
 export const toggoleSettingsState = () => {

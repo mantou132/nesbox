@@ -87,6 +87,8 @@ export class AppRootElement extends GemElement {
     const hasUnreadMsgUserId = friendStore.friendIds?.find((id) => friendStore.friends[id]?.unreadMessageCount);
     if (hasUnreadMsgUserId) {
       toggoleFriendChatState(hasUnreadMsgUserId);
+    } else {
+      toggoleFriendChatState(configure.recentFriendChat);
     }
   };
 
