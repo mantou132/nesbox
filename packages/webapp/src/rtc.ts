@@ -297,11 +297,14 @@ export class RTC extends EventTarget {
   #startClient = async () => {
     const conn = this.#createRTCPeerConnection(configure.user!.id);
 
-    const channel = conn.createDataChannel('msg');
+    /**
+     * 不按顺序接收消息的问题
+     * 1. 帧可能乱序，可以在帧数据上添加帧数，但需要复制内存（性能消耗多少？）
+     * 2. ping 值不准确
+     */
+    const channel = conn.createDataChannel('msg', { ordered: false, maxRetransmits: 0 });
     channel.binaryType = 'arraybuffer';
     channel.onopen = () => {
-      recentPing.length = 0;
-
       clearTimeout(this.#restartTimer);
       // `deleteUser` assign `null`
       channel.onclose = () => {
@@ -391,6 +394,8 @@ export class RTC extends EventTarget {
     removeEventListener(events.SINGAL, this.#onSignal);
     clearTimeout(this.#restartTimer);
     clearInterval(this.#pingTimer);
+
+    recentPing.length = 0;
   };
 
   send = (data: ChannelMessage, emit = true) => {
