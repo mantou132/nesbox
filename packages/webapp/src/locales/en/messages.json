@@ -251,6 +251,9 @@
   "tipChangePassword": {
     "message": "Password has been updated"
   },
+  "tipApplyFriendSuccess": {
+    "message": "Request has been sent"
+  },
   "tipIviteSuccess": {
     "message": "Invitation has been sent"
   },

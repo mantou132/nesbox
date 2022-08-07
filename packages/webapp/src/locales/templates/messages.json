@@ -251,6 +251,9 @@
   "tipChangePassword": {
     "message": "修改密码成功"
   },
+  "tipApplyFriendSuccess": {
+    "message": "请求已经发送"
+  },
   "tipIviteSuccess": {
     "message": "邀请已经发送"
   },

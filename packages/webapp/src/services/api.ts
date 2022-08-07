@@ -189,6 +189,7 @@ export const getFriends = async () => {
 
 export const applyFriend = async (username: string) => {
   await request<ApplyFriendMutation, ApplyFriendMutationVariables>(ApplyFriend, { input: { username } });
+  Toast.open('success', i18n.get('tipApplyFriendSuccess'));
 };
 
 export const acceptFriend = async (targetId: number, accept: boolean) => {
@@ -387,7 +388,7 @@ export const subscribeEvent = () => {
       if (applyFriend) {
         friendStore.friends[applyFriend.user.id] = applyFriend;
         updateStore(friendStore, {
-          friendIds: [...(friendStore.friendIds || []), applyFriend.user.id],
+          friendIds: [...new Set([...(friendStore.friendIds || []), applyFriend.user.id])],
         });
         playSound('apply_friend');
       }
@@ -395,7 +396,7 @@ export const subscribeEvent = () => {
       if (acceptFriend) {
         friendStore.friends[acceptFriend.user.id] = acceptFriend;
         updateStore(friendStore, {
-          friendIds: [...(friendStore.friendIds || []), acceptFriend.user.id],
+          friendIds: [...new Set([...(friendStore.friendIds || []), acceptFriend.user.id])],
         });
       }
 

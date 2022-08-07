@@ -118,6 +118,10 @@ pub fn accept_friend(conn: &PgConnection, uid: i32, tid: i32) -> FieldResult<ScF
         .set(status.eq(&convert_status_to_string(ScFriendStatus::Accept)))
         .execute(conn)?;
 
+    diesel::delete(friends.filter(user_id.eq(tid)).filter(target_id.eq(uid)))
+        .execute(conn)
+        .unwrap();
+
     let new_friend = NewFriend {
         user_id: tid,
         target_id: uid,

@@ -124,14 +124,16 @@ impl MutationRoot {
     fn apply_friend(context: &Context, input: ScNewFriend) -> FieldResult<String> {
         let conn = DB_POOL.get().unwrap();
         if let Ok(target_user) = get_user_by_username(&conn, &input.username) {
-            if let Ok(friend) = apply_friend(&conn, context.user_id, target_user.id) {
-                notify(
-                    target_user.id,
-                    ScNotifyMessageBuilder::default()
-                        .apply_friend(friend.clone())
-                        .build()
-                        .unwrap(),
-                );
+            if context.user_id != target_user.id {
+                if let Ok(friend) = apply_friend(&conn, context.user_id, target_user.id) {
+                    notify(
+                        target_user.id,
+                        ScNotifyMessageBuilder::default()
+                            .apply_friend(friend.clone())
+                            .build()
+                            .unwrap(),
+                    );
+                }
             }
         }
         Ok("Ok".into())

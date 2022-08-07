@@ -251,6 +251,9 @@
   "tipChangePassword": {
     "message": "パスワードが更新されました"
   },
+  "tipApplyFriendSuccess": {
+    "message": "リクエストが送信されました"
+  },
   "tipIviteSuccess": {
     "message": "招待状が送信されました"
   },
