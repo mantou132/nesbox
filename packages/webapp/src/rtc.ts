@@ -11,6 +11,10 @@ import { getTempText } from 'src/utils';
 export const pingStore = createStore<{ avgPing?: number }>({});
 
 const recentPing: number[] = [];
+const cleanPing = () => {
+  recentPing.length = 0;
+  updateStore(pingStore, { avgPing: undefined });
+};
 const pingTick = (ping: number) => {
   recentPing.push(ping);
   if (recentPing.length > 10) {
@@ -302,7 +306,7 @@ export class RTC extends EventTarget {
      * 1. 帧可能乱序，可以在帧数据上添加帧数，但需要复制内存（性能消耗多少？）
      * 2. ping 值不准确
      */
-    const channel = conn.createDataChannel('msg', { ordered: false, maxRetransmits: 0 });
+    const channel = conn.createDataChannel('msg', { ordered: false });
     channel.binaryType = 'arraybuffer';
     channel.onopen = () => {
       clearTimeout(this.#restartTimer);
@@ -394,8 +398,7 @@ export class RTC extends EventTarget {
     removeEventListener(events.SINGAL, this.#onSignal);
     clearTimeout(this.#restartTimer);
     clearInterval(this.#pingTimer);
-
-    recentPing.length = 0;
+    cleanPing();
   };
 
   send = (data: ChannelMessage, emit = true) => {
@@ -422,8 +425,12 @@ export class RTC extends EventTarget {
           if (frameNum % 2 === 0) {
             channel.send(frame);
           }
-        } else {
+        } else if (channel.clientPrevPing < 150) {
           if (frameNum % 3 === 0) {
+            channel.send(frame);
+          }
+        } else if (channel.clientPrevPing < 300) {
+          if (frameNum % 6 === 0) {
             channel.send(frame);
           }
         }
