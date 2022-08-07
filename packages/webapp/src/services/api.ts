@@ -212,7 +212,8 @@ export const deleteFriend = async (targetId: number) => {
 };
 
 export const createInvite = async (input: ScNewInvite) => {
-  await request<CreateInviteMutation, CreateInviteMutationVariables>(CreateInvite, { input }, { ignoreError: true });
+  await request<CreateInviteMutation, CreateInviteMutationVariables>(CreateInvite, { input });
+  Toast.open('success', i18n.get('tipIviteSuccess'));
 };
 
 export const acceptInvite = async (inviteId: number, accept: boolean) => {

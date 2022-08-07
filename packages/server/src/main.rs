@@ -64,7 +64,7 @@ async fn main() -> io::Result<()> {
             rooms.iter().for_each(|room| {
                 leave_room_and_notify(room.host).ok();
             });
-            log::warn!("Clean {} outdated rooms", rooms.len());
+            log::debug!("Clean {} outdated rooms", rooms.len());
         }
     });
 

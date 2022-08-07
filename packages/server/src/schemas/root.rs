@@ -125,14 +125,17 @@ impl MutationRoot {
         let conn = DB_POOL.get().unwrap();
         if let Ok(target_user) = get_user_by_username(&conn, &input.username) {
             if context.user_id != target_user.id {
-                if let Ok(friend) = apply_friend(&conn, context.user_id, target_user.id) {
-                    notify(
-                        target_user.id,
-                        ScNotifyMessageBuilder::default()
-                            .apply_friend(friend.clone())
-                            .build()
-                            .unwrap(),
-                    );
+                match apply_friend(&conn, context.user_id, target_user.id) {
+                    Ok(friend) => {
+                        notify(
+                            target_user.id,
+                            ScNotifyMessageBuilder::default()
+                                .apply_friend(friend.clone())
+                                .build()
+                                .unwrap(),
+                        );
+                    }
+                    Err(err) => log::debug!("{:?}", err),
                 }
             }
         }
@@ -162,31 +165,34 @@ impl MutationRoot {
         }
         Ok("Ok".into())
     }
-    fn create_invite(context: &Context, input: ScNewInvite) -> FieldResult<ScInvite> {
+    fn create_invite(context: &Context, input: ScNewInvite) -> FieldResult<String> {
         let conn = DB_POOL.get().unwrap();
-        let playing = get_playing(&conn, input.target_id).map(|room| room.id);
-        if Some(input.room_id) == playing {
-            return Err("can't invite".into());
+        let room_id = get_playing(&conn, input.target_id).map(|room| room.id);
+        if Some(input.room_id) != room_id {
+            match create_invite(&conn, context.user_id, &input) {
+                Ok((deleted_invite, invite)) => {
+                    if let Some(deleted_id) = deleted_invite {
+                        notify(
+                            input.target_id,
+                            ScNotifyMessageBuilder::default()
+                                .delete_invite(deleted_id)
+                                .build()
+                                .unwrap(),
+                        );
+                    }
+                    notify(
+                        input.target_id,
+                        ScNotifyMessageBuilder::default()
+                            .new_invite(invite.clone())
+                            .build()
+                            .unwrap(),
+                    );
+                }
+                Err(err) => log::debug!("{:?}", err),
+            }
         }
 
-        let (deleted_invite, invite) = create_invite(&conn, context.user_id, &input)?;
-        if let Some(deleted_id) = deleted_invite {
-            notify(
-                input.target_id,
-                ScNotifyMessageBuilder::default()
-                    .delete_invite(deleted_id)
-                    .build()
-                    .unwrap(),
-            );
-        }
-        notify(
-            input.target_id,
-            ScNotifyMessageBuilder::default()
-                .new_invite(invite.clone())
-                .build()
-                .unwrap(),
-        );
-        Ok(invite)
+        Ok("Ok".into())
     }
     fn accept_invite(context: &Context, input: ScUpdateInvite) -> FieldResult<String> {
         let conn = DB_POOL.get().unwrap();

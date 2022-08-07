@@ -179,9 +179,7 @@ mutation acceptFriend($input: ScUpdateFriend!) {
 }
 
 mutation createInvite($input: ScNewInvite!) {
-  createInvite(input: $input) {
-    ...ScInvitePart
-  }
+  createInvite(input: $input)
 }
 
 mutation acceptInvite($input: ScUpdateInvite!) {

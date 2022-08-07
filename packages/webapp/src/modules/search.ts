@@ -3,7 +3,6 @@ import { locale } from 'duoyun-ui/lib/locale';
 import { isIncludesString } from 'duoyun-ui/lib/utils';
 import type { Option } from 'duoyun-ui/elements/options';
 import { createPath } from 'duoyun-ui/elements/route';
-import { Toast } from 'duoyun-ui/elements/toast';
 
 import { friendStore, store } from 'src/store';
 import { theme } from 'src/theme';
@@ -111,10 +110,9 @@ export class MSearchElement extends GemElement<State> {
           icon: icons.person,
           label: friend.user.nickname,
           tag: playing ? html`<dy-use .element=${icons.share} style="width: 1.5em"></dy-use>` : undefined,
-          onClick: async () => {
+          onClick: () => {
             if (playing) {
-              await createInvite({ targetId: friend.user.id, roomId: playing.id });
-              Toast.open('success', i18n.get('tipIviteSuccess'));
+              createInvite({ targetId: friend.user.id, roomId: playing.id });
             } else {
               toggoleFriendChatState(friend.user.id);
             }

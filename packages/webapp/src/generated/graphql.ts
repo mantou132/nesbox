@@ -19,7 +19,7 @@ export type MutationRoot = {
   applyFriend: Scalars['String'];
   createComment: ScComment;
   createGame: ScGame;
-  createInvite: ScInvite;
+  createInvite: Scalars['String'];
   createMessage: ScMessage;
   createRoom: ScRoomBasic;
   enterPubRoom: ScRoomBasic;
@@ -478,7 +478,7 @@ export type CreateInviteMutationVariables = Exact<{
 }>;
 
 
-export type CreateInviteMutation = { __typename?: 'MutationRoot', createInvite: { __typename?: 'ScInvite', id: number, targetId: number, userId: number, createdAt: number, updatedAt: number, room: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } } };
+export type CreateInviteMutation = { __typename?: 'MutationRoot', createInvite: string };
 
 export type AcceptInviteMutationVariables = Exact<{
   input: ScUpdateInvite;
@@ -745,12 +745,9 @@ export const AcceptFriend = `
     `;
 export const CreateInvite = `
     mutation createInvite($input: ScNewInvite!) {
-  createInvite(input: $input) {
-    ...ScInvitePart
-  }
+  createInvite(input: $input)
 }
-    ${ScInvitePart}
-${ScRoomBasicPart}`;
+    `;
 export const AcceptInvite = `
     mutation acceptInvite($input: ScUpdateInvite!) {
   acceptInvite(input: $input)

@@ -1,6 +1,5 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, property } from '@mantou/gem';
 import { ContextMenu } from 'duoyun-ui/elements/menu';
-import { Toast } from 'duoyun-ui/elements/toast';
 import { commonHandle } from 'duoyun-ui/lib/hotkeys';
 
 import { Friend, Invite, store } from 'src/store';
@@ -126,9 +125,8 @@ export class MFriendItemElement extends GemElement {
         {
           text: i18n.get('inviteFriend'),
           disabled: !configure.user?.playing,
-          handle: async () => {
-            await createInvite({ targetId: this.friend.user.id, roomId: configure.user!.playing!.id });
-            Toast.open('success', i18n.get('tipIviteSuccess'));
+          handle: () => {
+            createInvite({ targetId: this.friend.user.id, roomId: configure.user!.playing!.id });
           },
         },
         {
