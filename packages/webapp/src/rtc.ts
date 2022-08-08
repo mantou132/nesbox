@@ -319,6 +319,8 @@ export class RTC extends EventTarget {
 
       const textMsg = new TextMsg(getTempText(i18n.get('enterRoomMsg', configure.user!.nickname))).toSystemRole();
       this.send(textMsg);
+
+      this.#sendPing();
     };
     channel.onmessage = ({ data }: MessageEvent<string | ArrayBuffer>) => {
       if (typeof data === 'string') {
@@ -365,8 +367,11 @@ export class RTC extends EventTarget {
       data: conn.localDescription,
     });
     this.#restartTimer = window.setTimeout(() => this.#restart(), 2000);
+  };
 
-    this.#pingTimer = window.setInterval(() => this.send(new Ping(pingStore.avgPing), false), 1000);
+  #sendPing = () => {
+    this.send(new Ping(pingStore.avgPing), false);
+    this.#pingTimer = window.setTimeout(this.#sendPing, 1000);
   };
 
   #restart = () => {
@@ -397,6 +402,7 @@ export class RTC extends EventTarget {
     this.#connMap.forEach((_, id) => this.#deleteUser(id));
     removeEventListener(events.SINGAL, this.#onSignal);
     clearTimeout(this.#restartTimer);
+
     clearInterval(this.#pingTimer);
     cleanPing();
   };
@@ -419,7 +425,10 @@ export class RTC extends EventTarget {
   sendFrame = (frame: ArrayBuffer, frameNum: number) => {
     this.#channelMap.forEach((channel) => {
       if (channel.readyState === 'open') {
-        if (!channel.clientPrevPing || channel.clientPrevPing < 30) {
+        // Wait for client to send ping
+        if (!channel.clientPrevPing) return;
+
+        if (channel.clientPrevPing < 30) {
           channel.send(frame);
         } else if (channel.clientPrevPing < 90) {
           if (frameNum % 2 === 0) {
