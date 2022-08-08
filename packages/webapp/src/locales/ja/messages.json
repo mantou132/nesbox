@@ -119,6 +119,9 @@
   "shortcutSearch": {
     "message": "探す"
   },
+  "shortcutHelp": {
+    "message": "ヘルプ"
+  },
   "shortcutSettings": {
     "message": "設定"
   },

@@ -25,6 +25,7 @@ export class MShortcutSettingsElement extends GemElement {
 
     const labelMap: LabelMap = {
       OPEN_SEARCH: i18n.get('shortcutSearch'),
+      OPEN_HELP: i18n.get('shortcutHelp'),
       OPEN_SETTINGS: i18n.get('shortcutSettings'),
       QUICK_REPLY: i18n.get('shortcutReadMsg'),
     };

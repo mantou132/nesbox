@@ -119,6 +119,9 @@
   "shortcutSearch": {
     "message": "搜索"
   },
+  "shortcutHelp": {
+    "message": "幫助"
+  },
   "shortcutSettings": {
     "message": "設置"
   },

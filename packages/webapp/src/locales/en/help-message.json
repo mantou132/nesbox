@@ -1,0 +1,8 @@
+{
+  "ping": {
+    "message": "What does Ping stand for?\nIndicates the time from the command sent by the client to the time it takes to receive the updated frame from the host, not applicable to the host. The ping value will affect the frequency of the host sending frames to the client. When the delay is too high, it will temporarily stop sending frames"
+  },
+  "webapp": {
+    "message": "What is the difference between Web and App?\nApp has a better experience than the Web, such as rich beeps, system notifications(Dock badges), and more features may be added in the future"
+  }
+}

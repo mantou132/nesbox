@@ -21,6 +21,7 @@ import {
   getShortcut,
   toggoleFriendChatState,
   toggoleFriendListState,
+  setSearchCommand,
   toggoleSearchState,
   toggoleSettingsState,
 } from 'src/configure';
@@ -95,6 +96,10 @@ export class AppRootElement extends GemElement {
   #globalShortcut = (evt: KeyboardEvent) => {
     hotkeys({
       [getShortcut('OPEN_SEARCH')]: preventDefault(toggoleSearchState),
+      [getShortcut('OPEN_HELP')]: preventDefault(() => {
+        setSearchCommand('?');
+        toggoleSearchState();
+      }),
       [getShortcut('OPEN_SETTINGS')]: preventDefault(toggoleSettingsState),
       [getShortcut('QUICK_REPLY')]: preventDefault(this.#openUnReadMessage),
     })(evt);

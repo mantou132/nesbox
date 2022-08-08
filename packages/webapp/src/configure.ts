@@ -46,6 +46,10 @@ const defaultShortcuts = {
     win: ['ctrl', 'k'],
     mac: ['command', 'k'],
   },
+  OPEN_HELP: {
+    win: ['ctrl', 'h'],
+    mac: ['command', 'h'],
+  },
   OPEN_SETTINGS: {
     win: ['esc'],
     mac: ['esc'],
@@ -101,12 +105,18 @@ export interface Profile {
   username: string;
 }
 
+// char list
+export const searchCommands = ['?'] as const;
+
+type SearchCommand = typeof searchCommands[number];
+
 interface Configure {
   user?: User;
   profile?: Profile;
   screencastMode?: boolean;
   friendListState?: boolean;
   settingsState?: boolean;
+  searchCommand?: SearchCommand;
   searchState?: boolean;
   recentFriendChat?: number;
   friendChatState?: number;
@@ -163,7 +173,14 @@ export const toggoleSettingsState = () => {
 };
 
 export const toggoleSearchState = () => {
-  updateStore(configure, { searchState: !configure.searchState });
+  updateStore(configure, {
+    searchState: !configure.searchState,
+    searchCommand: configure.searchState ? undefined : configure.searchCommand,
+  });
+};
+
+export const setSearchCommand = (command?: SearchCommand) => {
+  updateStore(configure, { searchCommand: command });
 };
 
 export const setNesFile = (file?: File) => {

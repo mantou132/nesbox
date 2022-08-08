@@ -119,6 +119,9 @@
   "shortcutSearch": {
     "message": "Search"
   },
+  "shortcutHelp": {
+    "message": "Help"
+  },
   "shortcutSettings": {
     "message": "Settings"
   },
