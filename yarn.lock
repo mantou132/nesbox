@@ -3436,10 +3436,10 @@ dset@^3.1.0:
   resolved "https://registry.yarnpkg.com/dset/-/dset-3.1.2.tgz#89c436ca6450398396dc6538ea00abc0c54cd45a"
   integrity sha512-g/M9sqy3oHe477Ar4voQxWtaPIFw1jTdKZuomOjhCcBx9nHUNn0pu6NopuFFrTh/TRZIKEj+76vLWFu9BNKk+Q==
 
-duoyun-ui@^0.0.42:
-  version "0.0.42"
-  resolved "https://registry.yarnpkg.com/duoyun-ui/-/duoyun-ui-0.0.42.tgz#1261c9f4bca632f5587d76392d6829096f323ecd"
-  integrity sha512-zH8D4xjfSQzdKgNSIu9VsRHqcuTVaguOio8NRC+1/Oq1C/Erk6BZW43j1tdWu9z4qJqZXrKRGm0pvSkoLQ3ppg==
+duoyun-ui@^0.0.43:
+  version "0.0.43"
+  resolved "https://registry.yarnpkg.com/duoyun-ui/-/duoyun-ui-0.0.43.tgz#15193352b92b519d5f6de70cbf9bfa8d8e52cf1c"
+  integrity sha512-dxVSfy3tVxSmPFkGPsTqU63PTFqE3tfbC0r+NVbDpWG6qb7uOvJN64FN+/Uec7YdxlPT/XhFlgNL5HbRXgd8lA==
   dependencies:
     d3-geo "^3.0.1"
     deep-query-selector "^1.0.1"

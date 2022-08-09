@@ -1,7 +1,7 @@
 import { GemElement, html, adoptedStyle, customElement, connectStore } from '@mantou/gem';
 
 import { configure, Settings } from 'src/configure';
-import { gridStyle } from 'src/modules/keybinding';
+import { gridStyle } from 'src/modules/shortcut-settings';
 import { updateAccount } from 'src/services/api';
 import { VideoFilter, VideoRenderMethod } from 'src/constants';
 import { i18n } from 'src/i18n';

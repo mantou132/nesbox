@@ -1,16 +1,37 @@
-import { GemElement, html, adoptedStyle, customElement, connectStore } from '@mantou/gem';
+import { GemElement, html, adoptedStyle, customElement, connectStore, createCSSSheet, css } from '@mantou/gem';
 import { isMac } from 'duoyun-ui/lib/hotkeys';
 
 import { configure, Settings } from 'src/configure';
 import { updateAccount } from 'src/services/api';
 import { i18n } from 'src/i18n';
-import { gridStyle } from 'src/modules/keybinding';
 
 import 'duoyun-ui/elements/shortcut-record';
 import 'duoyun-ui/elements/heading';
 
 type SettingsKey = keyof Settings['shortcuts'];
 type LabelMap = { [K in SettingsKey]?: string };
+
+export const gridStyle = createCSSSheet(css`
+  :host {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1em;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 4fr 11fr;
+    gap: 0.75em;
+    width: 100%;
+  }
+  .grid div {
+    display: flex;
+    align-items: center;
+  }
+  .help {
+    width: 1em;
+  }
+`);
 
 /**
  * @customElement m-shortcut-settings

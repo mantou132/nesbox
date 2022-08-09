@@ -10,10 +10,6 @@ import 'src/modules/account-settings';
 import 'src/modules/video-settings';
 import 'src/modules/shortcut-settings';
 
-type State = {
-  tab: number;
-};
-
 const style = createCSSSheet(css`
   :host {
     display: flex;
@@ -43,6 +39,10 @@ const style = createCSSSheet(css`
     display: none;
   }
 `);
+
+type State = {
+  tab: number;
+};
 
 /**
  * @customElement m-settings

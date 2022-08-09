@@ -3,7 +3,7 @@ import { throttle } from 'duoyun-ui/lib/utils';
 
 import { configure, Settings } from 'src/configure';
 import { i18n } from 'src/i18n';
-import { gridStyle } from 'src/modules/keybinding';
+import { gridStyle } from 'src/modules/shortcut-settings';
 import { updateAccount } from 'src/services/api';
 import { playSound } from 'src/utils';
 
