@@ -6,18 +6,16 @@ import {
   createCSSSheet,
   css,
   connectStore,
-  property,
   refobject,
   RefObject,
 } from '@mantou/gem';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
-import { changeFriendChatDraft, friendStore } from 'src/store';
+import { changeFriendChatDraft, friendStore, toggoleFriendChatState } from 'src/store';
 import { createMessage, getMessages, readMessage } from 'src/services/api';
 import { icons } from 'src/icons';
 import { theme } from 'src/theme';
-import { toggoleFriendChatState } from 'src/configure';
 import { ScUserStatus } from 'src/generated/graphql';
 import { i18n } from 'src/i18n';
 
@@ -99,10 +97,11 @@ const style = createCSSSheet(css`
 @connectStore(friendStore)
 export class MChatElement extends GemElement {
   @refobject messageRef: RefObject<HTMLElement>;
-  @property friendId: number;
 
   get #friend() {
-    return friendStore.friends[this.friendId];
+    if (friendStore.friendChatState) {
+      return friendStore.friends[friendStore.friendChatState];
+    }
   }
 
   get #isOnLine() {
@@ -113,14 +112,14 @@ export class MChatElement extends GemElement {
     evt.stopPropagation();
     hotkeys({
       enter: () => {
-        const msg = friendStore.draft[this.friendId];
-        if (msg) createMessage(this.friendId, msg);
-        changeFriendChatDraft(this.friendId);
+        const msg = friendStore.draft[friendStore.friendChatState!];
+        if (msg) createMessage(friendStore.friendChatState!, msg);
+        changeFriendChatDraft(friendStore.friendChatState!);
       },
       esc: () => {
-        const msg = friendStore.draft[this.friendId];
+        const msg = friendStore.draft[friendStore.friendChatState!];
         if (msg) {
-          changeFriendChatDraft(this.friendId);
+          changeFriendChatDraft(friendStore.friendChatState!);
         } else {
           toggoleFriendChatState();
         }
@@ -129,16 +128,34 @@ export class MChatElement extends GemElement {
   };
 
   mounted = () => {
-    getMessages(this.friendId).then(() => readMessage(this.friendId));
+    this.effect(
+      async () => {
+        if (friendStore.friendChatState) {
+          await getMessages(friendStore.friendChatState);
+          readMessage(friendStore.friendChatState);
+        }
+      },
+      () => [friendStore.friendChatState],
+    );
     this.effect(
       () => {
         this.messageRef.element?.scrollTo(0, 10000);
       },
-      () => [friendStore.messageIds[this.friendId]],
+      () => [friendStore.messageIds[friendStore.friendChatState || 0]],
     );
   };
 
   render = () => {
+    if (!friendStore.friendChatState) {
+      return html`
+        <style>
+          :host {
+            display: none !important;
+          }
+        </style>
+      `;
+    }
+
     return html`
       <div class="header">
         <dy-status-light class="title" .status=${this.#isOnLine ? 'positive' : 'default'}>
@@ -148,7 +165,7 @@ export class MChatElement extends GemElement {
         <dy-use class="close" .element=${icons.close} @click=${() => toggoleFriendChatState()}></dy-use>
       </div>
       <div ref=${this.messageRef.ref} class="list">
-        ${friendStore.messageIds[this.friendId]?.map(
+        ${friendStore.messageIds[friendStore.friendChatState]?.map(
           (
             id,
             index,
@@ -173,9 +190,9 @@ export class MChatElement extends GemElement {
         autofocus
         class="input"
         placeholder=${i18n.get('placeholderMessage')}
-        @change=${({ detail }: CustomEvent<string>) => changeFriendChatDraft(this.friendId, detail)}
+        @change=${({ detail }: CustomEvent<string>) => changeFriendChatDraft(friendStore.friendChatState!, detail)}
         @keydown=${this.#onKeyDown}
-        .value=${friendStore.draft[this.friendId] || ''}
+        .value=${friendStore.draft[friendStore.friendChatState] || ''}
       ></dy-input>
     `;
   };

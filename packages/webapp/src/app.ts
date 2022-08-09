@@ -19,7 +19,6 @@ import { forever } from 'duoyun-ui/lib/utils';
 import {
   configure,
   getShortcut,
-  toggoleFriendChatState,
   toggoleFriendListState,
   setSearchCommand,
   toggoleSearchState,
@@ -30,7 +29,8 @@ import { enterPubRoom, getAccount, getFriends, getGames, subscribeEvent } from '
 import { paramKeys, queryKeys } from 'src/constants';
 import { i18n } from 'src/i18n';
 import { preventDefault } from 'src/utils';
-import { friendStore } from 'src/store';
+import { friendStore, toggoleFriendChatState } from 'src/store';
+import { ScFriendStatus } from 'src/generated/graphql';
 
 import 'duoyun-ui/elements/input-capture';
 import 'duoyun-ui/elements/drawer';
@@ -88,8 +88,14 @@ export class AppRootElement extends GemElement {
     const hasUnreadMsgUserId = friendStore.friendIds?.find((id) => friendStore.friends[id]?.unreadMessageCount);
     if (hasUnreadMsgUserId) {
       toggoleFriendChatState(hasUnreadMsgUserId);
+    } else if (
+      (friendStore.friendIds?.some((id) => friendStore.friends[id]?.status === ScFriendStatus.Pending) ||
+        friendStore.inviteIds?.length) &&
+      !configure.friendListState
+    ) {
+      toggoleFriendListState();
     } else {
-      toggoleFriendChatState(configure.recentFriendChat);
+      toggoleFriendChatState(friendStore.recentFriendChat);
     }
   };
 
@@ -100,7 +106,13 @@ export class AppRootElement extends GemElement {
         setSearchCommand('?');
         toggoleSearchState();
       }),
-      [getShortcut('OPEN_SETTINGS')]: preventDefault(toggoleSettingsState),
+      [getShortcut('OPEN_SETTINGS')]: preventDefault(() => {
+        if (friendStore.friendChatState) {
+          toggoleFriendChatState();
+        } else {
+          toggoleSettingsState();
+        }
+      }),
       [getShortcut('QUICK_REPLY')]: preventDefault(this.#openUnReadMessage),
     })(evt);
   };
@@ -157,7 +169,7 @@ export class AppRootElement extends GemElement {
         <m-footer></m-footer>
       </div>
 
-      ${configure.friendChatState ? html`<m-chat .friendId=${configure.friendChatState}></m-chat>` : ''}
+      <m-chat></m-chat>
 
       <dy-drawer
         customize

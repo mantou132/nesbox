@@ -57,6 +57,8 @@ interface FriendStore {
   inviteIds?: number[];
   friends: Record<number, Friend | undefined>;
   friendIds?: number[];
+  recentFriendChat?: number;
+  friendChatState?: number;
 }
 
 export const [friendStore] = createCacheStore<FriendStore>(
@@ -74,3 +76,15 @@ export const [friendStore] = createCacheStore<FriendStore>(
 export function changeFriendChatDraft(friendId: number, body?: string) {
   updateStore(friendStore, { draft: { ...friendStore.draft, [friendId]: body } });
 }
+
+export const toggoleFriendChatState = async (id?: number) => {
+  if (id && id === friendStore.friendChatState) {
+    // re-focus on friend chat
+    updateStore(friendStore, { friendChatState: undefined });
+    await Promise.resolve();
+  }
+  updateStore(friendStore, {
+    recentFriendChat: id || friendStore.friendChatState || friendStore.recentFriendChat,
+    friendChatState: id,
+  });
+};

@@ -2,12 +2,12 @@ import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, pro
 import { ContextMenu } from 'duoyun-ui/elements/menu';
 import { commonHandle } from 'duoyun-ui/lib/hotkeys';
 
-import { Friend, Invite, store } from 'src/store';
+import { Friend, Invite, store, toggoleFriendChatState } from 'src/store';
 import { theme } from 'src/theme';
 import { ScUserStatus, ScFriendStatus } from 'src/generated/graphql';
 import { icons } from 'src/icons';
 import { acceptFriend, acceptInvite, createInvite, deleteFriend } from 'src/services/api';
-import { configure, toggoleFriendChatState, toggoleFriendListState } from 'src/configure';
+import { configure, toggoleFriendListState } from 'src/configure';
 import { i18n } from 'src/i18n';
 import { getAvatar } from 'src/utils';
 
@@ -56,7 +56,7 @@ const style = createCSSSheet(css`
   }
   .action {
     border-radius: ${theme.smallRound};
-    width: 1.5em;
+    width: 1.2em;
     padding: 0.2em;
   }
   :not(.invite) .action {

@@ -324,7 +324,7 @@ export const subscribeEvent = () => {
         friendStore.messages[newMessage.id] = newMessage;
         const userId = newMessage.userId === configure.user?.id ? newMessage.targetId : newMessage.userId;
         friendStore.messageIds[userId] = [...(friendStore.messageIds[userId] || []), newMessage.id];
-        if (configure.friendChatState !== newMessage.userId) {
+        if (friendStore.friendChatState !== newMessage.userId) {
           const friend = friendStore.friends[newMessage.userId];
           if (friend) {
             friendStore.friends[newMessage.userId] = {

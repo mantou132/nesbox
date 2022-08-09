@@ -118,8 +118,6 @@ interface Configure {
   settingsState?: boolean;
   searchCommand?: SearchCommand;
   searchState?: boolean;
-  recentFriendChat?: number;
-  friendChatState?: number;
   usedRelease?: number;
   openNesFile?: File;
   theme: ThemeName;
@@ -152,24 +150,8 @@ export const toggoleFriendListState = () => {
   updateStore(configure, { friendListState: !configure.friendListState });
 };
 
-export const toggoleFriendChatState = async (id?: number) => {
-  if (id && id === configure.friendChatState) {
-    // re-focus on friend chat
-    updateStore(configure, { friendChatState: undefined });
-    await Promise.resolve();
-  }
-  updateStore(configure, {
-    recentFriendChat: id || configure.friendChatState || configure.recentFriendChat,
-    friendChatState: id,
-  });
-};
-
 export const toggoleSettingsState = () => {
-  if (!configure.settingsState && configure.friendChatState) {
-    toggoleFriendChatState();
-  } else {
-    updateStore(configure, { settingsState: !configure.settingsState });
-  }
+  updateStore(configure, { settingsState: !configure.settingsState });
 };
 
 export const toggoleSearchState = () => {

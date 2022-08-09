@@ -16,18 +16,11 @@ import { createPath } from 'duoyun-ui/elements/route';
 import { isNotNullish } from 'duoyun-ui/lib/types';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 
-import { friendStore, store } from 'src/store';
+import { friendStore, store, toggoleFriendChatState } from 'src/store';
 import { theme } from 'src/theme';
 import { i18n } from 'src/i18n';
 import { icons } from 'src/icons';
-import {
-  configure,
-  getShortcut,
-  searchCommands,
-  toggoleFriendChatState,
-  setSearchCommand,
-  toggoleSearchState,
-} from 'src/configure';
+import { configure, getShortcut, searchCommands, setSearchCommand, toggoleSearchState } from 'src/configure';
 import { routes } from 'src/routes';
 import { paramKeys } from 'src/constants';
 import { getTempText } from 'src/utils';
