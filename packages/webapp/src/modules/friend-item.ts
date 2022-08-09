@@ -2,18 +2,17 @@ import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, pro
 import { ContextMenu } from 'duoyun-ui/elements/menu';
 import { commonHandle } from 'duoyun-ui/lib/hotkeys';
 
-import { Friend, Invite, store, toggoleFriendChatState } from 'src/store';
+import { Friend, store, toggoleFriendChatState } from 'src/store';
 import { theme } from 'src/theme';
 import { ScUserStatus, ScFriendStatus } from 'src/generated/graphql';
 import { icons } from 'src/icons';
-import { acceptFriend, acceptInvite, createInvite, deleteFriend } from 'src/services/api';
+import { acceptFriend, createInvite, deleteFriend } from 'src/services/api';
 import { configure, toggoleFriendListState } from 'src/configure';
 import { i18n } from 'src/i18n';
 import { getAvatar } from 'src/utils';
 
 import 'duoyun-ui/elements/avatar';
 import 'duoyun-ui/elements/help-text';
-import 'duoyun-ui/elements/divider';
 import 'duoyun-ui/elements/use';
 import 'src/modules/badge';
 
@@ -25,8 +24,6 @@ const style = createCSSSheet(css`
     align-items: center;
     padding: 0.5em;
     gap: 0.5em;
-    border-width: 1px;
-    border-style: solid;
   }
   :host(:where(:--active, [data-active], :hover, :focus)) {
     background-color: ${theme.lightBackgroundColor};
@@ -59,27 +56,9 @@ const style = createCSSSheet(css`
     width: 1.2em;
     padding: 0.2em;
   }
-  :not(.invite) .action {
-    display: none;
-  }
   :host(:hover) .action,
   .action:where(:--active, [data-active], :hover) {
     display: inline-flex;
-  }
-  .divider {
-    width: 100%;
-  }
-  .invite {
-    width: 100%;
-    display: flex;
-    align-items: center;
-  }
-  .invite-tip {
-    flex-grow: 1;
-    min-width: 0;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
   }
 `);
 
@@ -90,7 +69,6 @@ const style = createCSSSheet(css`
 @adoptedStyle(style)
 export class MFriendItemElement extends GemElement {
   @property friend: Friend;
-  @property invite?: Invite;
 
   get #isOnline() {
     return this.friend.user.status === ScUserStatus.Online;
@@ -141,18 +119,6 @@ export class MFriendItemElement extends GemElement {
     );
   };
 
-  #onAcceptInvite = (evt: Event) => {
-    evt.stopPropagation();
-    acceptInvite(this.invite!.id, true);
-    toggoleFriendListState();
-  };
-
-  #onDenyInvite = (evt: Event) => {
-    evt.stopPropagation();
-    acceptInvite(this.invite!.id, false);
-    toggoleFriendListState();
-  };
-
   #onClick = () => {
     toggoleFriendChatState(this.friend!.user.id);
     toggoleFriendListState();
@@ -168,8 +134,7 @@ export class MFriendItemElement extends GemElement {
           opacity: ${this.#isOnline ? 1 : 0.4};
         }
         :host {
-          order: ${!this.#isFriend ? 0 : this.invite || this.#isOnline ? 1 : 2};
-          border-color: ${this.invite ? theme.informativeColor : 'transparent'};
+          order: ${!this.#isFriend ? 0 : this.#isOnline ? 1 : 2};
         }
       </style>
       <dy-avatar
@@ -202,16 +167,6 @@ export class MFriendItemElement extends GemElement {
               @click=${(e: Event) => this.#onAcceptFriend(e, false)}
             ></dy-use>
           `}
-      ${this.invite
-        ? html`
-            <dy-divider class="divider"></dy-divider>
-            <div class="invite">
-              <div class="invite-tip">${i18n.get('sendTomeInvite')}</div>
-              <dy-use class="action" .element=${icons.check} @click=${this.#onAcceptInvite}></dy-use>
-              <dy-use class="action" .element=${icons.close} @click=${this.#onDenyInvite}></dy-use>
-            </div>
-          `
-        : ''}
     `;
   };
 }

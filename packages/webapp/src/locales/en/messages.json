@@ -11,6 +11,9 @@
   "search": {
     "message": "Search"
   },
+  "unknown": {
+    "message": "Unknown"
+  },
   "screencastMode": {
     "message": "Screencast Mode"
   },
@@ -50,8 +53,8 @@
   "inviteFriend": {
     "message": "Invite"
   },
-  "sendTomeInvite": {
-    "message": "Receive Invitation"
+  "sendToMeInvite": {
+    "message": "$1 invite"
   },
   "playing": {
     "message": "Plaging《$1》"
@@ -96,7 +99,7 @@
     "message": "Non-match new password"
   },
   "keySetting": {
-    "message": "Key Binding"
+    "message": "Joypad"
   },
   "keySettingJoypad1": {
     "message": "Joypad 1"

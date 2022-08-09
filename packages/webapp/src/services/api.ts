@@ -198,6 +198,7 @@ export const acceptFriend = async (targetId: number, accept: boolean) => {
     friendStore.friends[targetId] = { ...friendStore.friends[targetId]!, status: ScFriendStatus.Accept };
   } else {
     friendStore.friendIds = friendStore.friendIds?.filter((id) => id !== targetId);
+    delete friendStore.friends[targetId];
   }
   updateStore(friendStore);
 };

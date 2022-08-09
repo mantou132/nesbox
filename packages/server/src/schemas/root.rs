@@ -181,7 +181,7 @@ impl MutationRoot {
                         );
                     }
                     notify(
-                        input.target_id,
+                        invite.target_id,
                         ScNotifyMessageBuilder::default()
                             .new_invite(invite.clone())
                             .build()

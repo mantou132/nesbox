@@ -11,6 +11,9 @@
   "search": {
     "message": "探す"
   },
+  "unknown": {
+    "message": "わからない"
+  },
   "screencastMode": {
     "message": "スクリーンショットモード"
   },
@@ -50,8 +53,8 @@
   "inviteFriend": {
     "message": "招待"
   },
-  "sendTomeInvite": {
-    "message": "送信招待"
+  "sendToMeInvite": {
+    "message": "$1 招待状を送る"
   },
   "playing": {
     "message": "演奏《$1》"
@@ -96,13 +99,13 @@
     "message": "新しいパスワードを一致させない"
   },
   "keySetting": {
-    "message": "キー設定"
+    "message": "ジョイパッド"
   },
   "keySettingJoypad1": {
-    "message": "Joypad 1"
+    "message": "ジョイパッド 1"
   },
   "keySettingJoypad2": {
-    "message": "Joypad 2"
+    "message": "ジョイパッド 2"
   },
   "shortcut": {
     "message": "ホットキー"

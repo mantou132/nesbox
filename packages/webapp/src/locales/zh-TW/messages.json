@@ -11,6 +11,9 @@
   "search": {
     "message": "搜索"
   },
+  "unknown": {
+    "message": "未知"
+  },
   "screencastMode": {
     "message": "截屏模式"
   },
@@ -50,8 +53,8 @@
   "inviteFriend": {
     "message": "邀請"
   },
-  "sendTomeInvite": {
-    "message": "發來邀請"
+  "sendToMeInvite": {
+    "message": "$1 发来邀請"
   },
   "playing": {
     "message": "正在玩《$1》"
@@ -96,13 +99,13 @@
     "message": "不匹配新密碼"
   },
   "keySetting": {
-    "message": "按鍵"
+    "message": "控制器"
   },
   "keySettingJoypad1": {
-    "message": "手柄 1"
+    "message": "控制器 1"
   },
   "keySettingJoypad2": {
-    "message": "手柄 2"
+    "message": "控制器 2"
   },
   "shortcut": {
     "message": "快捷键"

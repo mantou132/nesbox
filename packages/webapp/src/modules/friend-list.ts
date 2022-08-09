@@ -3,7 +3,7 @@ import { Modal } from 'duoyun-ui/elements/modal';
 import type { DuoyunInputElement } from 'duoyun-ui/elements/input';
 
 import { icons } from 'src/icons';
-import { friendStore, Invite } from 'src/store';
+import { friendStore } from 'src/store';
 import { i18n } from 'src/i18n';
 import { applyFriend } from 'src/services/api';
 import { theme } from 'src/theme';
@@ -12,6 +12,7 @@ import 'duoyun-ui/elements/button';
 import 'duoyun-ui/elements/result';
 import 'duoyun-ui/elements/input';
 import 'src/modules/friend-item';
+import 'src/modules/invite-item';
 
 const style = createCSSSheet(css`
   :host {
@@ -48,20 +49,6 @@ const style = createCSSSheet(css`
 @adoptedStyle(style)
 @connectStore(friendStore)
 export class MFriendListElement extends GemElement {
-  constructor() {
-    super();
-    this.memo(
-      () => {
-        this.#inviteMap = new Map(
-          friendStore.inviteIds?.map((id) => [friendStore.invites[id]?.userId, friendStore.invites[id]]),
-        );
-      },
-      () => [friendStore.inviteIds],
-    );
-  }
-
-  #inviteMap = new Map<number | undefined, Invite | undefined>();
-
   #addFriend = async () => {
     const input = await Modal.open<DuoyunInputElement>({
       header: i18n.get('addFriend'),
@@ -80,6 +67,11 @@ export class MFriendListElement extends GemElement {
   render = () => {
     return html`
       <div class="list">
+        ${friendStore.inviteIds?.length
+          ? friendStore.inviteIds?.map(
+              (id) => html`<m-invite-item .invite=${friendStore.invites[id]!}></m-invite-item>`,
+            )
+          : ''}
         ${!friendStore.friendIds?.length
           ? html`
               <dy-result
@@ -89,10 +81,7 @@ export class MFriendListElement extends GemElement {
               ></dy-result>
             `
           : friendStore.friendIds?.map(
-              (id) =>
-                html`
-                  <m-friend-item .friend=${friendStore.friends[id]!} .invite=${this.#inviteMap.get(id)}></m-friend-item>
-                `,
+              (id) => html`<m-friend-item .friend=${friendStore.friends[id]!}></m-friend-item>`,
             )}
       </div>
       <div class="actions">
