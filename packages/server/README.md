@@ -6,6 +6,12 @@
 cargo watch -x "run -p server"
 ```
 
+## Webhook test
+
+```
+bore local 8080 --to bore.pub -p 34033
+```
+
 ## docker
 
 ```bash

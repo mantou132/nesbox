@@ -76,7 +76,7 @@ export class MGameItemElement extends GemElement {
   #onFavoriteClick = (evt: Event) => {
     evt.stopPropagation();
     favoriteGame(this.game.id, !this.favorited);
-    (evt.target as HTMLElement)?.blur();
+    (evt.target as HTMLElement).blur?.();
   };
 
   #onGameClick = async () => {

@@ -46,6 +46,7 @@ import { events, queryKeys } from 'src/constants';
 import { createInvite, updateRoomScreenshot } from 'src/services/api';
 import type { NesboxRenderElement } from 'src/elements/render';
 
+import 'duoyun-ui/elements/space';
 import 'src/modules/room-player-list';
 import 'src/modules/room-chat';
 import 'src/modules/nav';
@@ -579,7 +580,9 @@ export class PRoomElement extends GemElement<State> {
         @rolechange=${({ detail }: CustomEvent<RoleOffer>) => this.#rtc?.send(detail)}
         @kickout=${({ detail }: CustomEvent<number>) => this.#rtc?.kickoutRole(detail)}
       ></m-room-player-list>
-      ${this.#isHost ? html`<nesbox-fps class="info"></nesbox-fps>` : html`<nesbox-ping class="info"></nesbox-ping>`}
+      <dy-space class="info">
+        ${this.#isHost ? html`<nesbox-fps></nesbox-fps>` : html`<nesbox-ping></nesbox-ping>`}
+      </dy-space>
     `;
   };
 }

@@ -8,6 +8,7 @@ extern crate lazy_static;
 #[macro_use]
 extern crate derive_builder;
 
+use actix::Actor;
 use dotenv::dotenv;
 use std::{env, io, sync::Arc, time::Duration};
 
@@ -28,6 +29,7 @@ use crate::{
         room::get_outdated_rooms,
         root::{create_guest_schema, create_schema, leave_room_and_notify},
     },
+    voice::*,
 };
 
 mod auth;
@@ -36,6 +38,7 @@ mod error;
 mod github;
 mod handles;
 mod schemas;
+mod voice;
 
 #[actix_web::main]
 async fn main() -> io::Result<()> {
@@ -68,8 +71,16 @@ async fn main() -> io::Result<()> {
         }
     });
 
+    let voice_server = lobby::Lobby::default().start();
+
     HttpServer::new(move || {
         App::new()
+            .service(
+                web::resource("/voice/{room_id}")
+                    .app_data(Data::new(secret.clone()))
+                    .app_data(Data::new(voice_server.clone()))
+                    .route(web::get().to(voice_handle)),
+            )
             .service(
                 web::resource("/subscriptions")
                     .app_data(Data::from(schema.clone()))

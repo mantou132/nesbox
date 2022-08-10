@@ -1,3 +1,6 @@
+use std::collections::HashMap;
+
+use actix_web::web::Query;
 use actix_web::HttpRequest;
 use chrono::Utc;
 use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, Validation};
@@ -53,9 +56,15 @@ pub fn extract_token_from_str(authen_str: &str) -> &str {
     ""
 }
 
-pub fn extract_token_from_req(req: &HttpRequest) -> &str {
-    req.headers()
-        .get("authorization")
-        .map(|authn| extract_token_from_str(authn.to_str().unwrap_or_default()))
-        .unwrap_or("")
+pub fn extract_token_from_req(req: &HttpRequest) -> String {
+    let query = Query::<HashMap<String, String>>::from_query(req.query_string()).unwrap();
+
+    if let Some(token) = query.get("token") {
+        token.into()
+    } else {
+        req.headers()
+            .get("authorization")
+            .map(|authn| extract_token_from_str(authn.to_str().unwrap_or_default()).into())
+            .unwrap_or("".into())
+    }
 }

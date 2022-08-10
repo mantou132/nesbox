@@ -153,3 +153,54 @@ export function subscribe<Result, InputVar = Record<string, any>>(
     },
   };
 }
+
+const VOICE_ENDPOINT = '/voice';
+export function createVoiceService(roomId: number) {
+  const getUri = () => {
+    const { protocol, host, pathname } = new URL(API_BASE, location.origin);
+    return `${protocol.replace('http', 'ws')}${host}${pathname.replace(/\/$/, '')}${VOICE_ENDPOINT}/${roomId}?token=${
+      configure.profile?.token
+    }`;
+  };
+
+  const ws = new WebSocket(getUri());
+  ws.addEventListener('close', ({ code }) => {
+    if (code !== 1000) {
+      // retry ws
+    }
+  });
+
+  let readableStreamController: ReadableStreamController<ArrayBuffer> | null = null;
+  const result = {
+    close: async () => {
+      ws.close(1000);
+      readableStreamController?.close();
+      await result.writable.getWriter().close();
+      await result.writable.close();
+    },
+    readable: new ReadableStream<ArrayBuffer>({
+      start(controller) {
+        readableStreamController = controller;
+      },
+      pull(controller) {
+        ws.addEventListener(
+          'message',
+          ({ data }) => {
+            if (data instanceof ArrayBuffer) {
+              controller.enqueue(data);
+            } else {
+              logger.warn(`msg: ${data}`);
+            }
+          },
+          { once: true },
+        );
+      },
+    }),
+    writable: new WritableStream({
+      write(chunk: ArrayBuffer) {
+        ws.send(chunk);
+      },
+    }),
+  };
+  return result;
+}

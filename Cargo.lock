@@ -3885,8 +3885,10 @@ dependencies = [
 name = "server"
 version = "0.1.0"
 dependencies = [
+ "actix",
  "actix-cors",
  "actix-web",
+ "actix-web-actors",
  "actix-web-lab",
  "async-stream",
  "chrono",

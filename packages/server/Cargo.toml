@@ -18,6 +18,8 @@ openssl = "*"
 actix-web = "4"
 actix-web-lab = "0.16.1"
 actix-cors = "0.6"
+actix = "0.13"
+actix-web-actors = "4"
 
 juniper = { git = "https://github.com/graphql-rust/juniper", rev = "a32140cd46f17491d3f7a93b4a6c67732a29b0e8" }
 juniper_actix = { git = "https://github.com/graphql-rust/juniper", features = ["subscriptions"], rev = "a32140cd46f17491d3f7a93b4a6c67732a29b0e8" }

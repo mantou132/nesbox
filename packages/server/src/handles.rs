@@ -1,3 +1,4 @@
+use actix::Addr;
 use actix_web::{error, web, Error, HttpRequest, HttpResponse, Responder};
 use juniper::{
     http::{GraphQLRequest, GraphQLResponse},
@@ -9,13 +10,15 @@ use std::time::Duration;
 
 use crate::{
     auth::{extract_token_from_req, extract_token_from_str, UserToken},
-    db::root::Pool,
+    db::root::DB_POOL,
     github::{get_sc_new_game, validate, GithubPayload},
     schemas::root::{Context, GuestContext, GuestSchema, Schema},
     schemas::{
         game::{create_game, get_game_from_name, update_game},
         notify::{notify_all, ScNotifyMessageBuilder},
+        playing::get_playing,
     },
+    voice::{lobby::Lobby, ws::WsConn},
 };
 
 pub async fn subscriptions(
@@ -52,7 +55,7 @@ pub async fn graphql(
     secret: web::Data<String>,
     data: web::Json<GraphQLRequest>,
 ) -> impl Responder {
-    let user_id = match UserToken::parse(&secret, extract_token_from_req(&req)) {
+    let user_id = match UserToken::parse(&secret, &extract_token_from_req(&req)) {
         Some(id) => id,
         None => return HttpResponse::Unauthorized().finish(),
     };
@@ -99,7 +102,6 @@ pub async fn webhook(
     req: HttpRequest,
     body: web::Bytes,
     secret: web::Data<String>,
-    pool: web::Data<Pool>,
 ) -> impl Responder {
     let payload: GithubPayload = serde_json::from_slice(&body).unwrap();
 
@@ -109,7 +111,7 @@ pub async fn webhook(
         return HttpResponse::Unauthorized().finish();
     }
 
-    let conn = &pool.get_ref().get().unwrap();
+    let conn = DB_POOL.get().unwrap();
 
     match payload.action.as_str() {
         "closed" => {
@@ -117,12 +119,12 @@ pub async fn webhook(
             if sc_game.rom.is_empty() {
                 log::debug!("Not rom");
             } else {
-                match get_game_from_name(conn, &sc_game.name) {
+                match get_game_from_name(&conn, &sc_game.name) {
                     Some(game) => {
-                        update_game(conn, game.id, &sc_game).ok();
+                        update_game(&conn, game.id, &sc_game).ok();
                     }
                     None => {
-                        if let Ok(game) = create_game(conn, &sc_game) {
+                        if let Ok(game) = create_game(&conn, &sc_game) {
                             notify_all(
                                 ScNotifyMessageBuilder::default()
                                     .new_game(game)
@@ -137,4 +139,28 @@ pub async fn webhook(
         _ => {}
     }
     HttpResponse::Ok().json(payload)
+}
+
+pub async fn voice_handle(
+    req: HttpRequest,
+    stream: web::Payload,
+    secret: web::Data<String>,
+    srv: web::Data<Addr<Lobby>>,
+    room_id: web::Path<i32>,
+) -> impl Responder {
+    let user_id = match UserToken::parse(&secret, &extract_token_from_req(&req)) {
+        Some(id) => id,
+        None => return HttpResponse::Unauthorized().finish(),
+    };
+
+    let room_id = room_id.into_inner();
+    let conn = DB_POOL.get().unwrap();
+
+    if Some(room_id) != get_playing(&conn, user_id).map(|room| room.id) {
+        return HttpResponse::Unauthorized().finish();
+    }
+
+    let ws = WsConn::new(user_id, room_id, srv.get_ref().clone());
+    actix_web_actors::ws::start(ws, &req, stream)
+        .unwrap_or(HttpResponse::InternalServerError().finish())
 }
