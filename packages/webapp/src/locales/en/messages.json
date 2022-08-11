@@ -14,6 +14,9 @@
   "unknown": {
     "message": "Unknown"
   },
+  "system": {
+    "message": "System"
+  },
   "screencastMode": {
     "message": "Screencast Mode"
   },

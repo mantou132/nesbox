@@ -14,6 +14,9 @@
   "unknown": {
     "message": "未知"
   },
+  "system": {
+    "message": "系統"
+  },
   "screencastMode": {
     "message": "截屏模式"
   },

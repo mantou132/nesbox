@@ -20,7 +20,7 @@ import { sleep } from 'duoyun-ui/lib/utils';
 import { Time } from 'duoyun-ui/lib/time';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
-import { TextMsg } from 'src/rtc';
+import { SysMsg, TextMsg } from 'src/rtc';
 import { i18n } from 'src/i18n';
 import { theme } from 'src/theme';
 
@@ -158,9 +158,11 @@ export class MRoomChatElement extends GemElement<State> {
           ({ timestamp }) => timestamp,
           (msg) => html`
             <div class=${classMap({ msg: true, system: !msg.userId })}>
-              <span>[${new Time(msg.timestamp).format('HH:mm:ss')}] ${msg.username}</span>
+              <span>
+                [${new Time(msg.timestamp).format('HH:mm:ss')}] ${msg.userId ? msg.username : i18n.get('system')}
+              </span>
               :
-              <span>${msg.text}</span>
+              <span>${msg.userId ? msg.text : i18n.get(...(msg.text.split('\n') as SysMsg))}</span>
             </div>
           `,
         )}

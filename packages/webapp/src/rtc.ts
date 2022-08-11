@@ -3,10 +3,9 @@ import { Button } from '@mantou/nes';
 
 import { configure } from 'src/configure';
 import { events, SingalEvent, SingalType } from 'src/constants';
-import { i18n } from 'src/i18n';
+import { LocaleKey } from 'src/i18n';
 import { logger } from 'src/logger';
 import { sendSignal } from 'src/services/api';
-import { getTempText } from 'src/utils';
 
 export const pingStore = createStore<{ avgPing?: number }>({});
 
@@ -72,7 +71,7 @@ export abstract class ChannelMessageBase {
 
   toSystemRole() {
     this.userId = 0;
-    this.username = '系统';
+    this.username = '';
     return this;
   }
 
@@ -81,13 +80,14 @@ export abstract class ChannelMessageBase {
   }
 }
 
+export type SysMsg = [LocaleKey, ...string[]];
 export class TextMsg extends ChannelMessageBase {
   type = ChannelMessageType.CHAT_TEXT;
 
   text: string;
-  constructor(text: string) {
+  constructor(text: string | SysMsg) {
     super();
-    this.text = text;
+    this.text = typeof text === 'string' ? text : text.join('\n');
   }
 }
 
@@ -225,7 +225,7 @@ export class RTC extends EventTarget {
         this.#roles = this.#roles.map((role) => (role?.userId === userId ? undefined : role));
         this.#emitAnswer();
 
-        const textMsg = new TextMsg(getTempText(i18n.get('leaveRoomMsg', username))).toSystemRole();
+        const textMsg = new TextMsg(['leaveRoomMsg', username]).toSystemRole();
         this.#channelMap.forEach((channel) => channel.send(textMsg.toString()));
         this.#emitMessage(textMsg);
       };
@@ -317,7 +317,7 @@ export class RTC extends EventTarget {
       this.#channelMap.set(conn, channel);
       this.send(new RoleOffer(this.#roles.findIndex((role) => role?.userId === configure.user!.id)));
 
-      const textMsg = new TextMsg(getTempText(i18n.get('enterRoomMsg', configure.user!.nickname))).toSystemRole();
+      const textMsg = new TextMsg(['enterRoomMsg', configure.user!.nickname]).toSystemRole();
       this.send(textMsg);
 
       this.#sendPing();
