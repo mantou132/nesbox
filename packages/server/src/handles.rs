@@ -1,4 +1,3 @@
-use actix::Addr;
 use actix_web::{error, web, Error, HttpRequest, HttpResponse, Responder};
 use juniper::{
     http::{GraphQLRequest, GraphQLResponse},
@@ -18,7 +17,6 @@ use crate::{
         notify::{notify_all, ScNotifyMessageBuilder},
         playing::get_playing,
     },
-    voice::{lobby::Lobby, ws::WsConn},
 };
 
 pub async fn subscriptions(
@@ -139,28 +137,4 @@ pub async fn webhook(
         _ => {}
     }
     HttpResponse::Ok().json(payload)
-}
-
-pub async fn voice_handle(
-    req: HttpRequest,
-    stream: web::Payload,
-    secret: web::Data<String>,
-    srv: web::Data<Addr<Lobby>>,
-    room_id: web::Path<i32>,
-) -> impl Responder {
-    let user_id = match UserToken::parse(&secret, &extract_token_from_req(&req)) {
-        Some(id) => id,
-        None => return HttpResponse::Unauthorized().finish(),
-    };
-
-    let room_id = room_id.into_inner();
-    let conn = DB_POOL.get().unwrap();
-
-    if Some(room_id) != get_playing(&conn, user_id).map(|room| room.id) {
-        return HttpResponse::Unauthorized().finish();
-    }
-
-    let ws = WsConn::new(user_id, room_id, srv.get_ref().clone());
-    actix_web_actors::ws::start(ws, &req, stream)
-        .unwrap_or(HttpResponse::InternalServerError().finish())
 }

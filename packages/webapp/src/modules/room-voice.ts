@@ -12,7 +12,6 @@ import {
 
 import { configure } from 'src/configure';
 import { icons } from 'src/icons';
-import { createVoiceService } from 'src/services';
 import { theme } from 'src/theme';
 
 import 'duoyun-ui/elements/use';
@@ -51,30 +50,9 @@ export class MVoiceRoomElement extends GemElement {
     this.effect(
       ([roomId]) => {
         if (roomId && store.joined) {
-          const voice = createVoiceService(roomId);
-          const writer = voice.writable.getWriter();
-          const reader = voice.readable.getReader();
-          reader.read().then(async function play({ done, value }) {
-            if (!done && value) {
-              // play blob
-              await reader.read().then(play);
-            }
-          });
-          const streamPromise = navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-          let record: MediaRecorder | null = null;
-          streamPromise.then((stream) => {
-            record = new MediaRecorder(stream, { audioBitsPerSecond: 64000 });
-            record.start(1000);
-            record.addEventListener('dataavailable', async ({ data }) => {
-              await writer.ready;
-              const buffer = await data.arrayBuffer();
-              writer.write(buffer);
-            });
-          });
+          // webrtc connect server
           return () => {
-            voice.close();
-            record?.stop();
-            streamPromise.then((stream) => stream.getTracks().forEach((track) => track.stop()));
+            // close
           };
         }
       },
