@@ -155,7 +155,7 @@ export class AppRootElement extends GemElement {
   render = () => {
     return html`
       <m-nav></m-nav>
-      <div class="content" ref=${this.contentRef.ref}>
+      <div tabindex="-1" class="content" ref=${this.contentRef.ref}>
         <main style="display: centents">
           <dy-route
             @loading=${this.#onLoading}

@@ -15,7 +15,6 @@ use crate::{
     schemas::{
         game::{create_game, get_game_from_name, update_game},
         notify::{notify_all, ScNotifyMessageBuilder},
-        playing::get_playing,
     },
 };
 

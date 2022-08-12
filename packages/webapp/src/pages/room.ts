@@ -45,6 +45,7 @@ import { getCDNSrc, playHintSound, preventDefault } from 'src/utils';
 import { events, queryKeys } from 'src/constants';
 import { createInvite, updateRoomScreenshot } from 'src/services/api';
 import type { NesboxRenderElement } from 'src/elements/render';
+import { closeListenerSet } from 'src/elements/titlebar';
 
 import 'duoyun-ui/elements/space';
 import 'src/modules/room-player-list';
@@ -432,18 +433,23 @@ export class PRoomElement extends GemElement<State> {
     );
   };
 
-  #save = async () => {
-    if (!this.#isHost || !this.#romBuffer) return;
+  #getCachesName = (auto: boolean) => `${auto ? 'auto_' : ''}state_v2`;
+
+  #save = async (auto = false) => {
+    if (!this.#romBuffer) return;
     const { buffer } = Nes.memory();
-    const cache = await caches.open('state_v2');
-    const key = await hash(this.#romBuffer);
     const thumbnail = this.canvasRef.element!.captureThumbnail();
+    const cache = await caches.open(this.#getCachesName(auto));
+    const key = await hash(this.#romBuffer);
     await cache.put(
-      `/${key}?${new URLSearchParams({ timestamp: Date.now().toString(), thumbnail })}`,
+      `/${key}?${new URLSearchParams({ timestamp: Date.now().toString(), thumbnail, auto: auto ? 'auto' : '' })}`,
       new Response(new Blob([buffer])),
     );
+    if (auto) return;
     Toast.open('success', i18n.get('tipGameStateSave', new Time().format()));
   };
+
+  #autoSave = () => this.#save(true);
 
   #uploadScreenshot = () => {
     if (!this.#romBuffer || !this.#isVisible) return;
@@ -456,31 +462,36 @@ export class PRoomElement extends GemElement<State> {
   #load = async () => {
     if (!this.#isHost || !this.#romBuffer) return;
     const { buffer } = Nes.memory();
-    const cache = await caches.open('state_v2');
     const key = await hash(this.#romBuffer);
-    const reqs = await cache.keys(`/${key}`, { ignoreSearch: true });
+    const cache = await caches.open(this.#getCachesName(false));
+    const reqs = [...(await cache.keys(`/${key}`, { ignoreSearch: true }))].splice(0, 10);
+    const autoCache = await caches.open(this.#getCachesName(true));
+    const autoCacheReqs = await autoCache.keys(`/${key}`, { ignoreSearch: true });
+    const autoCacheReq = autoCacheReqs[autoCacheReqs.length - 1];
+    if (autoCacheReq) {
+      reqs.unshift(autoCacheReq);
+    }
     if (reqs.length === 0) {
       Toast.open('default', i18n.get('tipGameStateMissing'));
     } else {
+      const getQuery = (url: string, { searchParams } = new URL(url)) => ({
+        time: new Time(Number(searchParams.get('timestamp'))),
+        thumbnail: searchParams.get('thumbnail') || '',
+        tag: searchParams.get('auto') ? 'AUTO' : '',
+      });
       Modal.open({
         header: i18n.get('tipGameStateTitle'),
         body: html`
           <nesbox-list
             .data=${reqs
-              .map((req) => {
-                const { searchParams } = new URL(req.url);
-                return [
-                  req,
-                  new Time(Number(searchParams.get('timestamp'))),
-                  searchParams.get('thumbnail') || '',
-                ] as const;
-              })
-              .sort((a, b) => Number(b[1]) - Number(a[1]))
-              .map(([req, time, url]) => ({
-                img: url,
+              .map((req) => ({ req, ...getQuery(req.url) }))
+              .sort((a, b) => Number(b.time) - Number(a.time))
+              .map(({ req, time, thumbnail, tag }) => ({
+                img: thumbnail,
                 label: time.format(),
+                tag,
                 onClick: async (evt: PointerEvent) => {
-                  const res = await cache.match(req);
+                  const res = await (req === autoCacheReq ? autoCache : cache).match(req);
                   if (!res) return;
                   new Uint8Array(buffer).set(new Uint8Array(await res.arrayBuffer()));
                   Toast.open('success', i18n.get('tipGameStateLoad', time.format()));
@@ -511,6 +522,7 @@ export class PRoomElement extends GemElement<State> {
     this.effect(
       () => {
         if (!this.#playing) {
+          this.#autoSave();
           history.replace({
             path: createPath(routes.games),
           });
@@ -542,6 +554,7 @@ export class PRoomElement extends GemElement<State> {
 
     this.addEventListener('contextmenu', this.#onContextMenu);
 
+    closeListenerSet.add(this.#autoSave);
     addEventListener('keydown', this.#onKeyDown);
     addEventListener('keyup', this.#onKeyUp);
     addEventListener(events.PRESS_BUTTON, this.#onPressButton);
@@ -551,6 +564,7 @@ export class PRoomElement extends GemElement<State> {
     return () => {
       this.#audioContext?.close();
       this.#rtc?.destroy();
+      closeListenerSet.delete(this.#autoSave);
       removeEventListener('keydown', this.#onKeyDown);
       removeEventListener('keyup', this.#onKeyUp);
       removeEventListener(events.PRESS_BUTTON, this.#onPressButton);

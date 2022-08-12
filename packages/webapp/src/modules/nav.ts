@@ -13,6 +13,7 @@ import type { RouteItem } from 'duoyun-ui/elements/route';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { commonHandle } from 'duoyun-ui/lib/hotkeys';
 import { waitLoading } from 'duoyun-ui/elements/wait';
+import { focusStyle } from 'duoyun-ui/lib/styles';
 
 import { locationStore, routes } from 'src/routes';
 import { i18n } from 'src/i18n';
@@ -111,6 +112,7 @@ const style = createCSSSheet(css`
  */
 @customElement('m-nav')
 @adoptedStyle(style)
+@adoptedStyle(focusStyle)
 @connectStore(store)
 @connectStore(locationStore)
 @connectStore(i18n.store)

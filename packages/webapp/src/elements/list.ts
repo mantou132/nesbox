@@ -1,6 +1,10 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, property } from '@mantou/gem';
+import { commonHandle } from 'duoyun-ui/lib/hotkeys';
+import { focusStyle } from 'duoyun-ui/lib/styles';
 
 import { theme } from 'src/theme';
+
+import 'duoyun-ui/elements/tag';
 
 const style = createCSSSheet(css`
   ul {
@@ -11,7 +15,7 @@ const style = createCSSSheet(css`
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 1px;
+    gap: 2px;
   }
   li {
     cursor: default;
@@ -35,16 +39,18 @@ const style = createCSSSheet(css`
  */
 @customElement('nesbox-list')
 @adoptedStyle(style)
+@adoptedStyle(focusStyle)
 export class NesboxListElement extends GemElement {
-  @property data: { img: string; label: string; onClick: (evt: PointerEvent) => void }[];
+  @property data: { img: string; label: string; tag: string; onClick: (evt: PointerEvent) => void }[];
   render = () => {
     return html`
       <ul>
         ${this.data.map(
-          ({ img, label, onClick }) => html`
-            <li @click=${onClick}>
+          ({ img, label, tag, onClick }) => html`
+            <li @click=${onClick} tabindex="0" @keydown=${commonHandle}>
               <img src=${img} alt="" />
               <span>${label}</span>
+              ${tag && html`<dy-tag small color="notice">${tag}</dy-tag>`}
             </li>
           `,
         )}

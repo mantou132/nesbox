@@ -4,6 +4,7 @@ import { commonHandle } from 'duoyun-ui/lib/hotkeys';
 import { ContextMenu } from 'duoyun-ui/elements/menu';
 import type { GemUseElement } from '@mantou/gem/elements/use';
 import { waitLoading } from 'duoyun-ui/elements/wait';
+import { focusStyle } from 'duoyun-ui/lib/styles';
 
 import { i18n, langNames } from 'src/i18n';
 import { ThemeName, themeNames, changeTheme, theme } from 'src/theme';
@@ -31,6 +32,7 @@ const style = createCSSSheet(css`
  */
 @customElement('m-guest')
 @adoptedStyle(style)
+@adoptedStyle(focusStyle)
 @connectStore(configure)
 export class ModuleGuestElement extends GemElement {
   #openMenu = ({ target }: MouseEvent) => {

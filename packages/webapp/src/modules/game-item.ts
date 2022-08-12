@@ -105,6 +105,7 @@ export class MGameItemElement extends GemElement {
               <dy-button class="play" small @click=${this.#onGameClick}>${i18n.get('startGame')}</dy-button>
               <dy-button
                 small
+                tabindex="-1"
                 color="cancel"
                 @click=${this.#onFavoriteClick}
                 .icon=${this.favorited ? icons.favorited : icons.favorite}

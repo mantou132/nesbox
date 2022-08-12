@@ -26,13 +26,13 @@ fn main() {
     let builder = builder
         .menu(Menu::os_default(&context.package_info().name))
         .on_window_event(|event| {
-            let size = &event.window().outer_size().unwrap();
             match event.event() {
                 // bug: when enter fullscreen emit moved event
                 WindowEvent::Resized(_) | WindowEvent::Moved(_) => {
                     // https://github.com/tauri-apps/tauri/issues/4519
                     let monitor = event.window().current_monitor().unwrap().unwrap();
                     let screen = monitor.size();
+                    let size = &event.window().outer_size().unwrap();
                     event.window().set_toolbar_visible(size != screen);
                 }
                 _ => {}

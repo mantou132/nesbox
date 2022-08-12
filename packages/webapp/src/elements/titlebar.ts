@@ -20,6 +20,8 @@ const maximize = `<svg viewBox="0 0 10 10" fill="currentColor"><path d="M0,0v10h
 const unmaximize = `<svg viewBox="0 0 10.2 10.1" fill="currentColor"><path d="M2.1,0v2H0v8.1h8.2v-2h2V0H2.1z M7.2,9.2H1.1V3h6.1V9.2z M9.2,7.1h-1V2H3.1V1h6.1V7.1z" /></svg>`;
 const close = `<svg viewBox="0 0 10 10" fill="currentColor"><polygon points="10.2,0.7 9.5,0 5.1,4.4 0.7,0 0,0.7 4.4,5.1 0,9.5 0.7,10.2 5.1,5.8 9.5,10.2 10.2,9.5 5.8,5.1" /></svg>`;
 
+export const closeListenerSet = new Set<() => void | Promise<void>>();
+
 const style = createCSSSheet(css`
   :host {
     cursor: default;
@@ -125,10 +127,11 @@ export class MTitlebarElement extends GemElement<State> {
     this.#window?.listen('tauri://blur', () => this.setState({ blur: true }));
     this.#window?.listen('tauri://focus', () => this.setState({ blur: false }));
 
-    this.#window?.listen('tauri://close-requested', () => {
+    this.#window?.listen('tauri://close-requested', async () => {
       dispatchEvent(new CustomEvent('pagehide'));
       dispatchEvent(new CustomEvent('beforeunload'));
       dispatchEvent(new CustomEvent('unload'));
+      await Promise.all([...closeListenerSet].map((fn) => fn()));
       this.#window?.close();
     });
     // allow drag

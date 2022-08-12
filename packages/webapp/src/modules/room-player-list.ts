@@ -12,6 +12,7 @@ import {
   connectStore,
 } from '@mantou/gem';
 import { commonHandle } from 'duoyun-ui/lib/hotkeys';
+import { focusStyle } from 'duoyun-ui/lib/styles';
 
 import { theme } from 'src/theme';
 import { configure } from 'src/configure';
@@ -102,6 +103,7 @@ const itemStyle = createCSSSheet(css`
  */
 @customElement('m-room-player-item')
 @adoptedStyle(itemStyle)
+@adoptedStyle(focusStyle)
 @connectStore(i18n.store)
 export class MRoomPlayerItemElement extends GemElement {
   @property role: Role;
