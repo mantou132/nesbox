@@ -59,7 +59,6 @@ const style = createCSSSheet(css`
   :host {
     position: absolute;
     inset: 0;
-    display: flex;
   }
   .canvas {
     position: absolute;
@@ -292,13 +291,11 @@ export class PRoomElement extends GemElement<State> {
     this.#rtc = new RTC();
     this.#rtc.addEventListener('message', this.#onMessage);
 
-    if (this.#playing) {
-      this.#rtc.start({
-        host: this.#playing.host,
-        audio: this.audioRef.element!,
-        stream: this.#createStream(),
-      });
-    }
+    this.#rtc.start({
+      host: this.#playing!.host,
+      audio: this.audioRef.element!,
+      stream: this.#createStream(),
+    });
   };
 
   #getButton = ({ key, metaKey, ctrlKey, shiftKey, altKey }: KeyboardEvent) => {
@@ -380,7 +377,9 @@ export class PRoomElement extends GemElement<State> {
   };
 
   #onContextMenu = (event: MouseEvent) => {
-    if (!this.#playing) return;
+    if (!this.#playing) {
+      return event.preventDefault();
+    }
     ContextMenu.open(
       [
         !!friendStore.friendIds?.length && {

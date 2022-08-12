@@ -11,7 +11,7 @@ import { pingStore } from 'src/rtc';
 @connectStore(pingStore)
 export class NesboxPingElement extends GemElement {
   render = () => {
-    if (!pingStore.avgPing) return html``;
-    return html`Ping: ${pingStore.avgPing}ms`;
+    if (!pingStore.ping) return html``;
+    return html`Ping: ${pingStore.ping}ms`;
   };
 }

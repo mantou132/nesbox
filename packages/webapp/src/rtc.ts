@@ -7,25 +7,7 @@ import { LocaleKey } from 'src/i18n';
 import { logger } from 'src/logger';
 import { sendSignal } from 'src/services/api';
 
-export const pingStore = createStore<{ avgPing?: number }>({});
-
-const recentPing: number[] = [];
-const cleanPing = () => {
-  recentPing.length = 0;
-  updateStore(pingStore, { avgPing: undefined });
-};
-const pingTick = (ping: number) => {
-  recentPing.push(ping);
-  if (recentPing.length > 10) {
-    recentPing.shift();
-  }
-
-  if (recentPing.length > 3) {
-    updateStore(pingStore, {
-      avgPing: Math.round(recentPing.reduce((acc, val) => (acc += val)) / recentPing.length),
-    });
-  }
-};
+export const pingStore = createStore<{ ping?: number }>({});
 
 const buttonMap: Record<Button, Record<string, Button | undefined>> = {
   [Button.Joypad1Up]: { '2': Button.Joypad2Up, '3': Button.Joypad3Up, '4': Button.Joypad4Up },
@@ -327,7 +309,7 @@ export class RTC extends EventTarget {
         const msg = JSON.parse(data) as ChannelMessage;
         switch (msg.type) {
           case ChannelMessageType.PING:
-            pingTick(Date.now() - msg.timestamp);
+            updateStore(pingStore, { ping: Date.now() - msg.timestamp });
             break;
           default:
             this.#emitMessage(msg);
@@ -370,7 +352,7 @@ export class RTC extends EventTarget {
   };
 
   #sendPing = () => {
-    this.send(new Ping(pingStore.avgPing), false);
+    this.send(new Ping(pingStore.ping), false);
     this.#pingTimer = window.setTimeout(this.#sendPing, 1000);
   };
 
@@ -404,7 +386,7 @@ export class RTC extends EventTarget {
     clearTimeout(this.#restartTimer);
 
     clearInterval(this.#pingTimer);
-    cleanPing();
+    updateStore(pingStore, { ping: undefined });
   };
 
   send = (data: ChannelMessage, emit = true) => {
