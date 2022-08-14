@@ -3,18 +3,14 @@
     windows_subsystem = "windows"
 )]
 
-#[cfg(target_os = "windows")]
-use window_shadows::set_shadow;
-
 #[cfg(target_os = "macos")]
 #[macro_use]
 extern crate objc;
 
+use tauri::{generate_handler, Manager, Window};
 #[cfg(target_os = "macos")]
-use tauri::Menu;
-use tauri::{generate_handler, Manager, Window, WindowEvent};
-#[cfg(target_os = "macos")]
-use window_ext::{ToolbarThickness, WindowExt};
+use tauri::{Menu, WindowEvent};
+use window_ext::WindowExt;
 
 use handler::{play_sound, set_badge};
 
@@ -27,28 +23,11 @@ fn main() {
     let context = tauri::generate_context!();
 
     #[cfg(target_os = "macos")]
-    let builder = builder.menu(Menu::os_default(&context.package_info().name));
-
-    builder
-        .setup(|app| {
-            let main_window = app.get_window("main").unwrap();
-            #[cfg(target_os = "windows")]
-            {
-                main_window.set_decorations(false).ok();
-                set_shadow(&main_window, true).ok();
-            }
-            #[cfg(target_os = "macos")]
-            {
-                main_window.set_transparent_titlebar(ToolbarThickness::Medium);
-            }
-
-            // main_window.open_devtools();
-            Ok(())
-        })
+    let builder = builder
+        .menu(Menu::os_default(&context.package_info().name))
         .on_window_event(|event| {
             let size = &event.window().outer_size().unwrap();
             match event.event() {
-                #[cfg(target_os = "macos")]
                 // bug: when enter fullscreen emit moved event
                 WindowEvent::Resized(_) | WindowEvent::Moved(_) => {
                     // https://github.com/tauri-apps/tauri/issues/4519
@@ -58,6 +37,15 @@ fn main() {
                 }
                 _ => {}
             }
+        });
+
+    builder
+        .setup(|app| {
+            let main_window = app.get_window("main").unwrap();
+            main_window.set_background();
+            main_window.set_transparent_titlebar();
+            // main_window.open_devtools();
+            Ok(())
         })
         .on_page_load(|w: Window, _| w.get_window("main").unwrap().show().unwrap())
         .plugin(preload::PreloadPlugin::new())

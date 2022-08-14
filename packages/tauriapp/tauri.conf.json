@@ -64,7 +64,7 @@
         "width": 1024,
         "height": 640,
         "fileDropEnabled": false,
-        "visible": true
+        "visible": false
       }
     ]
   }
