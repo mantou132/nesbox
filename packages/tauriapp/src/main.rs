@@ -10,7 +10,6 @@ extern crate objc;
 use tauri::{generate_handler, Manager, Window};
 #[cfg(target_os = "macos")]
 use tauri::{Menu, WindowEvent};
-use window_ext::WindowExt;
 
 use handler::{play_sound, set_badge};
 
@@ -25,25 +24,28 @@ fn main() {
     #[cfg(target_os = "macos")]
     let builder = builder
         .menu(Menu::os_default(&context.package_info().name))
-        .on_window_event(|event| {
-            match event.event() {
-                // bug: when enter fullscreen emit moved event
-                WindowEvent::Resized(_) | WindowEvent::Moved(_) => {
-                    // https://github.com/tauri-apps/tauri/issues/4519
-                    let monitor = event.window().current_monitor().unwrap().unwrap();
-                    let screen = monitor.size();
-                    let size = &event.window().outer_size().unwrap();
-                    event.window().set_toolbar_visible(size != screen);
-                }
-                _ => {}
+        .on_window_event(|event| match event.event() {
+            // bug: when enter fullscreen emit moved event
+            WindowEvent::Resized(_) | WindowEvent::Moved(_) => {
+                use window_ext::WindowExt;
+                // https://github.com/tauri-apps/tauri/issues/4519
+                let monitor = event.window().current_monitor().unwrap().unwrap();
+                let screen = monitor.size();
+                let size = &event.window().outer_size().unwrap();
+                event.window().set_toolbar_visible(size != screen);
             }
+            _ => {}
         });
 
     builder
         .setup(|app| {
             let main_window = app.get_window("main").unwrap();
-            main_window.set_background();
-            main_window.set_transparent_titlebar();
+            #[cfg(any(target_os = "windows", target_os = "macos"))]
+            {
+                use window_ext::WindowExt;
+                main_window.set_background();
+                main_window.set_transparent_titlebar();
+            }
             // main_window.open_devtools();
             Ok(())
         })
