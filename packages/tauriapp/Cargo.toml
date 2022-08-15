@@ -23,7 +23,7 @@ rodio = { version = "0.15.0", features = ["symphonia-aac"], default-features = f
 [target.'cfg(target_os = "windows")'.dependencies]
 window-shadows = "0.1"
 webview2-com = "0.16"
-windows = "0.37"
+windows = { version = "0.37", features = ["UI_Notifications", "Data_Xml_Dom"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 cocoa = "0.24.0"

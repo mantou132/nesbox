@@ -20,18 +20,6 @@ impl<R: Runtime> Plugin<R> for PreloadPlugin<R> {
     }
 
     fn initialization_script(&self) -> Option<String> {
-        let set_app_badge = match OS {
-            "macos" => {
-                r#"(count) => {
-                    window.__TAURI__.tauri.invoke('set_badge', { count }).catch(() => {});
-                }"#
-            }
-            _ => {
-                r#"(count) => {
-                    count && window.__TAURI__.window.getCurrent().requestUserAttention(2);
-                }"#
-            }
-        };
         Some(format!(
             r#"
                 Object.defineProperty(window, 'open', {{
@@ -43,12 +31,16 @@ impl<R: Runtime> Plugin<R> for PreloadPlugin<R> {
                     configurable: true,
                 }});
                 Object.defineProperty(navigator, 'setAppBadge', {{
-                    value: {set_app_badge},
+                    value: (count) => {{
+                        window.__TAURI__.tauri.invoke('set_badge', {{ count }}).catch((err) => {{
+                            console.warn(err);
+                            count && window.__TAURI__.window.getCurrent().requestUserAttention(2);
+                        }});
+                    }},
                     configurable: true,
                 }});
             "#,
             os = OS,
-            set_app_badge = set_app_badge
         ))
     }
 
