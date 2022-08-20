@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { resolve } from 'path';
 
-import { defineConfig } from 'vite';
+import { Plugin, ResolvedConfig, defineConfig } from 'vite';
 
 const config = async ({ command }: any) => {
   return defineConfig({
@@ -20,6 +20,7 @@ const config = async ({ command }: any) => {
       sourcemap: true,
       brotliSize: false,
     },
+    plugins: [VitePluginPrefetchAll()],
     define: {
       'process.env.RELEASE': JSON.stringify(Date.now()),
       'process.env.COMMAND': JSON.stringify(command),
@@ -33,3 +34,24 @@ const config = async ({ command }: any) => {
 };
 
 export default config;
+
+function VitePluginPrefetchAll(): Plugin {
+  let viteConfig: ResolvedConfig;
+  return {
+    name: 'vite:vite-plugin-prefetch',
+    configResolved(config) {
+      viteConfig = config;
+    },
+    transformIndexHtml(html, ctx) {
+      if (!ctx.bundle) return html;
+
+      return Object.values(ctx.bundle)
+        .map((bundle) => `${viteConfig.server.base ?? ''}/${bundle.fileName}`)
+        .map((href) => ({
+          tag: 'link',
+          attrs: { rel: 'prefetch', href },
+          injectTo: 'head',
+        }));
+    },
+  };
+}
