@@ -51,6 +51,11 @@ fn main() {
         })
         .on_page_load(|w: Window, _| w.get_window("main").unwrap().show().unwrap())
         .plugin(preload::PreloadPlugin::new())
+        .plugin(
+            tauri_plugin_window_state::Builder::default()
+                .set_auto_show(false)
+                .build(),
+        )
         .invoke_handler(generate_handler![play_sound, set_badge])
         .run(context)
         .expect("error while running tauri application");

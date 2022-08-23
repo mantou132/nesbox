@@ -415,6 +415,7 @@ dependencies = [
  "serde_json",
  "tauri",
  "tauri-build",
+ "tauri-plugin-window-state",
  "webview2-com",
  "window-shadows",
  "windows",
@@ -4476,6 +4477,16 @@ dependencies = [
  "syn",
  "tauri-codegen",
  "tauri-utils",
+]
+
+[[package]]
+name = "tauri-plugin-window-state"
+version = "0.1.0"
+dependencies = [
+ "bincode",
+ "serde",
+ "tauri",
+ "thiserror",
 ]
 
 [[package]]

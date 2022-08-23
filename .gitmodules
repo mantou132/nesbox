@@ -1,3 +1,6 @@
 [submodule "deps/tetanes"]
 	path = deps/tetanes
 	url = https://github.com/mantou132/tetanes
+[submodule "deps/tauri-plugin-window-state"]
+	path = deps/tauri-plugin-window-state
+	url = https://github.com/mantou132/tauri-plugin-window-state.git
