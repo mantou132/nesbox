@@ -90,6 +90,9 @@ fragment ScFriendPart on ScFriend {
   status
   unreadMessageCount
 }
+query sdp($input: ScSdpReq!) {
+  sdp(input: $input)
+}
 
 query getGames {
   games {
@@ -242,6 +245,10 @@ subscription event {
     }
     sendSignal {
       userId
+      json
+    }
+    sdp {
+      roomId
       json
     }
     login

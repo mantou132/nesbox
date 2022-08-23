@@ -50,6 +50,7 @@ import { closeListenerSet } from 'src/elements/titlebar';
 import 'duoyun-ui/elements/space';
 import 'src/modules/room-player-list';
 import 'src/modules/room-chat';
+import 'src/modules/room-voice';
 import 'src/modules/nav';
 import 'src/elements/fps';
 import 'src/elements/ping';
@@ -595,6 +596,7 @@ export class PRoomElement extends GemElement<State> {
       ></m-room-player-list>
       <dy-space class="info">
         ${this.#isHost ? html`<nesbox-fps></nesbox-fps>` : html`<nesbox-ping></nesbox-ping>`}
+        <m-room-voice></m-room-voice>
       </dy-space>
     `;
   };

@@ -10,9 +10,18 @@ use super::notify::*;
 use super::playing::*;
 use super::room::*;
 use super::user::*;
+use crate::voice::*;
 use futures::Stream;
-use juniper::{graphql_subscription, EmptySubscription, FieldError, FieldResult, RootNode};
+use juniper::{
+    graphql_subscription, EmptySubscription, FieldError, FieldResult, GraphQLInputObject, RootNode,
+};
 use std::pin::Pin;
+
+#[derive(GraphQLInputObject)]
+struct ScSdpReq {
+    pub sdp: String,
+    pub is_upgrade: bool,
+}
 
 pub struct QueryRoot;
 
@@ -53,6 +62,26 @@ impl QueryRoot {
     fn invites(context: &Context) -> FieldResult<Vec<ScInvite>> {
         let conn = DB_POOL.get().unwrap();
         Ok(get_invites(&conn, context.user_id))
+    }
+    fn sdp(context: &Context, input: ScSdpReq) -> FieldResult<String> {
+        let conn = DB_POOL.get().unwrap();
+        let user_id = context.user_id;
+        if let Some(room_id) = get_playing(&conn, user_id).map(|room| room.id) {
+            tokio::spawn(async move {
+                create_rtc(user_id, room_id, input.sdp, input.is_upgrade, |json| {
+                    notify(
+                        user_id,
+                        ScNotifyMessageBuilder::default()
+                            .sdp(ScSDP { json, room_id })
+                            .build()
+                            .unwrap(),
+                    );
+                })
+                .await
+                .ok();
+            });
+        }
+        Ok("ok".into())
     }
 }
 

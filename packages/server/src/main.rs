@@ -36,6 +36,7 @@ mod error;
 mod github;
 mod handles;
 mod schemas;
+mod voice;
 
 #[actix_web::main]
 async fn main() -> io::Result<()> {

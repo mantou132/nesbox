@@ -10,6 +10,7 @@ import {
   Emitter,
   boolattribute,
   connectStore,
+  styleMap,
 } from '@mantou/gem';
 import { commonHandle } from 'duoyun-ui/lib/hotkeys';
 import { focusStyle } from 'duoyun-ui/lib/styles';
@@ -20,6 +21,7 @@ import { Role, RoleOffer } from 'src/rtc';
 import { icons } from 'src/icons';
 import { i18n } from 'src/i18n';
 import { getAvatar } from 'src/utils';
+import { voiceStore } from 'src/modules/room-voice';
 
 import 'duoyun-ui/elements/avatar';
 import 'duoyun-ui/elements/use';
@@ -56,6 +58,7 @@ export class MRoomPlayerListElement extends GemElement {
 
 const itemStyle = createCSSSheet(css`
   :host {
+    position: relative;
     display: flex;
     gap: 0.5em;
     align-items: center;
@@ -65,7 +68,14 @@ const itemStyle = createCSSSheet(css`
     box-sizing: border-box;
     flex-shrink: 0;
     border-radius: ${theme.smallRound};
-    overflow: hidden;
+  }
+  .volume {
+    position: absolute;
+    top: -1em;
+    left: -1em;
+    width: 2em;
+    transform: rotate(-30deg);
+    transition: all 0.3s;
   }
   :host(:hover) {
     background-color: ${theme.hoverBackgroundColor};
@@ -76,9 +86,12 @@ const itemStyle = createCSSSheet(css`
   .avatar {
     flex-shrink: 0;
     height: 100%;
+    width: auto;
   }
   .avatar::part(avatar) {
     border-radius: 0;
+    border-start-start-radius: ${theme.smallRound};
+    border-end-start-radius: ${theme.smallRound};
   }
   .username {
     display: flex;
@@ -105,6 +118,7 @@ const itemStyle = createCSSSheet(css`
 @adoptedStyle(itemStyle)
 @adoptedStyle(focusStyle)
 @connectStore(i18n.store)
+@connectStore(voiceStore)
 export class MRoomPlayerItemElement extends GemElement {
   @property role: Role;
   @property roleType: number;
@@ -137,6 +151,10 @@ export class MRoomPlayerItemElement extends GemElement {
 
   get #isLeaveable() {
     return !this.host && this.#isSelf;
+  }
+
+  get #audioLevel() {
+    return voiceStore.audioLevel[this.role!.userId];
   }
 
   #onClick = () => {
@@ -176,6 +194,14 @@ export class MRoomPlayerItemElement extends GemElement {
           cursor: ${this.#isHostRole ? 'not-allowed' : 'default'};
         }
       </style>
+      <dy-use
+        class="volume"
+        style=${styleMap({
+          scale: 1 + Math.max(this.#audioLevel - 0.3, 0) / 3,
+          opacity: this.#audioLevel > 0.1 ? 1 : 0,
+        })}
+        .element=${icons.volume}
+      ></dy-use>
       <dy-avatar class="avatar" square src=${getAvatar(this.role?.username)}></dy-avatar>
       <div class="username">
         <span>${this.role.username}</span>

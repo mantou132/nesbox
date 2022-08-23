@@ -64,6 +64,9 @@ import {
   ScUpdatePassword,
   ScUpdateRoom,
   ScUpdateRoomScreenshot,
+  Sdp,
+  SdpQuery,
+  SdpQueryVariables,
   SendSignal,
   SendSignalMutation,
   SendSignalMutationVariables,
@@ -83,10 +86,14 @@ import {
 import { store, friendStore } from 'src/store';
 import { request, subscribe } from 'src/services';
 import { configure, parseAccount, Settings } from 'src/configure';
-import { events, Singal, SingalEvent } from 'src/constants';
+import { events, SDPEvent, Singal, SingalEvent } from 'src/constants';
 import { i18n, isCurrentLang } from 'src/i18n';
 import { logout } from 'src/auth';
 import { documentVisible, playHintSound, playSound } from 'src/utils';
+
+export const sendSDP = async (sdp: RTCSessionDescription, isUpgrade: boolean) => {
+  await request<SdpQuery, SdpQueryVariables>(Sdp, { input: { sdp: JSON.stringify(sdp), isUpgrade } });
+};
 
 export const getGames = async () => {
   const { games, topGames, favorites } = await request<GetGamesQuery, GetGamesQueryVariables>(GetGames, {});
@@ -319,6 +326,7 @@ export const subscribeEvent = () => {
         updateUser,
         sendSignal,
         login,
+        sdp,
       } = event;
 
       if (newMessage) {
@@ -424,6 +432,14 @@ export const subscribeEvent = () => {
         window.dispatchEvent(
           new CustomEvent<SingalEvent>(events.SINGAL, {
             detail: { userId: sendSignal.userId, singal: JSON.parse(sendSignal.json) },
+          }),
+        );
+      }
+
+      if (sdp) {
+        window.dispatchEvent(
+          new CustomEvent<SDPEvent>(events.SDP, {
+            detail: { roomId: sdp.roomId, sdp: JSON.parse(sdp.json) },
           }),
         );
       }

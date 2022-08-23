@@ -16,6 +16,7 @@ export const paramKeys = {
 
 export const events = {
   SINGAL: 'singal',
+  SDP: 'sdp',
   PRESS_BUTTON: 'pressbutton',
   RELEASE_BUTTON: 'releasebutton',
 };
@@ -45,6 +46,11 @@ export type Singal = {
 export type SingalEvent = {
   userId: number;
   singal: Singal;
+};
+
+export type SDPEvent = {
+  roomId: number;
+  sdp: RTCSessionDescriptionInit;
 };
 
 // https://developer.mozilla.org/en-US/docs/Web/CSS/image-rendering
