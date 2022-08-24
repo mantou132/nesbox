@@ -1,15 +1,22 @@
 use std::env::consts::OS;
+use std::fs;
+use std::path::PathBuf;
 
-use tauri::{plugin::Plugin, Invoke, Runtime};
+use tauri::{
+    plugin::{Plugin, Result},
+    Invoke, Runtime,
+};
 
 pub struct PreloadPlugin<R: Runtime> {
     invoke_handler: Box<dyn Fn(Invoke<R>) + Send + Sync>,
+    app_dir: PathBuf,
 }
 
 impl<R: Runtime> PreloadPlugin<R> {
     pub fn new() -> Self {
         Self {
             invoke_handler: Box::new(tauri::generate_handler![]),
+            app_dir: PathBuf::new(),
         }
     }
 }
@@ -19,7 +26,40 @@ impl<R: Runtime> Plugin<R> for PreloadPlugin<R> {
         "preload"
     }
 
+    fn initialize(&mut self, app: &tauri::AppHandle<R>, _: serde_json::Value) -> Result<()> {
+        self.app_dir = app.path_resolver().app_dir().unwrap();
+        Ok(())
+    }
+
     fn initialization_script(&self) -> Option<String> {
+        let local_storage = match OS {
+            "macos" => {
+                format!(
+                    r#"
+                        // Avoid white screens, the document script should use `async` attribute
+                        window.addEventListener('DOMContentLoaded', () => {{
+                            Object.assign(localStorage, {});
+                        }})
+                        window.addEventListener('unload', () => {{
+                            const {{ writeTextFile, BaseDirectory }} = window.__TAURI__.fs;
+                            writeTextFile(
+                                'local_storage.json',
+                                JSON.stringify(
+                                    Object.fromEntries(
+                                        Object.entries(localStorage)
+                                            .filter(([_,value]) => value.length < 2000)
+                                    )
+                                ),
+                                {{ dir: BaseDirectory.App }}
+                            );
+                        }});
+                    "#,
+                    fs::read_to_string(self.app_dir.join("local_storage.json"))
+                        .unwrap_or("{}".into())
+                )
+            }
+            _ => "".into(),
+        };
         Some(format!(
             r#"
                 Object.defineProperty(window, 'open', {{
@@ -39,8 +79,10 @@ impl<R: Runtime> Plugin<R> for PreloadPlugin<R> {
                     }},
                     configurable: true,
                 }});
+                {local_storage}
             "#,
             os = OS,
+            local_storage = local_storage,
         ))
     }
 

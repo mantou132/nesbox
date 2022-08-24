@@ -44,7 +44,8 @@ export const [store] = createCacheStore<Store>(
     rooms: {},
   },
   {
-    prefix: configure.user!.username,
+    prefix: () => configure.user!.username,
+    depStore: configure,
     cacheExcludeKeys: ['roomIds', 'rooms'],
   },
 );
@@ -70,7 +71,10 @@ export const [friendStore] = createCacheStore<FriendStore>(
     invites: {},
     friends: {},
   },
-  { prefix: configure.user!.username },
+  {
+    prefix: () => configure.user!.username,
+    depStore: configure,
+  },
 );
 
 export function changeFriendChatDraft(friendId: number, body?: string) {

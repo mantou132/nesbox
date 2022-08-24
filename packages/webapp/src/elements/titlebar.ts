@@ -128,8 +128,8 @@ export class MTitlebarElement extends GemElement<State> {
     this.#window?.listen('tauri://focus', () => this.setState({ blur: false }));
 
     this.#window?.listen('tauri://close-requested', async () => {
-      dispatchEvent(new CustomEvent('pagehide'));
       dispatchEvent(new CustomEvent('beforeunload'));
+      dispatchEvent(new CustomEvent('pagehide'));
       dispatchEvent(new CustomEvent('unload'));
       await Promise.all([...closeListenerSet].map((fn) => fn()));
       this.#window?.close();

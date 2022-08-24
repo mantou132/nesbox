@@ -28,7 +28,7 @@ if ([routes.login, routes.register].some(matchRoute)) {
 } else if ([routes.download, routes.emulator].some(matchRoute)) {
   logger.info('Welcome!');
 } else if (!configure.profile || isExpiredProfile(configure.profile)) {
-  logout(true);
+  logout();
 }
 
 render(
