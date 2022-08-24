@@ -44,6 +44,7 @@ jobs:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ""
         with:
+          projectPath: "./packages/tauriapp"
           tagName: v__VERSION__
           releaseName: v__VERSION__
           releaseBody: ""
