@@ -64,12 +64,13 @@ import {
   ScUpdatePassword,
   ScUpdateRoom,
   ScUpdateRoomScreenshot,
-  Sdp,
-  SdpQuery,
-  SdpQueryVariables,
+  ScVoiceMsgKind,
   SendSignal,
   SendSignalMutation,
   SendSignalMutationVariables,
+  SendVoiceMsg,
+  SendVoiceMsgQuery,
+  SendVoiceMsgQueryVariables,
   UpdateAccount,
   UpdateAccountMutation,
   UpdateAccountMutationVariables,
@@ -86,13 +87,15 @@ import {
 import { store, friendStore } from 'src/store';
 import { request, subscribe } from 'src/services';
 import { configure, parseAccount, Settings } from 'src/configure';
-import { events, SDPEvent, Singal, SingalEvent } from 'src/constants';
+import { events, VoiceSingalEvent, Singal, SingalEvent } from 'src/constants';
 import { i18n, isCurrentLang } from 'src/i18n';
 import { logout } from 'src/auth';
-import { documentVisible, playHintSound, playSound } from 'src/utils';
+import { documentVisible, playHintSound, playSound, snakeToCamelCase } from 'src/utils';
 
-export const sendSDP = async (sdp: RTCSessionDescription, isUpgrade: boolean) => {
-  await request<SdpQuery, SdpQueryVariables>(Sdp, { input: { sdp: JSON.stringify(sdp), isUpgrade } });
+export const sendVoiceMsg = async (kind: ScVoiceMsgKind, payload: RTCSessionDescription | RTCIceCandidate) => {
+  await request<SendVoiceMsgQuery, SendVoiceMsgQueryVariables>(SendVoiceMsg, {
+    input: { json: JSON.stringify(payload), kind },
+  });
 };
 
 export const getGames = async () => {
@@ -326,7 +329,7 @@ export const subscribeEvent = () => {
         updateUser,
         sendSignal,
         login,
-        sdp,
+        voiceSignal,
       } = event;
 
       if (newMessage) {
@@ -436,10 +439,15 @@ export const subscribeEvent = () => {
         );
       }
 
-      if (sdp) {
+      if (voiceSignal) {
         window.dispatchEvent(
-          new CustomEvent<SDPEvent>(events.SDP, {
-            detail: { roomId: sdp.roomId, sdp: JSON.parse(sdp.json) },
+          new CustomEvent<VoiceSingalEvent>(events.VOICE_SINGAL, {
+            detail: {
+              roomId: voiceSignal.roomId,
+              singal: Object.fromEntries(
+                Object.entries(JSON.parse(voiceSignal.json)).map(([key, val]) => [snakeToCamelCase(key), val]),
+              ),
+            },
           }),
         );
       }

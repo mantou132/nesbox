@@ -90,8 +90,8 @@ fragment ScFriendPart on ScFriend {
   status
   unreadMessageCount
 }
-query sdp($input: ScSdpReq!) {
-  sdp(input: $input)
+query sendVoiceMsg($input: ScVoiceMsgReq!) {
+  voiceMsg(input: $input)
 }
 
 query getGames {
@@ -247,7 +247,7 @@ subscription event {
       userId
       json
     }
-    sdp {
+    voiceSignal {
       roomId
       json
     }

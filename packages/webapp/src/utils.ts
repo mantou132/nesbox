@@ -5,6 +5,10 @@ import { Time } from 'duoyun-ui/lib/time';
 import { configure } from 'src/configure';
 import { githubIssue } from 'src/constants';
 
+export function snakeToCamelCase(str: string) {
+  return str.replace(/_(.)/g, (_substr, $1: string) => $1.toUpperCase());
+}
+
 export const getCorSrc = (url: string) => {
   return `https://files.xianqiao.wang/${url}`;
 };

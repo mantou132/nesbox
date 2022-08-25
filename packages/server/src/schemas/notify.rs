@@ -24,11 +24,11 @@ pub struct ScNotifyMessage {
     update_user: Option<ScUserBasic>,
     send_signal: Option<ScSignal>,
     login: Option<bool>,
-    sdp: Option<ScSDP>,
+    voice_signal: Option<ScVoiceSignal>,
 }
 
 #[derive(GraphQLObject, Debug, Clone)]
-pub struct ScSDP {
+pub struct ScVoiceSignal {
     pub room_id: i32,
     pub json: String,
 }

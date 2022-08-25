@@ -12,16 +12,8 @@ use super::room::*;
 use super::user::*;
 use crate::voice::*;
 use futures::Stream;
-use juniper::{
-    graphql_subscription, EmptySubscription, FieldError, FieldResult, GraphQLInputObject, RootNode,
-};
+use juniper::{graphql_subscription, EmptySubscription, FieldError, FieldResult, RootNode};
 use std::pin::Pin;
-
-#[derive(GraphQLInputObject)]
-struct ScSdpReq {
-    pub sdp: String,
-    pub is_upgrade: bool,
-}
 
 pub struct QueryRoot;
 
@@ -63,22 +55,21 @@ impl QueryRoot {
         let conn = DB_POOL.get().unwrap();
         Ok(get_invites(&conn, context.user_id))
     }
-    fn sdp(context: &Context, input: ScSdpReq) -> FieldResult<String> {
+    fn voice_msg(context: &Context, input: ScVoiceMsgReq) -> FieldResult<String> {
         let conn = DB_POOL.get().unwrap();
         let user_id = context.user_id;
         if let Some(room_id) = get_playing(&conn, user_id).map(|room| room.id) {
             tokio::spawn(async move {
-                create_rtc(user_id, room_id, input.sdp, input.is_upgrade, |json| {
+                handle_msg(user_id, room_id, input, move |json| {
                     notify(
                         user_id,
                         ScNotifyMessageBuilder::default()
-                            .sdp(ScSDP { json, room_id })
+                            .voice_signal(ScVoiceSignal { json, room_id })
                             .build()
                             .unwrap(),
                     );
                 })
-                .await
-                .ok();
+                .await;
             });
         }
         Ok("ok".into())

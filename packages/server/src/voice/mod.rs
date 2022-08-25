@@ -1,3 +1,4 @@
+use juniper::{GraphQLEnum, GraphQLInputObject};
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::mpsc::Sender;
@@ -6,6 +7,7 @@ use tokio::sync::Mutex;
 use webrtc::api::interceptor_registry::register_default_interceptors;
 use webrtc::api::media_engine::{MediaEngine, MIME_TYPE_OPUS};
 use webrtc::api::APIBuilder;
+use webrtc::ice_transport::ice_candidate::RTCIceCandidate;
 use webrtc::ice_transport::ice_server::RTCIceServer;
 use webrtc::interceptor::registry::Registry;
 use webrtc::peer_connection::configuration::RTCConfiguration;
@@ -18,6 +20,19 @@ use webrtc::track::track_local::track_local_static_rtp::TrackLocalStaticRTP;
 use webrtc::track::track_local::{TrackLocal, TrackLocalWriter};
 use webrtc::track::track_remote::TrackRemote;
 use webrtc::Error;
+
+#[derive(GraphQLEnum)]
+pub enum ScVoiceMsgKind {
+    Offer,
+    Answer,
+    Ice,
+}
+
+#[derive(GraphQLInputObject)]
+pub struct ScVoiceMsgReq {
+    pub json: String,
+    pub kind: ScVoiceMsgKind,
+}
 
 struct ConnState {
     conn: Arc<RTCPeerConnection>,
@@ -32,31 +47,44 @@ lazy_static! {
     };
 }
 
+pub async fn add_ice(user_id: i32, room_id: i32, ice: String) {
+    if let Some(state) = ROOM_USER_CONN_STATE_MAP
+        .lock()
+        .await
+        .get(&room_id)
+        .and_then(|map| map.get(&user_id))
+    {
+        state
+            .conn
+            .add_ice_candidate(serde_json::from_str(&ice).unwrap())
+            .await
+            .ok();
+    }
+}
+
+pub async fn upgrade_rtc(user_id: i32, room_id: i32, sdp: String) {
+    if let Some(state) = ROOM_USER_CONN_STATE_MAP
+        .lock()
+        .await
+        .get(&room_id)
+        .and_then(|map| map.get(&user_id))
+    {
+        state
+            .conn
+            .set_remote_description(serde_json::from_str(&sdp).unwrap())
+            .await
+            .ok();
+
+        log::debug!("webrtc updated anwser");
+    }
+}
+
 pub async fn create_rtc(
     user_id: i32,
     room_id: i32,
     sdp: String,
-    is_upgrade: bool,
-    callback: impl Fn(String) -> (),
+    callback: impl Fn(String) + Send + Copy + Sync + 'static,
 ) -> Result<(), Error> {
-    if is_upgrade {
-        if let Some(state) = ROOM_USER_CONN_STATE_MAP
-            .lock()
-            .await
-            .get(&room_id)
-            .and_then(|map| map.get(&user_id))
-        {
-            state
-                .conn
-                .set_remote_description(serde_json::from_str(&sdp).unwrap())
-                .await
-                .ok();
-
-            log::debug!("webrtc updated anwser");
-            return Ok(());
-        }
-    }
-
     // Create a MediaEngine object to configure the supported codec
     let mut m = MediaEngine::default();
 
@@ -79,10 +107,16 @@ pub async fn create_rtc(
 
     // Prepare the configuration
     let config = RTCConfiguration {
-        ice_servers: vec![RTCIceServer {
-            urls: vec!["stun:stun.l.google.com:19302".to_owned()],
-            ..Default::default()
-        }],
+        ice_servers: vec![
+            RTCIceServer {
+                urls: vec!["stun:stun.services.mozilla.com".to_owned()],
+                ..Default::default()
+            },
+            RTCIceServer {
+                urls: vec!["stun:stun.l.google.com:19302".to_owned()],
+                ..Default::default()
+            },
+        ],
         ..Default::default()
     };
 
@@ -138,6 +172,18 @@ pub async fn create_rtc(
                 Box::pin(async {})
             },
         ))
+        .await;
+
+    peer_connection
+        .on_ice_candidate(Box::new(move |c: Option<RTCIceCandidate>| {
+            Box::pin(async move {
+                if let Some(candidate) = c {
+                    log::debug!("{:?}", candidate);
+                    let json = serde_json::to_string(&candidate.to_json().await.unwrap()).unwrap();
+                    callback(json);
+                }
+            })
+        }))
         .await;
 
     let pc2 = peer_connection.clone();
@@ -229,16 +275,8 @@ pub async fn create_rtc(
     // Create an answer
     let answer = peer_connection.create_answer(None).await?;
 
-    // Create channel that is blocked until ICE Gathering is complete
-    let mut gather_complete = peer_connection.gathering_complete_promise().await;
-
     // Sets the LocalDescription, and starts our UDP listeners
     peer_connection.set_local_description(answer).await?;
-
-    // Block until ICE Gathering is complete, disabling trickle ICE
-    // we do this because we only can exchange one signaling message
-    // in a production application you should exchange ICE Candidates via OnICECandidate
-    let _ = gather_complete.recv().await;
 
     if let Some(local_desc) = peer_connection.local_description().await {
         let json = serde_json::to_string(&local_desc).unwrap();
@@ -270,6 +308,27 @@ pub async fn create_rtc(
                     callback(json);
                 }
             }
+        }
+    }
+}
+
+pub async fn handle_msg(
+    user_id: i32,
+    room_id: i32,
+    input: ScVoiceMsgReq,
+    callback: impl Fn(String) + Send + Copy + Sync + 'static,
+) {
+    match input.kind {
+        ScVoiceMsgKind::Offer => {
+            create_rtc(user_id, room_id, input.json, callback)
+                .await
+                .ok();
+        }
+        ScVoiceMsgKind::Answer => {
+            upgrade_rtc(user_id, room_id, input.json).await;
+        }
+        ScVoiceMsgKind::Ice => {
+            add_ice(user_id, room_id, input.json).await;
         }
     }
 }

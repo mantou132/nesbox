@@ -13,9 +13,10 @@ import {
 import { configure } from 'src/configure';
 import { icons } from 'src/icons';
 import { theme } from 'src/theme';
-import { sendSDP } from 'src/services/api';
-import { events, SDPEvent } from 'src/constants';
+import { sendVoiceMsg } from 'src/services/api';
+import { events, VoiceSingalEvent } from 'src/constants';
 import { logger } from 'src/logger';
+import { ScVoiceMsgKind } from 'src/generated/graphql';
 
 import 'duoyun-ui/elements/use';
 
@@ -56,22 +57,30 @@ export class MVoiceRoomElement extends GemElement<State> {
     this.setState({ joined: !this.state.joined });
   };
 
+  #closeVoice = () => this.setState({ joined: false });
+
   #audioEle = document.createElement('audio');
 
   mounted = () => {
     this.effect(
       ([roomId]) => {
         if (roomId && this.state.joined) {
-          const peerConnection = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+          const peerConnection = new RTCPeerConnection({
+            iceServers: [{ urls: 'stun:stun.services.mozilla.com' }, { urls: 'stun:stun3.l.google.com:19302' }],
+          });
+          logger.info('RTCPeerConnection', peerConnection);
+
           peerConnection.addTransceiver('audio');
 
           let userMediaStream: null | MediaStream = null;
-          navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-            if (peerConnection.signalingState === 'closed') return;
+          // https://github.com/tauri-apps/tauri/issues/5039
+          navigator.mediaDevices?.getUserMedia({ audio: { channelCount: 1 } }).then(async (stream) => {
             userMediaStream = stream;
+            if (peerConnection.signalingState === 'closed') return;
             stream.getTracks().forEach((track) => peerConnection.addTrack(track, stream));
-            peerConnection.createOffer().then((d) => peerConnection.setLocalDescription(d));
+            peerConnection.setLocalDescription(await peerConnection.createOffer());
           });
+
           peerConnection.addEventListener('iceconnectionstatechange', () => {
             logger.info(`voice ${peerConnection.iceConnectionState}`);
             if (
@@ -79,59 +88,83 @@ export class MVoiceRoomElement extends GemElement<State> {
               peerConnection.iceConnectionState === 'failed' ||
               peerConnection.iceConnectionState === 'closed'
             ) {
-              this.setState({ joined: false });
+              this.#closeVoice();
             }
           });
-          peerConnection.addEventListener('track', (event) => {
-            this.#audioEle.srcObject = event.streams[0];
-            this.#audioEle.play().catch(() => {
-              this.setState({ joined: false });
-            });
+
+          peerConnection.addEventListener('track', ({ streams }) => {
+            this.#audioEle.srcObject = streams[0];
+            this.#audioEle.play().catch(this.#closeVoice);
+            streams[0].onremovetrack = ({ track }) => {
+              updateStore(voiceStore, { audioLevel: { ...voiceStore.audioLevel, [track.id]: undefined } });
+            };
           });
 
-          peerConnection.addEventListener('icecandidate', (event) => {
-            // why?
-            if (event.candidate === null) {
-              sendSDP(peerConnection.localDescription!, false).catch(() => {
-                this.setState({ joined: false });
+          peerConnection.addEventListener('icecandidate', ({ candidate }) => {
+            if (candidate === null) {
+              sendVoiceMsg(ScVoiceMsgKind.Offer, peerConnection.localDescription!).catch(this.#closeVoice);
+            } else {
+              sendVoiceMsg(ScVoiceMsgKind.Ice, candidate).catch(() => {
+                //
               });
             }
           });
 
-          const setSdp = async ({ detail }: CustomEvent<SDPEvent>) => {
+          const handleVoiceMsg = async ({ detail }: CustomEvent<VoiceSingalEvent>) => {
             if (roomId !== detail.roomId) return;
-            const sdp = new RTCSessionDescription(detail.sdp);
-            await peerConnection.setRemoteDescription(sdp);
-            if (sdp.type === 'offer') {
-              const answer = await peerConnection.createAnswer();
-              await peerConnection.setLocalDescription(answer);
-              sendSDP(peerConnection.localDescription!, true).catch(() => {
-                this.setState({ joined: false });
-              });
+            if ('candidate' in detail.singal) {
+              peerConnection.addIceCandidate(new RTCIceCandidate(detail.singal)).catch(logger.error);
+            }
+            if ('type' in detail.singal) {
+              const sdp = new RTCSessionDescription(detail.singal);
+              await peerConnection.setRemoteDescription(sdp);
+              if (sdp.type === 'offer') {
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+                sendVoiceMsg(ScVoiceMsgKind.Answer, peerConnection.localDescription!).catch(this.#closeVoice);
+              }
             }
           };
-          window.addEventListener(events.SDP, setSdp);
-          const timer = setInterval(async () => {
-            if (peerConnection.iceConnectionState === 'connected') {
-              peerConnection
-                .getReceivers()
-                .map((rv) => rv.track)
-                .filter((track) => track.id.length < 20)
-                .map(async (track) => {
-                  const stats = [...(await peerConnection.getStats(track))];
-                  // https://www.w3.org/TR/webrtc-stats/#dom-rtcinboundrtpstreamstats
-                  const inboundRtp = stats.find(([_, stat]) => stat.type === 'inbound-rtp')?.[1];
+
+          window.addEventListener(events.VOICE_SINGAL, handleVoiceMsg);
+
+          const intervalTimer = setInterval(async () => {
+            if (peerConnection.iceConnectionState !== 'connected') return;
+            peerConnection
+              .getReceivers()
+              .map((rv) => rv.track)
+              .filter((track) => track.id.length < 20)
+              .map(async (track) => {
+                const stats = [...(await peerConnection.getStats(track))];
+                // https://www.w3.org/TR/webrtc-stats/#dom-rtcinboundrtpstreamstats
+                const inboundRtp = stats.find(([_, stat]) => stat.type === 'inbound-rtp')?.[1];
+                if (inboundRtp) {
                   updateStore(voiceStore, {
                     audioLevel: { ...voiceStore.audioLevel, [track.id]: inboundRtp.audioLevel || 0 },
                   });
-                });
-            }
+                }
+              });
+            peerConnection
+              .getSenders()
+              .map((rv) => rv.track)
+              .map(async (track) => {
+                const stats = [...(await peerConnection.getStats(track))];
+                const mediaSource = stats.find(([_, stat]) => stat.type === 'media-source')?.[1];
+                if (mediaSource) {
+                  // Safari not support
+                  updateStore(voiceStore, {
+                    audioLevel: { ...voiceStore.audioLevel, [configure.user!.id]: mediaSource.audioLevel || 0 },
+                  });
+                }
+              });
           }, 60);
+
           return () => {
-            clearInterval(timer);
+            updateStore(voiceStore, { audioLevel: {} });
+            clearInterval(intervalTimer);
             this.#audioEle.pause();
             userMediaStream?.getTracks().forEach((track) => track.stop());
-            window.removeEventListener(events.SDP, setSdp);
+            window.removeEventListener(events.VOICE_SINGAL, handleVoiceMsg);
             peerConnection.close();
           };
         }

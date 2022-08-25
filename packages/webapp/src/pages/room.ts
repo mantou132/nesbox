@@ -434,7 +434,7 @@ export class PRoomElement extends GemElement<State> {
     );
   };
 
-  #getCachesName = (auto: boolean) => `${auto ? 'auto_' : ''}state_v2`;
+  #getCachesName = (auto: boolean) => `${auto ? 'auto_' : ''}state_v3`;
 
   #save = async (auto = false) => {
     if (!this.#romBuffer) return;

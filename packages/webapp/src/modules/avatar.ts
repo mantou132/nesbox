@@ -124,16 +124,11 @@ export class MAvatarElement extends GemElement {
           handle: toggoleScreencaseMode,
         },
         {
-          text: i18n.get('discord'),
-          tag: html`<dy-use .element=${icons.openNewWindow} style="width: 1.2em"></dy-use>`,
-          handle: () => {
-            open('https://discord.gg/hY6XkHwc');
-          },
-        },
-        {
           text: i18n.get('feedback'),
           tag: html`<dy-use .element=${icons.openNewWindow} style="width: 1.2em"></dy-use>`,
-          handle: () => open(githubIssue),
+          handle: () => {
+            open(githubIssue);
+          },
         },
         {
           text: i18n.get('addGame'),

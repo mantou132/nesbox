@@ -49,7 +49,7 @@ const style = createCSSSheet(css`
     display: flex;
     flex-direction: column;
     gap: ${theme.gridGutter};
-    width: 25em;
+    width: 22em;
     flex-shrink: 0;
   }
   .header {
@@ -96,7 +96,7 @@ const style = createCSSSheet(css`
     flex-grow: 1;
   }
   .comment-title dy-button {
-    width: 4em;
+    width: 5.5em;
   }
 `);
 
