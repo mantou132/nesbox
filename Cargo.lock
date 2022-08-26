@@ -3277,6 +3277,7 @@ dependencies = [
 name = "nes"
 version = "1.0.1"
 dependencies = [
+ "bincode",
  "console_error_panic_hook",
  "qoi",
  "tetanes",

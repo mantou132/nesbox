@@ -84,6 +84,16 @@ impl Nes {
         wasm_bindgen::memory()
     }
 
+    pub fn save_sate(&mut self) -> Vec<u8> {
+        bincode::serialize(self.control_deck.cpu()).unwrap_or_default()
+    }
+
+    pub fn load_sate(&mut self, state: Vec<u8>) {
+        if let Ok(cpu) = bincode::deserialize(&state) {
+            self.control_deck.load_cpu(cpu);
+        }
+    }
+
     pub fn new(output_sample_rate: f32) -> Self {
         let mut control_deck = ControlDeck::new(RamState::default());
         control_deck.set_filter(VideoFilter::Pixellate);

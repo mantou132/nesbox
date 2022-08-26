@@ -1,6 +1,6 @@
 [package]
 name = "nes"
-version = "1.0.1"
+version = "1.0.2"
 authors = ["mantou132"]
 edition = "2021"
 
@@ -12,6 +12,7 @@ default = ["console_error_panic_hook"]
 
 [dependencies]
 wasm-bindgen = "0.2.63"
+bincode = "1.3.3"
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires

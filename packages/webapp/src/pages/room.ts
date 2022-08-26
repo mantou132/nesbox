@@ -434,17 +434,22 @@ export class PRoomElement extends GemElement<State> {
     );
   };
 
-  #getCachesName = (auto: boolean) => `${auto ? 'auto_' : ''}state_v3`;
+  #getCachesName = (auto: boolean) => `${auto ? 'auto_' : ''}state_v4`;
 
   #save = async (auto = false) => {
-    if (!this.#romBuffer) return;
-    const { buffer } = Nes.memory();
+    if (!this.#nes || !this.#romBuffer) return;
+    const buffer = this.#nes.save_sate();
     const thumbnail = this.canvasRef.element!.captureThumbnail();
     const cache = await caches.open(this.#getCachesName(auto));
     const key = await hash(this.#romBuffer);
     await cache.put(
       `/${key}?${new URLSearchParams({ timestamp: Date.now().toString(), thumbnail, auto: auto ? 'auto' : '' })}`,
-      new Response(new Blob([buffer])),
+      new Response(new Blob([buffer]), {
+        headers: {
+          'Content-Type': 'application/octet-stream',
+          'Content-Length': buffer.length.toString(),
+        },
+      }),
     );
     if (auto) return;
     Toast.open('success', i18n.get('tipGameStateSave', new Time().format()));
@@ -462,7 +467,6 @@ export class PRoomElement extends GemElement<State> {
 
   #load = async () => {
     if (!this.#isHost || !this.#romBuffer) return;
-    const { buffer } = Nes.memory();
     const key = await hash(this.#romBuffer);
     const cache = await caches.open(this.#getCachesName(false));
     const reqs = [...(await cache.keys(`/${key}`, { ignoreSearch: true }))].splice(0, 10);
@@ -493,8 +497,8 @@ export class PRoomElement extends GemElement<State> {
                 tag,
                 onClick: async (evt: PointerEvent) => {
                   const res = await (req === autoCacheReq ? autoCache : cache).match(req);
-                  if (!res) return;
-                  new Uint8Array(buffer).set(new Uint8Array(await res.arrayBuffer()));
+                  if (!this.#nes || !res) return;
+                  this.#nes.load_sate(new Uint8Array(await res.arrayBuffer()));
                   Toast.open('success', i18n.get('tipGameStateLoad', time.format()));
                   evt.target?.dispatchEvent(new CustomEvent('close', { composed: true }));
                 },
@@ -504,6 +508,8 @@ export class PRoomElement extends GemElement<State> {
         disableDefualtCancelBtn: true,
         disableDefualtOKBtn: true,
         maskCloseable: true,
+      }).catch(() => {
+        //
       });
     }
   };
