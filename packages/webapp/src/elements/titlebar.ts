@@ -35,6 +35,7 @@ const style = createCSSSheet(css`
     color: white;
     z-index: 2147483647;
     justify-content: center;
+    flex-shrink: 0;
   }
   :host([type='win']) {
     justify-content: space-between;

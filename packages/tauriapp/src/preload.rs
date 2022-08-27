@@ -39,9 +39,9 @@ impl<R: Runtime> Plugin<R> for PreloadPlugin<R> {
                         // Avoid white screens, the document script should use `async` attribute
                         window.addEventListener('DOMContentLoaded', () => {{
                             Object.assign(localStorage, {});
-                        }})
+                        }});
                         window.addEventListener('unload', () => {{
-                            const {{ writeTextFile, BaseDirectory }} = window.__TAURI__.fs;
+                            const {{ writeTextFile, BaseDirectory }} = __TAURI__.fs;
                             writeTextFile(
                                 'local_storage.json',
                                 JSON.stringify(
@@ -62,8 +62,36 @@ impl<R: Runtime> Plugin<R> for PreloadPlugin<R> {
         };
         Some(format!(
             r#"
+                window.addEventListener('load', () => {{
+                    const webview = __TAURI__.window.getCurrent();
+                    webview.setTitle(document.title);
+                    window.name = webview.label;
+                }});
                 Object.defineProperty(window, 'open', {{
-                    value: (uri) => window.__TAURI__.shell.open(uri),
+                    value: (url, target, feat = '') => {{
+                        if (feat) {{
+                            const {{ width, height, top, left }} = Object.fromEntries(feat.split(',').map(p => p.split('=')));
+                            __TAURI__.window.getAll().find(w => w.label === 'viewer')?.setFocus();
+                            const webview = new __TAURI__.window.WebviewWindow(target, {{
+                                visible: false,
+                                url: String(url),
+                                width: width && Number(width),
+                                height: height && Number(height),
+                                x: left && Number(left),
+                                y: top && Number(top),
+                            }});
+                            const close = webview.close.bind(webview);
+                            webview.close = () => close().catch(() => {{}});
+                            return webview;
+                        }} else {{
+                            __TAURI__.shell.open(url);
+                        }}
+                    }},
+                    configurable: true,
+                }});
+                Object.defineProperty(window, 'close', {{
+                    // No tauri://close-requested
+                    value: () => __TAURI__.window.getCurrent().close(),
                     configurable: true,
                 }});
                 Object.defineProperty(navigator, 'appName', {{
@@ -72,9 +100,9 @@ impl<R: Runtime> Plugin<R> for PreloadPlugin<R> {
                 }});
                 Object.defineProperty(navigator, 'setAppBadge', {{
                     value: (count) => {{
-                        window.__TAURI__.tauri.invoke('set_badge', {{ count }}).catch((err) => {{
+                        __TAURI__.tauri.invoke('set_badge', {{ count }}).catch((err) => {{
                             console.warn(err);
-                            count && window.__TAURI__.window.getCurrent().requestUserAttention(2);
+                            count && __TAURI__.window.getCurrent().requestUserAttention(2);
                         }});
                     }},
                     configurable: true,

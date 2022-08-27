@@ -16,9 +16,41 @@ export const paramKeys = {
 
 export const events = {
   SINGAL: 'singal',
-  VOICE_SINGAL: 'voice_singal',
+  VOICE_SINGAL: 'voice-singal',
   PRESS_BUTTON: 'pressbutton',
   RELEASE_BUTTON: 'releasebutton',
+};
+
+export enum SingalType {
+  OFFER = 'offer',
+  ANSWER = 'answer',
+  NEW_ICE_CANDIDATE = 'new-ice-candidate',
+}
+
+export type Singal = {
+  type: SingalType;
+  data: any;
+};
+
+export type SingalEvent = {
+  userId: number;
+  singal: Singal;
+};
+
+export type VoiceSingalEvent = {
+  roomId: number;
+  singal: RTCSessionDescriptionInit | RTCIceCandidateInit;
+};
+
+export enum BcMsgType {
+  RAM_REQ = 'ram-req',
+  RAM_RES = 'ram-res',
+}
+
+export type BcMsgEvent = {
+  id: string;
+  type: BcMsgType;
+  data?: Uint8Array;
 };
 
 export const queryKeys = {
@@ -32,25 +64,6 @@ export const localStorageKeys = {
   CONFIGURE_LOCAL_STORAGE_KEY: 'configure_v5',
   STORE_LOCAL_STORAGE_KEY: 'store_v2',
   FRIEND_CHAT_STORAGE_KEY: 'friend_chat_v2',
-};
-
-export enum SingalType {
-  OFFER = 'offer',
-  ANSWER = 'answer',
-  NEW_ICE_CANDIDATE = 'new-ice-candidate',
-}
-export type Singal = {
-  type: SingalType;
-  data: any;
-};
-export type SingalEvent = {
-  userId: number;
-  singal: Singal;
-};
-
-export type VoiceSingalEvent = {
-  roomId: number;
-  singal: RTCSessionDescriptionInit | RTCIceCandidateInit;
 };
 
 // https://developer.mozilla.org/en-US/docs/Web/CSS/image-rendering

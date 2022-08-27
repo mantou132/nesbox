@@ -134,6 +134,12 @@
   "shortcutLoad": {
     "message": "加載狀態"
   },
+  "shortcutOpenRam": {
+    "message": "RAM 查看器"
+  },
+  "shortcutOpenCheat": {
+    "message": "金手指"
+  },
   "soundSetting": {
     "message": "聲音"
   },

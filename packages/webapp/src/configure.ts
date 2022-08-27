@@ -62,6 +62,14 @@ const defaultShortcuts = {
     win: ['ctrl', 'l'],
     mac: ['command', 'l'],
   },
+  OPEN_RAM_VIEWER: {
+    win: ['ctrl', 'shift', 'd'],
+    mac: ['command', 'shift', 'd'],
+  },
+  OPEN_CHEAT_SETTINGS: {
+    win: ['ctrl', 'shift', 'c'],
+    mac: ['command', 'shift', 'c'],
+  },
 };
 
 const defaultVideoSettings = {
@@ -69,11 +77,14 @@ const defaultVideoSettings = {
   filter: VideoFilter.DEFAULT,
 };
 
+export type Cheat = { code: string; enabled: boolean; toggleKey: string; comment: string };
+
 export type Settings = {
   keybinding: typeof defaultKeybinding;
   volume: typeof defaultVolume;
   shortcuts: typeof defaultShortcuts;
   video: typeof defaultVideoSettings;
+  cheat: Record<number, Cheat[] | undefined>;
 };
 
 export type User = Modify<LoginMutation['login']['user'], { settings: Settings }>;
@@ -94,6 +105,7 @@ export const parseAccount = (account: GetAccountQuery['account']): User => {
       volume: mergeSettings(defaultVolume, settings.volume),
       shortcuts: mergeSettings(defaultShortcuts, settings.shortcuts),
       video: mergeSettings(defaultVideoSettings, settings.video),
+      cheat: settings.cheat || {},
     },
   };
 };

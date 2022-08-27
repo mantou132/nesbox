@@ -136,9 +136,15 @@ export const updateRoom = async (input: ScUpdateRoom) => {
 };
 
 export const updateRoomScreenshot = async (input: ScUpdateRoomScreenshot) => {
-  request<UpdateRoomScreenshotMutation, UpdateRoomScreenshotMutationVariables>(UpdateRoomScreenshot, {
-    input,
-  });
+  request<UpdateRoomScreenshotMutation, UpdateRoomScreenshotMutationVariables>(
+    UpdateRoomScreenshot,
+    {
+      input,
+    },
+    {
+      ignoreError: true,
+    },
+  );
 };
 
 export const enterPubRoom = async (roomId: number) => {

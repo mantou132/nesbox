@@ -6,7 +6,7 @@ use tetanes::{
     common::{Kind, Reset},
     control_deck::ControlDeck,
     input::GamepadSlot,
-    memory::RamState,
+    memory::{MemRead, MemWrite, RamState},
     ppu::{VideoFilter, RENDER_HEIGHT, RENDER_SIZE, RENDER_WIDTH},
 };
 use wasm_bindgen::prelude::*;
@@ -82,16 +82,6 @@ pub struct Nes {
 impl Nes {
     pub fn memory() -> JsValue {
         wasm_bindgen::memory()
-    }
-
-    pub fn save_sate(&mut self) -> Vec<u8> {
-        bincode::serialize(self.control_deck.cpu()).unwrap_or_default()
-    }
-
-    pub fn load_sate(&mut self, state: Vec<u8>) {
-        if let Ok(cpu) = bincode::deserialize(&state) {
-            self.control_deck.load_cpu(cpu);
-        }
     }
 
     pub fn new(output_sample_rate: f32) -> Self {
@@ -265,5 +255,35 @@ impl Nes {
             }
         }
         matched
+    }
+
+    pub fn state(&mut self) -> Vec<u8> {
+        bincode::serialize(self.control_deck.cpu()).unwrap_or_default()
+    }
+
+    pub fn load_state(&mut self, state: &[u8]) {
+        if let Ok(cpu) = bincode::deserialize(&state) {
+            self.control_deck.load_cpu(cpu);
+        }
+    }
+
+    /// 2k(0u16..=0x07FF) ram + 8K(0x6000u16..=0x7FFF) sram
+    pub fn ram(&mut self) -> Vec<u8> {
+        let mut ram = Vec::new();
+        for addr in 0u16..=0x07FF {
+            ram.push(self.control_deck.cpu().bus.peek(addr));
+        }
+        for addr in 0x6000u16..=0x7FFF {
+            ram.push(self.control_deck.cpu().bus.peek(addr));
+        }
+        ram
+    }
+
+    pub fn read_ram(&mut self, addr: u16) -> u8 {
+        self.control_deck.cpu().bus.peek(addr)
+    }
+
+    pub fn write_ram(&mut self, addr: u16, val: u8) {
+        self.control_deck.cpu_mut().bus.write(addr, val);
     }
 }

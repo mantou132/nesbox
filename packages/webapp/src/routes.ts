@@ -31,6 +31,14 @@ const getInitRoutes = () => {
         return html`<p-emulator></p-emulator>`;
       },
     },
+    ramviewer: {
+      title: '内存查看器',
+      pattern: '/ramviewer',
+      async getContent(_params: Record<string, string>) {
+        await import('src/pages/ramviewer');
+        return html`<p-ramviewer></p-ramviewer>`;
+      },
+    },
     game: {
       title: i18n.get('gameTitle'),
       pattern: `/game/:${paramKeys.GAME_ID}`,

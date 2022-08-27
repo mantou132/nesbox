@@ -134,6 +134,12 @@
   "shortcutLoad": {
     "message": "Load State"
   },
+  "shortcutOpenRam": {
+    "message": "RAM Viewer"
+  },
+  "shortcutOpenCheat": {
+    "message": "Cheat Settings"
+  },
   "soundSetting": {
     "message": "Sound"
   },

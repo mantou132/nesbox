@@ -134,6 +134,12 @@
   "shortcutLoad": {
     "message": "読み込み状態"
   },
+  "shortcutOpenRam": {
+    "message": "RAM ビューア"
+  },
+  "shortcutOpenCheat": {
+    "message": "チート設定"
+  },
   "soundSetting": {
     "message": "音"
   },
