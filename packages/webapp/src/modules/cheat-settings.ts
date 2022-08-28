@@ -113,12 +113,12 @@ export class MCheatSettingsElement extends GemElement<State> {
   };
 
   #changeToggleKey = (data: Cheat, detail: string[]) => {
-    if (detail.length > 1 || detail[0].length > 1) return;
+    const key = detail.length > 1 || detail[0].length > 1 ? undefined : detail[0];
     if (data === this.state.newCheat) {
-      this.#onChangeNewCheat({ toggleKey: detail[0] });
+      this.#onChangeNewCheat({ toggleKey: key });
     } else {
       this.#onChangeSettings(
-        this.#cheatSettings.map((e) => (e === data ? Object.assign(data, { toggleKey: detail[0] }) : e)),
+        this.#cheatSettings.map((e) => (e === data ? Object.assign(data, { toggleKey: key }) : e)),
       );
     }
   };

@@ -132,7 +132,8 @@ export class PRamviewerElement extends GemElement<State> {
     const { ram, prevRam, quickFilter, valueFilter, base, currentAddr } = this.state;
     this.#data = [...ram]
       .map((v, i) => ({
-        addr: i,
+        // ram 2k + sram 8k
+        addr: i > 2047 ? i - 2048 + 0x6000 : i,
         prev: prevRam[i],
         now: v,
       }))

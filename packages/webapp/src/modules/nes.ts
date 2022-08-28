@@ -225,7 +225,7 @@ export class MNesElement extends GemElement<State> {
             this.#nes!.write_ram(addr, val[0]);
           }
           break;
-        case 2:
+        case 3:
           if (this.#nes!.read_ram(addr) < val[0]) {
             this.#nes!.write_ram(addr, val[0]);
           }
