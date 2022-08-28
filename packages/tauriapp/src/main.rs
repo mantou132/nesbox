@@ -9,9 +9,9 @@ extern crate objc;
 
 use std::{env, fs};
 
-use tauri::{api::path::app_dir, generate_handler, Window};
 #[cfg(target_os = "macos")]
-use tauri::{Menu, WindowEvent};
+use tauri::Menu;
+use tauri::{api::path::app_dir, generate_handler, Window, WindowEvent};
 
 use handler::{play_sound, set_badge};
 use tauri_plugin_window_state::STATE_FILENAME;

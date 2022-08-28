@@ -50,6 +50,15 @@
   "deleteFriend": {
     "message": "刪除好友"
   },
+  "share": {
+    "message": "分享"
+  },
+  "shareDesc": {
+    "message": "一起來玩 $1"
+  },
+  "inviteValidFriend": {
+    "message": "邀請好友"
+  },
   "inviteFriend": {
     "message": "邀請"
   },
@@ -176,6 +185,24 @@
   "license": {
     "message": "許可證"
   },
+  "cheatSettingsTitle": {
+    "message": "金手指（$1）"
+  },
+  "cheatCode": {
+    "message": "Code"
+  },
+  "cheatComment": {
+    "message": "備註"
+  },
+  "cheatEnable": {
+    "message": "啟用"
+  },
+  "cheatToggleKey": {
+    "message": "鍵綁定"
+  },
+  "cheatAdd": {
+    "message": "添加"
+  },
   "loginTitle": {
     "message": "登錄"
   },
@@ -256,6 +283,12 @@
   },
   "placeholderSearchPlaying": {
     "message": "$1 更改遊戲或者邀請好友"
+  },
+  "tipCheatCodeExist": {
+    "message": "Code 已經存在"
+  },
+  "tipCheatCodeFormatErr": {
+    "message": "Code 格式錯誤"
   },
   "tipRoomCrowded": {
     "message": "房間人數過多"

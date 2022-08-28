@@ -50,6 +50,15 @@
   "deleteFriend": {
     "message": "友達を削除します"
   },
+  "share": {
+    "message": "シェア"
+  },
+  "shareDesc": {
+    "message": "一緒に遊んでみましょう $1"
+  },
+  "inviteValidFriend": {
+    "message": "友達を招待"
+  },
   "inviteFriend": {
     "message": "招待"
   },
@@ -176,6 +185,24 @@
   "license": {
     "message": "ライセンス"
   },
+  "cheatSettingsTitle": {
+    "message": "Cheat Settings ($1)"
+  },
+  "cheatCode": {
+    "message": "Code"
+  },
+  "cheatComment": {
+    "message": "述べる"
+  },
+  "cheatEnable": {
+    "message": "開いてください"
+  },
+  "cheatToggleKey": {
+    "message": "キーバインディング"
+  },
+  "cheatAdd": {
+    "message": "追加"
+  },
   "loginTitle": {
     "message": "ログイン"
   },
@@ -256,6 +283,12 @@
   },
   "placeholderSearchPlaying": {
     "message": "$1 ゲームを変更するか、友達を招待します"
+  },
+  "tipCheatCodeExist": {
+    "message": "コードはすでに存在します"
+  },
+  "tipCheatCodeFormatErr": {
+    "message": "コード形式エラー"
   },
   "tipRoomCrowded": {
     "message": "部屋にはあまりにも多くの人がいます"

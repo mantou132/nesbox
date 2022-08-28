@@ -50,6 +50,15 @@
   "deleteFriend": {
     "message": "Delete Friend"
   },
+  "share": {
+    "message": "Share"
+  },
+  "shareDesc": {
+    "message": "Let's play $1 together"
+  },
+  "inviteValidFriend": {
+    "message": "Invite Friend"
+  },
   "inviteFriend": {
     "message": "Invite"
   },
@@ -176,6 +185,24 @@
   "license": {
     "message": "License"
   },
+  "cheatSettingsTitle": {
+    "message": "Cheat Settings ($1)"
+  },
+  "cheatCode": {
+    "message": "Code"
+  },
+  "cheatComment": {
+    "message": "Comment"
+  },
+  "cheatEnable": {
+    "message": "Enable"
+  },
+  "cheatToggleKey": {
+    "message": "Toggle Key"
+  },
+  "cheatAdd": {
+    "message": "Add"
+  },
   "loginTitle": {
     "message": "Login"
   },
@@ -256,6 +283,12 @@
   },
   "placeholderSearchPlaying": {
     "message": "$1 Change game or invite friends"
+  },
+  "tipCheatCodeExist": {
+    "message": "Code already exists"
+  },
+  "tipCheatCodeFormatErr": {
+    "message": "Code format error"
   },
   "tipRoomCrowded": {
     "message": "Room crowded"

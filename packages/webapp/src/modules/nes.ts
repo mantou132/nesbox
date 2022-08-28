@@ -210,15 +210,14 @@ export class MNesElement extends GemElement<State> {
   #execCheat = () => {
     if (!this.#nes) return;
     this.state.cheats.forEach((cheat) => {
-      // only support len is 1
       const { enabled, addr, type, val } = cheat;
       if (!enabled) return;
       switch (type) {
         case 0:
-          this.#nes!.write_ram(addr, val[0]);
+          val.forEach((v, i) => this.#nes!.write_ram(addr + i, v));
           break;
         case 1:
-          this.#nes!.write_ram(addr, val[0]);
+          val.forEach((v, i) => this.#nes!.write_ram(addr + i, v));
           cheat.enabled = false;
           break;
         case 2:

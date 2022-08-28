@@ -20,6 +20,7 @@ import { isNotBoolean } from 'duoyun-ui/lib/types';
 import { Toast } from 'duoyun-ui/elements/toast';
 import { hash } from 'duoyun-ui/lib/encode';
 import { Time } from 'duoyun-ui/lib/time';
+import { getStringFromTemplate } from 'duoyun-ui/lib/utils';
 
 import { configure, getShortcut } from 'src/configure';
 import { routes } from 'src/routes';
@@ -64,17 +65,17 @@ export class PRoomElement extends GemElement {
     ContextMenu.open(
       [
         !!friendStore.friendIds?.length && {
-          text: '邀请好友',
+          text: i18n.get('inviteValidFriend'),
           menu: friendStore.friendIds?.map((id) => ({
             text: friendStore.friends[id]?.user.nickname || '',
             handle: () => createInvite({ roomId: this.#playing!.id, targetId: id }),
           })),
         },
         {
-          text: '邀请',
+          text: i18n.get('inviteFriend'),
           handle: async () => {
             const input = await Modal.open<DuoyunInputElement>({
-              header: '邀请',
+              header: i18n.get('inviteFriend'),
               body: html`
                 <dy-input
                   autofocus
@@ -88,7 +89,7 @@ export class PRoomElement extends GemElement {
           },
         },
         {
-          text: '分享',
+          text: i18n.get('share'),
           handle: () => {
             const url = `${location.origin}${createPath(routes.games)}${new QueryString({
               [queryKeys.JOIN_ROOM]: this.#playing!.id,
@@ -97,7 +98,7 @@ export class PRoomElement extends GemElement {
               ? navigator
                   .share({
                     url,
-                    text: `一起来玩 ${store.games[this.#playing!.gameId]?.name}`,
+                    text: getStringFromTemplate(i18n.get('shareDesc', store.games[this.#playing!.gameId]?.name || '')),
                   })
                   .catch(() => {
                     //
@@ -109,12 +110,22 @@ export class PRoomElement extends GemElement {
           text: '---',
         },
         {
-          text: '内存查看器',
+          text: i18n.get('shortcutSave'),
+          handle: this.#save,
+          tag: getShortcut('SAVE_GAME_STATE', true),
+        },
+        {
+          text: i18n.get('shortcutLoad'),
+          handle: this.#load,
+          tag: getShortcut('LOAD_GAME_STATE', true),
+        },
+        {
+          text: i18n.get('shortcutOpenRam'),
           handle: this.#openRamViewer,
           tag: getShortcut('OPEN_RAM_VIEWER', true),
         },
         {
-          text: '金手指设置',
+          text: i18n.get('shortcutOpenCheat'),
           handle: this.#openCheatModal,
           tag: getShortcut('OPEN_CHEAT_SETTINGS', true),
         },
@@ -220,7 +231,7 @@ export class PRoomElement extends GemElement {
   #openCheatModal = () => {
     if (!this.#playing) return;
     Modal.open({
-      header: `金手指（${store.games[this.#playing.gameId]?.name}）`,
+      header: i18n.get('cheatSettingsTitle', store.games[this.#playing.gameId]?.name || ''),
       body: html`<m-cheat-settings .gameId=${this.#playing.gameId}></m-cheat-settings>`,
       disableDefualtCancelBtn: true,
       disableDefualtOKBtn: true,

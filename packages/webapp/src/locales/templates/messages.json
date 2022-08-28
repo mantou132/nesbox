@@ -50,6 +50,15 @@
   "deleteFriend": {
     "message": "删除好友"
   },
+  "share": {
+    "message": "分享"
+  },
+  "shareDesc": {
+    "message": "一起來玩 $1"
+  },
+  "inviteValidFriend": {
+    "message": "邀请好友"
+  },
   "inviteFriend": {
     "message": "邀请"
   },
@@ -176,6 +185,24 @@
   "license": {
     "message": "许可证"
   },
+  "cheatSettingsTitle": {
+    "message": "金手指（$1）"
+  },
+  "cheatCode": {
+    "message": "Code"
+  },
+  "cheatComment": {
+    "message": "备注"
+  },
+  "cheatEnable": {
+    "message": "启用"
+  },
+  "cheatToggleKey": {
+    "message": "键绑定"
+  },
+  "cheatAdd": {
+    "message": "添加"
+  },
   "loginTitle": {
     "message": "登录"
   },
@@ -256,6 +283,12 @@
   },
   "placeholderSearchPlaying": {
     "message": "$1 更改游戏或者邀请好友"
+  },
+  "tipCheatCodeExist": {
+    "message": "Code 已经存在"
+  },
+  "tipCheatCodeFormatErr": {
+    "message": "Code 格式错误"
   },
   "tipRoomCrowded": {
     "message": "房间人数过多"

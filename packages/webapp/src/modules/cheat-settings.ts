@@ -15,6 +15,8 @@ import { Cheat, configure } from 'src/configure';
 import { icons } from 'src/icons';
 import { updateAccount } from 'src/services/api';
 import { MNesElement } from 'src/modules/nes';
+import { i18n } from 'src/i18n';
+import { theme } from 'src/theme';
 
 import 'duoyun-ui/elements/table';
 import 'duoyun-ui/elements/input';
@@ -35,6 +37,16 @@ const style = createCSSSheet(css`
   .list::part(side) {
     height: 10em;
   }
+  .list::part(icon) {
+    width: 1.5em;
+    opacity: 0.8;
+  }
+  .list::part(close) {
+    color: ${theme.negativeColor};
+  }
+  .list::part(icon):hover {
+    opacity: 1;
+  }
 `);
 
 type State = {
@@ -47,6 +59,7 @@ type State = {
 @customElement('m-cheat-settings')
 @adoptedStyle(style)
 @connectStore(configure)
+@connectStore(i18n.store)
 export class MCheatSettingsElement extends GemElement<State> {
   @numattribute gameId: number;
 
@@ -82,12 +95,12 @@ export class MCheatSettingsElement extends GemElement<State> {
 
   #addData = async (data: Cheat) => {
     if (this.#cheatSettings.find((e) => e.code === data.code)) {
-      Toast.open('error', 'Code 重复');
+      Toast.open('error', i18n.get('tipCheatCodeExist'));
     } else if (MNesElement.parseCheatCode(data)) {
       await this.#onChangeSettings([...this.#cheatSettings, data]);
       this.setState({ newCheat: undefined });
     } else {
-      Toast.open('error', 'Code 格式错误');
+      Toast.open('error', i18n.get('tipCheatCodeFormatErr'));
     }
   };
 
@@ -124,7 +137,7 @@ export class MCheatSettingsElement extends GemElement<State> {
     const data = this.#data;
     const columns: Columns<Cheat> = [
       {
-        title: 'Code',
+        title: i18n.get('cheatCode'),
         dataIndex: 'code',
         render: (data) =>
           data === this.state.newCheat
@@ -138,7 +151,7 @@ export class MCheatSettingsElement extends GemElement<State> {
             : data.code,
       },
       {
-        title: 'Comment',
+        title: i18n.get('cheatComment'),
         dataIndex: 'comment',
         render: (data) =>
           data === this.state.newCheat
@@ -152,7 +165,7 @@ export class MCheatSettingsElement extends GemElement<State> {
             : data.comment,
       },
       {
-        title: 'Toggle Key',
+        title: i18n.get('cheatToggleKey'),
         dataIndex: 'toggleKey',
         width: '25%',
         render: (data) =>
@@ -165,8 +178,9 @@ export class MCheatSettingsElement extends GemElement<State> {
           `,
       },
       {
-        title: 'Enabled',
+        title: i18n.get('cheatEnable'),
         dataIndex: 'enabled',
+        width: '100px',
         render: (data) =>
           html`
             <dy-switch @change=${() => this.#toggle(data)} neutral="informative" .checked=${data.enabled}></dy-switch>
@@ -177,16 +191,20 @@ export class MCheatSettingsElement extends GemElement<State> {
       },
       {
         title: '',
+        width: '80px',
+        style: {
+          textAlign: 'right',
+        },
         render: (data) =>
           html`
             <dy-space>
-              <dy-button
+              <dy-use
+                part="icon"
                 ?hidden=${data !== this.state.newCheat}
                 @click=${() => this.#addData(data)}
-                small
-                .icon=${icons.check}
-              ></dy-button>
-              <dy-button color="danger" @click=${() => this.#removeData(data)} small .icon=${icons.close}></dy-button>
+                .element=${icons.check}
+              ></dy-use>
+              <dy-use part="icon close" @click=${() => this.#removeData(data)} .element=${icons.close}></dy-use>
             </dy-space>
           `,
       },
@@ -199,7 +217,7 @@ export class MCheatSettingsElement extends GemElement<State> {
         .columns=${columns}
         .noData=${' '}
       ></dy-table>
-      <dy-button ?disabled=${!!this.state.newCheat} @click=${this.#addNewCheat}>添加新项</dy-button>
+      <dy-button ?disabled=${!!this.state.newCheat} @click=${this.#addNewCheat}>${i18n.get('cheatAdd')}</dy-button>
     `;
   };
 }
