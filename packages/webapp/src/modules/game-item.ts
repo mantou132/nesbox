@@ -29,7 +29,6 @@ import 'duoyun-ui/elements/modal';
 const style = createCSSSheet(css`
   :host {
     position: relative;
-    overflow: hidden;
   }
   .actions {
     position: absolute;
@@ -48,6 +47,7 @@ const style = createCSSSheet(css`
     aspect-ratio: 503/348;
     border-radius: ${theme.normalRound};
     object-fit: cover;
+    box-shadow: 0 0 0 0.5px ${theme.borderColor};
   }
   :host(:hover) .cover {
     opacity: 0.7;

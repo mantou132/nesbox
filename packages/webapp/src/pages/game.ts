@@ -25,18 +25,29 @@ import { githubIssue } from 'src/constants';
 import 'duoyun-ui/elements/button';
 import 'duoyun-ui/elements/input';
 import 'duoyun-ui/elements/heading';
+import 'duoyun-ui/elements/divider';
 import 'src/modules/screenshots';
 import 'src/modules/comment';
 import 'src/modules/game-detail';
 
 const style = createCSSSheet(css`
   :host {
-    display: flex;
-    flex-direction: row;
-    gap: 1.5em;
+    display: block;
     min-height: 100vh;
     padding-inline: ${theme.gridGutter};
     align-items: flex-start;
+  }
+  dy-divider {
+    margin-block-end: 2rem;
+  }
+  .content {
+    display: flex;
+    flex-direction: row;
+    gap: 1.5em;
+  }
+  .screenshots,
+  .preview {
+    box-shadow: 0 0 0 0.5px ${theme.borderColor};
   }
   .info {
     flex-grow: 1;
@@ -56,19 +67,6 @@ const style = createCSSSheet(css`
     width: 100%;
     display: flex;
     align-items: center;
-  }
-  @media ${mediaQuery.PHONE} {
-    main {
-      flex-direction: column;
-    }
-    .aside {
-      display: none;
-    }
-    .header {
-      flex-direction: column;
-      gap: 1em;
-      align-items: flex-start;
-    }
   }
   .title {
     flex-grow: 1;
@@ -97,6 +95,22 @@ const style = createCSSSheet(css`
   }
   .comment-title dy-button {
     width: 5.5em;
+  }
+  @media ${mediaQuery.PHONE} {
+    .content {
+      flex-direction: column;
+    }
+    .aside {
+      width: 100%;
+    }
+    .preview {
+      display: none;
+    }
+    .header {
+      flex-direction: column;
+      gap: 1em;
+      align-items: flex-start;
+    }
   }
 `);
 
@@ -185,43 +199,46 @@ export class PGameElement extends GemElement {
         : '0%';
 
     return html`
-      <div class="info">
-        <m-screenshots .links=${game?.screenshots}></m-screenshots>
-        <div class="header">
-          <dy-heading lv="1" class="title">
-            ${game?.name}
-            <dy-use class="icon" @click=${this.#edit} .element=${icons.edit}></dy-use>
-          </dy-heading>
-          <dy-button @click=${() => game && createRoom({ gameId: game.id, private: false })}>
-            ${i18n.get('startGame')}
-          </dy-button>
-        </div>
-        <m-game-detail .md=${game?.description || ''}></m-game-detail>
-      </div>
-      <div class="aside">
-        <img class="preview" src=${game ? getCDNSrc(game.preview) : ''} />
-        <div class="comment-title">
-          <dy-heading lv="3">${i18n.get('gameComment')}</dy-heading>
-          <dy-input-group>
-            <dy-button
-              color=${theme.textColor}
-              @click=${() => this.#changeComment(true)}
-              .icon=${this.#isSelfLike ? icons.likeSolid : icons.like}
-              type=${this.#isSelfLike ? 'solid' : 'reverse'}
-            >
-              ${formatPercentage(true)}
+      <dy-divider></dy-divider>
+      <div class="content">
+        <div class="info">
+          <m-screenshots class="screenshots" .links=${game?.screenshots}></m-screenshots>
+          <div class="header">
+            <dy-heading lv="1" class="title">
+              ${game?.name}
+              <dy-use class="icon" @click=${this.#edit} .element=${icons.edit}></dy-use>
+            </dy-heading>
+            <dy-button @click=${() => game && createRoom({ gameId: game.id, private: false })}>
+              ${i18n.get('startGame')}
             </dy-button>
-            <dy-button
-              color=${theme.textColor}
-              @click=${() => this.#changeComment(false)}
-              .icon=${this.#isSelfUnLike ? icons.unlikeSolid : icons.unlike}
-              type=${this.#isSelfUnLike ? 'solid' : 'reverse'}
-            >
-              ${formatPercentage(false)}
-            </dy-button>
-          </dy-input-group>
+          </div>
+          <m-game-detail .md=${game?.description || ''}></m-game-detail>
         </div>
-        ${commentList}
+        <div class="aside">
+          <img class="preview" src=${game ? getCDNSrc(game.preview) : ''} />
+          <div class="comment-title">
+            <dy-heading lv="3">${i18n.get('gameComment')}</dy-heading>
+            <dy-input-group>
+              <dy-button
+                color=${theme.textColor}
+                @click=${() => this.#changeComment(true)}
+                .icon=${this.#isSelfLike ? icons.likeSolid : icons.like}
+                type=${this.#isSelfLike ? 'solid' : 'reverse'}
+              >
+                ${formatPercentage(true)}
+              </dy-button>
+              <dy-button
+                color=${theme.textColor}
+                @click=${() => this.#changeComment(false)}
+                .icon=${this.#isSelfUnLike ? icons.unlikeSolid : icons.unlike}
+                type=${this.#isSelfUnLike ? 'solid' : 'reverse'}
+              >
+                ${formatPercentage(false)}
+              </dy-button>
+            </dy-input-group>
+          </div>
+          ${commentList}
+        </div>
       </div>
     `;
   };

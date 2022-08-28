@@ -2,12 +2,15 @@ import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css } fr
 
 import { theme } from 'src/theme';
 
+import 'duoyun-ui/elements/divider';
+
 const style = createCSSSheet(css`
   :host {
-    display: contents;
+    display: block;
+    margin-block-start: ${theme.gridGutter};
+    padding-inline: ${theme.gridGutter};
   }
   footer {
-    margin-block-start: ${theme.gridGutter};
     padding: ${theme.gridGutter};
     text-align: center;
   }
@@ -20,6 +23,9 @@ const style = createCSSSheet(css`
 @adoptedStyle(style)
 export class MFooterElement extends GemElement {
   render = () => {
-    return html`<footer>NESBox © Copyright</footer>`;
+    return html`
+      <dy-divider></dy-divider>
+      <footer>NESBox © Copyright</footer>
+    `;
   };
 }

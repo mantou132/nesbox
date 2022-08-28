@@ -78,7 +78,8 @@ export class MVoiceRoomElement extends GemElement<State> {
             userMediaStream = stream;
             if (peerConnection.signalingState === 'closed') return;
             stream.getTracks().forEach((track) => peerConnection.addTrack(track, stream));
-            peerConnection.setLocalDescription(await peerConnection.createOffer());
+            await peerConnection.setLocalDescription(await peerConnection.createOffer());
+            sendVoiceMsg(ScVoiceMsgKind.Offer, peerConnection.localDescription!).catch(this.#closeVoice);
           });
 
           peerConnection.addEventListener('iceconnectionstatechange', () => {
@@ -101,13 +102,14 @@ export class MVoiceRoomElement extends GemElement<State> {
           });
 
           peerConnection.addEventListener('icecandidate', ({ candidate }) => {
-            if (candidate === null) {
-              sendVoiceMsg(ScVoiceMsgKind.Offer, peerConnection.localDescription!).catch(this.#closeVoice);
-            } else {
+            candidate &&
               sendVoiceMsg(ScVoiceMsgKind.Ice, candidate).catch(() => {
                 //
               });
-            }
+          });
+
+          peerConnection.addEventListener('icecandidateerror', (event) => {
+            logger.error(event);
           });
 
           const handleVoiceMsg = async ({ detail }: CustomEvent<VoiceSingalEvent>) => {
