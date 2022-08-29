@@ -137,6 +137,9 @@
   "shortcutSettings": {
     "message": "設定"
   },
+  "shortcutScreenshot": {
+    "message": "スクリーンショット"
+  },
   "shortcutSave": {
     "message": "状態を保存"
   },
@@ -319,6 +322,9 @@
   },
   "tipHostSetting": {
     "message": "変更オプションは、ホストにのみ有効です"
+  },
+  "tipScreenshotSaved": {
+    "message": "スクリーンショットを保存しました"
   },
   "code404001": { "message": "ユーザーが存在します" },
   "code404002": { "message": "ユーザーネームまたはパスワードが違います" },

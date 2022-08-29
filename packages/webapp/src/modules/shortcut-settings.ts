@@ -52,6 +52,7 @@ export class MShortcutSettingsElement extends GemElement {
     };
 
     const labelMap2: LabelMap = {
+      SCREENSHOT: i18n.get('shortcutScreenshot'),
       SAVE_GAME_STATE: i18n.get('shortcutSave'),
       LOAD_GAME_STATE: i18n.get('shortcutLoad'),
       OPEN_RAM_VIEWER: i18n.get('shortcutOpenRam'),

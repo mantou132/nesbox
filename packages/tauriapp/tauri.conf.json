@@ -9,7 +9,7 @@
   },
   "package": {
     "productName": "NESBox",
-    "version": "1.0.5"
+    "version": "1.0.6"
   },
   "tauri": {
     "allowlist": {
@@ -20,7 +20,7 @@
         "all": true
       },
       "fs": {
-        "scope": ["$APP/*"],
+        "scope": ["$APP/*", "$DESKTOP/*", "$PICTURE/*", "$DOWNLOAD/*"],
         "writeFile": true
       }
     },

@@ -10,8 +10,11 @@ import {
   RefObject,
   refobject,
 } from '@mantou/gem';
+import { BaseDirectory } from '@tauri-apps/api/fs';
+import { Time } from 'duoyun-ui/lib/time';
 
 import { configure } from 'src/configure';
+import { saveFile } from 'src/utils';
 
 const style = createCSSSheet(css`
   :host {
@@ -40,6 +43,16 @@ export class NesboxRenderElement extends GemElement {
   paint = (frame: Uint8Array) => {
     new Uint8Array(this.#imageData.data.buffer).set(frame);
     this.#ctx.putImageData(this.#imageData, 0, 0);
+  };
+
+  screenshot = () => {
+    return new Promise<BaseDirectory | undefined>((res) => {
+      this.#ctx.canvas.toBlob(
+        (blob) => blob && res(saveFile(new File([blob], `Screenshot ${new Time().format()}.png`))),
+        'image/png',
+        1,
+      );
+    });
   };
 
   captureStream = () => {

@@ -137,6 +137,9 @@
   "shortcutSettings": {
     "message": "Settings"
   },
+  "shortcutScreenshot": {
+    "message": "Screenshot"
+  },
   "shortcutSave": {
     "message": "Save State"
   },
@@ -319,6 +322,9 @@
   },
   "tipHostSetting": {
     "message": "The change option is only effective for the host"
+  },
+  "tipScreenshotSaved": {
+    "message": "Screenshot Saved"
   },
   "code404001": { "message": "Users exist" },
   "code404002": { "message": "Incorrect username or password" },

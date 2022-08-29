@@ -52,6 +52,24 @@ export const playSound = (kind: string, volume = configure.user?.settings.volume
     });
 };
 
+export const saveFile = async (file: File) => {
+  try {
+    if (!window.__TAURI__) throw new Error();
+    const { writeBinaryFile, BaseDirectory } = window.__TAURI__.fs;
+    await writeBinaryFile(file.name, new Uint8Array(await file.arrayBuffer()), { dir: BaseDirectory.Desktop });
+    return BaseDirectory.Desktop;
+  } catch {
+    const a = document.createElement('a');
+    a.download = file.name;
+    a.href = URL.createObjectURL(file);
+    document.body.append(a);
+    a.click();
+    a.remove();
+    addEventListener('focus', () => setTimeout(() => URL.revokeObjectURL(a.href), 1000), { once: true });
+    return undefined;
+  }
+};
+
 export const playHintSound = (kind: string) => {
   playSound(kind, configure.user!.settings.volume.hint);
 };

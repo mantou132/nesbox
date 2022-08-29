@@ -137,6 +137,9 @@
   "shortcutSettings": {
     "message": "設置"
   },
+  "shortcutScreenshot": {
+    "message": "截圖"
+  },
   "shortcutSave": {
     "message": "保存狀態"
   },
@@ -319,6 +322,9 @@
   },
   "tipHostSetting": {
     "message": "改選項只對主機有效"
+  },
+  "tipScreenshotSaved": {
+    "message": "截圖已保存到桌面"
   },
   "code404001": { "message": "用戶已存在" },
   "code404002": { "message": "賬號或密碼錯誤" },

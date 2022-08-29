@@ -110,6 +110,11 @@ export class PRoomElement extends GemElement {
           text: '---',
         },
         {
+          text: i18n.get('shortcutScreenshot'),
+          handle: this.#saveScreenshot,
+          tag: getShortcut('SCREENSHOT', true),
+        },
+        {
           text: i18n.get('shortcutSave'),
           handle: this.#save,
           tag: getShortcut('SAVE_GAME_STATE', true),
@@ -218,6 +223,13 @@ export class PRoomElement extends GemElement {
     });
   };
 
+  #saveScreenshot = async () => {
+    if (!this.nesbox.element!.romBuffer) return;
+    if (await this.nesbox.element!.screenshot()) {
+      Toast.open('success', i18n.get('tipScreenshotSaved'));
+    }
+  };
+
   #ramviewer: Window | null;
 
   #openRamViewer = () => {
@@ -243,6 +255,7 @@ export class PRoomElement extends GemElement {
 
   #onKeyDown = (event: KeyboardEvent) => {
     hotkeys({
+      [getShortcut('SCREENSHOT')]: preventDefault(this.#saveScreenshot),
       [getShortcut('SAVE_GAME_STATE')]: preventDefault(this.#save),
       [getShortcut('LOAD_GAME_STATE')]: preventDefault(this.#load),
       [getShortcut('OPEN_RAM_VIEWER')]: preventDefault(this.#openRamViewer),
@@ -278,13 +291,13 @@ export class PRoomElement extends GemElement {
       () => [this.#playing],
     );
 
-    const bc = new BroadcastChannel('');
-    bc.addEventListener('message', this.#onMessage);
+    const bc = window.BroadcastChannel && new BroadcastChannel('');
+    bc?.addEventListener('message', this.#onMessage);
 
     closeListenerSet.add(this.#autoSave);
     addEventListener('keydown', this.#onKeyDown);
     return () => {
-      bc.close();
+      bc?.close();
       closeListenerSet.delete(this.#autoSave);
       removeEventListener('keydown', this.#onKeyDown);
     };

@@ -54,6 +54,10 @@ const defaultShortcuts = {
     win: ['esc'],
     mac: ['esc'],
   },
+  SCREENSHOT: {
+    win: ['ctrl', 'shift', 's'],
+    mac: ['command', 'shift', 's'],
+  },
   SAVE_GAME_STATE: {
     win: ['ctrl', 's'],
     mac: ['command', 's'],
@@ -146,7 +150,7 @@ export const [configure] = createCacheStore<Configure>(
 export function getShortcut(command: keyof typeof defaultShortcuts, isDisplay = false) {
   const keys = configure.user?.settings.shortcuts[command][isMac ? 'mac' : 'win'];
   if (!keys) return '';
-  if (isDisplay) return keys.map((key) => getDisplayKey(key)).join('+');
+  if (isDisplay) return keys.map((key) => getDisplayKey(key)).join(' ');
   return keys.join('+');
 }
 

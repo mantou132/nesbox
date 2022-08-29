@@ -525,6 +525,10 @@ export class MNesElement extends GemElement<State> {
     return this.canvasRef.element!.captureThumbnail();
   };
 
+  screenshot = () => {
+    return this.canvasRef.element!.screenshot();
+  };
+
   getState = () => {
     return this.#nes?.state();
   };
