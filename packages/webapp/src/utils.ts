@@ -5,8 +5,16 @@ import { Time } from 'duoyun-ui/lib/time';
 import { configure } from 'src/configure';
 import { githubIssue } from 'src/constants';
 
-export function snakeToCamelCase(str: string) {
-  return str.replace(/_(.)/g, (_substr, $1: string) => $1.toUpperCase());
+export function convertObjectSnakeToCamelCase(obj: Record<string, any>) {
+  return Object.fromEntries(
+    Object.entries(obj).map(([key, val]) => [key.replace(/_(.)/g, (_substr, $1: string) => $1.toUpperCase()), val]),
+  );
+}
+
+export function convertObjectCamelCaseToSnake(obj: Record<string, any>) {
+  return Object.fromEntries(
+    Object.entries(obj).map(([key, val]) => [key.replace(/[A-Z]{1,2}/g, ($1: string) => '_' + $1.toLowerCase()), val]),
+  );
 }
 
 export const getCorSrc = (url: string) => {

@@ -8,13 +8,14 @@ use webrtc::api::interceptor_registry::register_default_interceptors;
 use webrtc::api::media_engine::{MediaEngine, MIME_TYPE_OPUS};
 use webrtc::api::APIBuilder;
 use webrtc::ice_transport::ice_candidate::RTCIceCandidate;
+use webrtc::ice_transport::ice_connection_state::RTCIceConnectionState;
 use webrtc::ice_transport::ice_server::RTCIceServer;
 use webrtc::interceptor::registry::Registry;
 use webrtc::peer_connection::configuration::RTCConfiguration;
 use webrtc::peer_connection::peer_connection_state::RTCPeerConnectionState;
+use webrtc::peer_connection::sdp::sdp_type::RTCSdpType;
 use webrtc::peer_connection::RTCPeerConnection;
 use webrtc::rtp_transceiver::rtp_codec::RTCRtpCodecCapability;
-use webrtc::rtp_transceiver::rtp_codec::RTPCodecType;
 use webrtc::rtp_transceiver::rtp_receiver::RTCRtpReceiver;
 use webrtc::track::track_local::track_local_static_rtp::TrackLocalStaticRTP;
 use webrtc::track::track_local::{TrackLocal, TrackLocalWriter};
@@ -32,6 +33,13 @@ pub enum ScVoiceMsgKind {
 pub struct ScVoiceMsgReq {
     pub json: String,
     pub kind: ScVoiceMsgKind,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct SdpExt {
+    pub r#type: RTCSdpType,
+    pub sdp: String,
+    pub sender_track_ids: Vec<String>,
 }
 
 struct ConnState {
@@ -54,11 +62,14 @@ pub async fn add_ice(user_id: i32, room_id: i32, ice: String) {
         .get(&room_id)
         .and_then(|map| map.get(&user_id))
     {
-        state
-            .conn
-            .add_ice_candidate(serde_json::from_str(&ice).unwrap())
-            .await
-            .ok();
+        match serde_json::from_str(&ice) {
+            Ok(candidate) => {
+                state.conn.add_ice_candidate(candidate).await.ok();
+            }
+            Err(err) => {
+                log::error!("ice error: {:?}, ice: {}", err, ice);
+            }
+        }
     }
 }
 
@@ -77,6 +88,14 @@ pub async fn upgrade_rtc(user_id: i32, room_id: i32, sdp: String) {
 
         log::debug!("webrtc updated anwser");
     }
+}
+
+async fn get_senders_ids(peer_connection: &Arc<RTCPeerConnection>) -> Vec<String> {
+    let mut ids = Vec::new();
+    for sender in peer_connection.get_senders().await.iter() {
+        ids.push(sender.track().await.unwrap().id().into())
+    }
+    ids
 }
 
 pub async fn create_rtc(
@@ -107,26 +126,15 @@ pub async fn create_rtc(
 
     // Prepare the configuration
     let config = RTCConfiguration {
-        ice_servers: vec![
-            RTCIceServer {
-                urls: vec!["stun:stun.services.mozilla.com".to_owned()],
-                ..Default::default()
-            },
-            RTCIceServer {
-                urls: vec!["stun:stun.l.google.com:19302".to_owned()],
-                ..Default::default()
-            },
-        ],
+        ice_servers: vec![RTCIceServer {
+            urls: vec!["stun:stun.l.google.com:19302".to_owned()],
+            ..Default::default()
+        }],
         ..Default::default()
     };
 
     // Create a new RTCPeerConnection
     let peer_connection = Arc::new(api.new_peer_connection(config).await?);
-
-    // It will generate extra track, but it can maintain the correct ID of the second track
-    peer_connection
-        .add_transceiver_from_kind(RTPCodecType::Audio, &[])
-        .await?;
 
     let (local_track_chan_tx, mut local_track_chan_rx) =
         tokio::sync::mpsc::channel::<Arc<TrackLocalStaticRTP>>(1);
@@ -183,6 +191,17 @@ pub async fn create_rtc(
                     callback(json);
                 }
             })
+        }))
+        .await;
+
+    let pc1 = peer_connection.clone();
+    peer_connection
+        .on_ice_connection_state_change(Box::new(move |connection_state: RTCIceConnectionState| {
+            log::debug!("ICE Connection State has changed: {}", connection_state);
+            if connection_state == RTCIceConnectionState::Failed {
+                let _ = pc1.close();
+            }
+            Box::pin(async {})
         }))
         .await;
 
@@ -279,7 +298,12 @@ pub async fn create_rtc(
     peer_connection.set_local_description(answer).await?;
 
     if let Some(local_desc) = peer_connection.local_description().await {
-        let json = serde_json::to_string(&local_desc).unwrap();
+        let json = serde_json::to_string(&SdpExt {
+            r#type: local_desc.sdp_type,
+            sdp: local_desc.sdp,
+            sender_track_ids: get_senders_ids(&peer_connection).await,
+        })
+        .unwrap();
         callback(json);
     }
 
@@ -304,7 +328,12 @@ pub async fn create_rtc(
                 peer_connection.set_local_description(offer).await?;
                 if let Some(local_desc) = peer_connection.local_description().await {
                     log::debug!("webrtc send offer");
-                    let json = serde_json::to_string(&local_desc).unwrap();
+                    let json = serde_json::to_string(&SdpExt {
+                        r#type: local_desc.sdp_type,
+                        sdp: local_desc.sdp,
+                        sender_track_ids: get_senders_ids(&peer_connection).await,
+                    })
+                    .unwrap();
                     callback(json);
                 }
             }

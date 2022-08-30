@@ -40,6 +40,7 @@ export const voiceStore = createStore<{ audioLevel: Record<number, number> }>({
 
 type State = {
   joined: boolean;
+  senderTrackIds: number[];
 };
 
 /**
@@ -51,6 +52,7 @@ type State = {
 export class MVoiceRoomElement extends GemElement<State> {
   state: State = {
     joined: false,
+    senderTrackIds: [],
   };
 
   #toggleVoice = () => {
@@ -66,11 +68,9 @@ export class MVoiceRoomElement extends GemElement<State> {
       ([roomId]) => {
         if (roomId && this.state.joined) {
           const peerConnection = new RTCPeerConnection({
-            iceServers: [{ urls: 'stun:stun.services.mozilla.com' }, { urls: 'stun:stun3.l.google.com:19302' }],
+            iceServers: [{ urls: 'stun:stun3.l.google.com:19302' }],
           });
           logger.info('RTCPeerConnection', peerConnection);
-
-          peerConnection.addTransceiver('audio');
 
           let userMediaStream: null | MediaStream = null;
           // https://github.com/tauri-apps/tauri/issues/5039
@@ -83,7 +83,7 @@ export class MVoiceRoomElement extends GemElement<State> {
           });
 
           peerConnection.addEventListener('iceconnectionstatechange', () => {
-            logger.info(`voice ${peerConnection.iceConnectionState}`);
+            logger.info(`voice iceConnectionState ${peerConnection.iceConnectionState}`);
             if (
               peerConnection.iceConnectionState === 'disconnected' ||
               peerConnection.iceConnectionState === 'failed' ||
@@ -94,6 +94,10 @@ export class MVoiceRoomElement extends GemElement<State> {
           });
 
           peerConnection.addEventListener('track', ({ streams }) => {
+            logger.info(
+              `voice track`,
+              streams.flatMap((s) => s.getTracks()),
+            );
             this.#audioEle.srcObject = streams[0];
             this.#audioEle.play().catch(this.#closeVoice);
             streams[0].onremovetrack = ({ track }) => {
@@ -115,9 +119,10 @@ export class MVoiceRoomElement extends GemElement<State> {
           const handleVoiceMsg = async ({ detail }: CustomEvent<VoiceSingalEvent>) => {
             if (roomId !== detail.roomId) return;
             if ('candidate' in detail.singal) {
-              peerConnection.addIceCandidate(new RTCIceCandidate(detail.singal)).catch(logger.error);
+              peerConnection.addIceCandidate(new RTCIceCandidate(detail.singal)).catch(this.#closeVoice);
             }
             if ('type' in detail.singal) {
+              this.setState({ senderTrackIds: detail.singal.senderTrackIds.map(Number) });
               const sdp = new RTCSessionDescription(detail.singal);
               await peerConnection.setRemoteDescription(sdp);
               if (sdp.type === 'offer') {
@@ -132,33 +137,27 @@ export class MVoiceRoomElement extends GemElement<State> {
 
           const intervalTimer = setInterval(async () => {
             if (peerConnection.iceConnectionState !== 'connected') return;
-            peerConnection
-              .getReceivers()
-              .map((rv) => rv.track)
-              .filter((track) => track.id.length < 20)
-              .map(async (track) => {
-                const stats = [...(await peerConnection.getStats(track))];
-                // https://www.w3.org/TR/webrtc-stats/#dom-rtcinboundrtpstreamstats
-                const inboundRtp = stats.find(([_, stat]) => stat.type === 'inbound-rtp')?.[1];
-                if (inboundRtp) {
-                  updateStore(voiceStore, {
-                    audioLevel: { ...voiceStore.audioLevel, [track.id]: inboundRtp.audioLevel || 0 },
-                  });
-                }
-              });
-            peerConnection
-              .getSenders()
-              .map((rv) => rv.track)
-              .map(async (track) => {
-                const stats = [...(await peerConnection.getStats(track))];
-                const mediaSource = stats.find(([_, stat]) => stat.type === 'media-source')?.[1];
-                if (mediaSource) {
-                  // Safari not support
-                  updateStore(voiceStore, {
-                    audioLevel: { ...voiceStore.audioLevel, [configure.user!.id]: mediaSource.audioLevel || 0 },
-                  });
-                }
-              });
+            peerConnection.getReceivers().map(async ({ track }, i) => {
+              const stats = [...(await peerConnection.getStats(track))];
+              // https://www.w3.org/TR/webrtc-stats/#dom-rtcinboundrtpstreamstats
+              const inboundRtp = stats.find(([_, stat]) => stat.type === 'inbound-rtp')?.[1];
+              const userId = this.state.senderTrackIds[i];
+              if (inboundRtp) {
+                updateStore(voiceStore, {
+                  audioLevel: { ...voiceStore.audioLevel, [userId]: inboundRtp.audioLevel || 0 },
+                });
+              }
+            });
+            peerConnection.getSenders().map(async ({ track }) => {
+              const stats = [...(await peerConnection.getStats(track))];
+              const mediaSource = stats.find(([_, stat]) => stat.type === 'media-source')?.[1];
+              if (mediaSource) {
+                // Safari not support
+                updateStore(voiceStore, {
+                  audioLevel: { ...voiceStore.audioLevel, [configure.user!.id]: mediaSource.audioLevel || 0 },
+                });
+              }
+            });
           }, 60);
 
           return () => {

@@ -39,7 +39,7 @@ export type SingalEvent = {
 
 export type VoiceSingalEvent = {
   roomId: number;
-  singal: RTCSessionDescriptionInit | RTCIceCandidateInit;
+  singal: (RTCSessionDescriptionInit & { senderTrackIds: string[] }) | RTCIceCandidateInit;
 };
 
 export enum BcMsgType {

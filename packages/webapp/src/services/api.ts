@@ -90,11 +90,17 @@ import { configure, parseAccount, Settings } from 'src/configure';
 import { events, VoiceSingalEvent, Singal, SingalEvent } from 'src/constants';
 import { i18n, isCurrentLang } from 'src/i18n';
 import { logout } from 'src/auth';
-import { documentVisible, playHintSound, playSound, snakeToCamelCase } from 'src/utils';
+import {
+  convertObjectCamelCaseToSnake,
+  convertObjectSnakeToCamelCase,
+  documentVisible,
+  playHintSound,
+  playSound,
+} from 'src/utils';
 
 export const sendVoiceMsg = async (kind: ScVoiceMsgKind, payload: RTCSessionDescription | RTCIceCandidate) => {
   await request<SendVoiceMsgQuery, SendVoiceMsgQueryVariables>(SendVoiceMsg, {
-    input: { json: JSON.stringify(payload), kind },
+    input: { json: JSON.stringify(convertObjectCamelCaseToSnake(JSON.parse(JSON.stringify(payload)))), kind },
   });
 };
 
@@ -450,9 +456,7 @@ export const subscribeEvent = () => {
           new CustomEvent<VoiceSingalEvent>(events.VOICE_SINGAL, {
             detail: {
               roomId: voiceSignal.roomId,
-              singal: Object.fromEntries(
-                Object.entries(JSON.parse(voiceSignal.json)).map(([key, val]) => [snakeToCamelCase(key), val]),
-              ),
+              singal: convertObjectSnakeToCamelCase(JSON.parse(voiceSignal.json)),
             },
           }),
         );
