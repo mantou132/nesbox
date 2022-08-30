@@ -11,7 +11,7 @@ use std::{env, fs};
 
 #[cfg(target_os = "macos")]
 use tauri::Menu;
-use tauri::{api::path::app_dir, generate_handler, Window, WindowEvent};
+use tauri::{api::path::app_dir, generate_handler, Manager, Window, WindowEvent};
 
 use handler::{play_sound, set_badge};
 use tauri_plugin_window_state::STATE_FILENAME;
@@ -32,12 +32,23 @@ fn main() {
     }
 
     builder
+        .setup(|app| {
+            let main_window = app.get_window("main").unwrap();
+            #[cfg(target_os = "windows")]
+            {
+                // windows main window create not trigger in `on_window_event`
+                use window_ext::WindowExt;
+                main_window.set_background();
+                main_window.set_transparent_titlebar();
+            }
+            Ok(())
+        })
         .on_page_load(|w: Window, _| w.show().unwrap())
         .on_window_event(|event| match event.event() {
             WindowEvent::Resized(_) | WindowEvent::Moved(_) => {
                 let window = event.window();
                 #[cfg(any(target_os = "windows", target_os = "macos"))]
-                // created event
+                // created event，new window
                 {
                     use window_ext::WindowExt;
                     window.set_background();
