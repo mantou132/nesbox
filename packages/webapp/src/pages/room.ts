@@ -21,6 +21,7 @@ import { Toast } from 'duoyun-ui/elements/toast';
 import { hash } from 'duoyun-ui/lib/encode';
 import { Time } from 'duoyun-ui/lib/time';
 import { getStringFromTemplate } from 'duoyun-ui/lib/utils';
+import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
 import { configure, getShortcut } from 'src/configure';
 import { routes } from 'src/routes';
@@ -32,14 +33,36 @@ import { createInvite, updateRoomScreenshot } from 'src/services/api';
 import { closeListenerSet } from 'src/elements/titlebar';
 import type { MNesElement } from 'src/modules/nes';
 
+import 'duoyun-ui/elements/space';
 import 'src/modules/nes';
 import 'src/modules/cheat-settings';
 import 'src/elements/list';
+import 'src/elements/game-controller';
+import 'src/elements/fps';
+import 'src/elements/ping';
 
 const style = createCSSSheet(css`
-  .nes {
+  .nes,
+  .controller {
     position: absolute;
     inset: 0;
+  }
+  @media ${`not all and ${mediaQuery.PHONE_LANDSCAPE}`} {
+    .controller {
+      display: none;
+    }
+  }
+  .info {
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+  }
+  @media ${mediaQuery.PHONE} {
+    .info {
+      right: 0;
+      bottom: 0;
+      font-size: 0.15em;
+    }
   }
 `);
 
@@ -304,6 +327,15 @@ export class PRoomElement extends GemElement {
   };
 
   render = () => {
-    return html`<m-nes class="nes" ref=${this.nesbox.ref} @contextmenu=${this.#onContextMenu}></m-nes>`;
+    return html`
+      <m-nes class="nes" ref=${this.nesbox.ref} @contextmenu=${this.#onContextMenu}></m-nes>
+      <nesbox-game-controller class="controller"></nesbox-game-controller>
+      <dy-space class="info">
+        ${this.#playing?.host === configure.user?.id
+          ? html`<nesbox-fps></nesbox-fps>`
+          : html`<nesbox-ping></nesbox-ping>`}
+        <m-room-voice></m-room-voice>
+      </dy-space>
+    `;
   };
 }

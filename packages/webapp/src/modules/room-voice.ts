@@ -101,7 +101,14 @@ export class MVoiceRoomElement extends GemElement<State> {
             this.#audioEle.srcObject = streams[0];
             this.#audioEle.play().catch(this.#closeVoice);
             streams[0].onremovetrack = ({ track }) => {
-              updateStore(voiceStore, { audioLevel: { ...voiceStore.audioLevel, [track.id]: undefined } });
+              const userId =
+                this.state.senderTrackIds[
+                  peerConnection
+                    .getReceivers()
+                    .map((e) => e.track.id)
+                    .findIndex((id) => id === track.id) || -1
+                ].toString();
+              updateStore(voiceStore, { audioLevel: { ...voiceStore.audioLevel, [userId]: undefined } });
             };
           });
 

@@ -38,7 +38,7 @@ const style = createCSSSheet(css`
     align-items: flex-start;
   }
   dy-divider {
-    margin-block-end: 2rem;
+    margin-block-end: ${theme.gridGutter};
   }
   .content {
     display: flex;

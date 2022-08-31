@@ -1570,9 +1570,9 @@
     write-file-atomic "^3.0.3"
 
 "@mantou/gem@^1.6.0":
-  version "1.6.15"
-  resolved "https://registry.yarnpkg.com/@mantou/gem/-/gem-1.6.15.tgz#852a4007fbcd6ab07616d2f46c98c80a29a92823"
-  integrity sha512-pm/QFZngImw8NRdfIfy4zBnnWIom3XvCRi8+43isIB5e4AS+qAVt60/IYJr1A6B8C0PN23e0gfRvzTMSDYVx4Q==
+  version "1.6.17"
+  resolved "https://registry.yarnpkg.com/@mantou/gem/-/gem-1.6.17.tgz#6867ca888b08eba751390077561c6d3a92481198"
+  integrity sha512-CxgojVXDNWVbeG7kfJl1KekOVFRQcPqEtHnT3bB4SRJhAdKoDGpr5RhheWzeJYbzxnsTV3iH4tomh8eBjN0vhg==
   dependencies:
     lit-html "^1.4.1"
 

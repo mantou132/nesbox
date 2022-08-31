@@ -140,7 +140,7 @@ export class NesboxGamepadElement extends GemElement {
                 `
               : html`
                   <style>
-                    .img::part(${name}) {
+                    .img::part(${name.toLowerCase()}) {
                       display: none;
                     }
                   </style>

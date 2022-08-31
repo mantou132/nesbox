@@ -55,6 +55,7 @@ const style = createCSSSheet(css`
     line-height: 1.5;
     text-transform: uppercase;
     font-size: 1.125em;
+    white-space: nowrap;
   }
   .link::after {
     content: '';
@@ -90,7 +91,8 @@ const style = createCSSSheet(css`
     .nav {
       gap: 0.5em;
     }
-    .link {
+    .heart,
+    .avatar {
       display: none;
     }
   }
@@ -147,7 +149,7 @@ export class MNavElement extends GemElement<State> {
                     </nesbox-tooltip>
                   `}
               <dy-use
-                class="icon"
+                class="icon heart"
                 tabindex="0"
                 @keydown=${commonHandle}
                 .element=${favorited ? icons.favorited : icons.favorite}
@@ -187,7 +189,7 @@ export class MNavElement extends GemElement<State> {
         >
           <m-badge></m-badge>
         </dy-use>
-        <m-avatar class="icon"></m-avatar>
+        <m-avatar class="icon avatar"></m-avatar>
       </nav>
     `;
   };

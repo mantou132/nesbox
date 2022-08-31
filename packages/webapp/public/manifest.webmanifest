@@ -9,6 +9,7 @@
   "background_color": "black",
   "theme_color": "black",
   "display": "standalone",
+  "orientation": "landscape",
   "file_handlers": [
     {
       "action": "/emulator",

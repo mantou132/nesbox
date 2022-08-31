@@ -9,6 +9,28 @@
     <title>NESBox</title>
     <link type="image/png" sizes="32x32" rel="icon" href="/logo-32.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
+    <script>
+      // hack @mantou/gem
+      window.globalThis = window.globalThis || {
+        queueMicrotask: function (callback) {
+          Promise.resolve().then(callback);
+        },
+      };
+      window.globalThis.EventTarget = Image;
+      if (!Element.prototype.toggleAttribute) {
+        Element.prototype.toggleAttribute = function (name, force) {
+          if (force !== void 0) force = !!force;
+          if (this.hasAttribute(name)) {
+            if (force) return true;
+            this.removeAttribute(name);
+            return false;
+          }
+          if (force === false) return false;
+          this.setAttribute(name, '');
+          return true;
+        };
+      }
+    </script>
     <script async type="module" src="./index.ts"></script>
   </head>
   <body>

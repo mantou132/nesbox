@@ -6,15 +6,14 @@
 
 ## Feature
 
-- Supports playing many popular nes games
+- Support playing many popular NES games
 - Support multiplayer online
+- Support game cheat
+- Support voice
 - Support gamepad
+- Support touch screen
 - Support game state restore
 - Friend system, chat, invite
 - Game review
 - Internationalization
 - As a local emulator
-
-## TODO
-
-- Mobile adaptation

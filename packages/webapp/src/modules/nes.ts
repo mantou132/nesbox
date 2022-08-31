@@ -14,7 +14,6 @@ import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { waitLoading } from 'duoyun-ui/elements/wait';
 import init, { Nes, Button } from '@mantou/nes';
 import { Toast } from 'duoyun-ui/elements/toast';
-import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { isNotNullish } from 'duoyun-ui/lib/types';
 
 import { Cheat, configure } from 'src/configure';
@@ -36,12 +35,9 @@ import { getCDNSrc, playHintSound } from 'src/utils';
 import { events } from 'src/constants';
 import type { NesboxRenderElement } from 'src/elements/render';
 
-import 'duoyun-ui/elements/space';
 import 'src/modules/room-player-list';
 import 'src/modules/room-chat';
 import 'src/modules/room-voice';
-import 'src/elements/fps';
-import 'src/elements/ping';
 import 'src/elements/render';
 
 const style = createCSSSheet(css`
@@ -74,18 +70,6 @@ const style = createCSSSheet(css`
     box-sizing: border-box;
     width: min(38em, 100vw);
     padding-inline: 1rem;
-  }
-  .info {
-    position: absolute;
-    right: 1rem;
-    bottom: 1rem;
-  }
-  @media ${mediaQuery.PHONE} {
-    .info {
-      right: 0;
-      bottom: 0;
-      font-size: 0.15em;
-    }
   }
 `);
 
@@ -514,10 +498,6 @@ export class MNesElement extends GemElement<State> {
         @rolechange=${({ detail }: CustomEvent<RoleOffer>) => this.#rtc?.send(detail)}
         @kickout=${({ detail }: CustomEvent<number>) => this.#rtc?.kickoutRole(detail)}
       ></m-room-player-list>
-      <dy-space class="info">
-        ${this.#isHost ? html`<nesbox-fps></nesbox-fps>` : html`<nesbox-ping></nesbox-ping>`}
-        <m-room-voice></m-room-voice>
-      </dy-space>
     `;
   };
 

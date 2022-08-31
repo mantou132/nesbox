@@ -18,7 +18,7 @@ const style = createCSSSheet(css`
     padding-inline: ${theme.gridGutter};
   }
   dy-divider {
-    margin-block-end: 2rem;
+    margin-block-end: ${theme.gridGutter};
   }
 `);
 
