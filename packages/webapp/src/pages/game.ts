@@ -150,7 +150,7 @@ export class PGameElement extends GemElement {
 
   #changeComment = async (like: boolean) => {
     const input = await Modal.open<HTMLInputElement>({
-      header: '编写评论',
+      header: i18n.get('addComment'),
       body: html`
         <dy-input
           autofocus

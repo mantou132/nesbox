@@ -1,4 +1,13 @@
-import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, property } from '@mantou/gem';
+import {
+  GemElement,
+  html,
+  adoptedStyle,
+  customElement,
+  createCSSSheet,
+  css,
+  property,
+  connectStore,
+} from '@mantou/gem';
 import { Time } from 'duoyun-ui/lib/time';
 
 import { Comment } from 'src/store';
@@ -32,6 +41,7 @@ const style = createCSSSheet(css`
  */
 @customElement('m-comment')
 @adoptedStyle(style)
+@connectStore(i18n.store)
 export class MCommentElement extends GemElement {
   @property comment: Comment;
 
@@ -49,7 +59,8 @@ export class MCommentElement extends GemElement {
         }
       </style>
       <dy-help-text>
-        [${new Time().relativeTimeFormat(this.comment.updatedAt)}] ${this.#isSelf ? '我' : this.comment.user.nickname}:
+        [${new Time().relativeTimeFormat(this.comment.updatedAt)}]
+        ${this.#isSelf ? i18n.get('selfComment') : this.comment.user.nickname}:
       </dy-help-text>
       ${this.comment.body
         ? html`<div class="body">${this.comment.body}</div>`

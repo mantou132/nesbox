@@ -269,6 +269,12 @@
   "gameComment": {
     "message": "用戶評論"
   },
+  "addComment": {
+    "message": "編寫評論"
+  },
+  "selfComment": {
+    "message": "我"
+  },
   "noneComment": {
     "message": "沒有評論"
   },

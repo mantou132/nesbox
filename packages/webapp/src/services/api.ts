@@ -104,7 +104,7 @@ export const sendVoiceMsg = async (kind: ScVoiceMsgKind, payload: RTCSessionDesc
   });
 };
 
-export const getGames = async () => {
+export const getGames = debounce(async () => {
   const { games, topGames, favorites } = await request<GetGamesQuery, GetGamesQueryVariables>(GetGames, {});
   const gameIds = games
     .map((e) => {
@@ -117,15 +117,18 @@ export const getGames = async () => {
     favoriteIds: favorites.filter((id) => isCurrentLang(store.games[id]!)),
     topGameIds: [...new Set([...topGames, ...gameIds])].filter((id) => isCurrentLang(store.games[id]!)).splice(0, 5),
   });
-};
+}, 10000);
 
 export const getRooms = async () => {
   const { rooms } = await request<GetRoomsQuery, GetRoomsQueryVariables>(GetRooms, {});
+  await getGames();
   updateStore(store, {
-    roomIds: rooms.map((e) => {
-      store.rooms[e.id] = e;
-      return e.id;
-    }),
+    roomIds: rooms
+      .filter(({ gameId }) => gameId in store.games && isCurrentLang(store.games[gameId]!))
+      .map((e) => {
+        store.rooms[e.id] = e;
+        return e.id;
+      }),
   });
 };
 

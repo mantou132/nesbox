@@ -78,7 +78,7 @@
     "message": "未找到页面"
   },
   "notFoundDetail": {
-    "message": "您访问的页面没有找到，$1<点击>返回首页"
+    "message": "访问的页面没有找到，$1<点击>返回首页"
   },
   "notDataTitle": {
     "message": "暂无数据"
@@ -268,6 +268,12 @@
   },
   "gameComment": {
     "message": "用户评论"
+  },
+  "addComment": {
+    "message": "编写评论"
+  },
+  "selfComment": {
+    "message": "我"
   },
   "noneComment": {
     "message": "没有评论"

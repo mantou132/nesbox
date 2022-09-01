@@ -264,7 +264,13 @@
     "message": "ゲームを追加します"
   },
   "addGameDetail": {
-    "message": "创建 Github issue，填写好标题，简介或者玩法，并上传截图（第一张为封面）和 .nes 文件的 zip 压缩包后等待维护者处理，处理后游戏将添加到 NESBox。截图和 nes 参考可以在$1<这里>下载"
+    "message": "Create GitHub Issue, fill in the title, Introduction or gameplay, and upload the screenshot (the first one as the cover) and the .nes files of the .zip file, after the closure, the game will be added to NESBox. screenshots and NES references can be downloaded at $1<here> download"
+  },
+  "addComment": {
+    "message": "コメント"
+  },
+  "selfComment": {
+    "message": "私"
   },
   "gameComment": {
     "message": "ユーザーコメント"
