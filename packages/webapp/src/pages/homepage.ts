@@ -1,12 +1,23 @@
-import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, raw, history } from '@mantou/gem';
+import {
+  GemElement,
+  html,
+  adoptedStyle,
+  customElement,
+  createCSSSheet,
+  css,
+  raw,
+  history,
+  connectStore,
+} from '@mantou/gem';
 import { isMac } from 'duoyun-ui/lib/hotkeys';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { Toast } from 'duoyun-ui/elements/toast';
 import { GemTitleElement } from 'duoyun-ui/elements/title';
 import { createPath } from 'duoyun-ui/elements/route';
+import { waitLoading } from 'duoyun-ui/elements/wait';
 
-import { getCorSrc } from 'src/utils';
-import { githubRelease } from 'src/constants';
+import { getCDNSrc, getCorSrc } from 'src/utils';
+import { githubRelease, githubUrl } from 'src/constants';
 import { theme } from 'src/theme';
 import leftSvg from 'src/images/homepage/left.svg';
 import rightSvg from 'src/images/homepage/right.svg';
@@ -15,12 +26,15 @@ import feature1Svg from 'src/images/homepage/feature1.svg';
 import feature2Svg from 'src/images/homepage/feature2.svg';
 import feature3Svg from 'src/images/homepage/feature3.svg';
 import { routes } from 'src/routes';
+import { homepageI18n } from 'src/homepage-i18n';
+import { i18n, langNames } from 'src/i18n';
 
 import 'duoyun-ui/elements/button';
 import 'duoyun-ui/elements/paragraph';
 import 'duoyun-ui/elements/heading';
 import 'duoyun-ui/elements/link';
 import 'duoyun-ui/elements/space';
+import 'duoyun-ui/elements/select';
 import 'src/elements/footer';
 
 const downloadSvg = raw`
@@ -94,6 +108,15 @@ const style = createCSSSheet(css`
     color: inherit;
     text-decoration: none;
   }
+  .links {
+    display: inline-flex;
+    align-items: center;
+    gap: 1em;
+  }
+  .links dy-select {
+    padding: 0;
+    display: none;
+  }
   .logo {
     display: inline-flex;
     align-items: center;
@@ -135,6 +158,10 @@ const style = createCSSSheet(css`
   section img {
     width: min(40em, 90vw);
   }
+  section:not(.screenshot) img {
+    box-sizing: border-box;
+    padding-inline: 2em;
+  }
   section dy-heading {
     color: inherit;
     font-size: clamp(1.5em, 5vw, 2.2em);
@@ -153,21 +180,29 @@ const style = createCSSSheet(css`
     width: 100%;
   }
   .screenshot svg {
+    pointer-events: none;
     position: absolute;
     width: calc(100% + 5em);
     height: auto;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -90%);
+    filter: hue-rotate(160deg);
   }
   @media (min-width: 60em) {
     .content {
       padding-inline: 2rem;
     }
     header .main {
-      padding-block: 2em 8em;
+      padding-block: 4em 10em;
       align-items: center;
       text-align: center;
+    }
+    .links {
+      gap: 1.5em;
+    }
+    .links dy-select {
+      display: flex;
     }
     section:not(.screenshot) .content {
       flex-direction: row;
@@ -176,7 +211,6 @@ const style = createCSSSheet(css`
     section:not(.screenshot) img {
       width: 60%;
       flex-shrink: 0;
-      box-sizing: border-box;
       padding: 4em;
     }
     section:not(.screenshot):nth-of-type(2n) img {
@@ -193,6 +227,7 @@ const style = createCSSSheet(css`
  */
 @customElement('p-homepage')
 @adoptedStyle(style)
+@connectStore(homepageI18n.store)
 export class PHomepageElement extends GemElement {
   #login = () => {
     history.push({ path: createPath(routes.login) });
@@ -200,7 +235,7 @@ export class PHomepageElement extends GemElement {
 
   #download = async () => {
     if (mediaQuery.isPhone) {
-      Toast.open('warning', 'Do not support the mobile');
+      Toast.open('warning', homepageI18n.get('tipNotSupport'));
       return;
     }
     try {
@@ -211,6 +246,11 @@ export class PHomepageElement extends GemElement {
     } catch {
       open(`${githubRelease}/latest`);
     }
+  };
+
+  #onLangChange = async ({ detail }: CustomEvent<string>) => {
+    await waitLoading(i18n.setLanguage(detail));
+    this.update();
   };
 
   render = () => {
@@ -227,67 +267,64 @@ export class PHomepageElement extends GemElement {
             <img draggable="false" class="icon" src="/logo-96.png" />
             <span>${GemTitleElement.defaultTitle}</span>
           </dy-link>
-          <dy-link href="/login">Login</dy-link>
+          <div class="links">
+            <dy-link href=${githubUrl}>Github</dy-link>
+            <dy-link href="/login">${i18n.get('login')}</dy-link>
+            <dy-select
+              borderless
+              @change=${this.#onLangChange}
+              .value=${i18n.currentLanguage}
+              .options=${Object.keys(i18n.resources).map((code) => ({
+                label: langNames[code],
+                value: code,
+              }))}
+            ></dy-select>
+          </div>
         </nav>
         <div class="content main">
-          <dy-heading lv="1">Bring Memories Back</dy-heading>
-          <dy-paragraph>
-            Find your favorite NES game and call your friends, no matter how far you are, you can enjoy the NES game
-            immediately on the NESBox, save the progress, continue next time.
-          </dy-paragraph>
+          <dy-heading lv="1">${homepageI18n.get('title')}</dy-heading>
+          <dy-paragraph>${homepageI18n.get('desc')}</dy-paragraph>
           <dy-space size="large">
-            <dy-button .icon=${downloadSvg} @click=${this.#download}>Download</dy-button>
-            <dy-button color=${theme.textColor} @click=${this.#login}>Open NESBox</dy-button>
+            <dy-button .icon=${downloadSvg} @click=${this.#download}>${homepageI18n.get('download')}</dy-button>
+            <dy-button color=${theme.textColor} @click=${this.#login}>${homepageI18n.get('open')}</dy-button>
           </dy-space>
         </div>
       </header>
       <main>
-        <section>
-          <div class="content">
-            <img draggable="false" src=${feature1Svg} />
-            <div class="feature">
-              <dy-heading lv="2">Massive games for you to choose</dy-heading>
-              <dy-paragraph>
-                NESBox collected a large number of NES games. After starting your favorite game, Nesbox will create a
-                room, you can invite friends to play together.
-              </dy-paragraph>
-            </div>
-          </div>
-        </section>
-        <section>
-          <div class="content">
-            <img draggable="false" src=${feature2Svg} />
-            <div class="feature">
-              <dy-heading lv="2">High-quality game experience</dy-heading>
-              <dy-paragraph>
-                NESBOX reliable technology allows you and your friends to conduct low-latency videos and audio
-                transmission, just like playing in the same room
-              </dy-paragraph>
-            </div>
-          </div>
-        </section>
-        <section>
-          <div class="content">
-            <img draggable="false" src=${feature3Svg} />
-            <div class="feature">
-              <dy-heading lv="2">Synchronize your settings</dy-heading>
-              <dy-paragraph>
-                NESBox can synchronize your keys, rendering settings, and sound settings. When you switch the device,
-                you can quickly play the game.
-              </dy-paragraph>
-            </div>
-          </div>
-        </section>
+        ${[
+          [feature1Svg, homepageI18n.get('feature1Title'), homepageI18n.get('feature1Desc')],
+          [feature2Svg, homepageI18n.get('feature2Title'), homepageI18n.get('feature2Desc')],
+          [feature3Svg, homepageI18n.get('feature3Title'), homepageI18n.get('feature3Desc')],
+        ].map(
+          ([img, title, desc]) => html`
+            <section>
+              <div class="content">
+                <img draggable="false" src=${img} />
+                <div class="feature">
+                  <dy-heading lv="2">${title}</dy-heading>
+                  <dy-paragraph>${desc}</dy-paragraph>
+                </div>
+              </div>
+            </section>
+          `,
+        )}
         <section class="screenshot">
           <div class="content">
             <img
+              alt="NESBox Screenshot"
               draggable="false"
-              src=${getCorSrc(
+              srcset=${`${getCDNSrc(
+                'https://user-images.githubusercontent.com/3841872/188081531-c0dd68b6-3603-42ae-9df0-8dad7fb211f4.png',
+              )} 1024w, ${getCDNSrc(
                 'https://user-images.githubusercontent.com/3841872/188080988-c40cc38a-26e2-4466-833d-cffb9ebc7f7f.png',
+              )} 2272w`}
+              sizes="(max-width: 1024px) 480px, 1024px"
+              src=${getCDNSrc(
+                'https://user-images.githubusercontent.com/3841872/188081531-c0dd68b6-3603-42ae-9df0-8dad7fb211f4.png',
               )}
             />
             <dy-heading lv="2">
-              Ready to start your journey?
+              ${homepageI18n.get('journey')}
               <svg width="531" height="49" viewBox="0 0 531 49" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
                   d="M527.098 15.0977L530.701 13.5155C530.789 13.4276 530.789 13.3397 530.701 13.3397L527.098 11.7576L525.428 8.06592C525.428 7.97803 525.34 7.97803 525.34 8.06592L523.67 11.6697L520.066 13.3397C519.978 13.3397 519.978 13.4276 520.066 13.5155L523.67 15.0977L525.34 18.7015H525.428L527.098 15.0977Z"
@@ -308,7 +345,7 @@ export class PHomepageElement extends GemElement {
                 />
               </svg>
             </dy-heading>
-            <dy-button .icon=${downloadSvg} @click=${this.#download}>Download</dy-button>
+            <dy-button .icon=${downloadSvg} @click=${this.#download}>${homepageI18n.get('download')}</dy-button>
           </div>
         </section>
       </main>

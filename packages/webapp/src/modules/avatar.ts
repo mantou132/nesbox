@@ -13,6 +13,7 @@ import { icons } from 'src/icons';
 import { getAvatar, getCDNSrc, getGithubGames } from 'src/utils';
 import { store } from 'src/store';
 import { githubIssue, githubRelease } from 'src/constants';
+import { logger } from 'src/logger';
 
 import 'duoyun-ui/elements/avatar';
 import 'duoyun-ui/elements/options';
@@ -65,7 +66,7 @@ export class MAvatarElement extends GemElement {
 
     await Modal.confirm(html`<dy-paragraph style="width:min(400px, 100vw)"> ${tip} </dy-paragraph>`);
 
-    const excludeGames = ['马力欧兄弟/水管马力欧', '忍者神龟 街机版', 'Mighty 快打旋风'];
+    const excludeGames = ['马力欧兄弟/水管马力欧', '忍者神龟 街机版', 'Mighty 快打旋风', 'Super C'];
     const list: { title: string; description: string }[] = (
       await waitLoading((await fetch(getCDNSrc(`${githubRelease}/download/0.0.1/matedata.json`))).json())
     )
@@ -78,6 +79,7 @@ export class MAvatarElement extends GemElement {
       if (!item) return;
       const links = await getGithubGames(item.title);
       const link = links.find((e) => e.textContent === item.title);
+      if (link) logger.info('Game exist:', link.textContent);
       return link ? await find(ls.slice(index, ls.length)) : item;
     };
     const item = await waitLoading(find(list));

@@ -7,7 +7,7 @@ import jaURI from 'src/locales/ja/homepage-message.json?url';
 export type Locale = typeof zhCN;
 export type LocaleKey = keyof Locale;
 
-export const helpI18n = i18n.createSubModule<typeof zhCN>('homepage', {
+export const homepageI18n = i18n.createSubModule<typeof zhCN>('homepage', {
   [i18n.fallbackLanguage]: zhCN,
   'zh-TW': twURI,
   en: enURI,

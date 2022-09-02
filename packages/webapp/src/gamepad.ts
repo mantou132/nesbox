@@ -1,5 +1,6 @@
 import { isNotNullish } from 'duoyun-ui/lib/types';
 import { Button } from '@mantou/nes';
+import { Toast } from 'duoyun-ui/elements/toast';
 
 import { events } from 'src/constants';
 
@@ -53,6 +54,9 @@ export const listener = () => {
   if ([...navigator.getGamepads()].find((e) => e?.connected)) {
     readGamepad();
   } else {
-    addEventListener('gamepadconnected', readGamepad);
+    addEventListener('gamepadconnected', () => {
+      Toast.open('default', 'Gamepad connected!');
+      readGamepad();
+    });
   }
 };

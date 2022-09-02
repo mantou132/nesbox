@@ -22,7 +22,7 @@ logger.info('MODE\t', import.meta.env.MODE);
 logger.info('RELEASE\t', RELEASE);
 logger.info('COMMAND\t', COMMAND);
 
-if (window.__TAURI__ || mediaQuery.isPWA) {
+if ([routes.home].some(matchRoute) && (window.__TAURI__ || mediaQuery.isPWA)) {
   history.replace({ path: createPath(routes.games) });
 }
 

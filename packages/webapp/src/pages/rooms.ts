@@ -25,9 +25,13 @@ const style = createCSSSheet(css`
 @customElement('p-rooms')
 @adoptedStyle(style)
 @connectStore(store)
+@connectStore(i18n.store)
 export class PRoomsElement extends GemElement {
   mounted = () => {
-    return polling(getRooms, 10_000);
+    this.effect(
+      () => polling(getRooms, 10_000),
+      () => [i18n.currentLanguage],
+    );
   };
 
   render = () => {

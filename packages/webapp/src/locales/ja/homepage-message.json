@@ -1,1 +1,38 @@
-{}
+{
+  "title": {
+    "message": "記憶を取り戻す"
+  },
+  "desc": {
+    "message": "お気に入りの NES ゲームを見つけて、友達に電話をかけましょう。遠く離れていても、すぐに NESBox で NES ゲームを楽しみ、進行状況を保存して、次回に続きます。"
+  },
+  "download": {
+    "message": "ダウンロード"
+  },
+  "open": {
+    "message": "開ける NESBox"
+  },
+  "feature1Title": {
+    "message": "あなたが選択できる大規模なゲーム"
+  },
+  "feature1Desc": {
+    "message": "NESBox は、多数の NES ゲームを収集しました。 お気に入りのゲームを開始すると、Nesbox が部屋を作成し、友達を招待して一緒にプレイすることができます。"
+  },
+  "feature2Title": {
+    "message": "高品質のゲーム体験"
+  },
+  "feature2Desc": {
+    "message": "NESBox の信頼性の高いテクノロジーにより、同じ部屋で遊んでいるのと同じように、あなたとあなたの友人が低遅延のビデオとオーディオの送信を行うことができます。"
+  },
+  "feature3Title": {
+    "message": "設定を同期する"
+  },
+  "feature3Desc": {
+    "message": "NESBox は、キー、レンダリング設定、およびサウンド設定を同期できます。 デバイスを切り替えると、すぐにゲームをプレイできます。"
+  },
+  "journey": {
+    "message": "旅を始める準備はできましたか?"
+  },
+  "tipNotSupport": {
+    "message": "モバイルをサポートしない"
+  }
+}

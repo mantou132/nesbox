@@ -1,1 +1,38 @@
-{}
+{
+  "title": {
+    "message": "带回回忆"
+  },
+  "desc": {
+    "message": "找到你最喜欢的 NES 游戏叫上你的朋友，无论你们相距多远，都可以在 NESBox 上立即享受 NES 游戏，保存进度，下次继续"
+  },
+  "download": {
+    "message": "立即下载"
+  },
+  "open": {
+    "message": "打开 NESBox"
+  },
+  "feature1Title": {
+    "message": "海量游戏任你选择"
+  },
+  "feature1Desc": {
+    "message": "NESBox 收集了大量 NES 游戏。开始你喜欢的游戏后，Nesbox 会创建一个房间，你可以邀请朋友一起玩。"
+  },
+  "feature2Title": {
+    "message": "高品质的游戏体验"
+  },
+  "feature2Desc": {
+    "message": "NESBox 通过可靠的技术让你和你的朋友进行低延迟的视频和音频传输，就像在同一个房间里玩一样。"
+  },
+  "feature3Title": {
+    "message": "同步你的设置"
+  },
+  "feature3Desc": {
+    "message": "NESBox 可以同步你的按键、渲染设置和声音设置。 当你切换设备时，你可以快速玩游戏。"
+  },
+  "journey": {
+    "message": "准备好开始你的旅程了吗？"
+  },
+  "tipNotSupport": {
+    "message": "不支持手机"
+  }
+}
