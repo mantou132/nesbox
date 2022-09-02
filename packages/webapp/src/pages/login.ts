@@ -17,11 +17,12 @@ import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 
 import { theme } from 'src/theme';
-import { gotoRedirectUri } from 'src/auth';
+import { gotoRedirectUri, isExpiredProfile } from 'src/auth';
 import { i18n } from 'src/i18n';
 import { routes } from 'src/routes';
 import { login, register } from 'src/services/guest-api';
 import { getCDNSrc } from 'src/utils';
+import { configure } from 'src/configure';
 
 import 'duoyun-ui/elements/form';
 import 'duoyun-ui/elements/link';
@@ -155,6 +156,12 @@ export class PLoginElement extends GemElement<State> {
       await login({ username, password });
     }
     gotoRedirectUri();
+  };
+
+  mounted = () => {
+    if (configure.profile && !isExpiredProfile(configure.profile)) {
+      gotoRedirectUri();
+    }
   };
 
   render = () => {

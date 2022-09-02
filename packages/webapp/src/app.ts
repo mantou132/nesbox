@@ -41,7 +41,6 @@ import 'src/modules/search';
 import 'src/modules/friend-list';
 import 'src/modules/chat';
 import 'src/modules/nav';
-import 'src/modules/footer';
 
 const style = createCSSSheet(css`
   :host {
@@ -165,8 +164,8 @@ export class AppRootElement extends GemElement {
           >
             <div style="height: 100vh"></div>
           </dy-route>
+          <div style="height: 3em"></div>
         </main>
-        <m-footer></m-footer>
       </div>
 
       <m-chat></m-chat>

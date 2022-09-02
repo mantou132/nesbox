@@ -48,7 +48,7 @@ export class NesboxListElement extends GemElement {
         ${this.data.map(
           ({ img, label, tag, onClick }) => html`
             <li @click=${onClick} tabindex="0" @keydown=${commonHandle}>
-              <img src=${img} alt="" />
+              <img draggable="false" src=${img} alt="" />
               <span>${label}</span>
               ${tag && html`<dy-tag small color="notice">${tag}</dy-tag>`}
             </li>

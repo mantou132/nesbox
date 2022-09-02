@@ -215,7 +215,7 @@ export class PGameElement extends GemElement {
           <m-game-detail .md=${game?.description || ''}></m-game-detail>
         </div>
         <div class="aside">
-          <img class="preview" src=${game ? getCDNSrc(game.preview) : ''} />
+          <img class="preview" draggable="false" src=${game ? getCDNSrc(game.preview) : ''} />
           <div class="comment-title">
             <dy-heading lv="3">${i18n.get('gameComment')}</dy-heading>
             <dy-input-group>

@@ -1,7 +1,8 @@
-import { html, render, styleMap } from '@mantou/gem';
+import { history, html, render, styleMap } from '@mantou/gem';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { Toast } from 'duoyun-ui/elements/toast';
 import { DuoyunDropAreaElement } from 'duoyun-ui/elements/drop-area';
+import { createPath } from 'duoyun-ui/elements/route';
 
 import { theme } from 'src/theme';
 import { configure } from 'src/configure';
@@ -21,11 +22,15 @@ logger.info('MODE\t', import.meta.env.MODE);
 logger.info('RELEASE\t', RELEASE);
 logger.info('COMMAND\t', COMMAND);
 
+if (window.__TAURI__ || mediaQuery.isPWA) {
+  history.replace({ path: createPath(routes.games) });
+}
+
 if ([routes.login, routes.register].some(matchRoute)) {
   if (configure.profile) {
     gotoRedirectUri();
   }
-} else if ([routes.download, routes.emulator, routes.ramviewer].some(matchRoute)) {
+} else if ([routes.home, routes.emulator, routes.ramviewer].some(matchRoute)) {
   logger.info('Welcome!');
 } else if (!configure.profile || isExpiredProfile(configure.profile)) {
   logout();
@@ -86,7 +91,7 @@ render(
         .routes=${[
           routes.login,
           routes.register,
-          routes.download,
+          routes.home,
           routes.emulator,
           routes.ramviewer,
           {

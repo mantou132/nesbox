@@ -10,10 +10,18 @@ export const locationStore = GemRouteElement.createLocationStore();
 
 const getInitRoutes = () => {
   return {
+    download: {
+      title: '',
+      pattern: '/download',
+      redirect: '/',
+    },
     home: {
       title: '',
       pattern: '/',
-      redirect: '/games',
+      async getContent(_params: Record<string, string>) {
+        await import('src/pages/homepage');
+        return html`<p-homepage></p-homepage>`;
+      },
     },
     games: {
       title: i18n.get('gamesTitle'),
@@ -69,14 +77,6 @@ const getInitRoutes = () => {
       async getContent(params: Record<string, string>) {
         await import('src/pages/room');
         return html`<p-room id=${params[paramKeys.ROOM_ID]}></p-room>`;
-      },
-    },
-    download: {
-      title: '下载',
-      pattern: '/download',
-      async getContent(_params: Record<string, string>) {
-        await import('src/pages/download');
-        return html`<p-download></p-download>`;
       },
     },
     login: {

@@ -97,7 +97,13 @@ export class MGameItemElement extends GemElement {
 
   render = () => {
     return html`
-      <img class="cover" loading="lazy" @click=${this.#onMoreClick} src=${getCDNSrc(this.game.preview)} />
+      <img
+        draggable="false"
+        class="cover"
+        loading="lazy"
+        @click=${this.#onMoreClick}
+        src=${getCDNSrc(this.game.preview)}
+      />
       ${this.silent
         ? ''
         : html`

@@ -74,7 +74,7 @@ export class MRoomItemElement extends GemElement {
     const hostNickname = this.room.users.find((u) => this.room.host === u.id)?.nickname;
     const preview = game ? getCDNSrc(game.preview) : '';
     return html`
-      <img class="cover" loading="lazy" src=${this.room.screenshot || preview} />
+      <img class="cover" draggable="false" loading="lazy" src=${this.room.screenshot || preview} />
       <div class="info">
         <dy-heading lv="4" class="heading text">${game?.name}</dy-heading>
         <div class="users">

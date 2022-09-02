@@ -11,7 +11,7 @@ export const gotoRedirectUri = () => {
     const { pathname, search } = new URL(String(url));
     history.replace({ path: pathname, query: search });
   } catch {
-    history.replace({ path: createPath(routes.home) });
+    history.replace({ path: createPath(routes.games) });
   }
 };
 
