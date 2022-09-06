@@ -40,7 +40,7 @@ export const voiceStore = createStore<{ audioLevel: Record<number, number> }>({
 
 type State = {
   joined: boolean;
-  senderTrackIds: number[];
+  receiverTracks: { trackId: string; userId: number }[];
 };
 
 /**
@@ -52,7 +52,7 @@ type State = {
 export class MVoiceRoomElement extends GemElement<State> {
   state: State = {
     joined: false,
-    senderTrackIds: [],
+    receiverTracks: [],
   };
 
   #toggleVoice = () => {
@@ -100,15 +100,13 @@ export class MVoiceRoomElement extends GemElement<State> {
             );
             this.#audioEle.srcObject = streams[0];
             this.#audioEle.play().catch(this.#closeVoice);
+            peerConnection.getReceivers().map(({ track }, i) => {
+              const receiverTrack = this.state.receiverTracks[i];
+              if (receiverTrack) receiverTrack.trackId = track.id;
+            });
             streams[0].onremovetrack = ({ track }) => {
-              const userId =
-                this.state.senderTrackIds[
-                  peerConnection
-                    .getReceivers()
-                    .map((e) => e.track.id)
-                    .findIndex((id) => id === track.id) || -1
-                ].toString();
-              updateStore(voiceStore, { audioLevel: { ...voiceStore.audioLevel, [userId]: undefined } });
+              const userId = this.state.receiverTracks.find((e) => e.trackId === track.id)?.userId;
+              updateStore(voiceStore, { audioLevel: { ...voiceStore.audioLevel, [String(userId)]: undefined } });
             };
           });
 
@@ -129,7 +127,10 @@ export class MVoiceRoomElement extends GemElement<State> {
               peerConnection.addIceCandidate(new RTCIceCandidate(detail.singal)).catch(this.#closeVoice);
             }
             if ('type' in detail.singal) {
-              this.setState({ senderTrackIds: detail.singal.senderTrackIds.map(Number) });
+              this.setState({
+                // trackId init in `ontrack`
+                receiverTracks: detail.singal.senderTrackIds.map((userId) => ({ trackId: '', userId: Number(userId) })),
+              });
               const sdp = new RTCSessionDescription(detail.singal);
               await peerConnection.setRemoteDescription(sdp);
               if (sdp.type === 'offer') {
@@ -148,7 +149,7 @@ export class MVoiceRoomElement extends GemElement<State> {
               const stats = [...(await peerConnection.getStats(track))];
               // https://www.w3.org/TR/webrtc-stats/#dom-rtcinboundrtpstreamstats
               const inboundRtp = stats.find(([_, stat]) => stat.type === 'inbound-rtp')?.[1];
-              const userId = this.state.senderTrackIds[i];
+              const userId = this.state.receiverTracks[i]?.userId;
               if (inboundRtp) {
                 updateStore(voiceStore, {
                   audioLevel: { ...voiceStore.audioLevel, [userId]: inboundRtp.audioLevel || 0 },
