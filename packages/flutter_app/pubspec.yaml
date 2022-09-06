@@ -29,6 +29,7 @@ environment:
 dependencies:
   event_bus:
   webview_flutter:
+  battery_plus:
   flutter:
     sdk: flutter
 

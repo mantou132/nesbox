@@ -3,6 +3,7 @@ import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { Toast } from 'duoyun-ui/elements/toast';
 import { DuoyunDropAreaElement } from 'duoyun-ui/elements/drop-area';
 import { createPath } from 'duoyun-ui/elements/route';
+import { isMtApp } from 'mt-app';
 
 import { theme } from 'src/theme';
 import { configure } from 'src/configure';
@@ -97,7 +98,11 @@ render(
           {
             pattern: '*',
             getContent() {
-              import('src/app');
+              if (isMtApp) {
+                import('src/mt-app');
+              } else {
+                import('src/app');
+              }
               return html`<app-root></app-root>`;
             },
           },

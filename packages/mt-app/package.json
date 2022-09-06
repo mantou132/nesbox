@@ -1,0 +1,5 @@
+{
+  "name": "mt-app",
+  "version": "0.0.1",
+  "module": "index.ts"
+}

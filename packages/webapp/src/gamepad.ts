@@ -1,6 +1,7 @@
 import { isNotNullish } from 'duoyun-ui/lib/types';
 import { Button } from '@mantou/nes';
 import { Toast } from 'duoyun-ui/elements/toast';
+import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 
 import { events } from 'src/constants';
 
@@ -21,6 +22,18 @@ const buttonMap: Record<Button, Button[]> = {
 
 const pressedButton = new Set<number>();
 
+function dispatchReleaseEvent(index: number, padIndex = 0) {
+  const btn = buttonMap[index]?.[padIndex];
+  dispatchEvent(new CustomEvent(events.RELEASE_BUTTON_INDEX, { detail: index }));
+  if (btn) dispatchEvent(new CustomEvent(events.RELEASE_BUTTON, { detail: btn }));
+}
+
+function dispatchPressEvent(index: number, padIndex = 0) {
+  const btn = buttonMap[index]?.[padIndex];
+  dispatchEvent(new CustomEvent(events.PRESS_BUTTON_INDEX, { detail: index }));
+  if (btn) dispatchEvent(new CustomEvent(events.PRESS_BUTTON, { detail: btn }));
+}
+
 function readGamepad() {
   const gamepads = navigator
     .getGamepads()
@@ -29,17 +42,15 @@ function readGamepad() {
 
   gamepads.forEach((gamepad, padIndex) => {
     gamepad.buttons.forEach((button, index) => {
-      const btn = buttonMap[index]?.[padIndex];
-      if (!btn) return;
       if (pressedButton.has(index)) {
         if (!button.pressed) {
           pressedButton.delete(index);
-          window.dispatchEvent(new CustomEvent(events.RELEASE_BUTTON, { detail: btn }));
+          dispatchReleaseEvent(index, padIndex);
         }
       } else {
         if (button.pressed) {
           pressedButton.add(index);
-          window.dispatchEvent(new CustomEvent(events.PRESS_BUTTON, { detail: btn }));
+          dispatchPressEvent(index, padIndex);
         }
       }
     });
@@ -59,4 +70,37 @@ export const listener = () => {
       readGamepad();
     });
   }
+};
+
+export const startKeyboardSimulation = () => {
+  addEventListener(
+    'keydown',
+    hotkeys({
+      w: () => dispatchPressEvent(12),
+      a: () => dispatchPressEvent(14),
+      s: () => dispatchPressEvent(13),
+      d: () => dispatchPressEvent(15),
+      j: () => dispatchPressEvent(2),
+      k: () => dispatchPressEvent(0),
+      4: () => dispatchPressEvent(4),
+      5: () => dispatchPressEvent(5),
+      6: () => dispatchPressEvent(6),
+      7: () => dispatchPressEvent(7),
+    }),
+  );
+  addEventListener(
+    'keyup',
+    hotkeys({
+      w: () => dispatchReleaseEvent(12),
+      a: () => dispatchReleaseEvent(14),
+      s: () => dispatchReleaseEvent(13),
+      d: () => dispatchReleaseEvent(15),
+      j: () => dispatchReleaseEvent(2),
+      k: () => dispatchReleaseEvent(0),
+      4: () => dispatchReleaseEvent(4),
+      5: () => dispatchReleaseEvent(5),
+      6: () => dispatchReleaseEvent(6),
+      7: () => dispatchReleaseEvent(7),
+    }),
+  );
 };

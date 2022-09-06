@@ -14,10 +14,12 @@
   "dependencies": {
     "@mantou/gem": "^1.6.0",
     "@mantou/nes": "^1.0.3",
+    "deep-query-selector": "^1.0.2",
     "duoyun-ui": "^0.0.48",
     "graphql": "^16.2.0",
     "jszip": "^3.10.0",
     "marked": "^4.0.16",
+    "mt-app": "^0.0.1",
     "subscriptions-transport-ws": "^0.11.0"
   },
   "devDependencies": {

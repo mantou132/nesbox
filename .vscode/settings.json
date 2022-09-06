@@ -19,6 +19,9 @@
     "editor.tabSize": 4,
     "editor.defaultFormatter": "rust-lang.rust-analyzer"
   },
+  "dart.lineLength": 120,
+  "[dart]": {
+    "editor.rulers": [120]
+  },
   "files.eol": "\n"
 }
-

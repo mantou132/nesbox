@@ -63,7 +63,7 @@ class WebPageState extends State<WebPage> {
   NavigationDecision _navigationDelegate(
       BuildContext context, NavigationRequest request) {
     if (kDebugMode) {
-      print('webpage============>$request');
+      print('webpage============> $request');
     }
     if (isExternalUrl(request.url)) {
       return NavigationDecision.navigate;

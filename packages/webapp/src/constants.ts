@@ -4,6 +4,7 @@ export const COMMAND = process.env.COMMAND as 'serve' | 'build';
 
 export const isTauriMacApp = navigator.appName === 'nesbox-macos';
 export const isTauriWinApp = navigator.appName === 'nesbox-windows';
+export const isFlutterApp = navigator.userAgent.includes('NESBox');
 
 export const githubUrl = 'https://github.com/mantou132/nesbox';
 export const githubIssue = `${githubUrl}/issues`;
@@ -19,6 +20,8 @@ export const events = {
   VOICE_SINGAL: 'voice-singal',
   PRESS_BUTTON: 'pressbutton',
   RELEASE_BUTTON: 'releasebutton',
+  PRESS_BUTTON_INDEX: 'pressbutton-index',
+  RELEASE_BUTTON_INDEX: 'releasebutton-index',
 };
 
 export enum SingalType {
