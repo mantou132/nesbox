@@ -5,11 +5,31 @@ use super::schema::games;
 use super::schema::invites;
 use super::schema::messages;
 use super::schema::playing;
+use super::schema::records;
 use super::schema::rooms;
 use super::schema::users;
 
 use chrono::NaiveDateTime;
 use serde_json::value::Value;
+
+#[derive(Queryable)]
+pub struct Record {
+    pub user_id: i32,
+    pub game_id: i32,
+    pub last_play_start_at: NaiveDateTime,
+    pub last_play_end_at: Option<NaiveDateTime>,
+    pub play_total: i64,
+}
+
+#[derive(Insertable)]
+#[table_name = "records"]
+pub struct NewRecord {
+    pub user_id: i32,
+    pub game_id: i32,
+    pub last_play_start_at: NaiveDateTime,
+    pub last_play_end_at: Option<NaiveDateTime>,
+    pub play_total: i64,
+}
 
 #[derive(Queryable)]
 pub struct Comment {

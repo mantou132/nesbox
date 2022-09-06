@@ -1,8 +1,9 @@
 use crate::db::root::DB_POOL;
+use chrono::{DateTime, Utc};
 
 use super::{
     friend::get_friend_ids, friend::ScFriend, game::ScGame, invite::ScInvite, message::ScMessage,
-    room::ScRoomBasic, user::get_user_basic, user::ScUserBasic,
+    record::pause_game, room::ScRoomBasic, user::get_user_basic, user::ScUserBasic,
 };
 use juniper::{GraphQLInputObject, GraphQLObject};
 use std::collections::HashMap;
@@ -45,7 +46,7 @@ pub struct ScNewSignal {
 }
 
 lazy_static! {
-    static ref NOTIFY_MAP: RwLock<HashMap<i32, Sender<ScNotifyMessage>>> = {
+    static ref NOTIFY_MAP: RwLock<HashMap<i32, (Sender<ScNotifyMessage>, DateTime<Utc>)>> = {
         let m = HashMap::new();
         RwLock::new(m)
     };
@@ -53,21 +54,28 @@ lazy_static! {
 
 pub fn notify(user_id: i32, msg: ScNotifyMessage) {
     let map = NOTIFY_MAP.read().unwrap();
-    map.get(&user_id).and_then(|tx| tx.send(msg).ok());
+    map.get(&user_id).and_then(|sender| sender.0.send(msg).ok());
 }
 
 pub fn notify_ids(ids: Vec<i32>, msg: ScNotifyMessage) {
     let map = NOTIFY_MAP.read().unwrap();
     for user_id in ids {
-        map.get(&user_id).and_then(|tx| tx.send(msg.clone()).ok());
+        map.get(&user_id)
+            .and_then(|sender| sender.0.send(msg.clone()).ok());
     }
 }
 
 pub fn notify_all(msg: ScNotifyMessage) {
     let map = NOTIFY_MAP.read().unwrap();
     for (user_id, _) in map.iter() {
-        map.get(&user_id).and_then(|tx| tx.send(msg.clone()).ok());
+        map.get(&user_id)
+            .and_then(|sender| sender.0.send(msg.clone()).ok());
     }
+}
+
+pub fn get_online_time(user_id: i32) -> Option<DateTime<Utc>> {
+    let map = NOTIFY_MAP.read().unwrap();
+    map.get(&user_id).map(|sender| sender.1)
 }
 
 pub fn has_user(user_id: i32) -> bool {
@@ -85,8 +93,9 @@ pub fn get_receiver(user_id: i32) -> NoyifyReceiver {
             .entry(user_id)
             .or_insert_with(|| {
                 log::debug!("{} is online", user_id);
-                broadcast::channel(5).0
+                (broadcast::channel(5).0, Utc::now())
             })
+            .0
             .subscribe(),
         user_id,
     )
@@ -94,15 +103,17 @@ pub fn get_receiver(user_id: i32) -> NoyifyReceiver {
 
 impl Drop for NoyifyReceiver {
     fn drop(&mut self) {
-        let user_id = NOTIFY_MAP.read().unwrap().get(&self.1).and_then(|tx| {
-            if tx.receiver_count() <= 1 {
-                Some(self.1)
+        let user_id = self.1;
+
+        let online_time = NOTIFY_MAP.read().unwrap().get(&self.1).and_then(|sender| {
+            if sender.0.receiver_count() <= 1 {
+                Some(sender.1)
             } else {
                 None
             }
         });
 
-        if let Some(user_id) = user_id {
+        if let Some(time) = online_time {
             log::debug!("{} is offline", user_id);
             // Temporary value release write lock
             NOTIFY_MAP.write().unwrap().remove(&user_id);
@@ -112,10 +123,14 @@ impl Drop for NoyifyReceiver {
                 notify_ids(
                     get_friend_ids(&conn, user_id),
                     ScNotifyMessageBuilder::default()
-                        .update_user(user)
+                        .update_user(user.clone())
                         .build()
                         .unwrap(),
                 );
+
+                if let Some(playing) = user.playing {
+                    pause_game(&conn, user_id, playing.game_id, time);
+                }
             }
         }
     }

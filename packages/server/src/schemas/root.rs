@@ -8,6 +8,7 @@ use super::invite::*;
 use super::message::*;
 use super::notify::*;
 use super::playing::*;
+use super::record::*;
 use super::room::*;
 use super::user::*;
 use crate::voice::*;
@@ -23,6 +24,10 @@ impl QueryRoot {
         let conn = DB_POOL.get().unwrap();
         Ok(get_games(&conn))
     }
+    fn recent_games(context: &Context) -> FieldResult<Vec<i32>> {
+        let conn = DB_POOL.get().unwrap();
+        Ok(get_recent_ids(&conn, context.user_id))
+    }
     fn top_games(_context: &Context) -> FieldResult<Vec<i32>> {
         let conn = DB_POOL.get().unwrap();
         Ok(get_top_ids(&conn))
@@ -34,6 +39,10 @@ impl QueryRoot {
     fn comments(_context: &Context, input: ScCommentsReq) -> FieldResult<Vec<ScComment>> {
         let conn = DB_POOL.get().unwrap();
         Ok(get_comments(&conn, input.game_id))
+    }
+    fn record(context: &Context, input: ScRecordReq) -> FieldResult<Option<ScRecord>> {
+        let conn = DB_POOL.get().unwrap();
+        Ok(get_record(&conn, context.user_id, input.game_id))
     }
     fn account(context: &Context) -> FieldResult<ScUser> {
         let conn = DB_POOL.get().unwrap();
@@ -225,7 +234,6 @@ impl MutationRoot {
 
             if room_id != invite.room.id {
                 if room_host == context.user_id {
-                    delete_playing_with_room(&conn, room_id);
                     delete_room(&conn, room_id);
                     notify_all(
                         ScNotifyMessageBuilder::default()
@@ -312,7 +320,13 @@ pub fn leave_room_and_notify(user_id: i32) -> FieldResult<String> {
     let conn = DB_POOL.get().unwrap();
     let room = get_playing(&conn, user_id).ok_or(format!("{} not playing", user_id))?;
     if user_id == room.host {
-        delete_playing_with_room(&conn, room.id);
+        delete_room(&conn, room.id);
+        notify_all(
+            ScNotifyMessageBuilder::default()
+                .delete_room(room.id)
+                .build()
+                .unwrap(),
+        )
     }
     let invites = get_invites_with(&conn, user_id);
     leave_room(&conn, user_id, room.id);
@@ -332,15 +346,6 @@ pub fn leave_room_and_notify(user_id: i32) -> FieldResult<String> {
             .build()
             .unwrap(),
     );
-    if get_room_user_ids(&conn, room.id).len() == 0 {
-        delete_room(&conn, room.id);
-        notify_all(
-            ScNotifyMessageBuilder::default()
-                .delete_room(room.id)
-                .build()
-                .unwrap(),
-        )
-    }
     Ok("Ok".into())
 }
 

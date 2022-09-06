@@ -122,6 +122,8 @@ export type QueryRoot = {
   games: Array<ScGame>;
   invites: Array<ScInvite>;
   messages: Array<ScMessage>;
+  recentGames: Array<Scalars['Int']>;
+  record?: Maybe<ScRecord>;
   rooms: Array<ScRoom>;
   topGames: Array<Scalars['Int']>;
   voiceMsg: Scalars['String'];
@@ -135,6 +137,11 @@ export type QueryRootCommentsArgs = {
 
 export type QueryRootMessagesArgs = {
   input: ScMessagesReq;
+};
+
+
+export type QueryRootRecordArgs = {
+  input: ScRecordReq;
 };
 
 
@@ -271,6 +278,17 @@ export type ScReadMessage = {
   targetId: Scalars['Int'];
 };
 
+export type ScRecord = {
+  __typename?: 'ScRecord';
+  lastPlayEndAt?: Maybe<Scalars['Float']>;
+  lastPlayStartAt: Scalars['Float'];
+  playTotal: Scalars['Float'];
+};
+
+export type ScRecordReq = {
+  gameId: Scalars['Int'];
+};
+
 export type ScRoom = {
   __typename?: 'ScRoom';
   createdAt: Scalars['Float'];
@@ -398,6 +416,8 @@ export type ScRoomPartFragment = { __typename?: 'ScRoom', id: number, gameId: nu
 
 export type ScCommentPartFragment = { __typename?: 'ScComment', gameId: number, body: string, like: boolean, createdAt: number, updatedAt: number, user: { __typename?: 'ScUserBasic', id: number, username: string, nickname: string, status: ScUserStatus, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } } };
 
+export type ScRecordPartFragment = { __typename?: 'ScRecord', playTotal: number, lastPlayStartAt: number, lastPlayEndAt?: number };
+
 export type ScFriendPartFragment = { __typename?: 'ScFriend', createdAt: number, status: ScFriendStatus, unreadMessageCount: number, user: { __typename?: 'ScUserBasic', id: number, username: string, nickname: string, status: ScUserStatus, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } } };
 
 export type SendVoiceMsgQueryVariables = Exact<{
@@ -410,7 +430,7 @@ export type SendVoiceMsgQuery = { __typename?: 'QueryRoot', voiceMsg: string };
 export type GetGamesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetGamesQuery = { __typename?: 'QueryRoot', topGames: Array<number>, favorites: Array<number>, games: Array<{ __typename?: 'ScGame', id: number, name: string, description: string, preview: string, createdAt: number, updatedAt: number, rom: string, screenshots: Array<string> }> };
+export type GetGamesQuery = { __typename?: 'QueryRoot', topGames: Array<number>, favorites: Array<number>, recentGames: Array<number>, games: Array<{ __typename?: 'ScGame', id: number, name: string, description: string, preview: string, createdAt: number, updatedAt: number, rom: string, screenshots: Array<string> }> };
 
 export type GetRoomsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -418,11 +438,11 @@ export type GetRoomsQueryVariables = Exact<{ [key: string]: never; }>;
 export type GetRoomsQuery = { __typename?: 'QueryRoot', rooms: Array<{ __typename?: 'ScRoom', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number, screenshot?: string, users: Array<{ __typename?: 'ScUserBasic', id: number, username: string, nickname: string, status: ScUserStatus, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } }> }> };
 
 export type GetCommentsQueryVariables = Exact<{
-  input: ScCommentsReq;
+  gameId: Scalars['Int'];
 }>;
 
 
-export type GetCommentsQuery = { __typename?: 'QueryRoot', comments: Array<{ __typename?: 'ScComment', gameId: number, body: string, like: boolean, createdAt: number, updatedAt: number, user: { __typename?: 'ScUserBasic', id: number, username: string, nickname: string, status: ScUserStatus, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } } }> };
+export type GetCommentsQuery = { __typename?: 'QueryRoot', comments: Array<{ __typename?: 'ScComment', gameId: number, body: string, like: boolean, createdAt: number, updatedAt: number, user: { __typename?: 'ScUserBasic', id: number, username: string, nickname: string, status: ScUserStatus, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } } }>, record?: { __typename?: 'ScRecord', playTotal: number, lastPlayStartAt: number, lastPlayEndAt?: number } };
 
 export type GetFriendsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -648,6 +668,13 @@ export const ScCommentPart = `
   updatedAt
 }
     `;
+export const ScRecordPart = `
+    fragment ScRecordPart on ScRecord {
+  playTotal
+  lastPlayStartAt
+  lastPlayEndAt
+}
+    `;
 export const ScFriendPart = `
     fragment ScFriendPart on ScFriend {
   user {
@@ -670,6 +697,7 @@ export const GetGames = `
   }
   topGames
   favorites
+  recentGames
 }
     ${ScGamePart}`;
 export const GetRooms = `
@@ -682,14 +710,18 @@ export const GetRooms = `
 ${ScUserBasicPart}
 ${ScRoomBasicPart}`;
 export const GetComments = `
-    query getComments($input: ScCommentsReq!) {
-  comments(input: $input) {
+    query getComments($gameId: Int!) {
+  comments(input: {gameId: $gameId}) {
     ...ScCommentPart
+  }
+  record(input: {gameId: $gameId}) {
+    ...ScRecordPart
   }
 }
     ${ScCommentPart}
 ${ScUserBasicPart}
-${ScRoomBasicPart}`;
+${ScRoomBasicPart}
+${ScRecordPart}`;
 export const GetFriends = `
     query getFriends {
   friends {

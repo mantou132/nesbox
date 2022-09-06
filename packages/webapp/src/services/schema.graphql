@@ -82,6 +82,12 @@ fragment ScCommentPart on ScComment {
   updatedAt
 }
 
+fragment ScRecordPart on ScRecord {
+  playTotal
+  lastPlayStartAt
+  lastPlayEndAt
+}
+
 fragment ScFriendPart on ScFriend {
   user {
     ...ScUserBasicPart
@@ -100,6 +106,7 @@ query getGames {
   }
   topGames
   favorites
+  recentGames
 }
 
 query getRooms {
@@ -108,9 +115,12 @@ query getRooms {
   }
 }
 
-query getComments($input: ScCommentsReq!) {
-  comments(input: $input) {
+query getComments($gameId: Int!) {
+  comments(input: { gameId: $gameId }) {
     ...ScCommentPart
+  }
+  record(input: { gameId: $gameId }) {
+    ...ScRecordPart
   }
 }
 

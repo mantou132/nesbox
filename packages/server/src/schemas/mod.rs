@@ -6,6 +6,7 @@ pub mod invite;
 pub mod message;
 pub mod notify;
 pub mod playing;
+pub mod record;
 pub mod room;
 pub mod root;
 pub mod user;

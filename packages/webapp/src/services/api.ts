@@ -105,7 +105,10 @@ export const sendVoiceMsg = async (kind: ScVoiceMsgKind, payload: RTCSessionDesc
 };
 
 export const getGames = debounce(async () => {
-  const { games, topGames, favorites } = await request<GetGamesQuery, GetGamesQueryVariables>(GetGames, {});
+  const { games, topGames, favorites, recentGames } = await request<GetGamesQuery, GetGamesQueryVariables>(
+    GetGames,
+    {},
+  );
   const gameIds = games
     .map((e) => {
       store.games[e.id] = e;
@@ -116,6 +119,7 @@ export const getGames = debounce(async () => {
     gameIds,
     favoriteIds: favorites.filter((id) => isCurrentLang(store.games[id]!)),
     topGameIds: [...new Set([...topGames, ...gameIds])].filter((id) => isCurrentLang(store.games[id]!)).splice(0, 5),
+    recentGames,
   });
 });
 
@@ -254,7 +258,8 @@ export const acceptInvite = async (inviteId: number, accept: boolean) => {
 };
 
 export const getComments = async (gameId: number) => {
-  const { comments } = await request<GetCommentsQuery, GetCommentsQueryVariables>(GetComments, { input: { gameId } });
+  const { comments, record } = await request<GetCommentsQuery, GetCommentsQueryVariables>(GetComments, { gameId });
+  store.record[gameId] = record;
   store.comment[gameId] = {
     userIds: comments.map((e) => e.user.id),
     comments: Object.fromEntries(comments.map((e) => [e.user.id, e])),

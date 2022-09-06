@@ -7,9 +7,11 @@ use juniper::{FieldResult, GraphQLInputObject, GraphQLObject};
 use super::invite::*;
 use super::notify::*;
 use super::playing::*;
+use super::record::*;
 use super::user::*;
 use crate::db::models::{NewRoom, Room};
 use crate::db::schema::rooms;
+
 #[derive(GraphQLObject, Debug, Clone)]
 pub struct ScRoomBasic {
     pub id: i32,
@@ -117,6 +119,8 @@ pub fn get_rooms(conn: &PgConnection) -> Vec<ScRoom> {
 }
 
 pub fn create_room(conn: &PgConnection, uid: i32, req: &ScNewRoom) -> FieldResult<ScRoomBasic> {
+    start_game(conn, uid, req.game_id);
+
     let new_room = NewRoom {
         game_id: req.game_id,
         private: req.private,
@@ -137,6 +141,17 @@ pub fn create_room(conn: &PgConnection, uid: i32, req: &ScNewRoom) -> FieldResul
 
 pub fn update_room(conn: &PgConnection, uid: i32, req: &ScUpdateRoom) -> FieldResult<ScRoomBasic> {
     use self::rooms::dsl::*;
+
+    let r = rooms
+        .filter(deleted_at.is_null())
+        .filter(id.eq(req.id))
+        .filter(host.eq(uid))
+        .get_result::<Room>(conn)?;
+
+    if r.game_id != req.game_id {
+        end_game(conn, uid, r.game_id);
+        start_game(conn, uid, req.game_id);
+    }
 
     let room = diesel::update(
         rooms
@@ -180,18 +195,38 @@ pub fn update_room_screenshot(
 pub fn delete_room(conn: &PgConnection, rid: i32) {
     use self::rooms::dsl::*;
 
+    if let Ok(room) = rooms.filter(id.eq(rid)).get_result::<Room>(conn) {
+        for user_id in get_room_user_ids(conn, rid) {
+            end_game(conn, user_id, room.game_id);
+        }
+    }
+
+    delete_playing_with_room(conn, rid);
+
     diesel::delete(rooms.filter(id.eq(rid)))
         .execute(conn)
         .unwrap();
 }
 
 pub fn enter_room(conn: &PgConnection, uid: i32, rid: i32) {
+    use self::rooms::dsl::*;
+
+    if let Ok(room) = rooms.filter(id.eq(rid)).get_result::<Room>(conn) {
+        start_game(conn, uid, room.game_id);
+    }
+
     delete_playing(conn, uid);
     create_playing(conn, uid, rid).ok();
     delete_invite(conn, uid, true);
 }
 
-pub fn leave_room(conn: &PgConnection, uid: i32, _rid: i32) {
+pub fn leave_room(conn: &PgConnection, uid: i32, rid: i32) {
+    use self::rooms::dsl::*;
+
+    if let Ok(room) = rooms.filter(id.eq(rid)).get_result::<Room>(conn) {
+        end_game(conn, uid, room.game_id);
+    }
+
     delete_playing(conn, uid);
     delete_invite(conn, uid, false);
 }

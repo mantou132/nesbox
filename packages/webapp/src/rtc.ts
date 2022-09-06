@@ -406,24 +406,22 @@ export class RTC extends EventTarget {
 
   sendFrame = (frame: ArrayBuffer, frameNum: number) => {
     this.#channelMap.forEach((channel) => {
-      if (channel.readyState === 'open') {
-        // Wait for client to send ping
-        if (!channel.clientPrevPing) return;
+      // Wait for client to send ping
+      if (!channel.clientPrevPing) return;
 
-        if (channel.clientPrevPing < 30) {
+      if (channel.clientPrevPing < 30) {
+        channel.send(frame);
+      } else if (channel.clientPrevPing < 90) {
+        if (frameNum % 2 === 0) {
           channel.send(frame);
-        } else if (channel.clientPrevPing < 90) {
-          if (frameNum % 2 === 0) {
-            channel.send(frame);
-          }
-        } else if (channel.clientPrevPing < 150) {
-          if (frameNum % 3 === 0) {
-            channel.send(frame);
-          }
-        } else if (channel.clientPrevPing < 300) {
-          if (frameNum % 6 === 0) {
-            channel.send(frame);
-          }
+        }
+      } else if (channel.clientPrevPing < 150) {
+        if (frameNum % 3 === 0) {
+          channel.send(frame);
+        }
+      } else if (channel.clientPrevPing < 300) {
+        if (frameNum % 6 === 0) {
+          channel.send(frame);
         }
       }
     });
@@ -435,3 +433,12 @@ export class RTC extends EventTarget {
     this.send(new RoleAnswer(this.#roles));
   };
 }
+
+const dataChannelSend = RTCDataChannel.prototype.send;
+RTCDataChannel.prototype.send = function (this: RTCDataChannel, data: string | Blob | ArrayBuffer | ArrayBufferView) {
+  try {
+    dataChannelSend.apply(this, [data]);
+  } catch {
+    //
+  }
+};
