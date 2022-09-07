@@ -74,13 +74,15 @@ export class MVoiceRoomElement extends GemElement<State> {
 
           let userMediaStream: null | MediaStream = null;
           // https://github.com/tauri-apps/tauri/issues/5039
-          navigator.mediaDevices?.getUserMedia({ audio: { channelCount: 1 } }).then(async (stream) => {
-            userMediaStream = stream;
-            if (peerConnection.signalingState === 'closed') return;
-            stream.getTracks().forEach((track) => peerConnection.addTrack(track, stream));
-            await peerConnection.setLocalDescription(await peerConnection.createOffer());
-            sendVoiceMsg(ScVoiceMsgKind.Offer, peerConnection.localDescription!).catch(this.#closeVoice);
-          });
+          navigator.mediaDevices
+            ?.getUserMedia({ audio: { channelCount: 1, sampleRate: 11025 } })
+            .then(async (stream) => {
+              userMediaStream = stream;
+              if (peerConnection.signalingState === 'closed') return;
+              stream.getTracks().forEach((track) => peerConnection.addTrack(track, stream));
+              await peerConnection.setLocalDescription(await peerConnection.createOffer());
+              sendVoiceMsg(ScVoiceMsgKind.Offer, peerConnection.localDescription!).catch(this.#closeVoice);
+            });
 
           peerConnection.addEventListener('iceconnectionstatechange', () => {
             logger.info(`voice iceConnectionState ${peerConnection.iceConnectionState}`);
@@ -124,7 +126,7 @@ export class MVoiceRoomElement extends GemElement<State> {
           const handleVoiceMsg = async ({ detail }: CustomEvent<VoiceSingalEvent>) => {
             if (roomId !== detail.roomId) return;
             if ('candidate' in detail.singal) {
-              peerConnection.addIceCandidate(new RTCIceCandidate(detail.singal)).catch(this.#closeVoice);
+              peerConnection.addIceCandidate(new RTCIceCandidate(detail.singal)).catch(logger.error);
             }
             if ('type' in detail.singal) {
               this.setState({
