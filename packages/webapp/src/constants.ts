@@ -22,6 +22,7 @@ export const events = {
   RELEASE_BUTTON: 'releasebutton',
   PRESS_BUTTON_INDEX: 'pressbutton-index',
   RELEASE_BUTTON_INDEX: 'releasebutton-index',
+  CLOSE_SETTINGS: 'close-settings',
 };
 
 export enum SingalType {

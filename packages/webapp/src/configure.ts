@@ -4,7 +4,7 @@ import { Modify } from 'duoyun-ui/lib/types';
 import { createCacheStore } from 'duoyun-ui/lib/utils';
 
 import { LoginMutation } from 'src/generated/guestgraphql';
-import { localStorageKeys, VideoFilter, VideoRenderMethod } from 'src/constants';
+import { events, localStorageKeys, VideoFilter, VideoRenderMethod } from 'src/constants';
 import type { ThemeName } from 'src/theme';
 import { GetAccountQuery } from 'src/generated/graphql';
 
@@ -89,6 +89,7 @@ export type Settings = {
   shortcuts: typeof defaultShortcuts;
   video: typeof defaultVideoSettings;
   cheat: Record<number, Cheat[] | undefined>;
+  tourIndex: number;
 };
 
 export type User = Modify<LoginMutation['login']['user'], { settings: Settings }>;
@@ -110,6 +111,7 @@ export const parseAccount = (account: GetAccountQuery['account']): User => {
       shortcuts: mergeSettings(defaultShortcuts, settings.shortcuts),
       video: mergeSettings(defaultVideoSettings, settings.video),
       cheat: settings.cheat || {},
+      tourIndex: settings.tourIndex || 0,
     },
   };
 };
@@ -168,6 +170,7 @@ export const toggoleFriendListState = () => {
 
 export const toggoleSettingsState = () => {
   updateStore(configure, { settingsState: !configure.settingsState });
+  if (!configure.settingsState) dispatchEvent(new CustomEvent(events.CLOSE_SETTINGS));
 };
 
 export const toggoleSearchState = () => {

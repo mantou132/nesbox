@@ -14,13 +14,17 @@ import { getAvatar, getCDNSrc, getGithubGames } from 'src/utils';
 import { store } from 'src/store';
 import { githubIssue, githubRelease } from 'src/constants';
 import { logger } from 'src/logger';
+import { routes } from 'src/routes';
 
+import 'duoyun-ui/elements/coach-mark';
+import 'duoyun-ui/elements/route';
 import 'duoyun-ui/elements/avatar';
 import 'duoyun-ui/elements/options';
 import 'duoyun-ui/elements/use';
 
 const style = createCSSSheet(css`
   :host {
+    position: relative;
     aspect-ratio: 1;
     cursor: pointer;
     display: flex;
@@ -151,6 +155,16 @@ export class MAvatarElement extends GemElement {
   };
 
   render = () => {
-    return html` <dy-avatar class="avatar" src=${getAvatar(configure.user?.username)}></dy-avatar> `;
+    return html`
+      <dy-avatar class="avatar" src=${getAvatar(configure.user?.username)}></dy-avatar>
+      <dy-route
+        .routes=${[
+          {
+            pattern: routes.room.pattern,
+            content: html`<dy-coach-mark index="0"></dy-coach-mark>`,
+          },
+        ]}
+      ></dy-route>
+    `;
   };
 }

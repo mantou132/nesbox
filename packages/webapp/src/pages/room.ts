@@ -33,6 +33,7 @@ import { createInvite, updateRoomScreenshot } from 'src/services/api';
 import { closeListenerSet } from 'src/elements/titlebar';
 import type { MNesElement } from 'src/modules/nes';
 
+import 'duoyun-ui/elements/coach-mark';
 import 'duoyun-ui/elements/space';
 import 'src/modules/nes';
 import 'src/modules/cheat-settings';
@@ -46,6 +47,13 @@ const style = createCSSSheet(css`
   .controller {
     position: absolute;
     inset: 0;
+  }
+  .coach-mark-container {
+    position: absolute;
+    top: 40%;
+    right: 15em;
+    width: 1px;
+    height: 1px;
   }
   @media ${`not all and ${mediaQuery.PHONE_LANDSCAPE}`} {
     .controller {
@@ -304,6 +312,7 @@ export class PRoomElement extends GemElement {
           ContextMenu.close();
           history.replace({ path: createPath(routes.games) });
         } else {
+          if (!mediaQuery.isPhone) import('src/tours');
           const timer = window.setInterval(this.#uploadScreenshot, 10000);
           return () => {
             clearInterval(timer);
@@ -336,6 +345,9 @@ export class PRoomElement extends GemElement {
           : html`<nesbox-ping></nesbox-ping>`}
         <m-room-voice></m-room-voice>
       </dy-space>
+      <div class="coach-mark-container">
+        <dy-coach-mark index="1"></dy-coach-mark>
+      </div>
     `;
   };
 }
