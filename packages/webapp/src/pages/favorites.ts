@@ -20,6 +20,9 @@ const style = createCSSSheet(css`
   }
 `);
 
+/**
+ * @customElement p-favorites
+ */
 @customElement('p-favorites')
 @adoptedStyle(style)
 @connectStore(i18n.store)

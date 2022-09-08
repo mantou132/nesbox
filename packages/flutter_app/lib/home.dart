@@ -46,14 +46,37 @@ class HomeState extends State<Home> {
     });
   }
 
-  _setStatusbarStyle(String statusBarStyle) {
+  _setOrientation(String orientation) async {
+    switch (orientation) {
+      case 'landscape':
+        await SystemChrome.setPreferredOrientations([
+          DeviceOrientation.landscapeRight,
+          DeviceOrientation.landscapeLeft,
+        ]);
+        break;
+      case 'portrait':
+        await SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitUp,
+          DeviceOrientation.portraitDown,
+        ]);
+        break;
+      default:
+        await SystemChrome.setPreferredOrientations([]);
+    }
+  }
+
+  _setStatusbarStyle(String statusBarStyle) async {
     if (statusBarStyle == 'none') {
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
     } else {
+      var top = MediaQuery.of(context).padding.top;
+
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
+
       SystemUiOverlayStyle baseStatusBarStyle =
           statusBarStyle == 'light' ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark;
 
-      if (MediaQuery.of(context).padding.top > 28) {
+      if (top > 28) {
         // ios
         SystemChrome.setSystemUIOverlayStyle(baseStatusBarStyle.copyWith(
           statusBarColor: Colors.transparent,
@@ -64,22 +87,11 @@ class HomeState extends State<Home> {
     }
   }
 
-  Future<bool> _onWillPop() async {
-    var controller = await _controller.future;
-    if (await controller.canGoBack()) {
-      controller.goBack();
-      return false;
-    } else {
-      // will exit app
-      return true;
-    }
-  }
-
   void _openWebPage(BuildContext context, String url) {
     Navigator.push(context, MaterialPageRoute(builder: (context) => WebPage(url)));
   }
 
-  void _sendMessage(String msgId, data) async {
+  void _sendMessage(int msgId, data) async {
     var controller = await _controller.future;
     // resolve promise when detail is truly
     var string = json.encode(data);
@@ -110,7 +122,11 @@ class HomeState extends State<Home> {
                 _sendMessage(msg['id'], true);
                 break;
               case 'statusbarstyle':
-                _setStatusbarStyle(msg['data']);
+                await _setStatusbarStyle(msg['data']);
+                _sendMessage(msg['id'], true);
+                break;
+              case 'orientation':
+                await _setOrientation(msg['data']);
                 _sendMessage(msg['id'], true);
                 break;
               case 'battery':
@@ -125,6 +141,17 @@ class HomeState extends State<Home> {
             }
           }
         });
+  }
+
+  Future<bool> _onWillPop() async {
+    var controller = await _controller.future;
+    if (await controller.canGoBack()) {
+      controller.goBack();
+      return false;
+    } else {
+      // will exit app
+      return true;
+    }
   }
 
   NavigationDecision _navigationDelegate(BuildContext context, NavigationRequest request) {
@@ -143,9 +170,6 @@ class HomeState extends State<Home> {
     if (kDebugMode) {
       print('=========> Homebuild');
     }
-
-    // init state
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
 
     return WillPopScope(
         onWillPop: _onWillPop,
@@ -167,5 +191,14 @@ class HomeState extends State<Home> {
             return _navigationDelegate(context, request);
           },
         ));
+  }
+
+  @override
+  void initState() {
+    // https://api.flutter.dev/flutter/services/SystemChrome/setEnabledSystemUIMode.html
+    Timer.periodic(const Duration(seconds: 2), (timer) {
+      SystemChrome.restoreSystemUIOverlays();
+    });
+    super.initState();
   }
 }

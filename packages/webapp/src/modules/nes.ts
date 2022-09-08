@@ -425,7 +425,9 @@ export class MNesElement extends GemElement<State> {
     );
 
     this.memo(
-      ([gameId, cheatSettins]) => {
+      () => {
+        const gameId = this.#playing?.gameId;
+        const cheatSettins = this.#settings?.cheat;
         if (gameId && cheatSettins) {
           const cheats = (cheatSettins[gameId] || [])
             .map((cheat) => MNesElement.parseCheatCode(cheat))
@@ -483,7 +485,7 @@ export class MNesElement extends GemElement<State> {
     const { messages, roles } = this.state;
 
     return html`
-      <nesbox-render class="canvas" ref=${this.canvasRef.ref}></nesbox-render>
+      <nesbox-render class="canvas" part="canvas" ref=${this.canvasRef.ref}></nesbox-render>
       <audio ref=${this.audioRef.ref} hidden></audio>
       <m-room-chat
         class="chat"

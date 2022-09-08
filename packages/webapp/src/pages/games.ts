@@ -97,6 +97,9 @@ type State = {
   background: string;
 };
 
+/**
+ * @customElement p-games
+ */
 @customElement('p-games')
 @adoptedStyle(style)
 @connectStore(i18n.store)

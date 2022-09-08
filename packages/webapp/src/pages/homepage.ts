@@ -257,14 +257,14 @@ export class PHomepageElement extends GemElement {
     return html`
       <header>
         <div class="bg">
-          <img class="bottom" src=${bottomSvg} />
-          <img class="left" src=${leftSvg} />
-          <img class="right" src=${rightSvg} />
+          <img class="bottom" src=${bottomSvg} loading="lazy" alt="" />
+          <img class="left" src=${leftSvg} loading="lazy" alt="" />
+          <img class="right" src=${rightSvg} loading="lazy" alt="" />
           <div class="light"></div>
         </div>
         <nav class="content">
           <dy-link class="logo" href="/">
-            <img draggable="false" class="icon" src="/logo-96.png" />
+            <img draggable="false" class="icon" src="/logo-96.png" alt="Logo" />
             <span>${GemTitleElement.defaultTitle}</span>
           </dy-link>
           <div class="links">
@@ -299,7 +299,7 @@ export class PHomepageElement extends GemElement {
           ([img, title, desc]) => html`
             <section>
               <div class="content">
-                <img draggable="false" src=${img} />
+                <img draggable="false" src=${img} loading="lazy" alt="feature image" />
                 <div class="feature">
                   <dy-heading lv="2">${title}</dy-heading>
                   <dy-paragraph>${desc}</dy-paragraph>
@@ -313,6 +313,7 @@ export class PHomepageElement extends GemElement {
             <img
               alt="NESBox Screenshot"
               draggable="false"
+              loading="lazy"
               srcset=${`${getCDNSrc(
                 'https://user-images.githubusercontent.com/3841872/188081531-c0dd68b6-3603-42ae-9df0-8dad7fb211f4.png',
               )} 1024w, ${getCDNSrc(

@@ -1,6 +1,7 @@
 import { html, createStore, updateStore, connect } from '@mantou/gem';
 import { GemRouteElement } from '@mantou/gem/elements/route';
 import { ValueOf } from 'duoyun-ui/lib/types';
+import { isMtApp } from 'mt-app';
 
 import { paramKeys } from 'src/constants';
 import { i18n } from 'src/i18n';
@@ -27,6 +28,10 @@ const getInitRoutes = () => {
       title: i18n.get('gamesTitle'),
       pattern: '/games',
       async getContent(_params: Record<string, string>) {
+        if (isMtApp) {
+          await import('src/pages/mt-games');
+          return html`<p-mt-games></p-mt-games>`;
+        }
         await import('src/pages/games');
         return html`<p-games></p-games>`;
       },
@@ -75,6 +80,10 @@ const getInitRoutes = () => {
       title: i18n.get('roomTitle'),
       pattern: `/room/:${paramKeys.ROOM_ID}`,
       async getContent(params: Record<string, string>) {
+        if (isMtApp) {
+          await import('src/pages/mt-room');
+          return html`<p-mt-room id=${params[paramKeys.ROOM_ID]}></p-mt-room>`;
+        }
         await import('src/pages/room');
         return html`<p-room id=${params[paramKeys.ROOM_ID]}></p-room>`;
       },

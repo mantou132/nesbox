@@ -2,7 +2,7 @@ const MT_APP_BRIDGE_NAME = Object.getOwnPropertyNames(window).find((e) => e.star
 
 export const isMtApp = !!MT_APP_BRIDGE_NAME;
 
-type Type = 'open' | 'statusbarstyle' | 'battery' | 'close';
+type Type = 'open' | 'statusbarstyle' | 'orientation' | 'battery' | 'close';
 
 const bridgePostMessage = (message: { type: Type; data?: any }) => {
   const submitMessage = { id: Date.now(), ...message };
@@ -19,14 +19,12 @@ export const mtApp = {
     let reject = (_: unknown) => {
       //
     };
-    setTimeout(() => reject(new Error('call timeout')), 3_000);
-    window.addEventListener(
-      `mtappmessage${id}`,
-      ({ detail }: CustomEvent) => {
-        resolve(detail);
-      },
-      { once: true },
-    );
+    const handle = ({ detail }: CustomEvent) => resolve(detail);
+    addEventListener(`mtappmessage${id}`, handle, { once: true });
+    setTimeout(() => {
+      removeEventListener(`mtappmessage${id}`, handle);
+      reject(new Error(`mtApp:${type} call timeout`));
+    }, 3_000);
     return new Promise<T>((res, rej) => {
       resolve = res;
       reject = rej;
@@ -34,7 +32,11 @@ export const mtApp = {
   },
 
   async setStatusBarStyle(style: 'none' | 'light' | 'dark') {
-    await this.call('statusbarstyle', style);
+    return await this.call('statusbarstyle', style);
+  },
+
+  async setOrientation(orientation: 'landscape' | 'portrait' | 'default') {
+    return await this.call('orientation', orientation);
   },
 };
 
@@ -112,6 +114,10 @@ if (MT_APP_BRIDGE_NAME && window === window.top) {
 
   Object.defineProperty(navigator, 'standalone', {
     value: true,
+  });
+
+  Object.defineProperty(window, 'mtApp', {
+    value: mtApp,
   });
 
   const data = MT_APP_BRIDGE_NAME.split('____')[1];

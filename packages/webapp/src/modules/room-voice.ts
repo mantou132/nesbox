@@ -17,6 +17,7 @@ import { sendVoiceMsg } from 'src/services/api';
 import { events, VoiceSingalEvent } from 'src/constants';
 import { logger } from 'src/logger';
 import { ScVoiceMsgKind } from 'src/generated/graphql';
+import { GamepadBtnIndex } from 'src/gamepad';
 
 import 'duoyun-ui/elements/use';
 
@@ -59,13 +60,23 @@ export class MVoiceRoomElement extends GemElement<State> {
     this.setState({ joined: !this.state.joined });
   };
 
+  #onPressButtonIndex = ({ detail }: CustomEvent<GamepadBtnIndex>) => {
+    switch (detail) {
+      case GamepadBtnIndex.FrontRightBottom:
+      case GamepadBtnIndex.FrontRightTop:
+        this.#toggleVoice();
+        break;
+    }
+  };
+
   #closeVoice = () => this.setState({ joined: false });
 
   #audioEle = document.createElement('audio');
 
   mounted = () => {
     this.effect(
-      ([roomId]) => {
+      () => {
+        const roomId = configure.user?.playing?.id;
         if (roomId && this.state.joined) {
           const peerConnection = new RTCPeerConnection({
             iceServers: [{ urls: 'stun:stun3.l.google.com:19302' }],
@@ -182,6 +193,11 @@ export class MVoiceRoomElement extends GemElement<State> {
       },
       () => [configure.user?.playing?.id, this.state.joined],
     );
+
+    addEventListener(events.PRESS_BUTTON_INDEX, this.#onPressButtonIndex);
+    return () => {
+      removeEventListener(events.PRESS_BUTTON_INDEX, this.#onPressButtonIndex);
+    };
   };
 
   render = () => {

@@ -5,13 +5,12 @@ import { readFileSync } from 'fs';
 import { execSync } from 'child_process';
 
 import { Octokit } from '@octokit/core';
+import { Data } from 'index';
 
 import originMetadata1 from './metadata1.json';
 import originMetadata2 from './metadata2.json';
 import originMetadata3 from './metadata3.json';
 import issues from './github.json';
-
-import { Data } from 'index';
 
 const roms = JSON.parse(readFileSync('./roms.json', { encoding: 'utf-8' }));
 

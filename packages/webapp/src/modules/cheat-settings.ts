@@ -74,7 +74,7 @@ export class MCheatSettingsElement extends GemElement<State> {
   }
 
   #onChangeNewCheat = (detail: Partial<Cheat>) => {
-    this.setState({ newCheat: Object.assign(this.state.newCheat, detail) });
+    this.setState({ newCheat: Object.assign(this.state.newCheat!, detail) });
   };
 
   #onChangeSettings = (data: Cheat[]) => {

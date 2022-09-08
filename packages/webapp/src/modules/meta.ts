@@ -15,13 +15,15 @@ const style = createCSSSheet(css`
 
 @customElement('m-meta')
 @connectStore(themeStore)
+@connectStore(i18n.store)
 @adoptedStyle(style)
 export class ModuleMetaElement extends GemElement {
   render = () => {
     return html`
       <dy-title suffix=${mediaQuery.isPWA ? '' : ` - ${i18n.get('title')}`}></dy-title>
       <dy-reflect>
-        <meta name="theme-color" content="${themeStore.titleBarColor}" />
+        <meta name="theme-color" content=${themeStore.titleBarColor} />
+        <meta name="description" content=${i18n.get('sloganDesc')} />
       </dy-reflect>
     `;
   };
