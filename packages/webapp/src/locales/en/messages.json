@@ -111,10 +111,10 @@
     "message": "Joypad"
   },
   "keySettingJoypad1": {
-    "message": "Joypad 1"
+    "message": "Joypad 1 - Keyboard Mapping"
   },
   "keySettingJoypad2": {
-    "message": "Joypad 2"
+    "message": "Joypad 2 - Keyboard Mapping"
   },
   "shortcut": {
     "message": "Shortcut"
@@ -292,6 +292,9 @@
   },
   "placeholderSearchPlaying": {
     "message": "$1 Change game or invite friends"
+  },
+  "tipKeybindingExist": {
+    "message": "This key has duplicate binding"
   },
   "tipCheatCodeExist": {
     "message": "Code already exists"

@@ -111,10 +111,10 @@
     "message": "控制器"
   },
   "keySettingJoypad1": {
-    "message": "控制器 1"
+    "message": "控制器 1 - 鍵盤映射"
   },
   "keySettingJoypad2": {
-    "message": "控制器 2"
+    "message": "控制器 2 - 鍵盤映射"
   },
   "shortcut": {
     "message": "快捷键"
@@ -292,6 +292,9 @@
   },
   "placeholderSearchPlaying": {
     "message": "$1 更改遊戲或者邀請好友"
+  },
+  "tipKeybindingExist": {
+    "message": "該鍵存在重複綁定"
   },
   "tipCheatCodeExist": {
     "message": "Code 已經存在"

@@ -1,6 +1,7 @@
 import { GemElement, html, customElement, connectStore } from '@mantou/gem';
+import { Toast } from 'duoyun-ui/elements/toast';
 
-import { configure } from 'src/configure';
+import { configure, Settings } from 'src/configure';
 import { updateAccount } from 'src/services/api';
 import { i18n } from 'src/i18n';
 import type { GamePadValue } from 'src/elements/gamepad';
@@ -15,6 +16,19 @@ import 'src/elements/gamepad';
 @connectStore(i18n.store)
 @connectStore(configure)
 export class MKeybindingElement extends GemElement {
+  #updateKeybinding = (keybinding: Settings['keybinding']) => {
+    const values = Object.values(keybinding);
+    if (values.length !== new Set(values).size) {
+      Toast.open('warning', i18n.get('tipKeybindingExist'));
+    }
+    updateAccount({
+      settings: {
+        ...configure.user!.settings,
+        keybinding,
+      },
+    });
+  };
+
   render = () => {
     if (!configure.user) return html``;
     const { keybinding } = configure.user.settings;
@@ -36,14 +50,9 @@ export class MKeybindingElement extends GemElement {
           Reset: keybinding.Reset,
         }}
         @change=${({ detail }: CustomEvent<GamePadValue>) =>
-          updateAccount({
-            settings: {
-              ...configure.user!.settings,
-              keybinding: {
-                ...keybinding,
-                ...detail,
-              },
-            },
+          this.#updateKeybinding({
+            ...keybinding,
+            ...detail,
           })}
       ></nesbox-gamepad>
       <dy-heading class="heading" lv="4">${i18n.get('keySettingJoypad2')}</dy-heading>
@@ -62,21 +71,16 @@ export class MKeybindingElement extends GemElement {
           Reset: '',
         }}
         @change=${({ detail }: CustomEvent<GamePadValue>) =>
-          updateAccount({
-            settings: {
-              ...configure.user!.settings,
-              keybinding: {
-                ...keybinding,
-                Up_2: detail.Up,
-                Left_2: detail.Left,
-                Down_2: detail.Down,
-                Right_2: detail.Right,
-                A_2: detail.A,
-                B_2: detail.B,
-                TurboA_2: detail.TurboA,
-                TurboB_2: detail.TurboB,
-              },
-            },
+          this.#updateKeybinding({
+            ...keybinding,
+            Up_2: detail.Up,
+            Left_2: detail.Left,
+            Down_2: detail.Down,
+            Right_2: detail.Right,
+            A_2: detail.A,
+            B_2: detail.B,
+            TurboA_2: detail.TurboA,
+            TurboB_2: detail.TurboB,
           })}
       ></nesbox-gamepad>
     `;

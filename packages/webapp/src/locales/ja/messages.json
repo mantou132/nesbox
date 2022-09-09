@@ -293,6 +293,9 @@
   "placeholderSearchPlaying": {
     "message": "$1 ゲームを変更するか、友達を招待します"
   },
+  "tipKeybindingExist": {
+    "message": "このキーはバインディングを繰り返しました"
+  },
   "tipCheatCodeExist": {
     "message": "コードはすでに存在します"
   },

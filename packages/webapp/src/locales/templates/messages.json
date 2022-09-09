@@ -111,10 +111,10 @@
     "message": "手柄"
   },
   "keySettingJoypad1": {
-    "message": "手柄 1"
+    "message": "手柄 1 - 键盘映射"
   },
   "keySettingJoypad2": {
-    "message": "手柄 2"
+    "message": "手柄 2 - 键盘映射"
   },
   "shortcut": {
     "message": "快捷键"
@@ -292,6 +292,9 @@
   },
   "placeholderSearchPlaying": {
     "message": "$1 更改游戏或者邀请好友"
+  },
+  "tipKeybindingExist": {
+    "message": "该键存在重复绑定"
   },
   "tipCheatCodeExist": {
     "message": "Code 已经存在"

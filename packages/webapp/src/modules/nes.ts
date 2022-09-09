@@ -324,6 +324,16 @@ export class MNesElement extends GemElement<State> {
     const { keybinding } = this.#settings!;
     if (metaKey || ctrlKey || shiftKey || altKey) return;
     const map: Record<string, Button> = {
+      [keybinding.Up_2]: Button.Joypad2Up,
+      [keybinding.Left_2]: Button.Joypad2Left,
+      [keybinding.Down_2]: Button.Joypad2Down,
+      [keybinding.Right_2]: Button.Joypad2Right,
+      [keybinding.A_2]: Button.Joypad2A,
+      [keybinding.B_2]: Button.Joypad2B,
+      [keybinding.TurboA_2]: Button.Joypad2TurboA,
+      [keybinding.TurboB_2]: Button.Joypad2TurboB,
+
+      // 重复时覆盖 joypad1
       [keybinding.Up]: Button.Joypad1Up,
       [keybinding.Left]: Button.Joypad1Left,
       [keybinding.Down]: Button.Joypad1Down,
@@ -335,15 +345,6 @@ export class MNesElement extends GemElement<State> {
       [keybinding.Select]: Button.Select,
       [keybinding.Start]: Button.Start,
       [keybinding.Reset]: Button.Reset,
-
-      [keybinding.Up_2]: Button.Joypad2Up,
-      [keybinding.Left_2]: Button.Joypad2Left,
-      [keybinding.Down_2]: Button.Joypad2Down,
-      [keybinding.Right_2]: Button.Joypad2Right,
-      [keybinding.A_2]: Button.Joypad2A,
-      [keybinding.B_2]: Button.Joypad2B,
-      [keybinding.TurboA_2]: Button.Joypad2TurboA,
-      [keybinding.TurboB_2]: Button.Joypad2TurboB,
     };
     return map[key.toLowerCase()];
   };
