@@ -110,6 +110,7 @@ pub fn get_rooms(conn: &PgConnection) -> Vec<ScRoom> {
     rooms
         .filter(deleted_at.is_null())
         .filter(private.eq(false))
+        .order(created_at.desc())
         .load::<Room>(conn)
         .unwrap()
         .iter()

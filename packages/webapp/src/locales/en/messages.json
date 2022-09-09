@@ -290,6 +290,9 @@
   "placeholderSearch": {
     "message": "$1 Search game or friends"
   },
+  "placeholderRoomSearch": {
+    "message": "$1 Search room or friends"
+  },
   "placeholderSearchPlaying": {
     "message": "$1 Change game or invite friends"
   },

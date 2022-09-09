@@ -47,6 +47,7 @@ pub fn get_comments(conn: &PgConnection, gid: i32) -> Vec<ScComment> {
     comments
         .filter(deleted_at.is_null())
         .filter(game_id.eq(gid))
+        .order(updated_at.desc())
         .load::<Comment>(conn)
         .unwrap()
         .iter()

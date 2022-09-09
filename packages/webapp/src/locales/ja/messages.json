@@ -290,6 +290,9 @@
   "placeholderSearch": {
     "message": "$1 ゲームや友達を検索します"
   },
+  "placeholderRoomSearch": {
+    "message": "$1 検索室または友達"
+  },
   "placeholderSearchPlaying": {
     "message": "$1 ゲームを変更するか、友達を招待します"
   },

@@ -290,6 +290,9 @@
   "placeholderSearch": {
     "message": "$1 搜索遊戲或者好友"
   },
+  "placeholderRoomSearch": {
+    "message": "$1 搜索房間或者好友"
+  },
   "placeholderSearchPlaying": {
     "message": "$1 更改遊戲或者邀請好友"
   },

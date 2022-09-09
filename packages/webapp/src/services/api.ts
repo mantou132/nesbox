@@ -319,7 +319,7 @@ export const favoriteGame = async (gameId: number, favorite: boolean) => {
     },
   });
   if (favorite) {
-    store.favoriteIds = [...(store.favoriteIds || []), gameId];
+    store.favoriteIds = [gameId, ...(store.favoriteIds || [])];
   } else {
     store.favoriteIds = store.favoriteIds?.filter((id) => id !== gameId);
   }

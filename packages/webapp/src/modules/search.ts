@@ -12,7 +12,7 @@ import {
 import { locale } from 'duoyun-ui/lib/locale';
 import { isIncludesString } from 'duoyun-ui/lib/utils';
 import type { Option } from 'duoyun-ui/elements/options';
-import { createPath } from 'duoyun-ui/elements/route';
+import { createPath, matchPath } from 'duoyun-ui/elements/route';
 import { isNotNullish } from 'duoyun-ui/lib/types';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 
@@ -23,12 +23,13 @@ import { icons } from 'src/icons';
 import { configure, getShortcut, searchCommands, setSearchCommand, toggoleSearchState } from 'src/configure';
 import { routes } from 'src/routes';
 import { paramKeys } from 'src/constants';
-import { getTempText } from 'src/utils';
-import { createInvite, updateRoom } from 'src/services/api';
+import { getCDNSrc, getTempText } from 'src/utils';
+import { createInvite, enterPubRoom, updateRoom } from 'src/services/api';
 
 import 'duoyun-ui/elements/input';
 import 'duoyun-ui/elements/options';
 import 'duoyun-ui/elements/alert';
+import 'duoyun-ui/elements/list';
 
 const style = createCSSSheet(css`
   :host {
@@ -50,8 +51,14 @@ const style = createCSSSheet(css`
     border-radius: ${theme.smallRound};
   }
   .result {
+    display: flex;
+    flex-direction: column;
     min-height: 0;
     flex-grow: 1;
+  }
+  .placeholder {
+    flex-grow: 1;
+    flex-shrink: 1;
   }
   .options {
     box-sizing: border-box;
@@ -80,6 +87,10 @@ export class MSearchElement extends GemElement<State> {
     search: '',
   };
 
+  get #isRooms() {
+    return matchPath(routes.rooms.pattern, history.getParams().path);
+  }
+
   #helpMessages: string[] = [];
 
   #getSearchCommand = (detail: string) => {
@@ -99,6 +110,8 @@ export class MSearchElement extends GemElement<State> {
   };
 
   #genOptions = (): Option[] => {
+    const { search } = this.state;
+
     if (configure.searchCommand === '?') {
       const search = this.state.search.substring(1);
       if (!search) return [];
@@ -128,10 +141,36 @@ export class MSearchElement extends GemElement<State> {
       const playing = configure.user?.playing;
       const isHost = playing?.host === configure.user?.id;
 
-      if (!playing || isHost) {
+      if (this.#isRooms) {
+        store.roomIds?.forEach((id) => {
+          const room = store.rooms[id];
+          if (!room) return;
+          const game = store.games[room.gameId];
+          const hostNickname = room.users.find((u) => room.host === u.id)?.nickname || '';
+          if (!game) return;
+          if (isIncludesString(game.name, search) || isIncludesString(hostNickname, search)) {
+            options.push({
+              label: html`
+                <dy-list-item
+                  .data=${{
+                    title: game.name,
+                    description: hostNickname,
+                    avatar: room.screenshot || getCDNSrc(game.preview),
+                  }}
+                ></dy-list-item>
+              `,
+              tag: this.#renderIcon(icons.received),
+              onClick: async () => {
+                enterPubRoom(room.id);
+                toggoleSearchState();
+              },
+            });
+          }
+        });
+      } else if (!playing || isHost) {
         store.gameIds?.forEach((id) => {
           const game = store.games[id];
-          if (game && isIncludesString(game.name, this.state.search)) {
+          if (game && isIncludesString(game.name, search)) {
             options.push({
               icon: icons.game,
               label: game.name,
@@ -162,7 +201,7 @@ export class MSearchElement extends GemElement<State> {
 
       friendStore.friendIds?.forEach((id) => {
         const friend = friendStore.friends[id];
-        if (friend && isIncludesString(friend.user.nickname, this.state.search)) {
+        if (friend && isIncludesString(friend.user.nickname, search)) {
           options.push({
             icon: icons.person,
             label: friend.user.nickname,
@@ -205,7 +244,11 @@ export class MSearchElement extends GemElement<State> {
           })}
           placeholder=${getTempText(
             i18n.get(
-              configure.user?.playing ? 'placeholderSearchPlaying' : 'placeholderSearch',
+              this.#isRooms
+                ? 'placeholderRoomSearch'
+                : configure.user?.playing
+                ? 'placeholderSearchPlaying'
+                : 'placeholderSearch',
               getShortcut('OPEN_SEARCH', true),
             ),
           )}
@@ -222,6 +265,7 @@ export class MSearchElement extends GemElement<State> {
               ></dy-options>
             `
           : ''}
+        <div class="placeholder" @click=${toggoleSearchState}></div>
       </div>
     `;
   };

@@ -18,6 +18,7 @@ pub fn get_favorites(conn: &PgConnection, uid: i32) -> Vec<i32> {
 
     favorites
         .filter(user_id.eq(uid))
+        .order(created_at.desc())
         .load::<Favorite>(conn)
         .unwrap()
         .iter()
