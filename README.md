@@ -17,3 +17,7 @@
 - Game review
 - Internationalization
 - As a local emulator
+
+## Contributing
+
+See the contributing guide([中文](./CONTRIBUTING.md))

@@ -5,7 +5,7 @@
   "scripts": {
     "lint": "lerna exec --ignore @nesbox/config --ignore @mantou/nes -- tsc --noEmit && eslint . --ext .ts,.js",
     "release": "lerna version",
-    "preinstall": "npx wasm-pack build --out-dir ../nes-pkg --target web --scope mantou packages/nes",
+    "build:nes": "npx wasm-pack build --out-dir ../nes-pkg --target web --scope mantou packages/nes",
     "prepare": "husky install"
   },
   "devDependencies": {

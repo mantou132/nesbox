@@ -1,5 +1,6 @@
-# NESBox Web
+# NESBox for Web
 
+Design [prototype](https://www.figma.com/file/N6DxApZl41524ey9fVL6LF/NESBox)
 
 ## codegen
 
@@ -24,5 +25,5 @@ yarn build
 ## env
 
 ```bash
-API_BASE=http://localhost:51100/
+API_BASE=http://localhost:8080/
 ```

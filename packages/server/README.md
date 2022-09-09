@@ -1,12 +1,26 @@
-# Server
+# NESBox API
 
 ## development
 
-```bash
-cargo watch -x "run -p server"
+install postgresql, diesel, create database, create `.env` file:
+
+```
+DATABASE_URL=postgres://username:password@localhost/database_name
 ```
 
-## Webhook test
+init database:
+
+```base
+diesel migration run
+```
+
+start:
+
+```bash
+cargo watch -x run
+```
+
+## webhook test
 
 ```
 bore local 8080 --to bore.pub -p 34033

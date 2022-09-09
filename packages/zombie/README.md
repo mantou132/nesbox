@@ -1,15 +1,3 @@
-# Create github issue
+# NESBox scripts
 
-## Create in batches
-
-1. Popular
-
-- 10k
-- 1k
-
-2. Base name(need exclude popular game)
-
-- have ja/en/zh name(count = 1250)
-- only have zh/en name(count = 250)
-- ~~only have ja/en name(count = 0)~~
-- only have en name or missing en name(count = 457)
+Used to download NES games and screenshots scripts, see [assets](https://github.com/mantou132/nesbox/releases/tag/0.0.1)

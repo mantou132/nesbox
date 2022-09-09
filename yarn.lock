@@ -3282,11 +3282,6 @@ deep-query-selector@^1.0.1:
   resolved "https://registry.yarnpkg.com/deep-query-selector/-/deep-query-selector-1.0.1.tgz#2c3d50dc443298375fa439f8b767b06fedc35554"
   integrity sha512-dG0qd5O86Rl+Jh4OiB1dv402fAMVipTLtO0BFUP8y+bS5R2xRuUSt1DxYTFhd2hc785QXTKdfGJct7O+RdoL+g==
 
-deep-query-selector@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/deep-query-selector/-/deep-query-selector-1.0.2.tgz#42487af5e13e14142920a449b26c5c293bb9c103"
-  integrity sha512-yLIhd0Rcwvxen5OymvdE5Ah5KB/MGfln1vSkw0t0yoQdnh2SEKCEz8Ir+rBLPYwDzs08nterVC8vOgi0irfv4w==
-
 defaults@^1.0.3:
   version "1.0.3"
   resolved "https://registry.npmjs.org/defaults/-/defaults-1.0.3.tgz"

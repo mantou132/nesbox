@@ -14,7 +14,6 @@
   "dependencies": {
     "@mantou/gem": "^1.6.0",
     "@mantou/nes": "^1.0.3",
-    "deep-query-selector": "^1.0.2",
     "duoyun-ui": "^0.0.50",
     "graphql": "^16.2.0",
     "jszip": "^3.10.0",

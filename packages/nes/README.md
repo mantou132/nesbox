@@ -3,15 +3,15 @@
 ## pull deps
 
 ```bash
-# root dir
 git submodule update
 ```
 
 ## compile to wasm
 
+[install](https://rustwasm.github.io/wasm-pack/installer/) wesm-pack.
+
 ```bash
-# root dir
-yarn
+wasm-pack build --out-dir ../nes-pkg --target web --scope mantou
 ```
 
 ## publish to npm
