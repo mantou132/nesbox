@@ -193,7 +193,12 @@ pub fn register(conn: &PgConnection, req: ScLoginReq, secret: &str) -> FieldResu
     let new_user = NewUser {
         username: &req.username,
         password: &hash_password(&req.password),
-        nickname: &req.username,
+        nickname: &req
+            .username
+            .trim_start_matches('@')
+            .split('@')
+            .next()
+            .unwrap_or_default(),
         settings: None,
         deleted_at: None,
         created_at: Utc::now().naive_utc(),
