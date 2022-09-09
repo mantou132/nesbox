@@ -10,6 +10,7 @@ import {
   styleMap,
   refobject,
   RefObject,
+  QueryString,
 } from '@mantou/gem';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { Loadbar } from 'duoyun-ui/elements/page-loadbar';
@@ -123,6 +124,7 @@ export class AppRootElement extends GemElement {
     if (rid) {
       history.replace({
         path: createPath(routes.room, { params: { [paramKeys.ROOM_ID]: String(rid) } }),
+        query: new QueryString({ [queryKeys.ROOM_FROM]: history.getParams().path }),
       });
 
       this.addEventListener('dragover', this.#stopPropagation);
@@ -136,7 +138,7 @@ export class AppRootElement extends GemElement {
       enterPubRoom(this.#joinRoom);
     }
 
-    this.effect(this.#enterRoom, () => [configure.user?.playing?.id, history.getParams().path]);
+    this.effect(this.#enterRoom, () => [configure.user?.playing?.id]);
     this.effect(
       () => forever(getGames),
       () => [i18n.currentLanguage],

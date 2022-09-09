@@ -60,6 +60,7 @@ export type BcMsgEvent = {
 export const queryKeys = {
   REDIRECT_URI: 'redirect_uri',
   JOIN_ROOM: 'join_room',
+  ROOM_FROM: 'room_from',
 };
 
 // clean outdate cache data

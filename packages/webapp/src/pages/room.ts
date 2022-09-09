@@ -11,7 +11,7 @@ import {
   RefObject,
   QueryString,
 } from '@mantou/gem';
-import { createPath } from 'duoyun-ui/elements/route';
+import { createPath, matchPath } from 'duoyun-ui/elements/route';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { ContextMenu } from 'duoyun-ui/elements/menu';
 import { Modal } from 'duoyun-ui/elements/modal';
@@ -310,7 +310,11 @@ export class PRoomElement extends GemElement {
         if (!this.#playing) {
           this.#autoSave();
           ContextMenu.close();
-          history.replace({ path: createPath(routes.games) });
+          const roomFrom = history.getParams().query.get(queryKeys.ROOM_FROM) || '';
+          const returnPath = [routes.favorites, routes.rooms, routes.game].some((route) =>
+            matchPath(route.pattern, roomFrom),
+          );
+          history.replace({ path: returnPath ? roomFrom : createPath(routes.games) });
         } else {
           if (!mediaQuery.isPhone) import('src/tours');
           const timer = window.setInterval(this.#uploadScreenshot, 10000);
