@@ -2,7 +2,7 @@
 
 ## development
 
-```base
+```bash
 cargo install tauri-cli
 ```
 
