@@ -69,7 +69,6 @@ const style = createCSSSheet(css`
 @connectStore(i18n.store)
 export class MGameItemElement extends GemElement {
   @boolattribute favorited: boolean;
-  @boolattribute silent: boolean;
 
   @property game: Game;
 
@@ -84,7 +83,6 @@ export class MGameItemElement extends GemElement {
   };
 
   #onMoreClick = (evt: Event) => {
-    if (this.silent) return;
     evt.stopPropagation();
     history.push({
       path: createPath(routes.game, {
@@ -104,20 +102,16 @@ export class MGameItemElement extends GemElement {
         @click=${this.#onMoreClick}
         src=${getCDNSrc(this.game.preview)}
       />
-      ${this.silent
-        ? ''
-        : html`
-            <dy-space class="actions" size="small">
-              <dy-button class="play" small @click=${this.#onGameClick}>${i18n.get('startGame')}</dy-button>
-              <dy-button
-                small
-                tabindex="-1"
-                color="cancel"
-                @click=${this.#onFavoriteClick}
-                .icon=${this.favorited ? icons.favorited : icons.favorite}
-              ></dy-button>
-            </dy-space>
-          `}
+      <dy-space class="actions" size="small">
+        <dy-button class="play" small @click=${this.#onGameClick}>${i18n.get('startGame')}</dy-button>
+        <dy-button
+          small
+          tabindex="-1"
+          color="cancel"
+          @click=${this.#onFavoriteClick}
+          .icon=${this.favorited ? icons.favorited : icons.favorite}
+        ></dy-button>
+      </dy-space>
       <div class="title" title=${this.game.name}>${this.game.name}</div>
     `;
   };

@@ -123,10 +123,11 @@ export interface Profile {
   username: string;
 }
 
-// char list
-export const searchCommands = ['?'] as const;
-
-type SearchCommand = typeof searchCommands[number];
+// only char
+export enum SearchCommand {
+  HELP = '?',
+  SELECT_GAME = '~',
+}
 
 interface Configure {
   user?: User;
@@ -180,8 +181,8 @@ export const toggoleSearchState = () => {
   });
 };
 
-export const setSearchCommand = (command?: SearchCommand) => {
-  updateStore(configure, { searchCommand: command });
+export const setSearchCommand = (command: SearchCommand | null) => {
+  updateStore(configure, { searchCommand: command || undefined, searchState: true });
 };
 
 export const setNesFile = (file?: File) => {

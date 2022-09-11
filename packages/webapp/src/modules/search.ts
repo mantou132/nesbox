@@ -8,6 +8,7 @@ import {
   connectStore,
   history,
   styleMap,
+  raw,
 } from '@mantou/gem';
 import { locale } from 'duoyun-ui/lib/locale';
 import { isIncludesString } from 'duoyun-ui/lib/utils';
@@ -20,7 +21,7 @@ import { friendStore, store, toggoleFriendChatState } from 'src/store';
 import { theme } from 'src/theme';
 import { i18n } from 'src/i18n';
 import { icons } from 'src/icons';
-import { configure, getShortcut, searchCommands, setSearchCommand, toggoleSearchState } from 'src/configure';
+import { configure, getShortcut, SearchCommand, setSearchCommand, toggoleSearchState } from 'src/configure';
 import { routes } from 'src/routes';
 import { paramKeys } from 'src/constants';
 import { getCDNSrc, getTempText } from 'src/utils';
@@ -82,6 +83,7 @@ type State = {
 @connectStore(store)
 @connectStore(i18n.store)
 @connectStore(friendStore)
+@connectStore(configure)
 export class MSearchElement extends GemElement<State> {
   state: State = {
     search: '',
@@ -91,96 +93,57 @@ export class MSearchElement extends GemElement<State> {
     return matchPath(routes.rooms.pattern, history.getParams().path);
   }
 
+  get #playing() {
+    return configure.user?.playing;
+  }
+
   #helpMessages: string[] = [];
 
-  #getSearchCommand = (detail: string) => {
-    return searchCommands.find((command) => detail && detail.startsWith(command));
-  };
-
   #onChange = ({ detail }: CustomEvent<string>) => {
-    const command = this.#getSearchCommand(detail);
-    if (command !== configure.searchCommand) {
+    const command = [SearchCommand.SELECT_GAME, SearchCommand.HELP].find((command) => detail === command);
+    if (command) {
+      if (!configure.user?.playing && command === SearchCommand.SELECT_GAME) return;
       setSearchCommand(command);
+      this.setState({ search: '' });
+    } else {
+      this.setState({ search: detail });
     }
-    this.setState({ search: command ? detail.substring(1) : detail });
   };
 
-  #renderIcon = (icon: string) => {
+  #getSearchCommandIcon = (command?: SearchCommand) => {
+    if (!command) return;
+    return raw`
+      <svg viewBox="0 0 24 24">
+        <text 
+          fill='currentColor'
+          x="50%"
+          y="50%"
+          dominant-baseline="middle"
+          text-anchor="middle">${command}</text>
+      </svg>
+    `;
+  };
+
+  #renderResultIcon = (icon: string) => {
     return html`<dy-use .element=${icon} style="width: 1.5em; flex-shrink: 0;"></dy-use>`;
   };
 
-  #genOptions = (): Option[] => {
-    const { search } = this.state;
-
-    if (configure.searchCommand === '?') {
-      const search = this.state.search.substring(1);
-      if (!search) return [];
-
-      return this.#helpMessages
-        .map((value) => {
-          if (!isIncludesString(value, search)) return;
-          const [title, desc] = value.split('\n');
-          return {
-            label: html`
-              <dy-alert
-                style=${styleMap({
-                  whiteSpace: 'normal',
-                  border: 'none',
-                  padding: '0',
-                })}
-                .header=${title}
-              >
-                ${desc}
-              </dy-alert>
-            `,
-          };
-        })
-        .filter(isNotNullish);
-    } else {
-      const options: Option[] = [];
-      const playing = configure.user?.playing;
-      const isHost = playing?.host === configure.user?.id;
-
-      if (this.#isRooms) {
-        store.roomIds?.forEach((id) => {
-          const room = store.rooms[id];
-          if (!room) return;
-          const game = store.games[room.gameId];
-          const hostNickname = room.users.find((u) => room.host === u.id)?.nickname || '';
-          if (!game) return;
-          if (isIncludesString(game.name, search) || isIncludesString(hostNickname, search)) {
-            options.push({
-              label: html`
-                <dy-list-item
-                  .data=${{
-                    title: game.name,
-                    description: hostNickname,
-                    avatar: room.screenshot || getCDNSrc(game.preview),
-                  }}
-                ></dy-list-item>
-              `,
-              tag: this.#renderIcon(icons.received),
-              onClick: async () => {
-                enterPubRoom(room.id);
-                toggoleSearchState();
-              },
-            });
-          }
-        });
-      } else if (!playing || isHost) {
-        store.gameIds?.forEach((id) => {
+  #genGameOptions = (): Option[] => {
+    return (
+      store.gameIds
+        ?.map((id) => {
           const game = store.games[id];
-          if (game && isIncludesString(game.name, search)) {
-            options.push({
+          if (game && isIncludesString(game.name, this.state.search)) {
+            return {
               icon: icons.game,
               label: game.name,
-              tag: playing ? this.#renderIcon(icons.received) : undefined,
+              tag: this.#playing ? this.#renderResultIcon(icons.received) : undefined,
               onClick: async () => {
-                if (playing) {
+                if (this.#playing) {
                   updateRoom({
-                    id: playing.id,
-                    private: playing.private,
-                    host: playing.host,
+                    id: this.#playing.id,
+                    private: this.#playing.private,
+                    host: this.#playing.host,
                     gameId: game.id,
                   });
                 } else {
@@ -194,31 +157,118 @@ export class MSearchElement extends GemElement<State> {
                 }
                 toggoleSearchState();
               },
-            });
+            };
           }
-        });
+        })
+        .filter(isNotNullish) || []
+    );
+  };
+
+  #genHelpOptions = (): Option[] => {
+    return this.#helpMessages
+      .map((value) => {
+        if (!isIncludesString(value, this.state.search)) return;
+        const [title, desc] = value.split('\n');
+        return {
+          label: html`
+            <dy-alert
+              style=${styleMap({
+                whiteSpace: 'normal',
+                border: 'none',
+                padding: '0',
+              })}
+              .header=${title}
+            >
+              ${desc}
+            </dy-alert>
+          `,
+        };
+      })
+      .filter(isNotNullish);
+  };
+
+  #genFriendOptions = (): Option[] => {
+    return (
+      friendStore.friendIds
+        ?.map((id) => {
+          const friend = friendStore.friends[id];
+          if (friend && isIncludesString(friend.user.nickname, this.state.search)) {
+            return {
+              icon: icons.person,
+              label: friend.user.nickname,
+              tag: this.#playing ? this.#renderResultIcon(icons.share) : undefined,
+              onClick: () => {
+                if (this.#playing) {
+                  createInvite({ targetId: friend.user.id, roomId: this.#playing.id });
+                } else {
+                  toggoleFriendChatState(friend.user.id);
+                }
+                toggoleSearchState();
+              },
+            };
+          }
+        })
+        .filter(isNotNullish) || []
+    );
+  };
+
+  #genRoomOptions = (): Option[] => {
+    return (
+      store.roomIds
+        ?.map((id) => {
+          const room = store.rooms[id];
+          if (!room) return;
+          const game = store.games[room.gameId];
+          const hostNickname = room.users.find((u) => room.host === u.id)?.nickname || '';
+          if (!game) return;
+          if (isIncludesString(game.name, this.state.search) || isIncludesString(hostNickname, this.state.search)) {
+            return {
+              label: html`
+                <dy-list-item
+                  .data=${{
+                    title: game.name,
+                    description: hostNickname,
+                    avatar: room.screenshot || getCDNSrc(game.preview),
+                  }}
+                ></dy-list-item>
+              `,
+              tag: this.#renderResultIcon(icons.received),
+              onClick: async () => {
+                enterPubRoom(room.id);
+                toggoleSearchState();
+              },
+            };
+          }
+        })
+        .filter(isNotNullish) || []
+    );
+  };
+
+  #genOptions = (): Option[] => {
+    const { search } = this.state;
+
+    if (configure.searchCommand === SearchCommand.SELECT_GAME) {
+      return this.#genGameOptions();
+    } else if (configure.searchCommand === SearchCommand.HELP) {
+      if (!search) return [];
+
+      return this.#genHelpOptions();
+    } else {
+      if (!search) return [];
+
+      const options: Option[] = [];
+      const playing = configure.user?.playing;
+      const isHost = playing?.host === configure.user?.id;
+
+      if (this.#isRooms) {
+        options.push(...this.#genRoomOptions());
+      } else if (!playing || isHost) {
+        options.push(...this.#genGameOptions());
       }
 
-      friendStore.friendIds?.forEach((id) => {
-        const friend = friendStore.friends[id];
-        if (friend && isIncludesString(friend.user.nickname, search)) {
-          options.push({
-            icon: icons.person,
-            label: friend.user.nickname,
-            tag: playing ? this.#renderIcon(icons.share) : undefined,
-            onClick: () => {
-              if (playing) {
-                createInvite({ targetId: friend.user.id, roomId: playing.id });
-              } else {
-                toggoleFriendChatState(friend.user.id);
-              }
-              toggoleSearchState();
-            },
-          });
-        }
-      });
+      options.push(...this.#genFriendOptions());
 
-      return options;
+      return options.sort((a, b) => (a.label > b.label ? 1 : -1));
     }
   };
 
@@ -230,6 +280,7 @@ export class MSearchElement extends GemElement<State> {
   };
 
   render = () => {
+    const { search } = this.state;
     const options = this.#genOptions();
 
     return html`
@@ -237,34 +288,35 @@ export class MSearchElement extends GemElement<State> {
         <dy-input
           class="input"
           autofocus
-          .value=${`${configure.searchCommand || ''}${this.state.search}`}
+          .value=${search}
+          .icon=${this.#getSearchCommandIcon(configure.searchCommand)}
           @change=${this.#onChange}
           @keydown=${hotkeys({
             [[getShortcut('OPEN_HELP'), getShortcut('OPEN_SEARCH')].join(',')]: (evt) => evt.preventDefault(),
+            backspace: () => !search && setSearchCommand(null),
           })}
           placeholder=${getTempText(
             i18n.get(
-              this.#isRooms
+              configure.searchCommand === SearchCommand.HELP
+                ? 'help'
+                : configure.searchCommand === SearchCommand.SELECT_GAME
+                ? 'selectGame'
+                : this.#isRooms
                 ? 'placeholderRoomSearch'
                 : configure.user?.playing
                 ? 'placeholderSearchPlaying'
                 : 'placeholderSearch',
-              getShortcut('OPEN_SEARCH', true),
+              configure.searchCommand === SearchCommand.HELP
+                ? getShortcut('OPEN_SEARCH', true)
+                : configure.searchCommand === SearchCommand.SELECT_GAME
+                ? ''
+                : getShortcut('OPEN_SEARCH', true),
             ),
           )}
         ></dy-input>
       </div>
       <div class="result">
-        ${this.state.search
-          ? html`
-              <dy-options
-                class="options"
-                .options=${options.length
-                  ? options.sort((a, b) => (a.label > b.label ? 1 : -1))
-                  : [{ label: locale.noData }]}
-              ></dy-options>
-            `
-          : ''}
+        <dy-options class="options" .options=${options.length ? options : [{ label: locale.noData }]}></dy-options>
         <div class="placeholder" @click=${toggoleSearchState}></div>
       </div>
     `;

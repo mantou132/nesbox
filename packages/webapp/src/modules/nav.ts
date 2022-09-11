@@ -7,7 +7,7 @@ import { focusStyle } from 'duoyun-ui/lib/styles';
 
 import { locationStore, routes } from 'src/routes';
 import { i18n } from 'src/i18n';
-import { configure, toggoleFriendListState, toggoleSearchState } from 'src/configure';
+import { configure, SearchCommand, setSearchCommand, toggoleFriendListState, toggoleSearchState } from 'src/configure';
 import { theme } from 'src/theme';
 import { favoriteGame, leaveRoom } from 'src/services/api';
 import { store } from 'src/store';
@@ -17,14 +17,9 @@ import 'duoyun-ui/elements/link';
 import 'duoyun-ui/elements/use';
 import 'duoyun-ui/elements/action-text';
 import 'duoyun-ui/elements/modal';
-import 'src/modules/game-selector';
 import 'src/elements/tooltip';
 import 'src/modules/avatar';
 import 'src/modules/badge';
-
-type State = {
-  select: boolean;
-};
 
 const style = createCSSSheet(css`
   :host {
@@ -107,12 +102,9 @@ const style = createCSSSheet(css`
 @connectStore(store)
 @connectStore(locationStore)
 @connectStore(i18n.store)
-export class MNavElement extends GemElement<State> {
+@connectStore(configure)
+export class MNavElement extends GemElement {
   @state room: boolean;
-
-  state: State = {
-    select: false,
-  };
 
   render = () => {
     const playing = configure.user?.playing;
@@ -142,7 +134,7 @@ export class MNavElement extends GemElement<State> {
                         class="title"
                         tabindex="0"
                         @keydown=${commonHandle}
-                        @click=${() => this.setState({ select: true })}
+                        @click=${() => setSearchCommand(SearchCommand.SELECT_GAME)}
                       >
                         ${store.games[gameId || 0]?.name}
                       </dy-action-text>
@@ -155,15 +147,6 @@ export class MNavElement extends GemElement<State> {
                 .element=${favorited ? icons.favorited : icons.favorite}
                 @click=${() => favoriteGame(gameId, !favorited)}
               ></dy-use>
-              <dy-modal
-                .open=${this.state.select}
-                .disableDefualtOKBtn=${true}
-                .header=${i18n.get('selectGame')}
-                @close=${() => this.setState({ select: false })}
-                .maskCloseable=${true}
-              >
-                <m-game-selector slot="body"></m-game-selector>
-              </dy-modal>
             `
           : html`
               <dy-active-link class="link" .route=${routes.games as RouteItem}>${routes.games.title}</dy-active-link>

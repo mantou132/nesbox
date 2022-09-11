@@ -24,6 +24,7 @@ import {
   setSearchCommand,
   toggoleSearchState,
   toggoleSettingsState,
+  SearchCommand,
 } from 'src/configure';
 import { routes, locationStore } from 'src/routes';
 import { enterPubRoom, getAccount, getFriends, getGames, subscribeEvent } from 'src/services/api';
@@ -102,10 +103,7 @@ export class AppRootElement extends GemElement {
   #globalShortcut = (evt: KeyboardEvent) => {
     hotkeys({
       [getShortcut('OPEN_SEARCH')]: preventDefault(toggoleSearchState),
-      [getShortcut('OPEN_HELP')]: preventDefault(() => {
-        setSearchCommand('?');
-        toggoleSearchState();
-      }),
+      [getShortcut('OPEN_HELP')]: preventDefault(() => setSearchCommand(SearchCommand.HELP)),
       [getShortcut('OPEN_SETTINGS')]: preventDefault(() => {
         if (friendStore.friendChatState) {
           toggoleFriendChatState();
