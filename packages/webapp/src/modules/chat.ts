@@ -12,7 +12,7 @@ import {
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
-import { changeFriendChatDraft, friendStore, toggoleFriendChatState } from 'src/store';
+import { changeFriendChatDraft, friendStore, toggleFriendChatState } from 'src/store';
 import { createMessage, getMessages, readMessage } from 'src/services/api';
 import { icons } from 'src/icons';
 import { theme } from 'src/theme';
@@ -121,7 +121,7 @@ export class MChatElement extends GemElement {
         if (msg) {
           changeFriendChatDraft(friendStore.friendChatState!);
         } else {
-          toggoleFriendChatState();
+          toggleFriendChatState();
         }
       },
     })(evt);
@@ -162,7 +162,7 @@ export class MChatElement extends GemElement {
           ${this.#friend?.user.nickname}
         </dy-status-light>
         <span style="flex-grow: 1"></span>
-        <dy-use class="close" .element=${icons.close} @click=${() => toggoleFriendChatState()}></dy-use>
+        <dy-use class="close" .element=${icons.close} @click=${() => toggleFriendChatState()}></dy-use>
       </div>
       <div ref=${this.messageRef.ref} class="list">
         ${friendStore.messageIds[friendStore.friendChatState]?.map(

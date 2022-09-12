@@ -5,7 +5,7 @@ import { commonHandle } from 'duoyun-ui/lib/hotkeys';
 import { ElementOf, isNotNullish } from 'duoyun-ui/lib/types';
 import { Modal } from 'duoyun-ui/elements/modal';
 
-import { configure, getShortcut, toggoleScreencaseMode, toggoleSettingsState } from 'src/configure';
+import { configure, getShortcut, toggleScreencaseMode, toggleSettingsState } from 'src/configure';
 import { logout } from 'src/auth';
 import { changeTheme, theme, ThemeName, themeNames } from 'src/theme';
 import { i18n, isCurrentLang, langNames } from 'src/i18n';
@@ -105,7 +105,7 @@ export class MAvatarElement extends GemElement {
       [
         {
           text: i18n.get('setting'),
-          handle: toggoleSettingsState,
+          handle: toggleSettingsState,
           tag: getShortcut('OPEN_SETTINGS', true),
         },
         {
@@ -127,7 +127,7 @@ export class MAvatarElement extends GemElement {
         {
           text: i18n.get('screencastMode'),
           selected: configure.screencastMode,
-          handle: toggoleScreencaseMode,
+          handle: toggleScreencaseMode,
         },
         {
           text: i18n.get('feedback'),

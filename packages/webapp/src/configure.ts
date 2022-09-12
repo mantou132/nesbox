@@ -161,20 +161,20 @@ export const deleteUser = () => {
   updateStore(configure, { user: undefined, profile: undefined });
 };
 
-export const toggoleScreencaseMode = () => {
+export const toggleScreencaseMode = () => {
   updateStore(configure, { screencastMode: !configure.screencastMode });
 };
 
-export const toggoleFriendListState = () => {
+export const toggleFriendListState = () => {
   updateStore(configure, { friendListState: !configure.friendListState });
 };
 
-export const toggoleSettingsState = () => {
+export const toggleSettingsState = () => {
   updateStore(configure, { settingsState: !configure.settingsState });
   if (!configure.settingsState) dispatchEvent(new CustomEvent(events.CLOSE_SETTINGS));
 };
 
-export const toggoleSearchState = () => {
+export const toggleSearchState = () => {
   updateStore(configure, {
     searchState: !configure.searchState,
     searchCommand: configure.searchState ? undefined : configure.searchCommand,

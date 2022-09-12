@@ -4,7 +4,7 @@ import { friendStore, Invite, store } from 'src/store';
 import { theme } from 'src/theme';
 import { icons } from 'src/icons';
 import { acceptInvite } from 'src/services/api';
-import { toggoleFriendListState } from 'src/configure';
+import { toggleFriendListState } from 'src/configure';
 import { i18n } from 'src/i18n';
 
 const style = createCSSSheet(css`
@@ -55,13 +55,13 @@ export class MInviteItemElement extends GemElement {
   #onAcceptInvite = (evt: Event) => {
     evt.stopPropagation();
     acceptInvite(this.invite.id, true);
-    toggoleFriendListState();
+    toggleFriendListState();
   };
 
   #onDenyInvite = (evt: Event) => {
     evt.stopPropagation();
     acceptInvite(this.invite.id, false);
-    toggoleFriendListState();
+    toggleFriendListState();
   };
 
   render = () => {

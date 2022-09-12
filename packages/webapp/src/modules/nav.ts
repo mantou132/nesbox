@@ -7,7 +7,7 @@ import { focusStyle } from 'duoyun-ui/lib/styles';
 
 import { locationStore, routes } from 'src/routes';
 import { i18n } from 'src/i18n';
-import { configure, SearchCommand, setSearchCommand, toggoleFriendListState, toggoleSearchState } from 'src/configure';
+import { configure, SearchCommand, setSearchCommand, toggleFriendListState, toggleSearchState } from 'src/configure';
 import { theme } from 'src/theme';
 import { favoriteGame, leaveRoom } from 'src/services/api';
 import { store } from 'src/store';
@@ -161,14 +161,14 @@ export class MNavElement extends GemElement {
           tabindex="0"
           @keydown=${commonHandle}
           .element=${icons.search}
-          @click=${toggoleSearchState}
+          @click=${toggleSearchState}
         ></dy-use>
         <dy-use
           class="icon"
           tabindex="0"
           @keydown=${commonHandle}
           .element=${icons.group}
-          @click=${toggoleFriendListState}
+          @click=${toggleFriendListState}
         >
           <m-badge></m-badge>
         </dy-use>
