@@ -13,6 +13,16 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "six-ben",
+      "name": "sixben",
+      "avatar_url": "https://avatars.githubusercontent.com/u/43313308?v=4",
+      "profile": "https://github.com/six-ben",
+      "contributions": [
+        "financial",
+        "test"
+      ]
     }
   ],
   "contributorsPerLine": 7,
@@ -20,5 +30,6 @@
   "projectOwner": "mantou132",
   "repoType": "github",
   "repoHost": "https://github.com",
-  "skipCi": true
+  "skipCi": true,
+  "commitConvention": "angular"
 }
