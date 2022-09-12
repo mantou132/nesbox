@@ -1,0 +1,24 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "hehehai",
+      "name": "一块木头",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12692552?v=4",
+      "profile": "https://hehehai.cn",
+      "contributions": [
+        "code"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "projectName": "nesbox",
+  "projectOwner": "mantou132",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "skipCi": true
+}
