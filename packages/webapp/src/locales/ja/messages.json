@@ -314,7 +314,7 @@
   "tipApplyFriendSuccess": {
     "message": "リクエストが送信されました"
   },
-  "tipIviteSuccess": {
+  "tipInviteSuccess": {
     "message": "招待状が送信されました"
   },
   "tipRoomDeleted": {

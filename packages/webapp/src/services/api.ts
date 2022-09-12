@@ -87,7 +87,7 @@ import {
 import { store, friendStore } from 'src/store';
 import { request, subscribe } from 'src/services';
 import { configure, parseAccount, Settings } from 'src/configure';
-import { events, VoiceSingalEvent, Singal, SingalEvent } from 'src/constants';
+import { events, VoiceSignalEvent, Signal, SignalEvent } from 'src/constants';
 import { i18n, isCurrentLang } from 'src/i18n';
 import { logout } from 'src/auth';
 import {
@@ -243,7 +243,7 @@ export const deleteFriend = async (targetId: number) => {
 
 export const createInvite = async (input: ScNewInvite) => {
   await request<CreateInviteMutation, CreateInviteMutationVariables>(CreateInvite, { input });
-  Toast.open('success', i18n.get('tipIviteSuccess'));
+  Toast.open('success', i18n.get('tipInviteSuccess'));
 };
 
 export const acceptInvite = async (inviteId: number, accept: boolean) => {
@@ -326,9 +326,9 @@ export const favoriteGame = async (gameId: number, favorite: boolean) => {
   updateStore(store);
 };
 
-export const sendSignal = async (targetId: number, singal: Singal) => {
+export const sendSignal = async (targetId: number, signal: Signal) => {
   await request<SendSignalMutation, SendSignalMutationVariables>(SendSignal, {
-    input: { targetId, json: JSON.stringify(singal) },
+    input: { targetId, json: JSON.stringify(signal) },
   });
 };
 
@@ -453,18 +453,18 @@ export const subscribeEvent = () => {
 
       if (sendSignal) {
         window.dispatchEvent(
-          new CustomEvent<SingalEvent>(events.SINGAL, {
-            detail: { userId: sendSignal.userId, singal: JSON.parse(sendSignal.json) },
+          new CustomEvent<SignalEvent>(events.SIGNAL, {
+            detail: { userId: sendSignal.userId, signal: JSON.parse(sendSignal.json) },
           }),
         );
       }
 
       if (voiceSignal) {
         window.dispatchEvent(
-          new CustomEvent<VoiceSingalEvent>(events.VOICE_SINGAL, {
+          new CustomEvent<VoiceSignalEvent>(events.VOICE_SIGNAL, {
             detail: {
               roomId: voiceSignal.roomId,
-              singal: convertObjectSnakeToCamelCase(JSON.parse(voiceSignal.json)),
+              signal: convertObjectSnakeToCamelCase(JSON.parse(voiceSignal.json)),
             },
           }),
         );

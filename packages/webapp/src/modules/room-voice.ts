@@ -14,7 +14,7 @@ import { configure } from 'src/configure';
 import { icons } from 'src/icons';
 import { theme } from 'src/theme';
 import { sendVoiceMsg } from 'src/services/api';
-import { events, VoiceSingalEvent } from 'src/constants';
+import { events, VoiceSignalEvent } from 'src/constants';
 import { logger } from 'src/logger';
 import { ScVoiceMsgKind } from 'src/generated/graphql';
 import { GamepadBtnIndex } from 'src/gamepad';
@@ -134,17 +134,17 @@ export class MVoiceRoomElement extends GemElement<State> {
             logger.error(event);
           });
 
-          const handleVoiceMsg = async ({ detail }: CustomEvent<VoiceSingalEvent>) => {
+          const handleVoiceMsg = async ({ detail }: CustomEvent<VoiceSignalEvent>) => {
             if (roomId !== detail.roomId) return;
-            if ('candidate' in detail.singal) {
-              peerConnection.addIceCandidate(new RTCIceCandidate(detail.singal)).catch(logger.error);
+            if ('candidate' in detail.signal) {
+              peerConnection.addIceCandidate(new RTCIceCandidate(detail.signal)).catch(logger.error);
             }
-            if ('type' in detail.singal) {
+            if ('type' in detail.signal) {
               this.setState({
                 // trackId init in `ontrack`
-                receiverTracks: detail.singal.senderTrackIds.map((userId) => ({ trackId: '', userId: Number(userId) })),
+                receiverTracks: detail.signal.senderTrackIds.map((userId) => ({ trackId: '', userId: Number(userId) })),
               });
-              const sdp = new RTCSessionDescription(detail.singal);
+              const sdp = new RTCSessionDescription(detail.signal);
               await peerConnection.setRemoteDescription(sdp);
               if (sdp.type === 'offer') {
                 const answer = await peerConnection.createAnswer();
@@ -154,7 +154,7 @@ export class MVoiceRoomElement extends GemElement<State> {
             }
           };
 
-          window.addEventListener(events.VOICE_SINGAL, handleVoiceMsg);
+          window.addEventListener(events.VOICE_SIGNAL, handleVoiceMsg);
 
           const intervalTimer = setInterval(async () => {
             if (peerConnection.iceConnectionState !== 'connected') return;
@@ -186,7 +186,7 @@ export class MVoiceRoomElement extends GemElement<State> {
             clearInterval(intervalTimer);
             this.#audioEle.pause();
             userMediaStream?.getTracks().forEach((track) => track.stop());
-            window.removeEventListener(events.VOICE_SINGAL, handleVoiceMsg);
+            window.removeEventListener(events.VOICE_SIGNAL, handleVoiceMsg);
             peerConnection.close();
           };
         }

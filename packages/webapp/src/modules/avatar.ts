@@ -5,7 +5,7 @@ import { commonHandle } from 'duoyun-ui/lib/hotkeys';
 import { ElementOf, isNotNullish } from 'duoyun-ui/lib/types';
 import { Modal } from 'duoyun-ui/elements/modal';
 
-import { configure, getShortcut, toggleScreencaseMode, toggleSettingsState } from 'src/configure';
+import { configure, getShortcut, toggleScreencastMode, toggleSettingsState } from 'src/configure';
 import { logout } from 'src/auth';
 import { changeTheme, theme, ThemeName, themeNames } from 'src/theme';
 import { i18n, isCurrentLang, langNames } from 'src/i18n';
@@ -72,7 +72,7 @@ export class MAvatarElement extends GemElement {
 
     const excludeGames = ['马力欧兄弟/水管马力欧', '忍者神龟 街机版', 'Mighty 快打旋风', 'Super C'];
     const list: { title: string; description: string }[] = (
-      await waitLoading((await fetch(getCDNSrc(`${githubRelease}/download/0.0.1/matedata.json`))).json())
+      await waitLoading((await fetch(getCDNSrc(`${githubRelease}/download/0.0.1/metadata.json`))).json())
     )
       .filter((e: any) => isCurrentLang({ ...e, name: e.title }) && !excludeGames.includes(e.title))
       .map((e: any) => ({ ...e, title: e.title.replace(/\/.*$/, '') }));
@@ -127,7 +127,7 @@ export class MAvatarElement extends GemElement {
         {
           text: i18n.get('screencastMode'),
           selected: configure.screencastMode,
-          handle: toggleScreencaseMode,
+          handle: toggleScreencastMode,
         },
         {
           text: i18n.get('feedback'),

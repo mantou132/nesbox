@@ -33,8 +33,8 @@ export const getAvatar = (username?: string) => {
 export const getGithubGames = async (s: string) => {
   const search = `${githubIssue}?q=is%3Aissue+label%3Agame+${encodeURIComponent(s.replaceAll(' ', '+'))}`;
   const text = await (await fetch(getCorSrc(search))).text();
-  const domparse = new DOMParser();
-  const doc = domparse.parseFromString(text, 'text/html');
+  const domParse = new DOMParser();
+  const doc = domParse.parseFromString(text, 'text/html');
   return [...doc.querySelectorAll('[aria-label=Issues] a[id^=issue]')] as HTMLAnchorElement[];
 };
 

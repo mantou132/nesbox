@@ -10,7 +10,7 @@ const style = createCSSSheet(css`
   }
 `);
 
-const contentcss = css`
+const contentCSS = css`
   p {
     display: block;
     margin-block-end: 0.75em;
@@ -33,6 +33,6 @@ export class MGameDetailElement extends GemElement {
   @attribute md: string;
 
   render = () => {
-    return html`<dy-unsafe .content=${marked.parse(this.md)} .contentcss=${contentcss}></dy-unsafe>`;
+    return html`<dy-unsafe .content=${marked.parse(this.md)} .contentcss=${contentCSS}></dy-unsafe>`;
   };
 }

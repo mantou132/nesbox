@@ -8,7 +8,7 @@ import { focusStyle } from 'duoyun-ui/lib/styles';
 
 import { i18n, langNames } from 'src/i18n';
 import { ThemeName, themeNames, changeTheme, theme } from 'src/theme';
-import { configure, toggleScreencaseMode } from 'src/configure';
+import { configure, toggleScreencastMode } from 'src/configure';
 
 import 'duoyun-ui/elements/input-capture';
 import 'duoyun-ui/elements/use';
@@ -58,7 +58,7 @@ export class ModuleGuestElement extends GemElement {
         {
           text: i18n.get('screencastMode'),
           selected: configure.screencastMode,
-          handle: toggleScreencaseMode,
+          handle: toggleScreencastMode,
         },
       ],
       {

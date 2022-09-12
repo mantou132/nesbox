@@ -2,7 +2,7 @@ import { createStore, updateStore } from '@mantou/gem';
 import { Button } from '@mantou/nes';
 
 import { configure } from 'src/configure';
-import { events, SingalEvent, SingalType } from 'src/constants';
+import { events, SignalEvent, SignalType } from 'src/constants';
 import { LocaleKey } from 'src/i18n';
 import { logger } from 'src/logger';
 import { sendSignal } from 'src/services/api';
@@ -238,39 +238,39 @@ export class RTC extends EventTarget {
     };
   };
 
-  #onOffer = async ({ userId, singal }: SingalEvent) => {
+  #onOffer = async ({ userId, signal }: SignalEvent) => {
     const conn = this.#createRTCPeerConnection(userId);
     conn.addEventListener('datachannel', ({ channel }) => this.#onDataChannel(userId, conn, channel));
     conn.addEventListener('icecandidate', (event) => {
       event.candidate &&
         sendSignal(userId, {
-          type: SingalType.NEW_ICE_CANDIDATE,
+          type: SignalType.NEW_ICE_CANDIDATE,
           data: event.candidate,
         });
     });
-    await conn.setRemoteDescription(new RTCSessionDescription(singal.data));
+    await conn.setRemoteDescription(new RTCSessionDescription(signal.data));
     await conn.setLocalDescription(await conn.createAnswer());
     await sendSignal(userId, {
-      type: SingalType.ANSWER,
+      type: SignalType.ANSWER,
       data: conn.localDescription,
     });
   };
 
-  #onSignal = async (event: CustomEvent<SingalEvent>) => {
-    const { userId, singal } = event.detail;
+  #onSignal = async (event: CustomEvent<SignalEvent>) => {
+    const { userId, signal } = event.detail;
     try {
-      switch (singal.type) {
+      switch (signal.type) {
         // host
-        case SingalType.OFFER:
+        case SignalType.OFFER:
           this.#onOffer(event.detail);
           break;
         // client
-        case SingalType.ANSWER:
-          await this.#connMap.get(configure.user!.id)?.setRemoteDescription(new RTCSessionDescription(singal.data));
+        case SignalType.ANSWER:
+          await this.#connMap.get(configure.user!.id)?.setRemoteDescription(new RTCSessionDescription(signal.data));
           break;
         // both
-        case SingalType.NEW_ICE_CANDIDATE:
-          await this.#connMap.get(this.#isHost ? userId : configure.user!.id)?.addIceCandidate(singal.data);
+        case SignalType.NEW_ICE_CANDIDATE:
+          await this.#connMap.get(this.#isHost ? userId : configure.user!.id)?.addIceCandidate(signal.data);
           break;
       }
     } catch (err) {
@@ -324,7 +324,7 @@ export class RTC extends EventTarget {
     conn.addEventListener('icecandidate', (event) => {
       event.candidate &&
         sendSignal(this.#host, {
-          type: SingalType.NEW_ICE_CANDIDATE,
+          type: SignalType.NEW_ICE_CANDIDATE,
           data: event.candidate,
         });
     });
@@ -345,7 +345,7 @@ export class RTC extends EventTarget {
 
     await conn.setLocalDescription(await conn.createOffer());
     await sendSignal(this.#host, {
-      type: SingalType.OFFER,
+      type: SignalType.OFFER,
       data: conn.localDescription,
     });
     this.#restartTimer = window.setTimeout(() => this.#restart(), 2000);
@@ -377,12 +377,12 @@ export class RTC extends EventTarget {
       this.#startClient();
     }
 
-    addEventListener(events.SINGAL, this.#onSignal);
+    addEventListener(events.SIGNAL, this.#onSignal);
   };
 
   destroy = () => {
     this.#connMap.forEach((_, id) => this.#deleteUser(id));
-    removeEventListener(events.SINGAL, this.#onSignal);
+    removeEventListener(events.SIGNAL, this.#onSignal);
     clearTimeout(this.#restartTimer);
 
     clearInterval(this.#pingTimer);

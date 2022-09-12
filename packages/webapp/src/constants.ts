@@ -16,8 +16,8 @@ export const paramKeys = {
 };
 
 export const events = {
-  SINGAL: 'singal',
-  VOICE_SINGAL: 'voice-singal',
+  SIGNAL: 'signal',
+  VOICE_SIGNAL: 'voice-signal',
   PRESS_BUTTON: 'pressbutton',
   RELEASE_BUTTON: 'releasebutton',
   PRESS_BUTTON_INDEX: 'pressbutton-index',
@@ -25,25 +25,25 @@ export const events = {
   CLOSE_SETTINGS: 'close-settings',
 };
 
-export enum SingalType {
+export enum SignalType {
   OFFER = 'offer',
   ANSWER = 'answer',
   NEW_ICE_CANDIDATE = 'new-ice-candidate',
 }
 
-export type Singal = {
-  type: SingalType;
+export type Signal = {
+  type: SignalType;
   data: any;
 };
 
-export type SingalEvent = {
+export type SignalEvent = {
   userId: number;
-  singal: Singal;
+  signal: Signal;
 };
 
-export type VoiceSingalEvent = {
+export type VoiceSignalEvent = {
   roomId: number;
-  singal: (RTCSessionDescriptionInit & { senderTrackIds: string[] }) | RTCIceCandidateInit;
+  signal: (RTCSessionDescriptionInit & { senderTrackIds: string[] }) | RTCIceCandidateInit;
 };
 
 export enum BcMsgType {

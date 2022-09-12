@@ -161,7 +161,7 @@ export const deleteUser = () => {
   updateStore(configure, { user: undefined, profile: undefined });
 };
 
-export const toggleScreencaseMode = () => {
+export const toggleScreencastMode = () => {
   updateStore(configure, { screencastMode: !configure.screencastMode });
 };
 

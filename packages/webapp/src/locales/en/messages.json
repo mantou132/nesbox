@@ -314,7 +314,7 @@
   "tipApplyFriendSuccess": {
     "message": "Request has been sent"
   },
-  "tipIviteSuccess": {
+  "tipInviteSuccess": {
     "message": "Invitation has been sent"
   },
   "tipRoomDeleted": {
