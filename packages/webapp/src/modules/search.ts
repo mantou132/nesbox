@@ -9,13 +9,15 @@ import {
   history,
   styleMap,
   raw,
+  RefObject,
+  refobject,
 } from '@mantou/gem';
 import { locale } from 'duoyun-ui/lib/locale';
 import { isIncludesString } from 'duoyun-ui/lib/utils';
-import type { Option } from 'duoyun-ui/elements/options';
+import type { DuoyunOptionsElement, Option } from 'duoyun-ui/elements/options';
 import { createPath, matchPath } from 'duoyun-ui/elements/route';
 import { isNotNullish } from 'duoyun-ui/lib/types';
-import { hotkeys } from 'duoyun-ui/lib/hotkeys';
+import { getDisplayKey, hotkeys, isMac } from 'duoyun-ui/lib/hotkeys';
 
 import { friendStore, store, toggleFriendChatState } from 'src/store';
 import { theme } from 'src/theme';
@@ -31,6 +33,7 @@ import 'duoyun-ui/elements/input';
 import 'duoyun-ui/elements/options';
 import 'duoyun-ui/elements/alert';
 import 'duoyun-ui/elements/list';
+import 'duoyun-ui/elements/paragraph';
 
 const style = createCSSSheet(css`
   :host {
@@ -85,6 +88,8 @@ type State = {
 @connectStore(friendStore)
 @connectStore(configure)
 export class MSearchElement extends GemElement<State> {
+  @refobject options: RefObject<DuoyunOptionsElement>;
+
   state: State = {
     search: '',
   };
@@ -124,10 +129,6 @@ export class MSearchElement extends GemElement<State> {
     `;
   };
 
-  #renderResultIcon = (icon: string) => {
-    return html`<dy-use .element=${icon} style="width: 1.5em; flex-shrink: 0;"></dy-use>`;
-  };
-
   #genGameOptions = (): Option[] => {
     return (
       store.gameIds
@@ -137,7 +138,7 @@ export class MSearchElement extends GemElement<State> {
             return {
               icon: icons.game,
               label: game.name,
-              tag: this.#playing ? this.#renderResultIcon(icons.received) : undefined,
+              tagIcon: this.#playing ? icons.received : undefined,
               onClick: async () => {
                 if (this.#playing) {
                   updateRoom({
@@ -196,7 +197,7 @@ export class MSearchElement extends GemElement<State> {
             return {
               icon: icons.person,
               label: friend.user.nickname,
-              tag: this.#playing ? this.#renderResultIcon(icons.share) : undefined,
+              tagIcon: this.#playing ? icons.share : undefined,
               onClick: () => {
                 if (this.#playing) {
                   createInvite({ targetId: friend.user.id, roomId: this.#playing.id });
@@ -232,7 +233,7 @@ export class MSearchElement extends GemElement<State> {
                   }}
                 ></dy-list-item>
               `,
-              tag: this.#renderResultIcon(icons.received),
+              tagIcon: icons.received,
               onClick: async () => {
                 enterPubRoom(room.id);
                 toggleSearchState();
@@ -272,16 +273,43 @@ export class MSearchElement extends GemElement<State> {
     }
   };
 
+  #getItemHotKey = (index: number) => [isMac ? 'command' : 'ctrl', String(index + 1)];
+
+  #onKeydown = hotkeys(
+    Object.fromEntries(
+      Array.from(Array(9), (_, index) => [
+        this.#getItemHotKey(index).join('+'),
+        () => this.options.element?.shadowRoot?.querySelectorAll<HTMLElement>('[tabindex]')[index]?.click(),
+      ]),
+    ),
+  );
+
   mounted = () => {
     import('src/help-i18n').then(({ helpI18n }) => {
       const resources = helpI18n.resources[helpI18n.currentLanguage] || {};
       this.#helpMessages = Object.entries(resources).map(([, v]) => (v.message || v) as string);
     });
+
+    this.addEventListener('keydown', this.#onKeydown);
   };
 
   render = () => {
     const { search } = this.state;
     const options = this.#genOptions();
+
+    options.forEach((option, index) => {
+      if (index < 9) {
+        option.tag = html`
+          <dy-paragraph style="margin: 0;">
+            <kbd>
+              ${this.#getItemHotKey(index)
+                .map((key) => getDisplayKey(key))
+                .join(' ')}
+            </kbd>
+          </dy-paragraph>
+        `;
+      }
+    });
 
     return html`
       <div class="header">
@@ -316,7 +344,15 @@ export class MSearchElement extends GemElement<State> {
         ></dy-input>
       </div>
       <div class="result">
-        <dy-options class="options" .options=${options.length ? options : [{ label: locale.noData }]}></dy-options>
+        ${search || configure.searchCommand === SearchCommand.SELECT_GAME
+          ? html`
+              <dy-options
+                class="options"
+                ref=${this.options.ref}
+                .options=${options.length ? options : [{ label: locale.noData }]}
+              ></dy-options>
+            `
+          : ''}
         <div class="placeholder" @click=${toggleSearchState}></div>
       </div>
     `;
