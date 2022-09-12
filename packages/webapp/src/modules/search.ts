@@ -316,7 +316,12 @@ export class MSearchElement extends GemElement<State> {
         ></dy-input>
       </div>
       <div class="result">
-        <dy-options class="options" .options=${options.length ? options : [{ label: locale.noData }]}></dy-options>
+        ${search
+          ? html`<dy-options
+              class="options"
+              .options=${options.length ? options : [{ label: locale.noData }]}
+            ></dy-options>`
+          : ''}
         <div class="placeholder" @click=${toggoleSearchState}></div>
       </div>
     `;
