@@ -17,11 +17,11 @@ import { createPath, matchPath } from 'duoyun-ui/elements/route';
 import { isNotNullish } from 'duoyun-ui/lib/types';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 
-import { friendStore, store, toggoleFriendChatState } from 'src/store';
+import { friendStore, store, toggleFriendChatState } from 'src/store';
 import { theme } from 'src/theme';
 import { i18n } from 'src/i18n';
 import { icons } from 'src/icons';
-import { configure, getShortcut, SearchCommand, setSearchCommand, toggoleSearchState } from 'src/configure';
+import { configure, getShortcut, SearchCommand, setSearchCommand, toggleSearchState } from 'src/configure';
 import { routes } from 'src/routes';
 import { paramKeys } from 'src/constants';
 import { getCDNSrc, getTempText } from 'src/utils';
@@ -155,7 +155,7 @@ export class MSearchElement extends GemElement<State> {
                     }),
                   });
                 }
-                toggoleSearchState();
+                toggleSearchState();
               },
             };
           }
@@ -201,9 +201,9 @@ export class MSearchElement extends GemElement<State> {
                 if (this.#playing) {
                   createInvite({ targetId: friend.user.id, roomId: this.#playing.id });
                 } else {
-                  toggoleFriendChatState(friend.user.id);
+                  toggleFriendChatState(friend.user.id);
                 }
-                toggoleSearchState();
+                toggleSearchState();
               },
             };
           }
@@ -235,7 +235,7 @@ export class MSearchElement extends GemElement<State> {
               tag: this.#renderResultIcon(icons.received),
               onClick: async () => {
                 enterPubRoom(room.id);
-                toggoleSearchState();
+                toggleSearchState();
               },
             };
           }
@@ -317,7 +317,7 @@ export class MSearchElement extends GemElement<State> {
       </div>
       <div class="result">
         <dy-options class="options" .options=${options.length ? options : [{ label: locale.noData }]}></dy-options>
-        <div class="placeholder" @click=${toggoleSearchState}></div>
+        <div class="placeholder" @click=${toggleSearchState}></div>
       </div>
     `;
   };

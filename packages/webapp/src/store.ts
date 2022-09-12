@@ -85,7 +85,7 @@ export function changeFriendChatDraft(friendId: number, body?: string) {
   updateStore(friendStore, { draft: { ...friendStore.draft, [friendId]: body } });
 }
 
-export const toggoleFriendChatState = async (id?: number) => {
+export const toggleFriendChatState = async (id?: number) => {
   if (id && id === friendStore.friendChatState) {
     // re-focus on friend chat
     updateStore(friendStore, { friendChatState: undefined });

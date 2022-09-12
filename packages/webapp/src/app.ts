@@ -20,10 +20,10 @@ import { forever } from 'duoyun-ui/lib/utils';
 import {
   configure,
   getShortcut,
-  toggoleFriendListState,
+  toggleFriendListState,
   setSearchCommand,
-  toggoleSearchState,
-  toggoleSettingsState,
+  toggleSearchState,
+  toggleSettingsState,
   SearchCommand,
 } from 'src/configure';
 import { routes, locationStore } from 'src/routes';
@@ -31,7 +31,7 @@ import { enterPubRoom, getAccount, getFriends, getGames, subscribeEvent } from '
 import { paramKeys, queryKeys } from 'src/constants';
 import { i18n } from 'src/i18n';
 import { preventDefault } from 'src/utils';
-import { friendStore, toggoleFriendChatState } from 'src/store';
+import { friendStore, toggleFriendChatState } from 'src/store';
 import { ScFriendStatus } from 'src/generated/graphql';
 
 import 'duoyun-ui/elements/input-capture';
@@ -88,27 +88,27 @@ export class AppRootElement extends GemElement {
   #openUnReadMessage = () => {
     const hasUnreadMsgUserId = friendStore.friendIds?.find((id) => friendStore.friends[id]?.unreadMessageCount);
     if (hasUnreadMsgUserId) {
-      toggoleFriendChatState(hasUnreadMsgUserId);
+      toggleFriendChatState(hasUnreadMsgUserId);
     } else if (
       (friendStore.friendIds?.some((id) => friendStore.friends[id]?.status === ScFriendStatus.Pending) ||
         friendStore.inviteIds?.length) &&
       !configure.friendListState
     ) {
-      toggoleFriendListState();
+      toggleFriendListState();
     } else {
-      toggoleFriendChatState(friendStore.recentFriendChat);
+      toggleFriendChatState(friendStore.recentFriendChat);
     }
   };
 
   #globalShortcut = (evt: KeyboardEvent) => {
     hotkeys({
-      [getShortcut('OPEN_SEARCH')]: preventDefault(toggoleSearchState),
+      [getShortcut('OPEN_SEARCH')]: preventDefault(toggleSearchState),
       [getShortcut('OPEN_HELP')]: preventDefault(() => setSearchCommand(SearchCommand.HELP)),
       [getShortcut('OPEN_SETTINGS')]: preventDefault(() => {
         if (friendStore.friendChatState) {
-          toggoleFriendChatState();
+          toggleFriendChatState();
         } else {
-          toggoleSettingsState();
+          toggleSettingsState();
         }
       }),
       [getShortcut('QUICK_REPLY')]: preventDefault(this.#openUnReadMessage),
@@ -173,7 +173,7 @@ export class AppRootElement extends GemElement {
       <dy-drawer
         customize
         .open=${!!configure.friendListState}
-        @close=${toggoleFriendListState}
+        @close=${toggleFriendListState}
         .body=${html`<m-friend-list style=${styleMap({ width: '15em' })}></m-friend-list>`}
       >
       </dy-drawer>
@@ -183,14 +183,14 @@ export class AppRootElement extends GemElement {
         .disableDefualtOKBtn=${true}
         .cancelText=${i18n.get('close')}
         .open=${!!configure.settingsState}
-        @close=${toggoleSettingsState}
+        @close=${toggleSettingsState}
       >
         <m-settings slot="body"></m-settings>
       </dy-modal>
 
       <dy-modal
         customize
-        @close=${toggoleSearchState}
+        @close=${toggleSearchState}
         .maskCloseable=${true}
         .open=${!!configure.searchState}
         .body=${html`<m-search></m-search>`}

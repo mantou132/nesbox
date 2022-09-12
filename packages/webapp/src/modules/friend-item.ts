@@ -2,12 +2,12 @@ import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, pro
 import { ContextMenu } from 'duoyun-ui/elements/menu';
 import { commonHandle } from 'duoyun-ui/lib/hotkeys';
 
-import { Friend, store, toggoleFriendChatState } from 'src/store';
+import { Friend, store, toggleFriendChatState } from 'src/store';
 import { theme } from 'src/theme';
 import { ScUserStatus, ScFriendStatus } from 'src/generated/graphql';
 import { icons } from 'src/icons';
 import { acceptFriend, createInvite, deleteFriend } from 'src/services/api';
-import { configure, toggoleFriendListState } from 'src/configure';
+import { configure, toggleFriendListState } from 'src/configure';
 import { i18n } from 'src/i18n';
 import { getAvatar } from 'src/utils';
 
@@ -120,8 +120,8 @@ export class MFriendItemElement extends GemElement {
   };
 
   #onClick = () => {
-    toggoleFriendChatState(this.friend!.user.id);
-    toggoleFriendListState();
+    toggleFriendChatState(this.friend!.user.id);
+    toggleFriendListState();
   };
 
   render = () => {

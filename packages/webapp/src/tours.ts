@@ -2,7 +2,7 @@ import { setTours, Tour } from 'duoyun-ui/elements/coach-mark';
 
 import { getCDNSrc } from 'src/utils';
 import { tourI18n } from 'src/tour-i18n';
-import { configure, toggoleSettingsState } from 'src/configure';
+import { configure, toggleSettingsState } from 'src/configure';
 import { events } from 'src/constants';
 import { updateAccount } from 'src/services/api';
 
@@ -15,7 +15,7 @@ const tours = [
     description: tourI18n.get('tour1Desc'),
     finishText: tourI18n.get('tour1FinishText'),
     finish: () => {
-      toggoleSettingsState();
+      toggleSettingsState();
       return new Promise((res) => addEventListener(events.CLOSE_SETTINGS, () => res(null), { once: true }));
     },
   },
