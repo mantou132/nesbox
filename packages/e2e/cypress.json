@@ -1,0 +1,7 @@
+{
+  "$schema": "https://on.cypress.io/cypress.schema.json",
+  "baseUrl": "http://localhost:3003/",
+  "includeShadowDom": true,
+  "viewportWidth": 1024,
+  "viewportHeight": 640
+}

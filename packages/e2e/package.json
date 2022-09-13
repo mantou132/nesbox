@@ -1,0 +1,14 @@
+{
+  "name": "e2e",
+  "version": "0.0.1",
+  "scripts": {
+    "test": "cypress open"
+  },
+  "devDependencies": {
+    "@nesbox/config": "^0.0.1",
+    "@types/cypress-dotenv": "2.0.0",
+    "cypress": "^9.1.1",
+    "cypress-dotenv": "^2.0.0",
+    "cypress-wait-until": "^1.7.2"
+  }
+}

@@ -256,7 +256,7 @@ export class PHomepageElement extends GemElement {
   render = () => {
     return html`
       <header>
-        <div class="bg">
+        <div class="bg" aria-hidden="true">
           <img class="bottom" src=${bottomSvg} loading="lazy" alt="" />
           <img class="left" src=${leftSvg} loading="lazy" alt="" />
           <img class="right" src=${rightSvg} loading="lazy" alt="" />
@@ -269,7 +269,7 @@ export class PHomepageElement extends GemElement {
           </dy-link>
           <div class="links">
             <dy-link href=${githubUrl}>Github</dy-link>
-            <dy-link href="/login">${i18n.get('login')}</dy-link>
+            <dy-link href="/login" data-cy="login">${i18n.get('login')}</dy-link>
             <dy-select
               borderless
               @change=${this.#onLangChange}

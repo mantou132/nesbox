@@ -119,6 +119,7 @@ export class MNavElement extends GemElement {
           ? html`
               <nesbox-tooltip .position=${'bottom'} .content=${i18n.get('leaveRoom')}>
                 <dy-use
+                  data-cy="back"
                   class="icon"
                   tabindex="0"
                   @keydown=${commonHandle}
@@ -144,6 +145,7 @@ export class MNavElement extends GemElement {
                 class="icon heart"
                 tabindex="0"
                 @keydown=${commonHandle}
+                data-cy="favorite"
                 .element=${favorited ? icons.favorited : icons.favorite}
                 @click=${() => favoriteGame(gameId, !favorited)}
               ></dy-use>

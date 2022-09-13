@@ -1,5 +1,8 @@
 {
   "name": "mt-app",
   "version": "0.0.1",
-  "module": "index.ts"
+  "module": "index.ts",
+  "devDependencies": {
+    "@nesbox/config": "^0.0.1"
+  }
 }

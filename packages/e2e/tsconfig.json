@@ -1,0 +1,7 @@
+{
+  "extends": "@nesbox/config/tsconfig",
+  "compilerOptions": {
+    "baseUrl": "./",
+    "types": ["cypress", "cypress-wait-until"]
+  }
+}

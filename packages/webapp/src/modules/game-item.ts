@@ -103,8 +103,9 @@ export class MGameItemElement extends GemElement {
         src=${getCDNSrc(this.game.preview)}
       />
       <dy-space class="actions" size="small">
-        <dy-button class="play" small @click=${this.#onGameClick}>${i18n.get('startGame')}</dy-button>
+        <dy-button data-cy="start" class="play" small @click=${this.#onGameClick}>${i18n.get('startGame')}</dy-button>
         <dy-button
+          data-cy="favorite"
           small
           tabindex="-1"
           color="cancel"

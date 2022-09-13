@@ -208,7 +208,7 @@ export class PGameElement extends GemElement {
               ${game?.name}
               <dy-use class="icon" @click=${this.#edit} .element=${icons.edit}></dy-use>
             </dy-heading>
-            <dy-button @click=${() => game && createRoom({ gameId: game.id, private: false })}>
+            <dy-button data-cy="start" @click=${() => game && createRoom({ gameId: game.id, private: false })}>
               ${i18n.get('startGame')}
             </dy-button>
           </div>
