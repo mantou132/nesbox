@@ -296,6 +296,9 @@
   "gameTotalPlay": {
     "message": "总 $1"
   },
+  "gameOfficial": {
+    "message": "游戏官网"
+  },
   "gameComment": {
     "message": "用户评论"
   },

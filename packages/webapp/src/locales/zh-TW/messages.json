@@ -296,6 +296,9 @@
   "gameTotalPlay": {
     "message": "總 $1"
   },
+  "gameOfficial": {
+    "message": "遊戲官網"
+  },
   "gameComment": {
     "message": "用戶評論"
   },

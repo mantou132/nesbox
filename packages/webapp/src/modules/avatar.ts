@@ -12,7 +12,7 @@ import { i18n, isCurrentLang, langNames } from 'src/i18n';
 import { icons } from 'src/icons';
 import { getAvatar, getCDNSrc, getGithubGames } from 'src/utils';
 import { store } from 'src/store';
-import { githubIssue, githubRelease } from 'src/constants';
+import { githubIssue, githubRelease, isTauriMacApp, isTauriWinApp } from 'src/constants';
 import { logger } from 'src/logger';
 import { routes } from 'src/routes';
 
@@ -140,6 +140,17 @@ export class MAvatarElement extends GemElement {
           tagIcon: icons.openNewWindow,
           handle: this.#addGame,
         },
+        ...(isTauriMacApp || isTauriWinApp
+          ? []
+          : [
+              {
+                text: i18n.get('gameOfficial'),
+                tag: html`<dy-use .element=${icons.openNewWindow} style="width: 1.2em"></dy-use>`,
+                handle: () => {
+                  open('/');
+                },
+              },
+            ]),
         {
           text: '---',
         },
