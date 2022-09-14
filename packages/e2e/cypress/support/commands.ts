@@ -31,7 +31,7 @@ const exec = () =>
 Cypress.Commands.add('deep', (selector: string) => {
   exec();
 
-  return cy.waitUntil(
+  cy.waitUntil(
     () =>
       cy.window({ log: false }).then((win) => {
         const result = win.eval(`document.deepQuerySelector(">>> ${selector}")`);
