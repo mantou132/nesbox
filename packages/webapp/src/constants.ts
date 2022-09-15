@@ -1,10 +1,13 @@
+import { mediaQuery } from '@mantou/gem/helper/mediaquery';
+import { isMtApp } from 'mt-app';
+
 export const RELEASE = Number(process.env.RELEASE);
 // https://vitejs.dev/guide/api-javascript.html#resolveconfig
 export const COMMAND = process.env.COMMAND as 'serve' | 'build';
 
 export const isTauriMacApp = navigator.appName === 'nesbox-macos';
 export const isTauriWinApp = navigator.appName === 'nesbox-windows';
-export const isFlutterApp = navigator.userAgent.includes('NESBox');
+export const isApp = window.__TAURI__ || mediaQuery.isPWA || isMtApp;
 
 export const githubUrl = 'https://github.com/mantou132/nesbox';
 export const githubIssue = `${githubUrl}/issues`;

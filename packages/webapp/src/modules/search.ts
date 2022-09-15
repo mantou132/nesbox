@@ -279,7 +279,10 @@ export class MSearchElement extends GemElement<State> {
     Object.fromEntries(
       Array.from(Array(9), (_, index) => [
         this.#getItemHotKey(index).join('+'),
-        () => this.options.element?.shadowRoot?.querySelectorAll<HTMLElement>('[tabindex]')[index]?.click(),
+        (evt: KeyboardEvent) => {
+          this.options.element?.shadowRoot?.querySelectorAll<HTMLElement>('[tabindex]')[index]?.click();
+          evt.preventDefault();
+        },
       ]),
     ),
   );

@@ -7,7 +7,7 @@ import { isMtApp, mtApp } from 'mt-app';
 
 import { theme } from 'src/theme';
 import { configure } from 'src/configure';
-import { COMMAND, isTauriMacApp, isTauriWinApp, RELEASE } from 'src/constants';
+import { COMMAND, isApp, isTauriMacApp, isTauriWinApp, RELEASE } from 'src/constants';
 import { logger } from 'src/logger';
 import { routes } from 'src/routes';
 import { gotoRedirectUri, isExpiredProfile, logout } from 'src/auth';
@@ -36,7 +36,7 @@ if (isTauriWinApp || isTauriMacApp) {
   import('src/elements/titlebar');
 }
 
-if ([routes.home].some(matchRoute) && (window.__TAURI__ || mediaQuery.isPWA || isMtApp)) {
+if ([routes.home].some(matchRoute) && isApp) {
   history.replace({ path: createPath(routes.games) });
 }
 
@@ -102,7 +102,6 @@ render(
       @change=${(evt: CustomEvent<File[]>) => evt.target instanceof DuoyunDropAreaElement && dropHandler(evt.detail)}
     >
       <dy-route
-        @contextmenu=${(e: Event) => e.preventDefault()}
         .routes=${[
           routes.login,
           routes.register,
@@ -166,12 +165,23 @@ addEventListener(
       const ele = event.composedPath()[0];
       const isInput = ele instanceof HTMLInputElement || ele instanceof HTMLTextAreaElement;
       if (!ele || !isInput || event.key === 'Escape') {
-        event.preventDefault();
+        // not system shortcut
+        if (!(event.key === 'w' && (event.ctrlKey || event.metaKey))) {
+          event.preventDefault();
+        }
       }
     }
   },
   { capture: true },
 );
+
+addEventListener('contextmenu', (evt) => {
+  const ele = evt.composedPath()[0];
+  const isInput = ele instanceof HTMLInputElement || ele instanceof HTMLTextAreaElement;
+  if (isApp && !isInput) {
+    evt.preventDefault();
+  }
+});
 
 if (COMMAND === 'build') {
   navigator.serviceWorker?.register('/sw.js', { type: 'module' });
