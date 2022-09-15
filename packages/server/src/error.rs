@@ -9,4 +9,7 @@ impl Error {
     pub fn username_or_password_error() -> Value {
         graphql_value!({"code": 404002})
     }
+    pub fn username_not_playing() -> Value {
+        graphql_value!({"code": 404101})
+    }
 }

@@ -1,4 +1,5 @@
 use crate::db::root::DB_POOL;
+use crate::error::Error;
 
 use super::comment::*;
 use super::favorite::*;
@@ -318,7 +319,10 @@ impl MutationRoot {
 
 pub fn leave_room_and_notify(user_id: i32) -> FieldResult<String> {
     let conn = DB_POOL.get().unwrap();
-    let room = get_playing(&conn, user_id).ok_or(format!("{} not playing", user_id))?;
+    let room = get_playing(&conn, user_id).ok_or(FieldError::new(
+        format!("{} not playing", user_id),
+        Error::username_not_playing(),
+    ))?;
     if user_id == room.host {
         delete_room(&conn, room.id);
         notify_all(
