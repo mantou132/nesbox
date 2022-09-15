@@ -237,8 +237,8 @@ export class PRoomElement extends GemElement {
               }))}
           ></nesbox-list>
         `,
-        disableDefualtCancelBtn: true,
-        disableDefualtOKBtn: true,
+        disableDefaultCancelBtn: true,
+        disableDefaultOKBtn: true,
         maskCloseable: true,
       }).catch(() => {
         //
@@ -261,10 +261,10 @@ export class PRoomElement extends GemElement {
     }
   };
 
-  #ramviewer: Window | null;
+  #ramViewer: Window | null;
 
   #openRamViewer = () => {
-    this.#ramviewer = open(
+    this.#ramViewer = open(
       new URL(routes.ramviewer.pattern, location.origin),
       'viewer',
       'width=480,height=640,top=0,left=0',
@@ -275,9 +275,16 @@ export class PRoomElement extends GemElement {
     if (!this.#playing) return;
     Modal.open({
       header: i18n.get('cheatSettingsTitle', store.games[this.#playing.gameId]?.name || ''),
-      body: html`<m-cheat-settings .gameId=${this.#playing.gameId}></m-cheat-settings>`,
-      disableDefualtCancelBtn: true,
-      disableDefualtOKBtn: true,
+      body: html`
+        <m-cheat-settings .gameId=${this.#playing.gameId}></m-cheat-settings>
+        <style>
+          .footer {
+            display: none !important;
+          }
+        </style>
+      `,
+      disableDefaultCancelBtn: true,
+      disableDefaultOKBtn: true,
       maskCloseable: true,
     }).catch(() => {
       //
@@ -320,7 +327,7 @@ export class PRoomElement extends GemElement {
           const timer = window.setInterval(this.#uploadScreenshot, 10000);
           return () => {
             clearInterval(timer);
-            this.#ramviewer?.close();
+            this.#ramViewer?.close();
           };
         }
       },

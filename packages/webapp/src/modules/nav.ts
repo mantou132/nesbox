@@ -23,14 +23,12 @@ import 'src/modules/badge';
 
 const style = createCSSSheet(css`
   :host {
+    position: relative;
+    z-index: 1;
     display: flex;
     background: ${theme.backgroundColor};
   }
   :host(:where(:--room, [data-room])) {
-    position: absolute;
-    z-index: 1;
-    top: 0;
-    width: 100%;
     background-color: black;
     background-image: linear-gradient(${theme.lightBackgroundColor} -60%, transparent);
   }

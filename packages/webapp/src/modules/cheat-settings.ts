@@ -217,7 +217,9 @@ export class MCheatSettingsElement extends GemElement<State> {
         .columns=${columns}
         .noData=${' '}
       ></dy-table>
-      <dy-button ?disabled=${!!this.state.newCheat} @click=${this.#addNewCheat}>${i18n.get('cheatAdd')}</dy-button>
+      <dy-button ?disabled=${!!this.state.newCheat} type="reverse" .icon=${icons.add} @click=${this.#addNewCheat}>
+        ${i18n.get('cheatAdd')}
+      </dy-button>
     `;
   };
 }

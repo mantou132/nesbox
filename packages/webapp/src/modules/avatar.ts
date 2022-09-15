@@ -20,7 +20,6 @@ import 'duoyun-ui/elements/coach-mark';
 import 'duoyun-ui/elements/route';
 import 'duoyun-ui/elements/avatar';
 import 'duoyun-ui/elements/options';
-import 'duoyun-ui/elements/use';
 
 const style = createCSSSheet(css`
   :host {
@@ -131,14 +130,14 @@ export class MAvatarElement extends GemElement {
         },
         {
           text: i18n.get('feedback'),
-          tag: html`<dy-use .element=${icons.openNewWindow} style="width: 1.2em"></dy-use>`,
+          tagIcon: icons.openNewWindow,
           handle: () => {
             open(githubIssue);
           },
         },
         {
           text: i18n.get('addGame'),
-          tag: html`<dy-use .element=${icons.openNewWindow} style="width: 1.2em"></dy-use>`,
+          tagIcon: icons.openNewWindow,
           handle: this.#addGame,
         },
         {
