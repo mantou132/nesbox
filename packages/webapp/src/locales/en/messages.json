@@ -278,6 +278,12 @@
   "selfComment": {
     "message": "Me"
   },
+  "gameLastPlay": {
+    "message": "Played $1"
+  },
+  "gameTotalPlay": {
+    "message": "Total $1"
+  },
   "gameComment": {
     "message": "Comment"
   },

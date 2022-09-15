@@ -12,6 +12,7 @@ import {
 import { Modal } from 'duoyun-ui/elements/modal';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { waitLoading } from 'duoyun-ui/elements/wait';
+import { formatDuration, Time } from 'duoyun-ui/lib/time';
 
 import { createComment, createRoom, getComments } from 'src/services/api';
 import { store } from 'src/store';
@@ -80,10 +81,27 @@ const style = createCSSSheet(css`
     background-color: ${theme.hoverBackgroundColor};
   }
   .preview {
+    display: block;
     width: 100%;
     aspect-ratio: 503/348;
     object-fit: cover;
     border-radius: ${theme.normalRound};
+  }
+  .stats {
+    position: absolute;
+    width: 100%;
+    box-sizing: border-box;
+    bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5em;
+    background: rgba(0, 0, 0, ${theme.maskAlpha});
+  }
+  .stats-icon {
+    gap: 0.2em;
+  }
+  .stats-icon::part(icon) {
+    width: 1.2em;
   }
   .comment-title {
     display: flex;
@@ -183,6 +201,7 @@ export class PGameElement extends GemElement {
 
   render = () => {
     const game = this.#game;
+    const record = store.record[this.gameId];
 
     let likedCount = 0;
 
@@ -215,7 +234,21 @@ export class PGameElement extends GemElement {
           <m-game-detail .md=${game?.description || ''}></m-game-detail>
         </div>
         <div class="aside">
-          <img class="preview" draggable="false" src=${game ? getCDNSrc(game.preview) : ''} />
+          <div style="position: relative;">
+            <img class="preview" draggable="false" src=${game ? getCDNSrc(game.preview) : ''} />
+            ${record
+              ? html`
+                  <div class="stats">
+                    <dy-use class="stats-icon" .element=${icons.date}>
+                      ${i18n.get('gameLastPlay', new Time().relativeTimeFormat(record.lastPlayStartAt))}
+                    </dy-use>
+                    <dy-use class="stats-icon" .element=${icons.schedule}>
+                      ${i18n.get('gameTotalPlay', formatDuration(record.playTotal))}
+                    </dy-use>
+                  </div>
+                `
+              : ''}
+          </div>
           <div class="comment-title">
             <dy-heading lv="3">${i18n.get('gameComment')}</dy-heading>
             <dy-input-group>

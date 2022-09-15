@@ -272,6 +272,12 @@
   "addGameDetail": {
     "message": "創建 Github issue，填寫好標題，簡介或者玩法，並上傳截圖（第一張為封面）和 .nes 文件的 zip 壓縮包後等待維護者關閉，關閉後遊戲將添加到 NESBox。截圖和 nes 參考可以在$1<這裡>下載"
   },
+  "gameLastPlay": {
+    "message": "$1玩過"
+  },
+  "gameTotalPlay": {
+    "message": "總 $1"
+  },
   "gameComment": {
     "message": "用戶評論"
   },

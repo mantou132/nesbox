@@ -278,6 +278,12 @@
   "selfComment": {
     "message": "私"
   },
+  "gameLastPlay": {
+    "message": "$1にプレイ"
+  },
+  "gameTotalPlay": {
+    "message": "合計 $1"
+  },
   "gameComment": {
     "message": "ユーザーコメント"
   },
