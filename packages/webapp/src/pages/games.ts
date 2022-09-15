@@ -143,6 +143,7 @@ export class PGamesElement extends GemElement<State> {
         .data=${topData}
         @change=${({ detail }: CustomEvent<number>) => this.#onTopChange(detail, topData?.length)}
       ></dy-carousel>
+      <m-game-list class="list" .recent=${true}></m-game-list>
       <m-game-list class="list"></m-game-list>
     `;
   };

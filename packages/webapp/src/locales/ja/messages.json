@@ -230,6 +230,12 @@
   "gamesTitle": {
     "message": "すべてのゲーム"
   },
+  "recentGame": {
+    "message": "最近のゲーム"
+  },
+  "allGame": {
+    "message": "すべてのゲーム"
+  },
   "gameTitle": {
     "message": "ゲーム"
   },

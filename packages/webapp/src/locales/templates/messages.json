@@ -230,6 +230,12 @@
   "gamesTitle": {
     "message": "所有游戏"
   },
+  "recentGame": {
+    "message": "最近游戏"
+  },
+  "allGame": {
+    "message": "所有游戏"
+  },
   "gameTitle": {
     "message": "游戏"
   },

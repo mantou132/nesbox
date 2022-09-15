@@ -230,6 +230,12 @@
   "gamesTitle": {
     "message": "Games"
   },
+  "recentGame": {
+    "message": "Recent Game"
+  },
+  "allGame": {
+    "message": "All Game"
+  },
   "gameTitle": {
     "message": "Game"
   },

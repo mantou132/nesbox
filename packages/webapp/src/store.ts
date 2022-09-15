@@ -34,7 +34,7 @@ interface Store {
   record: Record<number, GameRecord | undefined>;
   topGameIds?: number[];
   favoriteIds?: number[];
-  recentGames?: number[];
+  recentGameIds?: number[];
   rooms: Record<number, Room | undefined>;
   roomIds?: number[];
 }

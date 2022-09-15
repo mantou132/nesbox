@@ -119,7 +119,7 @@ export const getGames = debounce(async () => {
     gameIds,
     favoriteIds: favorites.filter((id) => isCurrentLang(store.games[id]!)),
     topGameIds: [...new Set([...topGames, ...gameIds])].filter((id) => isCurrentLang(store.games[id]!)).splice(0, 5),
-    recentGames,
+    recentGameIds: recentGames.slice(0, 8),
   });
 });
 
@@ -140,6 +140,9 @@ export const createRoom = async (input: ScNewRoom) => {
   const { createRoom } = await request<CreateRoomMutation, CreateRoomMutationVariables>(CreateRoom, { input });
   configure.user!.playing = createRoom;
   updateStore(configure);
+  updateStore(store, {
+    recentGameIds: [input.gameId, ...(store.recentGameIds || []).filter((id) => id !== input.gameId)],
+  });
 };
 
 export const updateRoom = async (input: ScUpdateRoom) => {
@@ -166,6 +169,9 @@ export const enterPubRoom = async (roomId: number) => {
   });
   configure.user!.playing = enterPubRoom;
   updateStore(configure);
+  updateStore(store, {
+    recentGameIds: [enterPubRoom.gameId, ...(store.recentGameIds || []).filter((id) => id !== enterPubRoom.gameId)],
+  });
 };
 
 export const leaveRoom = async () => {
