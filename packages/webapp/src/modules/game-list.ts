@@ -53,7 +53,7 @@ export class MGameListElement extends GemElement {
 
   get #data() {
     if (this.recent) {
-      return store.recentGameIds;
+      return store.recentGameIds?.slice(0, 4);
     } else if (this.favorite) {
       return store.favoriteIds;
     } else {
@@ -62,6 +62,15 @@ export class MGameListElement extends GemElement {
   }
 
   render = () => {
+    if (!this.#data?.length) {
+      return html`
+        <style>
+          :host {
+            display: none;
+          }
+        </style>
+      `;
+    }
     return html`
       ${this.recent
         ? html`<dy-heading lv="3">${i18n.get('recentGame')}</dy-heading>`

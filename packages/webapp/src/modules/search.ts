@@ -303,7 +303,7 @@ export class MSearchElement extends GemElement<State> {
     options.forEach((option, index) => {
       if (index < 9) {
         option.tag = html`
-          <dy-paragraph style="margin: 0;">
+          <dy-paragraph>
             <kbd>
               ${this.#getItemHotKey(index)
                 .map((key) => getDisplayKey(key))

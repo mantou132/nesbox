@@ -119,7 +119,7 @@ export const getGames = debounce(async () => {
     gameIds,
     favoriteIds: favorites.filter((id) => isCurrentLang(store.games[id]!)),
     topGameIds: [...new Set([...topGames, ...gameIds])].filter((id) => isCurrentLang(store.games[id]!)).splice(0, 5),
-    recentGameIds: recentGames.slice(0, 8),
+    recentGameIds: recentGames.filter((id) => isCurrentLang(store.games[id]!)),
   });
 });
 

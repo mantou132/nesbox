@@ -7,6 +7,7 @@ const style = createCSSSheet(css`
   :host {
     display: block;
     font-size: 1.125em;
+    text-align: justify;
   }
 `);
 

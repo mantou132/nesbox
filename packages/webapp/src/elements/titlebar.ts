@@ -11,7 +11,6 @@ import {
   titleStore,
 } from '@mantou/gem';
 
-import 'duoyun-ui/elements/title';
 import 'duoyun-ui/elements/reflect';
 import 'duoyun-ui/elements/use';
 
