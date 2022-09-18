@@ -12,8 +12,9 @@ import {
 } from '@mantou/gem';
 import { createPath } from 'duoyun-ui/elements/route';
 import { forever } from 'duoyun-ui/lib/utils';
+import { Loadbar } from 'duoyun-ui/elements/page-loadbar';
 
-import { routes } from 'src/routes';
+import { locationStore, routes } from 'src/routes';
 import { getAccount, getFriends, getGames, subscribeEvent } from 'src/services/api';
 import { i18n } from 'src/i18n';
 import { configure } from 'src/configure';
@@ -21,8 +22,8 @@ import { paramKeys } from 'src/constants';
 
 import 'src/modules/mt-nav';
 
-type MtStore = { imgUrl: string };
-const mtAppStore = createStore<MtStore>({ imgUrl: '' });
+type MtStore = { imgUrl: string; inertNav: boolean };
+const mtAppStore = createStore<MtStore>({ imgUrl: '', inertNav: false });
 
 export const updateMtApp = (data: Partial<MtStore>) => {
   updateStore(mtAppStore, data);
@@ -40,10 +41,10 @@ const style = createCSSSheet(css`
     position: absolute;
     inset: 0;
     object-fit: cover;
-    z-index: 0;
+    z-index: -1;
     width: 100%;
     height: 100%;
-    filter: blur(5em) brightness(0.6);
+    filter: blur(4em) brightness(0.3);
   }
   m-mt-nav {
     grid-area: nav;
@@ -58,6 +59,14 @@ const style = createCSSSheet(css`
 @connectStore(mtAppStore)
 @connectStore(configure)
 export class MTAppRootElement extends GemElement {
+  #onLoading = () => {
+    Loadbar.start();
+  };
+
+  #onChange = async () => {
+    Loadbar.end();
+  };
+
   #enterRoom = () => {
     const rid = configure.user?.playing?.id;
     if (rid) {
@@ -84,8 +93,13 @@ export class MTAppRootElement extends GemElement {
   render = () => {
     return html`
       <img class="bg" src=${mtAppStore.imgUrl} />
-      <m-mt-nav></m-mt-nav>
-      <dy-route .routes=${routes}></dy-route>
+      <m-mt-nav ?inert=${mtAppStore.inertNav}></m-mt-nav>
+      <dy-route
+        @loading=${this.#onLoading}
+        @routechange=${this.#onChange}
+        .routes=${routes}
+        .locationStore=${locationStore}
+      ></dy-route>
     `;
   };
 }

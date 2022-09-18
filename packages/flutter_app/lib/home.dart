@@ -20,7 +20,13 @@ class BatteryInfo {
   query() async {
     level = await battery.batteryLevel / 100;
     charging = await battery.batteryState == BatteryState.charging;
+    return this;
   }
+
+  Map<String, dynamic> toJson() => {
+        'level': level,
+        'charging': charging,
+      };
 }
 
 class Home extends StatefulWidget {
@@ -95,6 +101,9 @@ class HomeState extends State<Home> {
     var controller = await _controller.future;
     // resolve promise when detail is truly
     var string = json.encode(data);
+    if (kDebugMode) {
+      print(string);
+    }
     controller.runJavascript('dispatchEvent(new CustomEvent("mtappmessage$msgId", {detail: $string}));');
   }
 

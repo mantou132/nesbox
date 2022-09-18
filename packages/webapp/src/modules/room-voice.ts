@@ -17,7 +17,6 @@ import { sendVoiceMsg } from 'src/services/api';
 import { events, VoiceSignalEvent } from 'src/constants';
 import { logger } from 'src/logger';
 import { ScVoiceMsgKind } from 'src/generated/graphql';
-import { GamepadBtnIndex } from 'src/gamepad';
 
 import 'duoyun-ui/elements/use';
 
@@ -56,17 +55,8 @@ export class MVoiceRoomElement extends GemElement<State> {
     receiverTracks: [],
   };
 
-  #toggleVoice = () => {
+  toggleVoice = () => {
     this.setState({ joined: !this.state.joined });
-  };
-
-  #onPressButtonIndex = ({ detail }: CustomEvent<GamepadBtnIndex>) => {
-    switch (detail) {
-      case GamepadBtnIndex.FrontRightBottom:
-      case GamepadBtnIndex.FrontRightTop:
-        this.#toggleVoice();
-        break;
-    }
   };
 
   #closeVoice = () => this.setState({ joined: false });
@@ -193,20 +183,11 @@ export class MVoiceRoomElement extends GemElement<State> {
       },
       () => [configure.user?.playing?.id, this.state.joined],
     );
-
-    addEventListener(events.PRESS_BUTTON_INDEX, this.#onPressButtonIndex);
-    return () => {
-      removeEventListener(events.PRESS_BUTTON_INDEX, this.#onPressButtonIndex);
-    };
   };
 
   render = () => {
     return html`
-      <dy-use
-        class="icon"
-        @click=${this.#toggleVoice}
-        .element=${this.state.joined ? icons.mic : icons.micOff}
-      ></dy-use>
+      <dy-use class="icon" @click=${this.toggleVoice} .element=${this.state.joined ? icons.mic : icons.micOff}></dy-use>
     `;
   };
 }

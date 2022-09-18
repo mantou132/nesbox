@@ -61,6 +61,7 @@ export type BcMsgEvent = {
 };
 
 export const queryKeys = {
+  RECENT_GAMES: 'recent',
   REDIRECT_URI: 'redirect_uri',
   JOIN_ROOM: 'join_room',
   ROOM_FROM: 'room_from',

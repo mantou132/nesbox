@@ -72,6 +72,10 @@ const getInitRoutes = () => {
       title: i18n.get('roomsTitle'),
       pattern: '/rooms',
       async getContent(_params: Record<string, string>) {
+        if (isMtApp) {
+          await import('src/pages/mt-rooms');
+          return html`<p-mt-rooms></p-mt-rooms>`;
+        }
         await import('src/pages/rooms');
         return html`<p-rooms></p-rooms>`;
       },

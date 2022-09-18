@@ -1,11 +1,24 @@
-import { GemElement, connectStore, html, adoptedStyle, customElement, createCSSSheet, css } from '@mantou/gem';
-import { RouteItem } from 'duoyun-ui/elements/route';
+import {
+  GemElement,
+  connectStore,
+  html,
+  adoptedStyle,
+  customElement,
+  createCSSSheet,
+  css,
+  boolattribute,
+  QueryString,
+} from '@mantou/gem';
+import { createPath } from 'duoyun-ui/elements/route';
+import type { DuoyunActiveLinkElement } from 'duoyun-ui/elements/link';
 
 import { configure } from 'src/configure';
 import { theme } from 'src/theme';
 import { getAvatar } from 'src/utils';
 import { i18n } from 'src/i18n';
 import { routes } from 'src/routes';
+import { events, queryKeys } from 'src/constants';
+import { GamepadBtnIndex } from 'src/gamepad';
 
 import 'duoyun-ui/elements/avatar';
 import 'duoyun-ui/elements/link';
@@ -31,6 +44,9 @@ const style = createCSSSheet(css`
     grid-area: avatar;
     margin-inline-end: 0.5em;
   }
+  .avatar::part(avatar) {
+    background: ${theme.describeColor};
+  }
   .links {
     position: absolute;
     display: flex;
@@ -38,13 +54,17 @@ const style = createCSSSheet(css`
     left: 50%;
     transform: translate(-50%, -50%);
     gap: 2vw;
+    transition: all 0.3s ${theme.timingFunction};
+  }
+  :host([inert]) .links {
+    opacity: 0;
   }
   .link {
     padding: 0.4em 1em;
-    border-radius: 10em;
+    opacity: 0.5;
   }
   .link:where(:--active, [data-active]) {
-    background: rgba(0, 0, 0, 0.3);
+    opacity: 1;
   }
   .status {
     display: flex;
@@ -61,16 +81,52 @@ const style = createCSSSheet(css`
 @connectStore(configure)
 @connectStore(i18n.store)
 export class MMtNavElement extends GemElement {
+  @boolattribute inert: boolean;
+
+  get #links() {
+    return [
+      { path: createPath(routes.games), text: i18n.get('favoritesTitle') },
+      {
+        path: createPath(routes.games),
+        query: new QueryString({ [queryKeys.RECENT_GAMES]: 1 }).toString(),
+        text: i18n.get('recentGame'),
+      },
+      { path: createPath(routes.rooms), text: i18n.get('roomsTitle') },
+    ];
+  }
+
+  #onPressButtonIndex = ({ detail }: CustomEvent<GamepadBtnIndex>) => {
+    if (this.inert) return;
+    const links = [...(this.shadowRoot?.querySelectorAll<DuoyunActiveLinkElement>('dy-active-link') || [])];
+    const index = links.findIndex((e) => e.active);
+    switch (detail) {
+      case GamepadBtnIndex.FrontLeftBottom:
+        links[(index - 1 + links.length) % links.length].click();
+        break;
+      case GamepadBtnIndex.FrontRightBottom:
+        links[(index + 1 + links.length) % links.length].click();
+        break;
+    }
+  };
+
+  mounted = () => {
+    addEventListener(events.PRESS_BUTTON_INDEX, this.#onPressButtonIndex);
+    return () => {
+      removeEventListener(events.PRESS_BUTTON_INDEX, this.#onPressButtonIndex);
+    };
+  };
+
   render = () => {
     return html`
       <div class="user">
-        <dy-avatar class="avatar" square src=${getAvatar(configure.user?.username)}></dy-avatar>
+        <dy-avatar class="avatar" src=${getAvatar(configure.user?.username)}></dy-avatar>
         <span class="nickname">${configure.user?.nickname}</span>
       </div>
       <div class="links">
-        <dy-active-link class="link" .route=${routes.games as RouteItem}>${i18n.get('gamesTitle')}</dy-active-link>
-        <dy-active-link class="link">${i18n.get('favoritesTitle')}</dy-active-link>
-        <dy-active-link class="link">${i18n.get('roomsTitle')}</dy-active-link>
+        ${this.#links.map(
+          ({ path, text, query = '' }) =>
+            html`<dy-active-link class="link" .path=${path} .query=${query}>${text}</dy-active-link>`,
+        )}
       </div>
       <div class="status">
         <nesbox-net class="net"></nesbox-net>
