@@ -9,6 +9,7 @@ import {
   connectStore,
   history,
   updateStore,
+  QueryString,
 } from '@mantou/gem';
 import { createPath } from 'duoyun-ui/elements/route';
 import { forever } from 'duoyun-ui/lib/utils';
@@ -18,7 +19,7 @@ import { locationStore, routes } from 'src/routes';
 import { getAccount, getFriends, getGames, subscribeEvent } from 'src/services/api';
 import { i18n } from 'src/i18n';
 import { configure } from 'src/configure';
-import { paramKeys } from 'src/constants';
+import { paramKeys, queryKeys } from 'src/constants';
 
 import 'src/modules/mt-nav';
 
@@ -72,12 +73,13 @@ export class MTAppRootElement extends GemElement {
     if (rid) {
       history.replace({
         path: createPath(routes.room, { params: { [paramKeys.ROOM_ID]: String(rid) } }),
+        query: new QueryString({ [queryKeys.ROOM_FROM]: history.getParams().path + history.getParams().query }),
       });
     }
   };
 
   mounted = () => {
-    this.effect(this.#enterRoom, () => [configure.user?.playing?.id, history.getParams().path]);
+    this.effect(this.#enterRoom, () => [configure.user?.playing?.id]);
     this.effect(
       () => forever(getGames),
       () => [i18n.currentLanguage],

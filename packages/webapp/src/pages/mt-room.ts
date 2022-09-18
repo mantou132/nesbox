@@ -10,7 +10,7 @@ import {
   connectStore,
   history,
 } from '@mantou/gem';
-import { createPath } from 'duoyun-ui/elements/route';
+import { createPath, matchPath } from 'duoyun-ui/elements/route';
 import { waitLoading } from 'duoyun-ui/elements/wait';
 
 import { configure } from 'src/configure';
@@ -18,7 +18,7 @@ import type { MNesElement } from 'src/modules/nes';
 import { routes } from 'src/routes';
 import { leaveRoom, updateRoomScreenshot } from 'src/services/api';
 import { store } from 'src/store';
-import { events } from 'src/constants';
+import { events, queryKeys } from 'src/constants';
 import { GamepadBtnIndex } from 'src/gamepad';
 import type { MVoiceRoomElement } from 'src/modules/room-voice';
 
@@ -79,7 +79,6 @@ export class PMtRoomElement extends GemElement {
         waitLoading(leaveRoom());
         break;
       case GamepadBtnIndex.FrontRightTop:
-        // TODO: Open drawer options: voice, settings, invite...
         this.voice.element?.toggleVoice();
         break;
     }
@@ -89,7 +88,11 @@ export class PMtRoomElement extends GemElement {
     this.effect(
       () => {
         if (!this.#playing) {
-          history.replace({ path: createPath(routes.games) });
+          const roomFrom = history.getParams().query.get(queryKeys.ROOM_FROM) || '';
+          const { pathname, search } = new URL(roomFrom, location.origin);
+          const returnPath =
+            roomFrom && [routes.rooms, routes.games].some((route) => matchPath(route.pattern, pathname));
+          history.replace({ path: returnPath ? pathname : createPath(routes.games), query: search || undefined });
         } else {
           const timer = window.setInterval(this.#uploadScreenshot, 10000);
           return () => {

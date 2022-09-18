@@ -9,7 +9,6 @@ import {
   createStore,
   updateStore,
   state,
-  history,
   repeat,
 } from '@mantou/gem';
 import { formatDuration, Time } from 'duoyun-ui/lib/time';
@@ -23,6 +22,7 @@ import { events, queryKeys } from 'src/constants';
 import { updateMtApp } from 'src/mt-app';
 import { i18n } from 'src/i18n';
 import { icons } from 'src/icons';
+import { locationStore } from 'src/routes';
 
 import 'duoyun-ui/elements/divider';
 import 'duoyun-ui/elements/empty';
@@ -103,13 +103,13 @@ const style = createCSSSheet(css`
 @customElement('p-mt-games')
 @adoptedStyle(style)
 @connectStore(store)
-@connectStore(history.store)
+@connectStore(locationStore)
 @connectStore(mtGamesStore)
 export class PMtGamesElement extends GemElement {
   @state detail: boolean;
 
   get #data() {
-    const { query } = history.getParams();
+    const { query } = locationStore;
     if (query.get(queryKeys.RECENT_GAMES)) return store.recentGameIds;
     return store.favoriteIds;
   }
@@ -131,10 +131,17 @@ export class PMtGamesElement extends GemElement {
     }
   };
 
+  #queryWatching = false;
   mounted = () => {
     this.effect(
-      () => updateStore(mtGamesStore, { focusId: 0, currentIndex: 0 }),
-      () => [history.getParams().query.toString()],
+      ([recent]) => {
+        if (this.#queryWatching || recent) {
+          updateStore(mtGamesStore, { focusId: 0, currentIndex: 0 });
+        } else {
+          this.#queryWatching = true;
+        }
+      },
+      () => [locationStore.query.get(queryKeys.RECENT_GAMES)],
     );
 
     this.effect(() => {
@@ -161,7 +168,7 @@ export class PMtGamesElement extends GemElement {
       <div class="rotor">
         ${this.#data?.length
           ? repeat(
-              [history.getParams().query.toString()],
+              [locationStore.query.toString()],
               (key) => key,
               () => html`
                 <nesbox-rotor
