@@ -428,9 +428,9 @@ export class MNesElement extends GemElement<State> {
     this.memo(
       () => {
         const gameId = this.#playing?.gameId;
-        const cheatSettins = this.#settings?.cheat;
-        if (gameId && cheatSettins) {
-          const cheats = (cheatSettins[gameId] || [])
+        const cheatSettings = this.#settings?.cheat;
+        if (gameId && cheatSettings) {
+          const cheats = (cheatSettings[gameId] || [])
             .map((cheat) => MNesElement.parseCheatCode(cheat))
             .filter(isNotNullish);
 

@@ -38,6 +38,10 @@ const defaultVolume = {
 };
 
 const defaultShortcuts = {
+  ROOM_SPEECH: {
+    win: ['shift'],
+    mac: ['shift'],
+  },
   QUICK_REPLY: {
     win: ['.'],
     mac: ['.'],

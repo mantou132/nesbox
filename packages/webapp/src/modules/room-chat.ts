@@ -23,6 +23,8 @@ import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { SysMsg, TextMsg } from 'src/rtc';
 import { i18n } from 'src/i18n';
 import { theme } from 'src/theme';
+import { configure, getShortcut } from 'src/configure';
+import { icons } from 'src/icons';
 
 import 'duoyun-ui/elements/input';
 import 'duoyun-ui/elements/button';
@@ -66,6 +68,7 @@ const style = createCSSSheet(css`
 type State = {
   input: string;
   silent: boolean;
+  speechTimer: number;
 };
 
 /**
@@ -83,6 +86,7 @@ export class MRoomChatElement extends GemElement<State> {
   state: State = {
     input: '',
     silent: true,
+    speechTimer: 0,
   };
 
   #stopPropagation = (event: Event) => event.stopPropagation();
@@ -91,12 +95,14 @@ export class MRoomChatElement extends GemElement<State> {
     this.setState({ input: detail });
   };
 
-  #onSubmit = () => {
+  #onSubmit = (evt: KeyboardEvent) => {
+    this.#stopPropagation(evt);
     this.state.input && this.submit(new TextMsg(this.state.input));
-    this.setState({ input: '' });
+    this.setState({ input: '', silent: true });
   };
 
-  #onEsc = () => {
+  #onEsc = (evt: KeyboardEvent) => {
+    this.#stopPropagation(evt);
     if (this.state.input) {
       this.setState({ input: '' });
     } else {
@@ -105,16 +111,46 @@ export class MRoomChatElement extends GemElement<State> {
     }
   };
 
-  #onKeyDown = (evt: KeyboardEvent) => {
-    this.#stopPropagation(evt);
+  #onKeyDown = hotkeys({
+    enter: this.#onSubmit,
+    esc: this.#onEsc,
+  });
+
+  #onGlobalKeyDown = (evt: KeyboardEvent) => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!configure.user || !SpeechRecognition) return;
     hotkeys({
-      enter: this.#onSubmit,
-      esc: this.#onEsc,
+      [getShortcut('ROOM_SPEECH')]: async () => {
+        const originInput = this.state.input;
+        const recognition = new SpeechRecognition();
+        recognition.lang = document.documentElement.lang;
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        recognition.maxAlternatives = 1;
+
+        const getTimer = () => {
+          clearTimeout(this.state.speechTimer);
+          return window.setTimeout(() => {
+            recognition.stop();
+            if (this.state.speechTimer) {
+              this.setState({ speechTimer: 0, silent: true, input: originInput });
+            }
+          }, 3000);
+        };
+        this.setState({ silent: false, speechTimer: getTimer() });
+
+        recognition.addEventListener('result', ({ results }) => {
+          if (this.state.speechTimer) {
+            this.setState({ input: results[0].item(0).transcript, speechTimer: getTimer() });
+          }
+        });
+        recognition.start();
+      },
     })(evt);
   };
 
   focus = async () => {
-    this.setState({ silent: false });
+    this.setState({ silent: false, speechTimer: 0 });
     await Promise.resolve();
     this.inputRef.element?.focus();
   };
@@ -148,6 +184,11 @@ export class MRoomChatElement extends GemElement<State> {
         this.setState({ silent: true });
       }, 3000);
     });
+
+    addEventListener('keydown', this.#onGlobalKeyDown);
+    return () => {
+      removeEventListener('keydown', this.#onGlobalKeyDown);
+    };
   };
 
   render = () => {
@@ -173,7 +214,8 @@ export class MRoomChatElement extends GemElement<State> {
             <dy-input
               ref=${this.inputRef.ref}
               class=${classMap({ input: true })}
-              placeholder=${i18n.get('placeholderMessage')}
+              .icon=${this.state.speechTimer ? icons.loading : undefined}
+              placeholder=${this.state.speechTimer ? 'Speech Recognition' : i18n.get('placeholderMessage')}
               @keydown=${this.#onKeyDown}
               @keyup=${this.#stopPropagation}
               @change=${this.#onChange}

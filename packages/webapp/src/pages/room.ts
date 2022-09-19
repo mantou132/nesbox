@@ -90,9 +90,8 @@ export class PRoomElement extends GemElement {
   }
 
   #onContextMenu = (event: MouseEvent) => {
-    if (!this.#playing) {
-      return event.preventDefault();
-    }
+    event.preventDefault();
+    if (!this.#playing) return;
     ContextMenu.open(
       [
         !!friendStore.friendIds?.length && {

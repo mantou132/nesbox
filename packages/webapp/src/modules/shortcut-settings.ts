@@ -49,6 +49,7 @@ export class MShortcutSettingsElement extends GemElement {
       OPEN_HELP: i18n.get('shortcutHelp'),
       OPEN_SETTINGS: i18n.get('shortcutSettings'),
       QUICK_REPLY: i18n.get('shortcutReadMsg'),
+      ROOM_SPEECH: 'Speech',
     };
 
     const labelMap2: LabelMap = {
@@ -68,7 +69,7 @@ export class MShortcutSettingsElement extends GemElement {
               <div>${labelMap[name as SettingsKey]}</div>
               <dy-shortcut-record
                 .value=${isMac ? key.mac : key.win}
-                @change=${({ detail }: CustomEvent<string[]>) =>
+                @change=${({ detail }: CustomEvent<string[]>) => {
                   updateAccount({
                     settings: {
                       ...configure.user!.settings,
@@ -80,7 +81,8 @@ export class MShortcutSettingsElement extends GemElement {
                         },
                       },
                     },
-                  })}
+                  });
+                }}
               ></dy-shortcut-record>
             `,
         )}
