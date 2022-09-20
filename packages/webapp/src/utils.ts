@@ -101,3 +101,19 @@ export const preventDefault = (fn: () => void) => {
     fn();
   };
 };
+
+export function requestFrame(generateFrame: () => void) {
+  const duration = 1000 / 60;
+  let timer = 0;
+  let nextFrameIdealTime = performance.now();
+  const nextFrame = () => {
+    const now = performance.now();
+    nextFrameIdealTime += duration;
+    if (nextFrameIdealTime < now) nextFrameIdealTime = now;
+    const nextFrameDelay = nextFrameIdealTime - now;
+    generateFrame();
+    timer = window.setTimeout(nextFrame, nextFrameDelay);
+  };
+  nextFrame();
+  return () => clearTimeout(timer);
+}

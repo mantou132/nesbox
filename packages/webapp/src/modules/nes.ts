@@ -31,7 +31,7 @@ import {
 import { store } from 'src/store';
 import { i18n } from 'src/i18n';
 import type { MRoomChatElement } from 'src/modules/room-chat';
-import { getCDNSrc, playHintSound } from 'src/utils';
+import { getCDNSrc, playHintSound, requestFrame } from 'src/utils';
 import { events } from 'src/constants';
 import type { NesboxRenderElement } from 'src/elements/render';
 
@@ -222,8 +222,6 @@ export class MNesElement extends GemElement<State> {
   #bufferSize = this.#sampleRate / 60;
   #nextStartTime = 0;
   #loop = () => {
-    if (this.isConnected) requestAnimationFrame(this.#loop);
-
     if (!this.#nes || !this.#isVisible) return;
     this.#execCheat();
     const frameNum = this.#nes.clock_frame();
@@ -245,7 +243,10 @@ export class MNesElement extends GemElement<State> {
     node.connect(this.#gainNode);
     node.connect(this.#audioStreamDestination);
     node.buffer = audioBuffer;
-    const start = Math.max(this.#nextStartTime, this.#audioContext.currentTime + 0.032);
+    const start = Math.max(
+      this.#nextStartTime,
+      this.#audioContext.currentTime + this.#bufferSize / this.#sampleRate / 1000,
+    );
     node.start(start);
     this.#nextStartTime = start + this.#bufferSize / this.#sampleRate;
   };
@@ -407,7 +408,14 @@ export class MNesElement extends GemElement<State> {
   };
 
   mounted = () => {
-    if (this.#isHost) requestAnimationFrame(this.#loop);
+    this.effect(
+      () => {
+        if (this.#isHost) {
+          return requestFrame(this.#loop);
+        }
+      },
+      () => [],
+    );
 
     this.effect(
       () => this.#setVolume,

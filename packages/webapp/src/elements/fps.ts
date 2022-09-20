@@ -34,6 +34,7 @@ let timer = 0;
 const tick = () => {
   const now = performance.now();
   const delta = now - lastFrameTime;
+  if (delta === 0) return;
   lastFrameTime = now;
 
   const fps = Math.round(1000 / delta);

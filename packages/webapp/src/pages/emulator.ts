@@ -16,6 +16,7 @@ import { Modal } from 'duoyun-ui/elements/modal';
 
 import type { NesboxRenderElement } from 'src/elements/render';
 import { configure, defaultKeybinding } from 'src/configure';
+import { requestFrame } from 'src/utils';
 
 import 'duoyun-ui/elements/heading';
 import 'src/elements/render';
@@ -117,8 +118,6 @@ export class PEmulatorElement extends GemElement {
   #bufferSize = this.#sampleRate / 60;
   #nextStartTime = 0;
   #loop = () => {
-    if (this.isConnected) requestAnimationFrame(this.#loop);
-
     if (!this.#nes || !this.#isVisible) return;
     this.#nes.clock_frame();
 
@@ -134,7 +133,10 @@ export class PEmulatorElement extends GemElement {
     const node = this.#audioContext.createBufferSource();
     node.connect(this.#audioContext.destination);
     node.buffer = audioBuffer;
-    const start = Math.max(this.#nextStartTime, this.#audioContext.currentTime + 0.032);
+    const start = Math.max(
+      this.#nextStartTime,
+      this.#audioContext.currentTime + this.#bufferSize / this.#sampleRate / 1000,
+    );
     node.start(start);
     this.#nextStartTime = start + this.#bufferSize / this.#sampleRate;
   };
@@ -151,7 +153,10 @@ export class PEmulatorElement extends GemElement {
 
   mounted = () => {
     this.#audioContext = new AudioContext({ sampleRate: this.#sampleRate });
-    requestAnimationFrame(this.#loop);
+    this.effect(
+      () => requestFrame(this.#loop),
+      () => [],
+    );
     this.effect(this.#initNes, () => [configure.openNesFile]);
     addEventListener('keydown', this.#onKeyDown);
     addEventListener('keyup', this.#onKeyUp);
