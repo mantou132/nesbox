@@ -68,9 +68,12 @@ const style = createCSSSheet(css`
     box-sizing: border-box;
     background-color: ${theme.backgroundColor};
     max-height: 100%;
-    overflow: auto;
     margin-block-start: -0.6em;
     border: none;
+    scrollbar-width: none;
+  }
+  .options::-webkit-scrollbar {
+    width: 0;
   }
 `);
 
