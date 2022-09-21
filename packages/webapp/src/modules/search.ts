@@ -18,6 +18,7 @@ import type { DuoyunOptionsElement, Option } from 'duoyun-ui/elements/options';
 import { createPath, matchPath } from 'duoyun-ui/elements/route';
 import { isNotNullish } from 'duoyun-ui/lib/types';
 import { getDisplayKey, hotkeys, isMac } from 'duoyun-ui/lib/hotkeys';
+import type { DuoyunInputElement } from 'duoyun-ui/elements/input';
 
 import { friendStore, store, toggleFriendChatState } from 'src/store';
 import { theme } from 'src/theme';
@@ -33,6 +34,7 @@ import 'duoyun-ui/elements/input';
 import 'duoyun-ui/elements/options';
 import 'duoyun-ui/elements/alert';
 import 'duoyun-ui/elements/list';
+import 'duoyun-ui/elements/space';
 import 'duoyun-ui/elements/paragraph';
 
 const style = createCSSSheet(css`
@@ -92,6 +94,7 @@ type State = {
 @connectStore(configure)
 export class MSearchElement extends GemElement<State> {
   @refobject options: RefObject<DuoyunOptionsElement>;
+  @refobject input: RefObject<DuoyunInputElement>;
 
   state: State = {
     search: '',
@@ -133,6 +136,7 @@ export class MSearchElement extends GemElement<State> {
   };
 
   #genGameOptions = (): Option[] => {
+    const favorites = new Set(store.favoriteIds);
     return (
       store.gameIds
         ?.map((id) => {
@@ -140,7 +144,12 @@ export class MSearchElement extends GemElement<State> {
           if (game && isIncludesString(game.name, this.state.search)) {
             return {
               icon: icons.game,
-              label: game.name,
+              label: html`
+                <dy-space>
+                  <span>${game.name}</span>
+                  ${favorites.has(id) ? html`<dy-use style="width:1em" .element=${icons.favorited}></dy-use>` : ''}
+                </dy-space>
+              `,
               tagIcon: this.#playing ? icons.received : undefined,
               onClick: async () => {
                 if (this.#playing) {
@@ -278,8 +287,8 @@ export class MSearchElement extends GemElement<State> {
 
   #getItemHotKey = (index: number) => [isMac ? 'command' : 'ctrl', String(index + 1)];
 
-  #onKeydown = hotkeys(
-    Object.fromEntries(
+  #onKeydown = hotkeys({
+    ...Object.fromEntries(
       Array.from(Array(9), (_, index) => [
         this.#getItemHotKey(index).join('+'),
         (evt: KeyboardEvent) => {
@@ -288,7 +297,8 @@ export class MSearchElement extends GemElement<State> {
         },
       ]),
     ),
-  );
+    [[getShortcut('OPEN_HELP'), getShortcut('OPEN_SEARCH')].join(',')]: () => this.input.element?.focus(),
+  });
 
   mounted = () => {
     import('src/help-i18n').then(({ helpI18n }) => {
@@ -320,6 +330,7 @@ export class MSearchElement extends GemElement<State> {
     return html`
       <div class="header">
         <dy-input
+          ref=${this.input.ref}
           class="input"
           autofocus
           .value=${search}
