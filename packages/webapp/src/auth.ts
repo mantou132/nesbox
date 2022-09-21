@@ -17,9 +17,10 @@ export const gotoRedirectUri = () => {
 
 export const logout = () => {
   deleteUser();
-  const path = createPath(routes.login);
-  const query = new QueryString({ [queryKeys.REDIRECT_URI]: window.location.href });
-  history.replace({ path, query });
+  history.replace({
+    path: createPath(routes.login),
+    query: new QueryString({ [queryKeys.REDIRECT_URI]: window.location.href }),
+  });
 };
 
 export const isExpiredProfile = (profile: Profile) => {

@@ -6,6 +6,7 @@ import { icons } from 'src/icons';
 import { acceptInvite } from 'src/services/api';
 import { toggleFriendListState } from 'src/configure';
 import { i18n } from 'src/i18n';
+import { ScUserStatus } from 'src/generated/graphql';
 
 const style = createCSSSheet(css`
   :host {
@@ -66,6 +67,15 @@ export class MInviteItemElement extends GemElement {
 
   render = () => {
     const friend = friendStore.friends[this.invite.userId];
+    if (friend?.user.status === ScUserStatus.Offline) {
+      return html`
+        <style>
+          :host {
+            display: none !important;
+          }
+        </style>
+      `;
+    }
     return html`
       <div class="title">${store.games[this.invite.room.gameId]?.name || ''}</div>
       <div class="invite">

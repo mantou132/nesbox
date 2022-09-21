@@ -9,7 +9,7 @@ import {
   numattribute,
 } from '@mantou/gem';
 
-import { ScFriendStatus } from 'src/generated/graphql';
+import { ScFriendStatus, ScUserStatus } from 'src/generated/graphql';
 import { friendStore } from 'src/store';
 import { theme } from 'src/theme';
 
@@ -47,7 +47,12 @@ export class MBadgeElement extends GemElement {
   render = () => {
     const count = this.friendid
       ? friendStore.friends[this.friendid]?.unreadMessageCount || 0
-      : (friendStore.inviteIds?.length || 0) +
+      : (friendStore.inviteIds?.reduce(
+          (p, id) =>
+            p +
+            (friendStore.friends[friendStore.invites[id]?.userId || 0]?.user.status === ScUserStatus.Offline ? 0 : 1),
+          0,
+        ) || 0) +
         (friendStore.friendIds?.reduce(
           (p, id) =>
             p +

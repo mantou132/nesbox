@@ -87,7 +87,7 @@ export class PMtRoomElement extends GemElement {
   mounted = () => {
     this.effect(
       () => {
-        if (!this.#playing) {
+        if (configure.user && !this.#playing) {
           const roomFrom = history.getParams().query.get(queryKeys.ROOM_FROM) || '';
           const { pathname, search } = new URL(roomFrom, location.origin);
           const returnPath =
