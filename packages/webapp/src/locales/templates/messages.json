@@ -260,6 +260,9 @@
   "roomEmptyRole": {
     "message": "无"
   },
+  "kickOutRole": {
+    "message": "移动到观众席"
+  },
   "selectGame": {
     "message": "更换游戏"
   },
@@ -324,7 +327,7 @@
     "message": "修改密码成功"
   },
   "tipApplyFriendSuccess": {
-    "message": "请求已经发送"
+    "message": "已经向“$1”发送好友请求"
   },
   "tipInviteSuccess": {
     "message": "邀请已经发送"

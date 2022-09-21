@@ -507,7 +507,7 @@ export class MNesElement extends GemElement<State> {
         .isHost=${this.#isHost}
         .roles=${roles}
         @rolechange=${({ detail }: CustomEvent<RoleOffer>) => this.#rtc?.send(detail)}
-        @kickout=${({ detail }: CustomEvent<number>) => this.#rtc?.kickoutRole(detail)}
+        @kickout=${({ detail }: CustomEvent<number>) => this.#rtc?.kickOutRole(detail)}
       ></m-room-player-list>
     `;
   };

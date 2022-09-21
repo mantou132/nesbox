@@ -36,6 +36,7 @@ export type Role =
   | {
       userId: number;
       username: string;
+      nickname: string;
     }
   | undefined;
 
@@ -44,16 +45,19 @@ export abstract class ChannelMessageBase {
   timestamp: number;
   userId: number;
   username: string;
+  nickname: string;
 
   constructor() {
     this.timestamp = Date.now();
     this.userId = configure.user!.id;
-    this.username = configure.user!.nickname;
+    this.username = configure.user!.username;
+    this.nickname = configure.user!.nickname;
   }
 
   toSystemRole() {
     this.userId = 0;
     this.username = '';
+    this.nickname = '';
     return this;
   }
 
@@ -126,7 +130,10 @@ export class RTC extends EventTarget {
 
   #connMap = new Map<number, RTCPeerConnection>();
   #channelMap = new Map<RTCPeerConnection, RTCDataChannel>();
-  #roles: Role[] = [, { userId: configure.user!.id, username: configure.user!.nickname }];
+  #roles: Role[] = [
+    ,
+    { userId: configure.user!.id, username: configure.user!.username, nickname: configure.user!.nickname },
+  ];
 
   #stream: MediaStream;
   #audio: HTMLAudioElement;
@@ -166,7 +173,7 @@ export class RTC extends EventTarget {
   };
 
   #setRoles = (userId: number, msg: RoleOffer) => {
-    const role: Role = { userId, username: msg.username };
+    const role: Role = { userId, username: msg.username, nickname: msg.nickname };
     const index = this.#roles.findIndex((role) => role?.userId === userId);
 
     if (msg.roleType === 0) {
@@ -201,13 +208,13 @@ export class RTC extends EventTarget {
       this.#channelMap.set(conn, channel);
 
       channel.onclose = () => {
-        const username = this.#roles.find((role) => role?.userId === userId)?.username || '';
+        const nickname = this.#roles.find((role) => role?.userId === userId)?.nickname || '';
 
         this.#deleteUser(userId);
         this.#roles = this.#roles.map((role) => (role?.userId === userId ? undefined : role));
         this.#emitAnswer();
 
-        const textMsg = new TextMsg(['leaveRoomMsg', username]).toSystemRole();
+        const textMsg = new TextMsg(['leaveRoomMsg', nickname]).toSystemRole();
         this.#channelMap.forEach((channel) => channel.send(textMsg.toString()));
         this.#emitMessage(textMsg);
       };
@@ -275,7 +282,7 @@ export class RTC extends EventTarget {
       }
     } catch (err) {
       // No remoteDescription.
-      // Set remote anser error
+      // Set remote answer error
       logger.error(err);
     }
   };
@@ -427,7 +434,7 @@ export class RTC extends EventTarget {
     });
   };
 
-  kickoutRole = (userId: number) => {
+  kickOutRole = (userId: number) => {
     if (!this.#isHost) return;
     this.#setRoles(userId, new RoleOffer(0));
     this.send(new RoleAnswer(this.#roles));

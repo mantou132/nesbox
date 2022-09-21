@@ -257,6 +257,9 @@
   "leaveRoomMsg": {
     "message": "$1部屋を出ます"
   },
+  "kickOutRole": {
+    "message": "削除する"
+  },
   "roomEmptyRole": {
     "message": "なし"
   },
@@ -324,7 +327,7 @@
     "message": "パスワードが更新されました"
   },
   "tipApplyFriendSuccess": {
-    "message": "リクエストが送信されました"
+    "message": "すでに友達リクエストを「$1」に送信しました"
   },
   "tipInviteSuccess": {
     "message": "招待状が送信されました"

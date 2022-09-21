@@ -14,6 +14,8 @@ import {
 } from '@mantou/gem';
 import { commonHandle } from 'duoyun-ui/lib/hotkeys';
 import { focusStyle } from 'duoyun-ui/lib/styles';
+import { ContextMenu } from 'duoyun-ui/elements/menu';
+import { isNotBoolean } from 'duoyun-ui/lib/types';
 
 import { theme } from 'src/theme';
 import { configure } from 'src/configure';
@@ -22,6 +24,8 @@ import { icons } from 'src/icons';
 import { i18n } from 'src/i18n';
 import { getAvatar } from 'src/utils';
 import { voiceStore } from 'src/modules/room-voice';
+import { applyFriend } from 'src/services/api';
+import { friendStore } from 'src/store';
 
 import 'duoyun-ui/elements/avatar';
 import 'duoyun-ui/elements/use';
@@ -134,7 +138,7 @@ export class MRoomPlayerItemElement extends GemElement {
   }
 
   get #isSelf() {
-    return this.role && this.role.userId === configure.user?.id;
+    return !!this.role && this.role.userId === configure.user?.id;
   }
 
   get #isHostRole() {
@@ -145,11 +149,15 @@ export class MRoomPlayerItemElement extends GemElement {
     return !this.host && !this.role;
   }
 
-  get #isKickoutable() {
-    return this.host && this.role && !this.#isSelf;
+  get #isAllowKickOut() {
+    return !!(this.host && this.role && !this.#isSelf);
   }
 
-  get #isLeaveable() {
+  get #isOther() {
+    return !!this.role && !this.#isSelf;
+  }
+
+  get #isAllowLeave() {
     return !this.host && this.#isSelf;
   }
 
@@ -161,10 +169,23 @@ export class MRoomPlayerItemElement extends GemElement {
     if (this.#isJoinable) {
       this.rolechange(new RoleOffer(this.roleType));
     }
-    if (this.#isKickoutable) {
-      this.kickout(this.role!.userId);
+    if (this.#isOther) {
+      ContextMenu.open(
+        [
+          this.#isAllowKickOut && {
+            text: i18n.get('kickOutRole'),
+            handle: () => this.kickout(this.role!.userId),
+          },
+          {
+            text: i18n.get('addFriend'),
+            disabled: !!friendStore.friends[this.role!.userId],
+            handle: () => applyFriend(this.role!.username),
+          },
+        ].filter(isNotBoolean),
+        { activeElement: this, width: '10em' },
+      );
     }
-    if (this.#isLeaveable) {
+    if (this.#isAllowLeave) {
       this.rolechange(new RoleOffer(0));
     }
   };
@@ -191,7 +212,6 @@ export class MRoomPlayerItemElement extends GemElement {
       <style>
         :host {
           border: 1px solid ${this.#isSelf ? theme.noticeColor : theme.borderColor};
-          cursor: ${this.#isHostRole ? 'not-allowed' : 'default'};
         }
       </style>
       <dy-use
@@ -202,9 +222,9 @@ export class MRoomPlayerItemElement extends GemElement {
         })}
         .element=${icons.volume}
       ></dy-use>
-      <dy-avatar class="avatar" square src=${getAvatar(this.role?.username)}></dy-avatar>
+      <dy-avatar class="avatar" square src=${getAvatar(this.role?.nickname)}></dy-avatar>
       <div class="username">
-        <span>${this.role.username}</span>
+        <span>${this.role.nickname}</span>
       </div>
     `;
   };

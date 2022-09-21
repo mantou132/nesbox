@@ -89,6 +89,10 @@ export class PRoomElement extends GemElement {
     return configure.user?.playing;
   }
 
+  get #isHost() {
+    return configure.user?.id === this.#playing?.host;
+  }
+
   #onContextMenu = (event: MouseEvent) => {
     event.preventDefault();
     if (!this.#playing) return;
@@ -144,22 +148,22 @@ export class PRoomElement extends GemElement {
           handle: this.#saveScreenshot,
           tag: getShortcut('SCREENSHOT', true),
         },
-        {
-          text: i18n.get('shortcutSave'),
+        this.#isHost && {
+          text: i18n.get('shortcutSave') + ' (Local)',
           handle: this.#save,
           tag: getShortcut('SAVE_GAME_STATE', true),
         },
-        {
-          text: i18n.get('shortcutLoad'),
+        this.#isHost && {
+          text: i18n.get('shortcutLoad') + ' (Local)',
           handle: this.#load,
           tag: getShortcut('LOAD_GAME_STATE', true),
         },
-        {
+        this.#isHost && {
           text: i18n.get('shortcutOpenRam'),
           handle: this.#openRamViewer,
           tag: getShortcut('OPEN_RAM_VIEWER', true),
         },
-        {
+        this.#isHost && {
           text: i18n.get('shortcutOpenCheat'),
           handle: this.#openCheatModal,
           tag: getShortcut('OPEN_CHEAT_SETTINGS', true),
@@ -350,9 +354,7 @@ export class PRoomElement extends GemElement {
       <m-nes class="nes" ref=${this.nesbox.ref} @contextmenu=${this.#onContextMenu}></m-nes>
       <nesbox-game-controller class="controller"></nesbox-game-controller>
       <dy-space class="info">
-        ${this.#playing?.host === configure.user?.id
-          ? html`<nesbox-fps></nesbox-fps>`
-          : html`<nesbox-ping></nesbox-ping>`}
+        ${this.#isHost ? html`<nesbox-fps></nesbox-fps>` : html`<nesbox-ping></nesbox-ping>`}
         <m-room-voice></m-room-voice>
       </dy-space>
       <div class="coach-mark-container">

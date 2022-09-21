@@ -224,7 +224,7 @@ export const getFriends = async () => {
 
 export const applyFriend = async (username: string) => {
   await request<ApplyFriendMutation, ApplyFriendMutationVariables>(ApplyFriend, { input: { username } });
-  Toast.open('success', i18n.get('tipApplyFriendSuccess'));
+  Toast.open('default', i18n.get('tipApplyFriendSuccess', username));
 };
 
 export const acceptFriend = async (targetId: number, accept: boolean) => {

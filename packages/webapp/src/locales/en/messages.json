@@ -260,6 +260,9 @@
   "roomEmptyRole": {
     "message": "None"
   },
+  "kickOutRole": {
+    "message": "Remove"
+  },
   "selectGame": {
     "message": "Change Game"
   },
@@ -324,7 +327,7 @@
     "message": "Password has been updated"
   },
   "tipApplyFriendSuccess": {
-    "message": "Request has been sent"
+    "message": "Already sent a friend request to \"$1\""
   },
   "tipInviteSuccess": {
     "message": "Invitation has been sent"

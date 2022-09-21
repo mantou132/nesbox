@@ -260,6 +260,9 @@
   "roomEmptyRole": {
     "message": "無"
   },
+  "kickOutRole": {
+    "message": "移動到觀眾席"
+  },
   "selectGame": {
     "message": "更換遊戲"
   },
@@ -324,7 +327,7 @@
     "message": "修改密碼成功"
   },
   "tipApplyFriendSuccess": {
-    "message": "請求已經發送"
+    "message": "已經向“$1”發送好友請求"
   },
   "tipInviteSuccess": {
     "message": "邀請已經發送"
