@@ -31,6 +31,7 @@ export type MutationRoot = {
   updatePassword: ScUser;
   updateRoom: ScRoomBasic;
   updateRoomScreenshot: ScRoomBasic;
+  voiceMsg: Scalars['String'];
 };
 
 
@@ -113,6 +114,11 @@ export type MutationRootUpdateRoomScreenshotArgs = {
   input: ScUpdateRoomScreenshot;
 };
 
+
+export type MutationRootVoiceMsgArgs = {
+  input: ScVoiceMsgReq;
+};
+
 export type QueryRoot = {
   __typename?: 'QueryRoot';
   account: ScUser;
@@ -126,7 +132,6 @@ export type QueryRoot = {
   record?: Maybe<ScRecord>;
   rooms: Array<ScRoom>;
   topGames: Array<Scalars['Int']>;
-  voiceMsg: Scalars['String'];
 };
 
 
@@ -142,11 +147,6 @@ export type QueryRootMessagesArgs = {
 
 export type QueryRootRecordArgs = {
   input: ScRecordReq;
-};
-
-
-export type QueryRootVoiceMsgArgs = {
-  input: ScVoiceMsgReq;
 };
 
 export type ScComment = {
@@ -420,13 +420,6 @@ export type ScRecordPartFragment = { __typename?: 'ScRecord', playTotal: number,
 
 export type ScFriendPartFragment = { __typename?: 'ScFriend', createdAt: number, status: ScFriendStatus, unreadMessageCount: number, user: { __typename?: 'ScUserBasic', id: number, username: string, nickname: string, status: ScUserStatus, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } } };
 
-export type SendVoiceMsgQueryVariables = Exact<{
-  input: ScVoiceMsgReq;
-}>;
-
-
-export type SendVoiceMsgQuery = { __typename?: 'QueryRoot', voiceMsg: string };
-
 export type GetGamesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -460,6 +453,13 @@ export type GetAccountQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetAccountQuery = { __typename?: 'QueryRoot', account: { __typename?: 'ScUser', id: number, username: string, nickname: string, settings?: string, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } } };
+
+export type SendVoiceMsgMutationVariables = Exact<{
+  input: ScVoiceMsgReq;
+}>;
+
+
+export type SendVoiceMsgMutation = { __typename?: 'MutationRoot', voiceMsg: string };
 
 export type SendSignalMutationVariables = Exact<{
   input: ScNewSignal;
@@ -685,11 +685,6 @@ export const ScFriendPart = `
   unreadMessageCount
 }
     `;
-export const SendVoiceMsg = `
-    query sendVoiceMsg($input: ScVoiceMsgReq!) {
-  voiceMsg(input: $input)
-}
-    `;
 export const GetGames = `
     query getGames {
   games {
@@ -750,6 +745,11 @@ export const GetAccount = `
 }
     ${ScAccountPart}
 ${ScRoomBasicPart}`;
+export const SendVoiceMsg = `
+    mutation sendVoiceMsg($input: ScVoiceMsgReq!) {
+  voiceMsg(input: $input)
+}
+    `;
 export const SendSignal = `
     mutation sendSignal($input: ScNewSignal!) {
   signaling(input: $input)

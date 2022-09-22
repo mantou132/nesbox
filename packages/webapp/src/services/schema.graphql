@@ -96,9 +96,6 @@ fragment ScFriendPart on ScFriend {
   status
   unreadMessageCount
 }
-query sendVoiceMsg($input: ScVoiceMsgReq!) {
-  voiceMsg(input: $input)
-}
 
 query getGames {
   games {
@@ -143,6 +140,10 @@ query getAccount {
   account {
     ...ScAccountPart
   }
+}
+
+mutation sendVoiceMsg($input: ScVoiceMsgReq!) {
+  voiceMsg(input: $input)
 }
 
 mutation sendSignal($input: ScNewSignal!) {

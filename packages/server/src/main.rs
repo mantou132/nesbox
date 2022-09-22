@@ -63,9 +63,11 @@ async fn main() -> io::Result<()> {
             let mut rooms = get_outdated_rooms(&DB_POOL.get().unwrap());
             rooms.truncate(100);
             rooms.iter().for_each(|room| {
-                leave_room_and_notify(room.host).ok();
+                if let Err(err) = leave_room_and_notify(room.host) {
+                    log::error!("{:?}", err);
+                }
             });
-            log::debug!("Clean {} outdated rooms", rooms.len());
+            log::debug!("Clean outdated rooms: {:?}", rooms);
         }
     });
 

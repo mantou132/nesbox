@@ -69,8 +69,8 @@ import {
   SendSignalMutation,
   SendSignalMutationVariables,
   SendVoiceMsg,
-  SendVoiceMsgQuery,
-  SendVoiceMsgQueryVariables,
+  SendVoiceMsgMutation,
+  SendVoiceMsgMutationVariables,
   UpdateAccount,
   UpdateAccountMutation,
   UpdateAccountMutationVariables,
@@ -99,7 +99,7 @@ import {
 } from 'src/utils';
 
 export const sendVoiceMsg = async (kind: ScVoiceMsgKind, payload: RTCSessionDescription | RTCIceCandidate) => {
-  await request<SendVoiceMsgQuery, SendVoiceMsgQueryVariables>(SendVoiceMsg, {
+  await request<SendVoiceMsgMutation, SendVoiceMsgMutationVariables>(SendVoiceMsg, {
     input: { json: JSON.stringify(convertObjectCamelCaseToSnake(JSON.parse(JSON.stringify(payload)))), kind },
   });
 };

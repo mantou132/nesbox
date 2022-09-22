@@ -65,6 +65,12 @@ impl QueryRoot {
         let conn = DB_POOL.get().unwrap();
         Ok(get_invites(&conn, context.user_id))
     }
+}
+
+pub struct MutationRoot;
+
+#[juniper::graphql_object(Context = Context)]
+impl MutationRoot {
     fn voice_msg(context: &Context, input: ScVoiceMsgReq) -> FieldResult<String> {
         let conn = DB_POOL.get().unwrap();
         let user_id = context.user_id;
@@ -84,12 +90,6 @@ impl QueryRoot {
         }
         Ok("ok".into())
     }
-}
-
-pub struct MutationRoot;
-
-#[juniper::graphql_object(Context = Context)]
-impl MutationRoot {
     fn signaling(context: &Context, input: ScNewSignal) -> FieldResult<String> {
         notify(
             input.target_id,
