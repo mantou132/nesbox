@@ -4,6 +4,7 @@ import { Time } from 'duoyun-ui/lib/time';
 
 import { configure } from 'src/configure';
 import { githubIssue } from 'src/constants';
+import { logger } from 'src/logger';
 
 export function convertObjectSnakeToCamelCase(obj: Record<string, any>) {
   return Object.fromEntries(
@@ -64,9 +65,14 @@ export const saveFile = async (file: File) => {
   try {
     if (!window.__TAURI__) throw new Error();
     const { writeBinaryFile, BaseDirectory } = window.__TAURI__.fs;
-    await writeBinaryFile(file.name, new Uint8Array(await file.arrayBuffer()), { dir: BaseDirectory.Desktop });
+    await writeBinaryFile(
+      file.name.replaceAll(' ', '-').replaceAll(':', '-'),
+      new Uint8Array(await file.arrayBuffer()),
+      { dir: BaseDirectory.Desktop },
+    );
     return BaseDirectory.Desktop;
-  } catch {
+  } catch (err) {
+    logger.warn(err);
     const a = document.createElement('a');
     a.download = file.name;
     a.href = URL.createObjectURL(file);
