@@ -6,7 +6,6 @@ import {
   createCSSSheet,
   css,
   connectStore,
-  history,
   styleMap,
   raw,
   RefObject,
@@ -15,7 +14,6 @@ import {
 import { locale } from 'duoyun-ui/lib/locale';
 import { isIncludesString } from 'duoyun-ui/lib/utils';
 import type { DuoyunOptionsElement, Option } from 'duoyun-ui/elements/options';
-import { createPath, matchPath } from 'duoyun-ui/elements/route';
 import { isNotNullish } from 'duoyun-ui/lib/types';
 import { getDisplayKey, hotkeys, isMac } from 'duoyun-ui/lib/hotkeys';
 import type { DuoyunInputElement } from 'duoyun-ui/elements/input';
@@ -26,9 +24,8 @@ import { i18n } from 'src/i18n';
 import { icons } from 'src/icons';
 import { configure, getShortcut, SearchCommand, setSearchCommand, toggleSearchState } from 'src/configure';
 import { routes } from 'src/routes';
-import { paramKeys } from 'src/constants';
-import { getCDNSrc, getTempText } from 'src/utils';
-import { createInvite, enterPubRoom, updateRoom } from 'src/services/api';
+import { getCDNSrc, getTempText, matchRoute } from 'src/utils';
+import { createInvite, createRoom, enterPubRoom, updateRoom } from 'src/services/api';
 
 import 'duoyun-ui/elements/input';
 import 'duoyun-ui/elements/options';
@@ -101,7 +98,7 @@ export class MSearchElement extends GemElement<State> {
   };
 
   get #isRooms() {
-    return matchPath(routes.rooms.pattern, history.getParams().path);
+    return matchRoute(routes.rooms);
   }
 
   get #playing() {
@@ -119,6 +116,29 @@ export class MSearchElement extends GemElement<State> {
     } else {
       this.setState({ search: detail });
     }
+  };
+
+  #getItemHotKey = (index: number) => [isMac ? 'command' : 'ctrl', String(index + 1)];
+
+  #onKeydown = hotkeys({
+    ...Object.fromEntries(
+      Array.from(Array(9), (_, index) => [
+        this.#getItemHotKey(index).join('+'),
+        (evt: KeyboardEvent) => {
+          this.options.element?.shadowRoot?.querySelectorAll<HTMLElement>('[tabindex]')[index]?.click();
+          evt.preventDefault();
+        },
+      ]),
+    ),
+    [[getShortcut('OPEN_HELP'), getShortcut('OPEN_SEARCH')].join(',')]: () => this.input.element?.focus(),
+  });
+
+  #onKeydownInput = (evt: KeyboardEvent) => {
+    hotkeys({
+      // Safari bug: https://github.com/mantou132/gem/issues/66
+      backspace: () => !this.state.search && setSearchCommand(null),
+      [[getShortcut('OPEN_HELP'), getShortcut('OPEN_SEARCH')].join(',')]: (evt) => evt.preventDefault(),
+    })(evt);
   };
 
   #getSearchCommandIcon = (command?: SearchCommand) => {
@@ -150,7 +170,7 @@ export class MSearchElement extends GemElement<State> {
                   ${favorites.has(id) ? html`<dy-use style="width:1em" .element=${icons.favorited}></dy-use>` : ''}
                 </dy-space>
               `,
-              tagIcon: this.#playing ? icons.received : undefined,
+              tagIcon: icons.received,
               onClick: async () => {
                 if (this.#playing) {
                   updateRoom({
@@ -160,13 +180,7 @@ export class MSearchElement extends GemElement<State> {
                     gameId: game.id,
                   });
                 } else {
-                  history.push({
-                    path: createPath(routes.game, {
-                      params: {
-                        [paramKeys.GAME_ID]: game.id.toString(),
-                      },
-                    }),
-                  });
+                  createRoom({ gameId: game.id, private: false });
                 }
                 toggleSearchState();
               },
@@ -285,21 +299,6 @@ export class MSearchElement extends GemElement<State> {
     }
   };
 
-  #getItemHotKey = (index: number) => [isMac ? 'command' : 'ctrl', String(index + 1)];
-
-  #onKeydown = hotkeys({
-    ...Object.fromEntries(
-      Array.from(Array(9), (_, index) => [
-        this.#getItemHotKey(index).join('+'),
-        (evt: KeyboardEvent) => {
-          this.options.element?.shadowRoot?.querySelectorAll<HTMLElement>('[tabindex]')[index]?.click();
-          evt.preventDefault();
-        },
-      ]),
-    ),
-    [[getShortcut('OPEN_HELP'), getShortcut('OPEN_SEARCH')].join(',')]: () => this.input.element?.focus(),
-  });
-
   mounted = () => {
     import('src/help-i18n').then(({ helpI18n }) => {
       const resources = helpI18n.resources[helpI18n.currentLanguage] || {};
@@ -313,19 +312,21 @@ export class MSearchElement extends GemElement<State> {
     const { search } = this.state;
     const options = this.#genOptions();
 
-    options.forEach((option, index) => {
-      if (index < 9) {
-        option.tag = html`
-          <dy-paragraph>
-            <kbd>
-              ${this.#getItemHotKey(index)
-                .map((key) => getDisplayKey(key))
-                .join(' ')}
-            </kbd>
-          </dy-paragraph>
-        `;
-      }
-    });
+    if (configure.searchCommand !== SearchCommand.HELP) {
+      options.forEach((option, index) => {
+        if (index < 9) {
+          option.tag = html`
+            <dy-paragraph>
+              <kbd>
+                ${this.#getItemHotKey(index)
+                  .map((key) => getDisplayKey(key))
+                  .join(' ')}
+              </kbd>
+            </dy-paragraph>
+          `;
+        }
+      });
+    }
 
     return html`
       <div class="header">
@@ -336,10 +337,7 @@ export class MSearchElement extends GemElement<State> {
           .value=${search}
           .icon=${this.#getSearchCommandIcon(configure.searchCommand)}
           @change=${this.#onChange}
-          @keydown=${hotkeys({
-            [[getShortcut('OPEN_HELP'), getShortcut('OPEN_SEARCH')].join(',')]: (evt) => evt.preventDefault(),
-            backspace: () => !search && setSearchCommand(null),
-          })}
+          @keydown=${this.#onKeydownInput}
           placeholder=${getTempText(
             i18n.get(
               configure.searchCommand === SearchCommand.HELP
