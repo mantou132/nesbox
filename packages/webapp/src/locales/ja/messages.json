@@ -233,6 +233,9 @@
   "recentGame": {
     "message": "最近のゲーム"
   },
+  "newGame": {
+    "message": "最新の追加"
+  },
   "allGame": {
     "message": "すべてのゲーム"
   },

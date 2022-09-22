@@ -231,7 +231,10 @@
     "message": "所有游戏"
   },
   "recentGame": {
-    "message": "最近游戏"
+    "message": "最近玩过"
+  },
+  "newGame": {
+    "message": "最新添加"
   },
   "allGame": {
     "message": "所有游戏"

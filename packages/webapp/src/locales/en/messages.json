@@ -233,6 +233,9 @@
   "recentGame": {
     "message": "Recent Game"
   },
+  "newGame": {
+    "message": "New Game"
+  },
   "allGame": {
     "message": "All Game"
   },

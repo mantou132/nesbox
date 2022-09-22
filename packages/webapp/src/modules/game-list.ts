@@ -38,6 +38,7 @@ const style = createCSSSheet(css`
 export class MGameListElement extends GemElement {
   @boolattribute favorite: boolean;
   @boolattribute recent: boolean;
+  @boolattribute new: boolean;
 
   constructor() {
     super();
@@ -52,7 +53,9 @@ export class MGameListElement extends GemElement {
   #favSet = new Set(store.favoriteIds);
 
   get #data() {
-    if (this.recent) {
+    if (this.new) {
+      return store.gameIds?.slice(store.gameIds.length - 4).reverse();
+    } else if (this.recent) {
       return store.recentGameIds?.slice(0, 4);
     } else if (this.favorite) {
       return store.favoriteIds;
@@ -74,6 +77,8 @@ export class MGameListElement extends GemElement {
     return html`
       ${this.recent
         ? html`<dy-heading lv="3">${i18n.get('recentGame')}</dy-heading>`
+        : this.new
+        ? html`<dy-heading lv="3">${i18n.get('newGame')}</dy-heading>`
         : this.favorite
         ? ''
         : html`<dy-heading lv="3">${i18n.get('allGame')}</dy-heading>`}
