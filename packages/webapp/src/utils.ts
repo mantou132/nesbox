@@ -3,7 +3,7 @@ import { matchPath, RouteItem } from 'duoyun-ui/elements/route';
 import { Time } from 'duoyun-ui/lib/time';
 
 import { configure } from 'src/configure';
-import { githubIssue } from 'src/constants';
+import { githubIssue, VideoRefreshRate } from 'src/constants';
 import { logger } from 'src/logger';
 
 export function convertObjectSnakeToCamelCase(obj: Record<string, any>) {
@@ -108,8 +108,9 @@ export const preventDefault = (fn: () => void) => {
   };
 };
 
-export function requestFrame(generateFrame: () => void) {
+export function requestFrame(render: () => void, generator = VideoRefreshRate.FIXED) {
   const duration = 1000 / 60;
+  const frameGenerator = generator === VideoRefreshRate.FIXED ? (window as Window).setTimeout : requestAnimationFrame;
   let timer = 0;
   let nextFrameIdealTime = performance.now();
   const nextFrame = () => {
@@ -117,9 +118,15 @@ export function requestFrame(generateFrame: () => void) {
     nextFrameIdealTime += duration;
     if (nextFrameIdealTime < now) nextFrameIdealTime = now;
     const nextFrameDelay = nextFrameIdealTime - now;
-    generateFrame();
-    timer = window.setTimeout(nextFrame, nextFrameDelay);
+    render();
+    timer = frameGenerator(nextFrame, nextFrameDelay);
   };
   nextFrame();
-  return () => clearTimeout(timer);
+  return () => {
+    if (generator === VideoRefreshRate.FIXED) {
+      clearTimeout(timer);
+    } else {
+      cancelAnimationFrame(timer);
+    }
+  };
 }

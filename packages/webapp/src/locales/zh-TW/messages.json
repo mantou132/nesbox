@@ -170,6 +170,15 @@
   "videoSetting": {
     "message": "視頻"
   },
+  "refreshRate": {
+    "message": "刷新率"
+  },
+  "refreshRateFixed": {
+    "message": "固定"
+  },
+  "refreshRateSync": {
+    "message": "同步顯示器"
+  },
   "videoRender": {
     "message": "渲染方法"
   },

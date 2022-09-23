@@ -85,3 +85,8 @@ export const enum VideoFilter {
   DEFAULT = 'default',
   NTSC = 'NTSC',
 }
+
+export const enum VideoRefreshRate {
+  FIXED = 'fixed',
+  SYNC = 'SYNC',
+}

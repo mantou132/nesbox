@@ -411,10 +411,10 @@ export class MNesElement extends GemElement<State> {
     this.effect(
       () => {
         if (this.#isHost) {
-          return requestFrame(this.#loop);
+          return requestFrame(this.#loop, this.#settings?.video.refreshRate);
         }
       },
-      () => [],
+      () => [this.#settings?.video.refreshRate],
     );
 
     this.effect(

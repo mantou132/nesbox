@@ -170,6 +170,15 @@
   "videoSetting": {
     "message": "Video"
   },
+  "refreshRate": {
+    "message": "Refresh Rate"
+  },
+  "refreshRateFixed": {
+    "message": "Fixed"
+  },
+  "refreshRateSync": {
+    "message": "Synchronous Display"
+  },
   "videoRender": {
     "message": "Render Mode"
   },

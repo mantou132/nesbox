@@ -3,7 +3,7 @@ import { GemElement, html, adoptedStyle, customElement, connectStore } from '@ma
 import { configure, Settings } from 'src/configure';
 import { gridStyle } from 'src/modules/shortcut-settings';
 import { updateAccount } from 'src/services/api';
-import { VideoFilter, VideoRenderMethod } from 'src/constants';
+import { VideoFilter, VideoRefreshRate, VideoRenderMethod } from 'src/constants';
 import { i18n } from 'src/i18n';
 import { icons } from 'src/icons';
 
@@ -35,6 +35,15 @@ export class MVideoSettingsElement extends GemElement {
 
     return html`
       <div class="grid">
+        <div>${i18n.get('refreshRate')}</div>
+        <dy-select
+          .value=${configure.user.settings.video.refreshRate}
+          .options=${[
+            { label: i18n.get('refreshRateFixed'), value: VideoRefreshRate.FIXED },
+            { label: i18n.get('refreshRateSync'), value: VideoRefreshRate.SYNC },
+          ]}
+          @change=${(evt: CustomEvent<VideoRenderMethod>) => this.#updateVideoSetting('refreshRate', evt.detail)}
+        ></dy-select>
         <div>${i18n.get('videoRender')}</div>
         <dy-select
           .value=${configure.user.settings.video.render}

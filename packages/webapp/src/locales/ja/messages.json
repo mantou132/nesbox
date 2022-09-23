@@ -170,6 +170,15 @@
   "videoSetting": {
     "message": "ビデオ"
   },
+  "refreshRate": {
+    "message": "リフレッシュレート"
+  },
+  "refreshRateFixed": {
+    "message": "修理済み"
+  },
+  "refreshRateSync": {
+    "message": "同期ディスプレイ"
+  },
   "videoRender": {
     "message": "レンダリングメソッド"
   },
