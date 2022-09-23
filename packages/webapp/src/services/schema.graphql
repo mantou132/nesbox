@@ -18,6 +18,19 @@ fragment ScMessagePart on ScMessage {
   updatedAt
 }
 
+fragment ScLobbyMessagePart on ScLobbyMessage {
+  createdAt
+  userId
+  username
+  nickname
+  text
+}
+
+fragment ScLobbyInfoPart on ScLobbyInfo {
+  lobbyUserCount
+  onlineUserCount
+}
+
 fragment ScRoomBasicPart on ScRoomBasic {
   id
   gameId
@@ -142,6 +155,20 @@ query getAccount {
   }
 }
 
+mutation enterLobby($input: ScEnterLobbyReq!) {
+  enterLobby(input: $input) {
+    ...ScLobbyInfoPart
+  }
+}
+
+mutation leaveLobby {
+  leaveLobby
+}
+
+mutation sendLobbyMsg($input: ScNewLobbyMessage!) {
+  lobbyMsg(input: $input)
+}
+
 mutation sendVoiceMsg($input: ScVoiceMsgReq!) {
   voiceMsg(input: $input)
 }
@@ -232,6 +259,9 @@ subscription event {
   event {
     newMessage {
       ...ScMessagePart
+    }
+    lobbyMessage {
+      ...ScLobbyMessagePart
     }
     newGame {
       ...ScGamePart

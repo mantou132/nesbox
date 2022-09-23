@@ -3,6 +3,7 @@ pub mod favorite;
 pub mod friend;
 pub mod game;
 pub mod invite;
+pub mod lobby;
 pub mod message;
 pub mod notify;
 pub mod playing;

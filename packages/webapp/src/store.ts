@@ -8,6 +8,8 @@ import {
   GetGamesQuery,
   GetRoomsQuery,
   GetMessagesQuery,
+  EventSubscription,
+  EnterLobbyMutation,
 } from 'src/generated/graphql';
 import { localStorageKeys } from 'src/constants';
 import { configure } from 'src/configure';
@@ -19,6 +21,8 @@ export type Friend = ElementOf<GetFriendsQuery['friends']>;
 export type Comment = ElementOf<GetCommentsQuery['comments']>;
 export type GameRecord = GetCommentsQuery['record'];
 export type Message = ElementOf<GetMessagesQuery['messages']>;
+export type LobbyInfo = EnterLobbyMutation['enterLobby'];
+export type LobbyMessage = Exclude<EventSubscription['event']['lobbyMessage'], undefined>;
 
 interface Store {
   games: Record<number, Game | undefined>;
@@ -37,6 +41,8 @@ interface Store {
   recentGameIds?: number[];
   rooms: Record<number, Room | undefined>;
   roomIds?: number[];
+  lobbyInfo?: LobbyInfo;
+  lobbyMessage: LobbyMessage[];
 }
 
 export const [store] = createCacheStore<Store>(
@@ -46,13 +52,18 @@ export const [store] = createCacheStore<Store>(
     comment: {},
     rooms: {},
     record: {},
+    lobbyMessage: [],
   },
   {
     prefix: () => configure.user?.username,
     depStore: configure,
-    cacheExcludeKeys: ['roomIds', 'rooms'],
+    cacheExcludeKeys: ['roomIds', 'rooms', 'lobbyMessage'],
   },
 );
+
+export function clearLobbyMessage() {
+  updateStore(store, { lobbyMessage: [] });
+}
 
 interface FriendStore {
   draft: Record<number, string | undefined>;

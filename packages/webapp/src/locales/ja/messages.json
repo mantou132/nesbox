@@ -257,6 +257,9 @@
   "roomsTitle": {
     "message": "オープンルーム"
   },
+  "lobbyUserCount": {
+    "message": "ロビーの現在の $1 人"
+  },
   "roomTitle": {
     "message": "ゲーム"
   },

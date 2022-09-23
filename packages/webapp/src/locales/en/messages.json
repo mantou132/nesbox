@@ -257,6 +257,9 @@
   "roomsTitle": {
     "message": "Rooms"
   },
+  "lobbyUserCount": {
+    "message": "Current $1 in Lobby"
+  },
   "roomTitle": {
     "message": "Playing"
   },

@@ -6,6 +6,7 @@ use super::favorite::*;
 use super::friend::*;
 use super::game::*;
 use super::invite::*;
+use super::lobby::*;
 use super::message::*;
 use super::notify::*;
 use super::playing::*;
@@ -13,6 +14,7 @@ use super::record::*;
 use super::room::*;
 use super::user::*;
 use crate::voice::*;
+use chrono::Utc;
 use futures::Stream;
 use juniper::{graphql_subscription, EmptySubscription, FieldError, FieldResult, RootNode};
 use std::pin::Pin;
@@ -71,6 +73,31 @@ pub struct MutationRoot;
 
 #[juniper::graphql_object(Context = Context)]
 impl MutationRoot {
+    fn enter_lobby(context: &Context, input: ScEnterLobbyReq) -> FieldResult<ScLobbyInfo> {
+        Ok(enter_lobby(context.user_id, input))
+    }
+    fn leave_lobby(context: &Context) -> FieldResult<String> {
+        leave_lobby(context.user_id);
+        Ok("Ok".into())
+    }
+    fn lobby_msg(context: &Context, input: ScNewLobbyMessage) -> FieldResult<String> {
+        let conn = DB_POOL.get().unwrap();
+        let user = get_user_basic(&conn, context.user_id)?;
+        notify_ids(
+            get_lobby_other_ids(context.user_id),
+            ScNotifyMessageBuilder::default()
+                .lobby_message(ScLobbyMessage {
+                    created_at: Utc::now().timestamp_millis() as f64,
+                    user_id: context.user_id,
+                    nickname: user.nickname,
+                    username: user.username,
+                    text: input.text,
+                })
+                .build()
+                .unwrap(),
+        );
+        Ok("Ok".into())
+    }
     fn voice_msg(context: &Context, input: ScVoiceMsgReq) -> FieldResult<String> {
         let conn = DB_POOL.get().unwrap();
         let user_id = context.user_id;

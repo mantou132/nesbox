@@ -1,5 +1,6 @@
 import { html, adoptedStyle, customElement, createCSSSheet, css, connectStore, GemElement } from '@mantou/gem';
 import { polling } from 'duoyun-ui/lib/utils';
+import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
 import { getRooms } from 'src/services/api';
 import { store } from 'src/store';
@@ -10,6 +11,7 @@ import { theme } from 'src/theme';
 import 'duoyun-ui/elements/result';
 import 'src/modules/game-list';
 import 'src/modules/room-list';
+import 'src/modules/lobby-chat';
 
 const style = createCSSSheet(css`
   :host {
@@ -20,6 +22,11 @@ const style = createCSSSheet(css`
   dy-divider {
     margin-block-end: ${theme.gridGutter};
   }
+  .chat {
+    position: fixed;
+    right: ${theme.gridGutter};
+    bottom: ${theme.gridGutter};
+  }
 `);
 
 @customElement('p-rooms')
@@ -29,7 +36,7 @@ const style = createCSSSheet(css`
 export class PRoomsElement extends GemElement {
   mounted = () => {
     this.effect(
-      () => polling(getRooms, 10_000),
+      () => polling(getRooms, 7_000),
       () => [i18n.currentLanguage],
     );
   };
@@ -42,6 +49,7 @@ export class PRoomsElement extends GemElement {
             <dy-result style="height: 60vh" .illustrator=${icons.empty} .header=${i18n.get('notDataTitle')}></dy-result>
           `
         : html`<m-room-list></m-room-list>`}
+      ${!mediaQuery.isPhone ? html`<m-lobby-chat class="chat"></m-lobby-chat>` : ''}
     `;
   };
 }

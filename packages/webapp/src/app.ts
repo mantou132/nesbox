@@ -31,7 +31,7 @@ import { enterPubRoom, getAccount, getFriends, getGames, subscribeEvent } from '
 import { paramKeys, queryKeys } from 'src/constants';
 import { i18n } from 'src/i18n';
 import { preventDefault } from 'src/utils';
-import { friendStore, toggleFriendChatState } from 'src/store';
+import { clearLobbyMessage, friendStore, toggleFriendChatState } from 'src/store';
 import { ScFriendStatus } from 'src/generated/graphql';
 
 import 'duoyun-ui/elements/input-capture';
@@ -138,7 +138,10 @@ export class AppRootElement extends GemElement {
 
     this.effect(this.#enterRoom, () => [configure.user?.playing?.id]);
     this.effect(
-      () => forever(getGames),
+      () => {
+        clearLobbyMessage();
+        return forever(getGames);
+      },
       () => [i18n.currentLanguage],
     );
     forever(getAccount);

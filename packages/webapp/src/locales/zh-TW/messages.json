@@ -257,6 +257,9 @@
   "roomsTitle": {
     "message": "公開房間"
   },
+  "lobbyUserCount": {
+    "message": "當前 $1 人在大廳"
+  },
   "roomTitle": {
     "message": "遊戲"
   },

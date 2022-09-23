@@ -25,6 +25,9 @@ import {
   CreateRoom,
   CreateRoomMutation,
   CreateRoomMutationVariables,
+  EnterLobby,
+  EnterLobbyMutation,
+  EnterLobbyMutationVariables,
   EnterPubRoom,
   EnterPubRoomMutation,
   EnterPubRoomMutationVariables,
@@ -51,6 +54,9 @@ import {
   GetRooms,
   GetRoomsQuery,
   GetRoomsQueryVariables,
+  LeaveLobby,
+  LeaveLobbyMutation,
+  LeaveLobbyMutationVariables,
   LeaveRoom,
   LeaveRoomMutation,
   LeaveRoomMutationVariables,
@@ -65,6 +71,9 @@ import {
   ScUpdateRoom,
   ScUpdateRoomScreenshot,
   ScVoiceMsgKind,
+  SendLobbyMsg,
+  SendLobbyMsgMutation,
+  SendLobbyMsgMutationVariables,
   SendSignal,
   SendSignalMutation,
   SendSignalMutationVariables,
@@ -97,6 +106,33 @@ import {
   playHintSound,
   playSound,
 } from 'src/utils';
+
+export const enterLobby = async () => {
+  const { enterLobby } = await request<EnterLobbyMutation, EnterLobbyMutationVariables>(EnterLobby, {
+    input: { area: i18n.currentLanguage },
+  });
+  updateStore(store, { lobbyInfo: enterLobby });
+};
+
+export const leaveLobby = async () => {
+  request<LeaveLobbyMutation, LeaveLobbyMutationVariables>(LeaveLobby, {}, { ignoreError: true });
+};
+
+export const sendLobbyMsg = async (text: string) => {
+  await request<SendLobbyMsgMutation, SendLobbyMsgMutationVariables>(SendLobbyMsg, { input: { text } });
+  updateStore(store, {
+    lobbyMessage: [
+      ...store.lobbyMessage,
+      {
+        createdAt: Date.now(),
+        userId: configure.user!.id,
+        username: configure.user!.username,
+        nickname: configure.user!.nickname,
+        text,
+      },
+    ],
+  });
+};
 
 export const sendVoiceMsg = async (kind: ScVoiceMsgKind, payload: RTCSessionDescription | RTCIceCandidate) => {
   await request<SendVoiceMsgMutation, SendVoiceMsgMutationVariables>(SendVoiceMsg, {
@@ -344,6 +380,7 @@ export const subscribeEvent = () => {
     for await (const { event } of subscription) {
       const {
         newMessage,
+        lobbyMessage,
         newGame,
         updateRoom,
         deleteRoom,
@@ -357,6 +394,12 @@ export const subscribeEvent = () => {
         login,
         voiceSignal,
       } = event;
+
+      if (lobbyMessage) {
+        updateStore(store, {
+          lobbyMessage: [...store.lobbyMessage, lobbyMessage],
+        });
+      }
 
       if (newMessage) {
         friendStore.messages[newMessage.id] = newMessage;

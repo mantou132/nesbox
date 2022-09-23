@@ -1,9 +1,10 @@
-use crate::db::root::DB_POOL;
+use crate::{db::root::DB_POOL, schemas::lobby::leave_lobby};
 use chrono::{DateTime, Utc};
 
 use super::{
-    friend::get_friend_ids, friend::ScFriend, game::ScGame, invite::ScInvite, message::ScMessage,
-    record::pause_game, room::ScRoomBasic, user::get_user_basic, user::ScUserBasic,
+    friend::get_friend_ids, friend::ScFriend, game::ScGame, invite::ScInvite,
+    lobby::ScLobbyMessage, message::ScMessage, record::pause_game, room::ScRoomBasic,
+    user::get_user_basic, user::ScUserBasic,
 };
 use juniper::{GraphQLInputObject, GraphQLObject};
 use std::collections::HashMap;
@@ -14,6 +15,7 @@ use tokio::sync::broadcast::{self, Receiver, Sender};
 #[builder(setter(strip_option), default)]
 pub struct ScNotifyMessage {
     new_message: Option<ScMessage>,
+    lobby_message: Option<ScLobbyMessage>,
     new_game: Option<ScGame>,
     update_room: Option<ScRoomBasic>,
     delete_room: Option<i32>,
@@ -78,6 +80,10 @@ pub fn get_online_time(user_id: i32) -> Option<DateTime<Utc>> {
     map.get(&user_id).map(|sender| sender.1)
 }
 
+pub fn get_online_count() -> i32 {
+    NOTIFY_MAP.read().unwrap().len().try_into().unwrap()
+}
+
 pub fn has_user(user_id: i32) -> bool {
     let map = NOTIFY_MAP.read().unwrap();
     map.contains_key(&user_id)
@@ -117,6 +123,8 @@ impl Drop for NoyifyReceiver {
             log::debug!("{} is offline", user_id);
             // Temporary value release write lock
             NOTIFY_MAP.write().unwrap().remove(&user_id);
+
+            leave_lobby(user_id);
 
             let conn = DB_POOL.get().unwrap();
             if let Ok(user) = get_user_basic(&conn, user_id) {
