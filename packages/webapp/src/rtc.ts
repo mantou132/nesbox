@@ -145,7 +145,14 @@ export class RTC extends EventTarget {
   #createRTCPeerConnection = (userId: number) => {
     this.#deleteUser(userId);
     const conn = new RTCPeerConnection({
-      iceServers: [{ urls: 'stun:stun.services.mozilla.com' }, { urls: 'stun:stun3.l.google.com:19302' }],
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        {
+          urls: ['turn:eu-0.turn.peerjs.com:3478', 'turn:us-0.turn.peerjs.com:3478'],
+          username: 'peerjs',
+          credential: 'peerjsp',
+        },
+      ],
     });
     this.#stream.getTracks().forEach((track) => conn.addTrack(track, this.#stream));
     this.#connMap.set(userId, conn);
