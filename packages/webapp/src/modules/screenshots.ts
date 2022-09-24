@@ -82,6 +82,7 @@ export class MScreenshotsElement extends GemElement<State> {
         ref=${this.carouselRef.ref}
         @change=${({ detail }: CustomEvent<number>) => this.setState({ current: detail })}
         class="carousel"
+        .interval=${5000}
         .data=${this.links.map((img) => ({ img: getCDNSrc(img), title: '', description: '' }))}
       ></dy-carousel>
       <div class="preview">

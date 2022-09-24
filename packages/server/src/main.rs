@@ -23,8 +23,10 @@ use tokio::time;
 
 use crate::{
     db::root::DB_POOL,
+    error::Error,
     handles::*,
     schemas::{
+        room::delete_room,
         room::get_outdated_rooms,
         root::{create_guest_schema, create_schema, leave_room_and_notify},
     },
@@ -60,11 +62,16 @@ async fn main() -> io::Result<()> {
         let mut interval = time::interval(Duration::from_secs(60 * 60));
         loop {
             interval.tick().await;
-            let mut rooms = get_outdated_rooms(&DB_POOL.get().unwrap());
+            let conn = DB_POOL.get().unwrap();
+            let mut rooms = get_outdated_rooms(&conn);
             rooms.truncate(100);
             rooms.iter().for_each(|room| {
                 if let Err(err) = leave_room_and_notify(room.host) {
-                    log::error!("{:?}", err);
+                    if err.extensions().to_owned() == Error::username_not_playing() {
+                        delete_room(&conn, room.id);
+                    } else {
+                        log::error!("{:?}", err);
+                    }
                 }
             });
             log::debug!("Clean outdated rooms: {:?}", rooms);

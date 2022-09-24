@@ -350,6 +350,8 @@ pub fn leave_room_and_notify(user_id: i32) -> FieldResult<String> {
         format!("{} not playing", user_id),
         Error::username_not_playing(),
     ))?;
+    let invites = get_invites_with(&conn, user_id);
+    leave_room(&conn, user_id, room.id);
     if user_id == room.host {
         delete_room(&conn, room.id);
         notify_all(
@@ -359,8 +361,6 @@ pub fn leave_room_and_notify(user_id: i32) -> FieldResult<String> {
                 .unwrap(),
         )
     }
-    let invites = get_invites_with(&conn, user_id);
-    leave_room(&conn, user_id, room.id);
     for invite in invites {
         notify(
             invite.target_id,

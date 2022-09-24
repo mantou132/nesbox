@@ -110,30 +110,29 @@ pub async fn webhook(
 
     let conn = DB_POOL.get().unwrap();
 
-    match payload.action.as_str() {
-        "closed" => {
-            let sc_game = get_sc_new_game(&payload);
-            if sc_game.rom.is_empty() {
-                log::debug!("Not rom");
-            } else {
-                match get_game_from_name(&conn, &sc_game.name) {
-                    Some(game) => {
-                        update_game(&conn, game.id, &sc_game).ok();
+    let closed = payload.action.as_str() == "closed";
+    let edited = payload.action.as_str() == "edited" && payload.issue.state.as_str() == "closed";
+    if closed || edited {
+        let sc_game = get_sc_new_game(&payload);
+        if sc_game.rom.is_empty() {
+            log::debug!("Not rom");
+        } else {
+            match get_game_from_name(&conn, &sc_game.name) {
+                Some(game) => {
+                    update_game(&conn, game.id, &sc_game).ok();
+                }
+                None => {
+                    if let Ok(game) = create_game(&conn, &sc_game) {
+                        notify_all(
+                            ScNotifyMessageBuilder::default()
+                                .new_game(game)
+                                .build()
+                                .unwrap(),
+                        );
                     }
-                    None => {
-                        if let Ok(game) = create_game(&conn, &sc_game) {
-                            notify_all(
-                                ScNotifyMessageBuilder::default()
-                                    .new_game(game)
-                                    .build()
-                                    .unwrap(),
-                            );
-                        }
-                    }
-                };
-            }
+                }
+            };
         }
-        _ => {}
     }
     HttpResponse::Ok().json(payload)
 }

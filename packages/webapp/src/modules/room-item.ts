@@ -29,8 +29,8 @@ const style = createCSSSheet(css`
   .info {
     display: flex;
     flex-direction: column;
-    padding: 1em;
-    gap: 1em;
+    padding: 0.75em;
+    gap: 0.5em;
   }
   .text {
     text-overflow: ellipsis;
@@ -76,7 +76,7 @@ export class MRoomItemElement extends GemElement {
     return html`
       <img class="cover" draggable="false" loading="lazy" src=${this.room.screenshot || preview} />
       <div class="info">
-        <dy-heading lv="4" class="heading text">${game?.name}</dy-heading>
+        <dy-heading lv="4" class="heading text" title=${game?.name || ''}>${game?.name}</dy-heading>
         <div class="users">
           <span class="name text">${hostNickname}</span>
           <dy-use class="icon" .element=${icons.group}></dy-use>

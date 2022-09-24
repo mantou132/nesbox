@@ -29,10 +29,12 @@ pub struct GithubUser {
     login: String,
 }
 
+// https://docs.github.com/en/rest/issues/issues#get-an-issue
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GithubIssue {
     pub title: String,
     pub body: String,
+    pub state: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -40,6 +42,7 @@ pub struct GithubRepo {
     pub owner: GithubUser,
 }
 
+// https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#issues
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GithubPayload {
     pub action: String,

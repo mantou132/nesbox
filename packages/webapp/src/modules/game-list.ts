@@ -65,7 +65,7 @@ export class MGameListElement extends GemElement {
   }
 
   render = () => {
-    if (!this.#data?.length) {
+    if (!this.#data || this.#data.length < 3) {
       return html`
         <style>
           :host {
