@@ -17,6 +17,7 @@ import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 
 import { theme } from 'src/theme';
+import { icons } from 'src/icons';
 import { gotoRedirectUri, isExpiredProfile } from 'src/auth';
 import { i18n } from 'src/i18n';
 import { routes } from 'src/routes';
@@ -128,6 +129,7 @@ const style = createCSSSheet(css`
 type State = {
   username: string;
   password: string;
+  loading: boolean;
 };
 /**
  * @customElement p-login
@@ -142,6 +144,7 @@ export class PLoginElement extends GemElement<State> {
   state: State = {
     username: '',
     password: '',
+    loading: false,
   };
 
   #goto = () => {
@@ -155,12 +158,18 @@ export class PLoginElement extends GemElement<State> {
   #onChange = (evt: CustomEvent<State>) => this.setState({ ...evt.detail });
 
   #onSubmit = async () => {
-    if (!(await this.formRef.element!.valid())) return;
-    const { username, password } = this.state;
-    if (this.register) {
-      await register({ username, password });
-    } else {
-      await login({ username, password });
+    if (this.state.loading) return;
+    try {
+      this.setState({ loading: true });
+      if (!(await this.formRef.element!.valid())) return;
+      const { username, password } = this.state;
+      if (this.register) {
+        await register({ username, password });
+      } else {
+        await login({ username, password });
+      }
+    } finally {
+      this.setState({ loading: false });
     }
     gotoRedirectUri();
   };
@@ -172,7 +181,7 @@ export class PLoginElement extends GemElement<State> {
   };
 
   render = () => {
-    const { username, password } = this.state;
+    const { username, password, loading } = this.state;
     return html`
       <div class="bg-copyright">
         <nesbox-tooltip .content=${i18n.get('bgCopyright')}>
@@ -211,7 +220,7 @@ export class PLoginElement extends GemElement<State> {
           ></dy-form-item>
         </dy-form>
         <div class="actions">
-          <dy-button data-cy="submit" @click=${this.#onSubmit}>
+          <dy-button data-cy="submit" @click=${this.#onSubmit} .icon=${loading ? icons.loading : null}>
             ${this.register ? i18n.get('register') : i18n.get('login')}
           </dy-button>
           <dy-action-text @click=${this.#goto}>
