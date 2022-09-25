@@ -36,6 +36,7 @@ pub struct ScVoiceMsgReq {
 }
 
 #[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SdpExt {
     pub r#type: RTCSdpType,
     pub sdp: String,

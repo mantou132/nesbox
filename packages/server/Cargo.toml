@@ -16,7 +16,7 @@ diesel = { version = "1.4.4", features = ["postgres", "chrono", "r2d2", "serde_j
 openssl = "*"
 
 actix-web = "4"
-actix-web-lab = "0.16.1"
+actix-web-lab = "0.17.0"
 actix-cors = "0.6"
 
 juniper = { git = "https://github.com/graphql-rust/juniper", rev = "a32140cd46f17491d3f7a93b4a6c67732a29b0e8" }
@@ -38,4 +38,4 @@ tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
 async-stream = "0.3"
 pulldown-cmark = "0.9.1"
 
-webrtc = "0.4.0"
+webrtc = "0.5.1"

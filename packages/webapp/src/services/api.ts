@@ -99,13 +99,7 @@ import { configure, parseAccount, Settings } from 'src/configure';
 import { events, VoiceSignalEvent, Signal, SignalEvent } from 'src/constants';
 import { i18n, isCurrentLang } from 'src/i18n';
 import { logout } from 'src/auth';
-import {
-  convertObjectCamelCaseToSnake,
-  convertObjectSnakeToCamelCase,
-  documentVisible,
-  playHintSound,
-  playSound,
-} from 'src/utils';
+import { documentVisible, playHintSound, playSound } from 'src/utils';
 
 export const enterLobby = async () => {
   const { enterLobby } = await request<EnterLobbyMutation, EnterLobbyMutationVariables>(EnterLobby, {
@@ -136,7 +130,7 @@ export const sendLobbyMsg = async (text: string) => {
 
 export const sendVoiceMsg = async (kind: ScVoiceMsgKind, payload: RTCSessionDescription | RTCIceCandidate) => {
   await request<SendVoiceMsgMutation, SendVoiceMsgMutationVariables>(SendVoiceMsg, {
-    input: { json: JSON.stringify(convertObjectCamelCaseToSnake(JSON.parse(JSON.stringify(payload)))), kind },
+    input: { json: JSON.stringify(payload), kind },
   });
 };
 
@@ -513,7 +507,7 @@ export const subscribeEvent = () => {
           new CustomEvent<VoiceSignalEvent>(events.VOICE_SIGNAL, {
             detail: {
               roomId: voiceSignal.roomId,
-              signal: convertObjectSnakeToCamelCase(JSON.parse(voiceSignal.json)),
+              signal: JSON.parse(voiceSignal.json),
             },
           }),
         );
