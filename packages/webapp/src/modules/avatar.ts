@@ -141,6 +141,13 @@ export class MAvatarElement extends GemElement {
           handle: this.#addGame,
         },
         {
+          text: i18n.get('official'),
+          tagIcon: icons.openNewWindow,
+          handle: () => {
+            open(location.origin);
+          },
+        },
+        {
           text: '---',
         },
         {
