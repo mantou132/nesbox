@@ -68,5 +68,18 @@ export async function fetchList() {
   log('只有日英名称', items.filter((e) => !e.zh && e.ja && e.en).length);
   log('只有英名称', items.filter((e) => !e.zh && !e.ja && e.en).length);
 
+  const pGroup: Record<string, number> = {};
+  items.forEach((e) => (pGroup[e.platform] = (pGroup[e.platform] || 0) + 1));
+  log(
+    '平台',
+    Object.entries(pGroup).sort((b, a) => a[1] - b[1]),
+  );
+  const publisherGroup: Record<string, number> = {};
+  items.forEach((e) => (publisherGroup[e.publisher] = (publisherGroup[e.publisher] || 0) + 1));
+  log(
+    '发行商',
+    Object.entries(publisherGroup).sort((b, a) => a[1] - b[1]),
+  );
+
   return items;
 }

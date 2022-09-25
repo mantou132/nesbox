@@ -1,0 +1,4 @@
+ALTER TABLE games DROP COLUMN platform;
+ALTER TABLE games DROP COLUMN series;
+ALTER TABLE games DROP COLUMN kind;
+ALTER TABLE games DROP COLUMN max_player;

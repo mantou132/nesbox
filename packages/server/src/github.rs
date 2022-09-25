@@ -1,8 +1,9 @@
 use actix_web::HttpRequest;
 use data_encoding::HEXLOWER;
 use pulldown_cmark::{Event, Options, Parser, Tag};
+use std::str::FromStr;
 
-use crate::schemas::game::ScNewGame;
+use crate::schemas::game::*;
 use ring::hmac::{verify, Key, HMAC_SHA256};
 
 pub fn validate(req: &HttpRequest, secret: &str, data: &[u8]) -> bool {
@@ -29,12 +30,18 @@ pub struct GithubUser {
     login: String,
 }
 
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
+pub struct GithubLabel {
+    name: String,
+}
+
 // https://docs.github.com/en/rest/issues/issues#get-an-issue
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GithubIssue {
     pub title: String,
     pub body: String,
     pub state: String,
+    pub labels: Vec<GithubLabel>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -86,21 +93,58 @@ pub fn get_sc_new_game(payload: &GithubPayload) -> ScNewGame {
         preview,
         rom,
         screenshots,
+        kind: payload
+            .issue
+            .labels
+            .iter()
+            .find(|label| label.name.starts_with("game.kind."))
+            .and_then(|label| label.name.split_terminator(".").last())
+            .and_then(|s| ScGameKind::from_str(s).ok()),
+        max_player: payload
+            .issue
+            .labels
+            .iter()
+            .find(|label| label.name.starts_with("game.max_player."))
+            .and_then(|label| label.name.split_terminator(".").last())
+            .and_then(|s| s.parse::<i32>().ok()),
+        platform: payload
+            .issue
+            .labels
+            .iter()
+            .find(|label| label.name.starts_with("game.platform."))
+            .and_then(|label| label.name.split_terminator(".").last())
+            .and_then(|s| ScGamePlatform::from_str(s).ok()),
+        series: payload
+            .issue
+            .labels
+            .iter()
+            .find(|label| label.name.starts_with("game.series."))
+            .and_then(|label| label.name.split_terminator(".").last())
+            .and_then(|s| ScGameSeries::from_str(s).ok()),
     }
 }
 
 #[cfg(test)]
 mod tests {
     use crate::{
-        github::{get_sc_new_game, GithubIssue, GithubPayload, GithubRepo, GithubUser},
-        schemas::game::ScNewGame,
+        github::{
+            get_sc_new_game, GithubIssue, GithubLabel, GithubPayload, GithubRepo, GithubUser,
+        },
+        schemas::game::*,
     };
 
     #[test]
     fn parse_github_payload() {
         let payload = GithubPayload {
-            action: "".into(),
+            action: "closed".into(),
             issue: GithubIssue {
+                labels: vec![
+                    GithubLabel {name: "game.kind.act".into()}, 
+                    GithubLabel {name: "game.max_player.1".into()}, 
+                    GithubLabel {name: "game.platform.nes".into()},
+                    GithubLabel {name: "game.series.tmnt".into()},
+                ],
+                state: "open".into(),
                 title: "name".into(),
                 body: "![NekketsuKakutouDensetsu_frontcover](https://user-images.githubusercontent.com/3841872/168952574-26de855e-b7cd-43fe-ab94-093a2903832d.png)\r\n\r\nゲームモードは、ストーリーにそって闘いを進めていく「ストーリーモード」と最高4人でどたばたと闘い合う「バトルモード」の2種類のモードがあるぞ！\r\n![ABUIABACGAAg9eiD9gUo_I7-uQYwmgM4mgM](https://user-images.githubusercontent.com/3841872/168967700-44131eb9-6e33-48d0-9f3d-e71e9fcdb51b.jpg)\r\n[legend.nes.zip](https://github.com/mantou132/nesbox/files/8713065/legend.nes.zip)\r\n".into(),
             },
@@ -116,7 +160,11 @@ mod tests {
                 description: "![NekketsuKakutouDensetsu_frontcover](https://user-images.githubusercontent.com/3841872/168952574-26de855e-b7cd-43fe-ab94-093a2903832d.png)\r\n\r\nゲームモードは、ストーリーにそって闘いを進めていく「ストーリーモード」と最高4人でどたばたと闘い合う「バトルモード」の2種類のモードがあるぞ！\r\n![ABUIABACGAAg9eiD9gUo_I7-uQYwmgM4mgM](https://user-images.githubusercontent.com/3841872/168967700-44131eb9-6e33-48d0-9f3d-e71e9fcdb51b.jpg)\r\n[legend.nes.zip](https://github.com/mantou132/nesbox/files/8713065/legend.nes.zip)\r\n".into(),
                 preview: "https://user-images.githubusercontent.com/3841872/168952574-26de855e-b7cd-43fe-ab94-093a2903832d.png".into(),
                 rom: "https://github.com/mantou132/nesbox/files/8713065/legend.nes.zip".into(),
-                screenshots: vec!["https://user-images.githubusercontent.com/3841872/168967700-44131eb9-6e33-48d0-9f3d-e71e9fcdb51b.jpg".into()]
+                screenshots: vec!["https://user-images.githubusercontent.com/3841872/168967700-44131eb9-6e33-48d0-9f3d-e71e9fcdb51b.jpg".into()],
+                kind: Some(ScGameKind::Act),
+                max_player: Some(1),
+                platform: Some(ScGamePlatform::Nes),
+                series: Some(ScGameSeries::Tmnt),
             }
         );
     }

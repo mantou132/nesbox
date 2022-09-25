@@ -7,6 +7,10 @@ fragment ScGamePart on ScGame {
   updatedAt
   rom
   screenshots
+  platform
+  kind
+  series
+  maxPlayer
 }
 
 fragment ScMessagePart on ScMessage {

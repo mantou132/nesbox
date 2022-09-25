@@ -110,9 +110,12 @@ pub async fn webhook(
 
     let conn = DB_POOL.get().unwrap();
 
-    let closed = payload.action.as_str() == "closed";
-    let edited = payload.action.as_str() == "edited" && payload.issue.state.as_str() == "closed";
-    if closed || edited {
+    let action = payload.action.as_str();
+    let state = payload.issue.state.as_str();
+    let closed = action == "closed";
+    let edited = action == "edited" && state == "closed";
+    let labeled = action == "labeled" && state == "closed";
+    if closed || edited || labeled {
         let sc_game = get_sc_new_game(&payload);
         if sc_game.rom.is_empty() {
             log::debug!("Not rom");

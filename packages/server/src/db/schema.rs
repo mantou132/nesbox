@@ -39,6 +39,10 @@ table! {
         updated_at -> Timestamp,
         rom -> Varchar,
         screenshots -> Nullable<Text>,
+        platform -> Nullable<Varchar>,
+        series -> Nullable<Varchar>,
+        kind -> Nullable<Varchar>,
+        max_player -> Nullable<Int4>,
     }
 }
 
@@ -123,14 +127,5 @@ joinable!(rooms -> games (game_id));
 joinable!(rooms -> users (host));
 
 allow_tables_to_appear_in_same_query!(
-    comments,
-    favorites,
-    friends,
-    games,
-    invites,
-    messages,
-    playing,
-    records,
-    rooms,
-    users,
+    comments, favorites, friends, games, invites, messages, playing, records, rooms, users,
 );
