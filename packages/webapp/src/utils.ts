@@ -1,9 +1,10 @@
-import { history, render, TemplateResult } from '@mantou/gem';
+import { history, QueryString, render, TemplateResult } from '@mantou/gem';
 import { matchPath, RouteItem } from 'duoyun-ui/elements/route';
 import { Time } from 'duoyun-ui/lib/time';
+import { ValueOf } from 'duoyun-ui/lib/types';
 
 import { configure } from 'src/configure';
-import { githubIssue, VideoRefreshRate } from 'src/constants';
+import { githubIssue, queryKeys, VideoRefreshRate } from 'src/constants';
 import { logger } from 'src/logger';
 
 export const getCorSrc = (url: string) => {
@@ -88,6 +89,22 @@ export const formatTime = (timestamp: number) => {
 };
 
 export const matchRoute = (route: RouteItem) => matchPath(route.pattern, history.getParams().path);
+
+export function changeQuery(
+  key: ValueOf<typeof queryKeys>,
+  value: undefined | null | string | number | string[] | number[],
+) {
+  const p = history.getParams();
+  const query = new QueryString(p.query);
+  if (!value) {
+    query.delete(key);
+  } else if (Array.isArray(value)) {
+    query.setAny(key, value);
+  } else {
+    query.set(key, String(value));
+  }
+  history.replace({ ...p, query });
+}
 
 export const preventDefault = (fn: () => void) => {
   return (event: KeyboardEvent) => {

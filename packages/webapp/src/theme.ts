@@ -42,13 +42,17 @@ const defaultTheme = {
   normalRound: '4px',
   smallRound: '2px',
   gridGutter: '24px',
-  popupZIndex: '2147483646',
+  popupZIndex: '2147483644',
   timingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
   timingEasingFunction: 'cubic-bezier(0.16, 1, 0.29, 0.99)',
-  ...(isMtApp || mediaQuery.isPhone
+  ...(isMtApp
     ? {
         normalRound: '0',
         smallRound: '0',
+      }
+    : {}),
+  ...(isMtApp || mediaQuery.isPhone
+    ? {
         gridGutter: '16px',
       }
     : {}),
@@ -66,6 +70,9 @@ const punkTheme = {
   disabledColor: '#54566f',
   titleBarColor: '#0d0f1e',
   maskAlpha: '0.6',
+
+  normalRound: '0',
+  smallRound: '0',
 };
 
 export const theme = createTheme({ ...defaultTheme });

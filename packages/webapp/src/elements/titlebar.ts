@@ -32,7 +32,7 @@ const style = createCSSSheet(css`
     font-size: 0.75em;
     background: black;
     color: white;
-    z-index: 2147483647;
+    z-index: 2147483645;
     justify-content: center;
     flex-shrink: 0;
   }

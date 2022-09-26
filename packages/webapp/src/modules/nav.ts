@@ -149,7 +149,9 @@ export class MNavElement extends GemElement {
               ></dy-use>
             `
           : html`
-              <dy-active-link class="link" .route=${routes.games as RouteItem}>${routes.games.title}</dy-active-link>
+              <dy-active-link class="link" .route=${routes.games as RouteItem} .pattern=${routes.games.pattern}>
+                ${routes.games.title}
+              </dy-active-link>
               <dy-active-link class="link" .route=${routes.favorites as RouteItem}>
                 ${routes.favorites.title}
               </dy-active-link>

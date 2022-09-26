@@ -248,6 +248,84 @@
   "allGame": {
     "message": "所有游戏"
   },
+  "gameKind": {
+    "message": "游戏类型"
+  },
+  "gameKindAct": {
+    "message": "动作冒险"
+  },
+  "gameKindFtg": {
+    "message": "格斗竞技"
+  },
+  "gameKindStg": {
+    "message": "飞行射击"
+  },
+  "gameKindSpg": {
+    "message": "休闲体育"
+  },
+  "gameKindRpg": {
+    "message": "角色扮演"
+  },
+  "gameKindStrategy": {
+    "message": "策略烧脑"
+  },
+  "gameKindOther": {
+    "message": "其他"
+  },
+  "gameSeries": {
+    "message": "所属系列"
+  },
+  "gameSeriesMario": {
+    "message": "马里奥系列"
+  },
+  "gameSeriesContra": {
+    "message": "魂斗罗系列"
+  },
+  "gameSeriesDoubleDragon": {
+    "message": "双截龙系列"
+  },
+  "gameSeriesMegaMan": {
+    "message": "洛克人系列"
+  },
+  "gameSeriesNekketsu": {
+    "message": "热血系列"
+  },
+  "gameSeriesNinjaGaiden": {
+    "message": "忍者龙剑系列"
+  },
+  "gameSeriesStreetFighter": {
+    "message": "街头霸王系列"
+  },
+  "gameSeriesTank": {
+    "message": "坦克大战系列"
+  },
+  "gameSeriesTmnt": {
+    "message": "忍者神龟系列"
+  },
+  "gameSeriesAdventureIsland": {
+    "message": "冒险岛系列"
+  },
+  "gameSeriesChipDale": {
+    "message": "松鼠大作战系列"
+  },
+  "gameSeriesDragonBall": {
+    "message": "龙珠系列"
+  },
+  "gameSeriesLodeRunner": {
+    "message": "淘金者系列"
+  },
+  "gameSeriesSanGokuShi": {
+    "message": "三国志系列"
+  },
+  "gameMaxPlayer": {
+    "message": "最多玩家"
+  },
+  "gamePlayer": {
+    "message": "$1 个玩家"
+  },
+  "gameNoLimit": {
+    "message": "不限"
+  },
   "gameTitle": {
     "message": "游戏"
   },

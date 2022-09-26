@@ -65,6 +65,9 @@ export const queryKeys = {
   REDIRECT_URI: 'redirect_uri',
   JOIN_ROOM: 'join_room',
   ROOM_FROM: 'room_from',
+  GAME_KIND: 'game_kind',
+  GAME_PLAYER: 'game_player',
+  GAME_SERIES: 'game_series',
 };
 
 // clean outdate cache data

@@ -248,6 +248,84 @@
   "allGame": {
     "message": "すべてのゲーム"
   },
+  "gameKind": {
+    "message": "カテゴリー"
+  },
+  "gameKindAct": {
+    "message": "Action"
+  },
+  "gameKindFtg": {
+    "message": "Fighting"
+  },
+  "gameKindStg": {
+    "message": "Shooting"
+  },
+  "gameKindSpg": {
+    "message": "Sports"
+  },
+  "gameKindRpg": {
+    "message": "RPG"
+  },
+  "gameKindStrategy": {
+    "message": "Strategy"
+  },
+  "gameKindOther": {
+    "message": "他の"
+  },
+  "gameSeries": {
+    "message": "シリーズ"
+  },
+  "gameSeriesMario": {
+    "message": "Mario"
+  },
+  "gameSeriesContra": {
+    "message": "Contra"
+  },
+  "gameSeriesDoubleDragon": {
+    "message": "Double Dragon"
+  },
+  "gameSeriesMegaMan": {
+    "message": "Mega Man"
+  },
+  "gameSeriesNekketsu": {
+    "message": "Nekketsu"
+  },
+  "gameSeriesNinjaGaiden": {
+    "message": "Ninja Gaiden"
+  },
+  "gameSeriesStreetFighter": {
+    "message": "Street Fighter"
+  },
+  "gameSeriesTank": {
+    "message": "Tank"
+  },
+  "gameSeriesTmnt": {
+    "message": "TMNT"
+  },
+  "gameSeriesAdventureIsland": {
+    "message": "Adventure Island"
+  },
+  "gameSeriesChipDale": {
+    "message": "Chip Dale"
+  },
+  "gameSeriesDragonBall": {
+    "message": "Dragon Ball"
+  },
+  "gameSeriesLodeRunner": {
+    "message": "Lode Runner"
+  },
+  "gameSeriesSanGokuShi": {
+    "message": "San Goku Shi"
+  },
+  "gameMaxPlayer": {
+    "message": "プレーヤー"
+  },
+  "gamePlayer": {
+    "message": "$1 プレーヤー"
+  },
+  "gameNoLimit": {
+    "message": "制限なし"
+  },
   "gameTitle": {
     "message": "ゲーム"
   },
