@@ -103,7 +103,7 @@ import { documentVisible, playHintSound, playSound } from 'src/utils';
 
 export const enterLobby = async () => {
   const { enterLobby } = await request<EnterLobbyMutation, EnterLobbyMutationVariables>(EnterLobby, {
-    input: { area: i18n.currentLanguage },
+    input: { area: i18n.currentLanguage.split('-')[0] },
   });
   updateStore(store, { lobbyInfo: enterLobby });
 };

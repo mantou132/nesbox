@@ -28,7 +28,7 @@ pub enum ScGameKind {
     Rpg,
     // 及时策略
     Rts,
-    // 回合制战略
+    // 回合制战略、棋牌
     Tbs,
     // 模擬
     Slg,
@@ -36,7 +36,7 @@ pub enum ScGameKind {
     Stg,
     // 运动
     Spg,
-    // 棋牌、桌游
+    // 桌游
     Tbg,
     // 益智解谜
     Pzg,
