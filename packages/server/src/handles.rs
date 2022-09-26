@@ -115,26 +115,34 @@ pub async fn webhook(
     let closed = action == "closed";
     let edited = action == "edited" && state == "closed";
     let labeled = action == "labeled" && state == "closed";
-    if closed || edited || labeled {
-        let sc_game = get_sc_new_game(&payload);
-        if sc_game.rom.is_empty() {
-            log::debug!("Not rom");
-        } else {
-            match get_game_from_name(&conn, &sc_game.name) {
-                Some(game) => {
-                    update_game(&conn, game.id, &sc_game).ok();
-                }
-                None => {
-                    if let Ok(game) = create_game(&conn, &sc_game) {
-                        notify_all(
-                            ScNotifyMessageBuilder::default()
-                                .new_game(game)
-                                .build()
-                                .unwrap(),
-                        );
+    if payload
+        .issue
+        .labels
+        .iter()
+        .find(|label| label.name == "duplicate")
+        .is_none()
+    {
+        if closed || edited || labeled {
+            let sc_game = get_sc_new_game(&payload);
+            if sc_game.rom.is_empty() {
+                log::debug!("Not rom");
+            } else {
+                match get_game_from_name(&conn, &sc_game.name) {
+                    Some(game) => {
+                        update_game(&conn, game.id, &sc_game).ok();
                     }
-                }
-            };
+                    None => {
+                        if let Ok(game) = create_game(&conn, &sc_game) {
+                            notify_all(
+                                ScNotifyMessageBuilder::default()
+                                    .new_game(game)
+                                    .build()
+                                    .unwrap(),
+                            );
+                        }
+                    }
+                };
+            }
         }
     }
     HttpResponse::Ok().json(payload)

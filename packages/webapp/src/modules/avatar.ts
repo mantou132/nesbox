@@ -2,24 +2,24 @@ import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, con
 import { ContextMenu } from 'duoyun-ui/elements/menu';
 import { waitLoading } from 'duoyun-ui/elements/wait';
 import { commonHandle } from 'duoyun-ui/lib/hotkeys';
-import { ElementOf, isNotNullish } from 'duoyun-ui/lib/types';
 import { Modal } from 'duoyun-ui/elements/modal';
+import { locale } from 'duoyun-ui/lib/locale';
 
 import { configure, getShortcut, toggleScreencastMode, toggleSettingsState } from 'src/configure';
 import { logout } from 'src/auth';
 import { changeTheme, theme, ThemeName, themeNames } from 'src/theme';
-import { i18n, isCurrentLang, langNames } from 'src/i18n';
+import { i18n, langNames } from 'src/i18n';
 import { icons } from 'src/icons';
-import { getAvatar, getCDNSrc, getGithubGames } from 'src/utils';
-import { store } from 'src/store';
-import { githubIssue, githubRelease } from 'src/constants';
-import { logger } from 'src/logger';
+import { getAvatar } from 'src/utils';
+import { githubIssue } from 'src/constants';
 import { routes } from 'src/routes';
+import type { MNewGameElement } from 'src/modules/new-game';
 
 import 'duoyun-ui/elements/coach-mark';
 import 'duoyun-ui/elements/route';
 import 'duoyun-ui/elements/avatar';
 import 'duoyun-ui/elements/options';
+import 'src/modules/new-game';
 
 const style = createCSSSheet(css`
   :host {
@@ -55,47 +55,27 @@ export class MAvatarElement extends GemElement {
   }
 
   #addGame = async () => {
-    // 重名时游戏名称添加了`（中文/日本語）`后缀
-    const map = new Map(
-      Object.values(store.games)
-        .filter(isNotNullish)
-        .map((game) => [game.name.replace(/（.*）$/, '').replace(/\/.*$/, ''), game.id]),
+    const newGameElement = await Modal.open<MNewGameElement>({
+      header: i18n.get('addGame'),
+      body: html`<m-new-game></m-new-game>`,
+      okText: locale.nextTour,
+    });
+
+    open(
+      `${githubIssue}/new?${new URLSearchParams({
+        title: newGameElement.state.title,
+        body: newGameElement.state.description,
+        labels: [
+          newGameElement.state.kind,
+          newGameElement.state.series,
+          newGameElement.state.maxPlayer,
+          newGameElement.state.platform,
+        ]
+          .filter((e) => !!e)
+          .join(),
+        assignees: 'mantou132',
+      })}`,
     );
-
-    const tip = i18n.get(
-      'addGameDetail',
-      (e) => html`<dy-link @click=${() => open(`${githubRelease}/tag/0.0.1`)}>${e}</dy-link>`,
-    );
-
-    await Modal.confirm(html`<dy-paragraph style="width:min(400px, 100vw)"> ${tip} </dy-paragraph>`);
-
-    const excludeGames = ['马力欧兄弟/水管马力欧', '忍者神龟 街机版', 'Mighty 快打旋风', 'Super C'];
-    const list: { title: string; description: string }[] = (
-      await waitLoading((await fetch(getCDNSrc(`${githubRelease}/download/0.0.1/metadata.json`))).json())
-    )
-      .filter((e: any) => isCurrentLang({ ...e, name: e.title }) && !excludeGames.includes(e.title))
-      .map((e: any) => ({ ...e, title: e.title.replace(/\/.*$/, '') }));
-
-    const find = async (ls: typeof list): Promise<ElementOf<typeof list> | undefined> => {
-      const index = ls.findIndex((e) => !map.has(e.title));
-      const item = ls[index];
-      if (!item) return;
-      const links = await getGithubGames(item.title);
-      const link = links.find((e) => e.textContent === item.title);
-      if (link) logger.info('Game exist:', link.textContent);
-      return link ? await find(ls.slice(index, ls.length)) : item;
-    };
-    const item = await waitLoading(find(list));
-    if (item) {
-      open(
-        `${githubIssue}/new?${new URLSearchParams({
-          title: item.title,
-          body: item.description,
-          labels: 'game',
-          assignees: 'mantou132',
-        })}`,
-      );
-    }
   };
 
   #onClick = (event: Event) => {

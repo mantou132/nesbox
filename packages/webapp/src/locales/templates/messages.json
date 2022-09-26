@@ -366,7 +366,10 @@
     "message": "添加游戏"
   },
   "addGameDetail": {
-    "message": "创建 Github issue，填写好标题，简介或者玩法，并上传截图（第一张为封面）和 .nes 文件的 zip 压缩包后等待维护者处理，处理后游戏将添加到 NESBox。截图和 nes 参考可以在$1<这里>下载"
+    "message": "游戏需要名称、截图（第一张为封面）和 ROM 文件（ZIP 压缩包），填写好简单信息后将打开一个新的 Github Issue，你可以在那里上传文件，编写攻略，Issue 关闭后游戏将添加到 NESBox。截图和 ROM 参考可以在$1<这里>下载"
+  },
+  "gameName": {
+    "message": "游戏名称"
   },
   "gameLastPlay": {
     "message": "$1玩过"

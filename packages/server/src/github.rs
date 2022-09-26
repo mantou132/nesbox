@@ -32,7 +32,7 @@ pub struct GithubUser {
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct GithubLabel {
-    name: String,
+    pub name: String,
 }
 
 // https://docs.github.com/en/rest/issues/issues#get-an-issue
