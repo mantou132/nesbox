@@ -258,7 +258,6 @@ export class PRoomElement extends GemElement {
   };
 
   #saveScreenshot = async () => {
-    if (!this.nesbox.element!.romBuffer) return;
     if (await this.nesbox.element!.screenshot()) {
       Toast.open('success', i18n.get('tipScreenshotSaved'));
     }
