@@ -526,6 +526,7 @@ export class MNesElement extends GemElement<State> {
 
   loadState = (buffer: Uint8Array) => {
     this.#nes?.load_state(buffer);
+    this.#setVideoFilter();
   };
 
   getRam = () => {
