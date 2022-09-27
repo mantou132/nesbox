@@ -34,7 +34,7 @@ const style = createCSSSheet(css`
   .tabs::part(current-tab) {
     color: currentColor;
     background-color: ${theme.hoverBackgroundColor};
-    border-radius: ${`${theme.smallRound} 0 0 ${theme.smallRound}`};
+    border-radius: ${`${theme.normalRound} 0 0 ${theme.normalRound}`};
   }
   .tabs::part(marker) {
     display: none;

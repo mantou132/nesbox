@@ -14,6 +14,9 @@ export const themeNames = {
   get punk() {
     return i18n.get('punkTheme');
   },
+  get retro() {
+    return i18n.get('retroTheme');
+  },
 };
 
 export type ThemeName = keyof typeof themeNames;
@@ -30,6 +33,7 @@ const defaultTheme = {
   borderColor: '#515151',
   disabledColor: '#333',
   titleBarColor: '#000',
+  imageFilter: 'none',
   maskAlpha: '0.4',
   // same of light/dark
   // https://spectrum.adobe.com/page/color/#Semantic-colors
@@ -39,8 +43,8 @@ const defaultTheme = {
   noticeColor: '#e68619',
   negativeColor: '#e34850',
   focusColor: '#2680eb',
-  normalRound: '4px',
-  smallRound: '2px',
+  normalRound: '10px',
+  smallRound: '4px',
   gridGutter: '24px',
   popupZIndex: '2147483644',
   timingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
@@ -69,8 +73,25 @@ const punkTheme = {
   borderColor: '#222b89',
   disabledColor: '#54566f',
   titleBarColor: '#0d0f1e',
+  imageFilter: 'saturate(110%)',
   maskAlpha: '0.6',
+  normalRound: '0',
+  smallRound: '0',
+};
 
+const retroTheme = {
+  primaryColor: '#ef9017',
+  highlightColor: '#f4e6d9',
+  textColor: '#f4e6d9',
+  describeColor: '#817971',
+  backgroundColor: '#0b0a06',
+  lightBackgroundColor: '#1e1e1a',
+  hoverBackgroundColor: '#2f2f2a',
+  borderColor: '#515151',
+  disabledColor: '#333',
+  titleBarColor: '#000',
+  imageFilter: 'grayscale(0.1) contrast(90%) saturate(90%)',
+  maskAlpha: '0.7',
   normalRound: '0',
   smallRound: '0',
 };
@@ -84,6 +105,9 @@ export function changeTheme(name: ThemeName) {
   switch (name) {
     case 'punk':
       updateTheme(theme, punkTheme);
+      break;
+    case 'retro':
+      updateTheme(theme, retroTheme);
       break;
     case 'default':
       updateTheme(theme, defaultTheme);

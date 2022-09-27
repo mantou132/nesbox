@@ -112,7 +112,12 @@ export class MLobbyChatElement extends GemElement<State> {
             ></dy-input>
           `
         : html`
-            <dy-button color="cancel" .icon=${icons.chat} @click=${() => this.setState({ start: true })}>
+            <dy-button
+              title=${`Online ${lobbyInfo?.onlineUserCount}`}
+              color="cancel"
+              .icon=${icons.chat}
+              @click=${() => this.setState({ start: true })}
+            >
               ${i18n.get('lobbyUserCount', String(lobbyInfo?.lobbyUserCount || 1))}
             </dy-button>
           `}

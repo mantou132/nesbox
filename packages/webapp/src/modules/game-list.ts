@@ -7,6 +7,7 @@ import {
   css,
   connectStore,
   boolattribute,
+  repeat,
 } from '@mantou/gem';
 import { isNotNullish } from 'duoyun-ui/lib/types';
 
@@ -204,7 +205,8 @@ export class MGameListElement extends GemElement {
             <dy-divider></dy-divider>
           `}
       <div class="list">
-        ${this.#filteredData?.map(
+        ${repeat(
+          this.#filteredData || [],
           (id) =>
             store.games[id] &&
             html`<m-game-item .game=${store.games[id]!} .favorited=${this.#favSet.has(id)}></m-game-item>`,

@@ -220,7 +220,7 @@ export class PLoginElement extends GemElement<State> {
           ></dy-form-item>
         </dy-form>
         <div class="actions">
-          <dy-button data-cy="submit" @click=${this.#onSubmit} .icon=${loading ? icons.loading : null}>
+          <dy-button data-cy="submit" @click=${this.#onSubmit} .icon=${loading ? icons.loading : undefined}>
             ${this.register ? i18n.get('register') : i18n.get('login')}
           </dy-button>
           <dy-action-text @click=${this.#goto}>

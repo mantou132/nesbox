@@ -21,7 +21,7 @@ const style = createCSSSheet(css`
     background-color: ${theme.backgroundColor};
     display: flex;
     flex-direction: column;
-    box-shadow: 0 0px 10px rgba(0, 0, 0, calc(${theme.maskAlpha} - 0.15));
+    box-shadow: 0 0 0.75em rgba(0, 0, 0, calc(${theme.maskAlpha} - 0.15));
   }
   .list {
     overscroll-behavior: contain;
@@ -36,9 +36,6 @@ const style = createCSSSheet(css`
     flex-direction: column;
     gap: 1em;
     padding: 1em;
-  }
-  .button {
-    border-radius: ${theme.smallRound};
   }
 `);
 

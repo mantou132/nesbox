@@ -13,11 +13,11 @@ import { isMac } from 'duoyun-ui/lib/hotkeys';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { Toast } from 'duoyun-ui/elements/toast';
 import { GemTitleElement } from 'duoyun-ui/elements/title';
-import { createPath } from 'duoyun-ui/elements/route';
+import { createPath, RouteItem } from 'duoyun-ui/elements/route';
 import { waitLoading } from 'duoyun-ui/elements/wait';
 
 import { getCDNSrc, getCorSrc } from 'src/utils';
-import { githubRelease, githubUrl } from 'src/constants';
+import { githubRelease } from 'src/constants';
 import { theme } from 'src/theme';
 import leftSvg from 'src/images/homepage/left.svg';
 import rightSvg from 'src/images/homepage/right.svg';
@@ -48,6 +48,7 @@ const style = createCSSSheet(css`
     display: block;
     height: 100vh;
     overflow: auto;
+    scrollbar-width: thin;
   }
   .content {
     max-width: 70rem;
@@ -157,6 +158,7 @@ const style = createCSSSheet(css`
   }
   section img {
     width: min(40em, 90vw);
+    height: auto;
   }
   section:not(.screenshot) img {
     box-sizing: border-box;
@@ -268,8 +270,6 @@ export class PHomepageElement extends GemElement {
             <span>${GemTitleElement.defaultTitle}</span>
           </dy-link>
           <div class="links">
-            <dy-link href=${githubUrl}>Github</dy-link>
-            <dy-link href="/login" data-cy="login">${i18n.get('login')}</dy-link>
             <dy-select
               borderless
               @change=${this.#onLangChange}
@@ -279,6 +279,7 @@ export class PHomepageElement extends GemElement {
                 value: code,
               }))}
             ></dy-select>
+            <dy-link .route=${routes.login as RouteItem} data-cy="login">${i18n.get('login')}</dy-link>
           </div>
         </nav>
         <div class="content main">
@@ -299,7 +300,7 @@ export class PHomepageElement extends GemElement {
           ([img, title, desc]) => html`
             <section>
               <div class="content">
-                <img draggable="false" src=${img} loading="lazy" alt="feature image" />
+                <img draggable="false" src=${img} loading="lazy" alt="feature image" width="729" height="628" />
                 <div class="feature">
                   <dy-heading lv="2">${title}</dy-heading>
                   <dy-paragraph>${desc}</dy-paragraph>
@@ -314,6 +315,8 @@ export class PHomepageElement extends GemElement {
               alt="NESBox Screenshot"
               draggable="false"
               loading="lazy"
+              width="800"
+              height="530"
               srcset=${`${getCDNSrc(
                 'https://user-images.githubusercontent.com/3841872/188081531-c0dd68b6-3603-42ae-9df0-8dad7fb211f4.png',
               )} 1024w, ${getCDNSrc(

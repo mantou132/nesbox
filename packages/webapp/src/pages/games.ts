@@ -67,7 +67,7 @@ const style = createCSSSheet(css`
       border-radius: 0;
     }
     .top::part(title) {
-      text-shadow: 0 0.1em 0.3em rgba(0, 0, 0, ${theme.maskAlpha});
+      text-shadow: 0 0.1em 0.3em rgba(0, 0, 0, 0.6);
     }
     .top::part(description) {
       display: none;

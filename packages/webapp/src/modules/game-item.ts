@@ -35,8 +35,8 @@ const style = createCSSSheet(css`
     top: 0.3em;
     right: 0.3em;
   }
-  .play {
-    border-radius: ${theme.smallRound};
+  .actions dy-button {
+    box-shadow: 0 0.1em 0.5em rgba(0, 0, 0, 0.3);
   }
   :host(:not(:hover):not(:focus)) .play {
     opacity: 0;
@@ -48,6 +48,7 @@ const style = createCSSSheet(css`
     border-radius: ${theme.normalRound};
     object-fit: cover;
     box-shadow: 0 0 0 0.5px ${theme.borderColor};
+    filter: ${theme.imageFilter};
   }
   :host(:hover) .cover {
     opacity: 0.7;

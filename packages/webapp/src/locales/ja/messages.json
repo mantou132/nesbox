@@ -33,10 +33,13 @@
     "message": "トピックを選択します"
   },
   "defaultTheme": {
-    "message": "デフォルトのテーマ"
+    "message": "デフォルト"
   },
   "punkTheme": {
-    "message": "パンクテーマ"
+    "message": "パンク"
+  },
+  "retroTheme": {
+    "message": "レトロ"
   },
   "logoutAccount": {
     "message": "サインアウト “$1”"

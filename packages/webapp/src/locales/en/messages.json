@@ -38,6 +38,9 @@
   "punkTheme": {
     "message": "Punk"
   },
+  "retroTheme": {
+    "message": "Retro"
+  },
   "logoutAccount": {
     "message": "Logout \"$1\""
   },

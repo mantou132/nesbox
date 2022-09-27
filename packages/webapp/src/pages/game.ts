@@ -50,6 +50,9 @@ const style = createCSSSheet(css`
   .preview {
     box-shadow: 0 0 0 0.5px ${theme.borderColor};
   }
+  .preview {
+    filter: ${theme.imageFilter};
+  }
   .info {
     flex-grow: 1;
     display: flex;
@@ -95,7 +98,7 @@ const style = createCSSSheet(css`
     display: flex;
     justify-content: space-between;
     padding: 0.5em;
-    background: rgba(0, 0, 0, ${theme.maskAlpha});
+    background: rgba(0, 0, 0, 0.6);
   }
   .stats-icon {
     gap: 0.2em;

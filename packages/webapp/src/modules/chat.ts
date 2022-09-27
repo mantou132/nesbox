@@ -37,7 +37,7 @@ const style = createCSSSheet(css`
     height: min(24em, calc(100vh - 2em));
     background-color: ${theme.lightBackgroundColor};
     border: 1px solid ${theme.borderColor};
-    box-shadow: 0 5px 10px rgba(0, 0, 0, calc(${theme.maskAlpha} - 0.15));
+    box-shadow: 0 0.3em 0.75em rgba(0, 0, 0, calc(${theme.maskAlpha} - 0.15));
     box-sizing: border-box;
     border-radius: ${theme.normalRound};
   }

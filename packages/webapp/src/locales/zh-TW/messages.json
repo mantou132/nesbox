@@ -38,6 +38,9 @@
   "punkTheme": {
     "message": "朋克主題"
   },
+  "retroTheme": {
+    "message": "復古主題"
+  },
   "logoutAccount": {
     "message": "登出 “$1”"
   },
