@@ -13,14 +13,15 @@ import { createPath } from 'duoyun-ui/elements/route';
 import { HexColor, hslToRgb, parseHexColor, rgbToHexColor, rgbToHsl } from 'duoyun-ui/lib/color';
 import { marked } from 'marked';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
+import { isNotNullish } from 'duoyun-ui/lib/types';
 
 import { store } from 'src/store';
 import { routes } from 'src/routes';
-import { paramKeys } from 'src/constants';
+import { paramKeys, pixelFont } from 'src/constants';
 import { createRoom } from 'src/services/api';
 import { theme, themeStore } from 'src/theme';
 import { i18n } from 'src/i18n';
-import { getCDNSrc } from 'src/utils';
+import { fontLoading, getCDNSrc } from 'src/utils';
 
 import 'duoyun-ui/elements/carousel';
 import 'duoyun-ui/elements/link';
@@ -39,6 +40,8 @@ const style = createCSSSheet(css`
   .top {
     cursor: pointer;
     transition: all 0.5s ${theme.timingEasingFunction};
+    background-size: auto 3em;
+    image-rendering: pixelated;
   }
   .top::part(img) {
     --mask-range: 0;
@@ -95,6 +98,7 @@ const style = createCSSSheet(css`
 
 type State = {
   background: string;
+  backgroundImage: string;
 };
 
 /**
@@ -107,6 +111,31 @@ type State = {
 export class PGamesElement extends GemElement<State> {
   state: State = {
     background: 'transparent',
+    backgroundImage: 'none',
+  };
+
+  #canvas = document.createElement('canvas');
+
+  #getBackgroundImageUrl = async (text: string) => {
+    await fontLoading(pixelFont);
+    const font = `bold 10px '${pixelFont.family}', sans-serif`;
+    const ctx = this.#canvas.getContext('2d')!;
+    const paddingInline = 16;
+    const paddingBlock = 8;
+    ctx.font = font;
+    const box = ctx.measureText(text);
+    const textWidth = box.actualBoundingBoxRight - box.actualBoundingBoxLeft;
+    const textHeight = box.actualBoundingBoxAscent + box.actualBoundingBoxDescent;
+    this.#canvas.width = textWidth + paddingInline;
+    this.#canvas.height = (textHeight + paddingBlock) * 2;
+    const x = paddingBlock / 2;
+    const y = box.actualBoundingBoxAscent + paddingInline / 2;
+    ctx.fillStyle = '#ffffff08';
+    ctx.font = font;
+    ctx.fillText(text, x, y);
+    ctx.fillText(text, x - (textWidth + paddingInline) / 2, y + (textHeight + paddingBlock));
+    ctx.fillText(text, x + (textWidth + paddingInline) / 2, y + (textHeight + paddingBlock));
+    return this.#canvas.toDataURL();
   };
 
   #onTopChange = async (index: number, length = 5) => {
@@ -118,6 +147,13 @@ export class PGamesElement extends GemElement<State> {
       background: rgbToHexColor(
         hslToRgb([(hux + blockRange / 2 + ((index * 2) % length) * ((1 - blockRange) / length)) % 1, 0.17, 0.53]),
       ),
+    });
+    const game = store.games[store.topGameIds?.[index] || 0];
+    const dataUrl = await this.#getBackgroundImageUrl(
+      [game?.platform, game?.series, game?.name].filter(isNotNullish).join(' ').toUpperCase(),
+    );
+    this.setState({
+      backgroundImage: `url(${dataUrl})`,
     });
   };
 
@@ -139,7 +175,7 @@ export class PGamesElement extends GemElement<State> {
     return html`
       <dy-carousel
         class="top"
-        style=${styleMap({ background: this.state.background })}
+        style=${styleMap({ backgroundColor: this.state.background, backgroundImage: this.state.backgroundImage })}
         .data=${topData}
         @change=${({ detail }: CustomEvent<number>) => this.#onTopChange(detail, topData?.length)}
       ></dy-carousel>

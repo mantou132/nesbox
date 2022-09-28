@@ -2,6 +2,7 @@ import { history, QueryString, render, TemplateResult } from '@mantou/gem';
 import { matchPath, RouteItem } from 'duoyun-ui/elements/route';
 import { Time } from 'duoyun-ui/lib/time';
 import { ValueOf } from 'duoyun-ui/lib/types';
+import { once } from 'duoyun-ui/lib/utils';
 
 import { configure } from 'src/configure';
 import { githubIssue, queryKeys, VideoRefreshRate } from 'src/constants';
@@ -135,3 +136,5 @@ export function requestFrame(render: () => void, generator = VideoRefreshRate.FI
     }
   };
 }
+
+export const fontLoading = once((font: FontFace) => font.load().then((font) => document.fonts.add(font)));

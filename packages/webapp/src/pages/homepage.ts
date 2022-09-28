@@ -16,8 +16,8 @@ import { GemTitleElement } from 'duoyun-ui/elements/title';
 import { createPath, RouteItem } from 'duoyun-ui/elements/route';
 import { waitLoading } from 'duoyun-ui/elements/wait';
 
-import { getCDNSrc, getCorSrc } from 'src/utils';
-import { githubRelease } from 'src/constants';
+import { fontLoading, getCDNSrc, getCorSrc } from 'src/utils';
+import { githubRelease, pixelFont } from 'src/constants';
 import { theme } from 'src/theme';
 import leftSvg from 'src/images/homepage/left.svg';
 import rightSvg from 'src/images/homepage/right.svg';
@@ -122,6 +122,7 @@ const style = createCSSSheet(css`
     display: inline-flex;
     align-items: center;
     gap: 0.5em;
+    font-family: '${pixelFont.family}', sans-serif;
   }
   .logo img {
     height: 2.5em;
@@ -253,6 +254,10 @@ export class PHomepageElement extends GemElement {
   #onLangChange = async ({ detail }: CustomEvent<string>) => {
     await waitLoading(i18n.setLanguage(detail));
     this.update();
+  };
+
+  mounted = () => {
+    fontLoading(pixelFont);
   };
 
   render = () => {
