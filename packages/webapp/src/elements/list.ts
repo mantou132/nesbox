@@ -41,7 +41,7 @@ const style = createCSSSheet(css`
 @adoptedStyle(style)
 @adoptedStyle(focusStyle)
 export class NesboxListElement extends GemElement {
-  @property data: { img: string; label: string; tag: string; onClick: (evt: PointerEvent) => void }[];
+  @property data: { img: string; label: string; tag: string; onClick: (evt: PointerEvent) => void | Promise<void> }[];
   render = () => {
     return html`
       <ul>

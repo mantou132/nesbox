@@ -306,8 +306,14 @@ export class PRoomElement extends GemElement {
   #onMessage = ({ data, target }: MessageEvent<BcMsgEvent>) => {
     switch (data.type) {
       case BcMsgType.RAM_REQ: {
-        const res: BcMsgEvent = { id: data.id, type: BcMsgType.RAM_RES, data: this.nesbox.element!.getRam() };
-        (target as BroadcastChannel).postMessage(res);
+        const ram = this.nesbox.element!.getRam();
+        if (ram) {
+          const ramDep = new Uint8Array(ram.byteLength);
+          // TODO: support SharedArrayBuffer
+          ramDep.set(ram);
+          const res: BcMsgEvent = { id: data.id, type: BcMsgType.RAM_RES, data: ramDep };
+          (target as BroadcastChannel).postMessage(res);
+        }
         break;
       }
     }

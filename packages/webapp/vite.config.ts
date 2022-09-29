@@ -29,6 +29,11 @@ const config = async ({ command }: any) => {
     server: {
       host: '0.0.0.0',
       port: 3003,
+      headers: {
+        'Cross-Origin-Opener-Policy': 'same-origin',
+        'Cross-Origin-Embedder-Policy': 'require-corp',
+        'Cross-Origin-Resource-Policy': 'same-site',
+      },
     },
   });
 };

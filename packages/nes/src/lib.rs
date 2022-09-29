@@ -1,5 +1,6 @@
 // ref: https://github.com/lukexor/tetanes/blob/main/tetanes-web/src/lib.rs
 
+use js_sys::{SharedArrayBuffer, Uint8Array};
 use qoi::{decode_to_vec, encode_to_vec};
 use tetanes::{
     audio::{AudioMixer, NesAudioCallback},
@@ -75,6 +76,7 @@ pub struct Nes {
     sound: bool,
     qoi_buffer: Vec<u8>,
     qoi_decode_buffer: Vec<u8>,
+    ram_buffer: SharedArrayBuffer,
     frame: i32,
 }
 
@@ -98,6 +100,7 @@ impl Nes {
             qoi_buffer: Vec::new(),
             qoi_decode_buffer: Vec::new(),
             frame: 0,
+            ram_buffer: SharedArrayBuffer::new(10 * 1024),
         }
     }
 
@@ -268,13 +271,16 @@ impl Nes {
     }
 
     /// 2k(0u16..=0x07FF) ram + 8K(0x6000u16..=0x7FFF) sram
-    pub fn ram(&mut self) -> Vec<u8> {
-        let mut ram = Vec::new();
+    pub fn ram(&mut self) -> Uint8Array {
+        let ram = Uint8Array::new(&self.ram_buffer);
         for addr in 0u16..=0x07FF {
-            ram.push(self.control_deck.cpu().bus.peek(addr));
+            ram.set_index(u32::from(addr), self.read_ram(addr));
         }
         for addr in 0x6000u16..=0x7FFF {
-            ram.push(self.control_deck.cpu().bus.peek(addr));
+            ram.set_index(
+                u32::from(addr - 0x6000u16 + 0x07FF + 1),
+                self.read_ram(addr),
+            );
         }
         ram
     }

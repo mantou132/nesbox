@@ -99,6 +99,7 @@ export class MGameItemElement extends GemElement {
       <img
         draggable="false"
         class="cover"
+        crossorigin="anonymous"
         loading="lazy"
         @click=${this.#onMoreClick}
         src=${getCDNSrc(this.game.preview)}

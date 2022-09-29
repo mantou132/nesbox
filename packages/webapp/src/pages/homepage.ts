@@ -322,6 +322,7 @@ export class PHomepageElement extends GemElement {
               loading="lazy"
               width="800"
               height="530"
+              crossorigin="anonymous"
               srcset=${`${getCDNSrc(
                 'https://user-images.githubusercontent.com/3841872/188081531-c0dd68b6-3603-42ae-9df0-8dad7fb211f4.png',
               )} 1024w, ${getCDNSrc(

@@ -238,7 +238,7 @@ export class PGameElement extends GemElement {
         </div>
         <div class="aside">
           <div style="position: relative;">
-            <img class="preview" draggable="false" src=${game ? getCDNSrc(game.preview) : ''} />
+            <img class="preview" draggable="false" crossorigin="anonymous" src=${game ? getCDNSrc(game.preview) : ''} />
             ${record
               ? html`
                   <div class="stats">

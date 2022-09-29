@@ -22,7 +22,7 @@ import { configure } from 'src/configure';
 import { Role, RoleOffer } from 'src/rtc';
 import { icons } from 'src/icons';
 import { i18n } from 'src/i18n';
-import { getAvatar } from 'src/utils';
+import { getAvatar, getCDNSrc } from 'src/utils';
 import { voiceStore } from 'src/modules/room-voice';
 import { applyFriend } from 'src/services/api';
 import { friendStore } from 'src/store';
@@ -198,7 +198,11 @@ export class MRoomPlayerItemElement extends GemElement {
             border: 1px solid ${theme.borderColor};
           }
         </style>
-        <dy-avatar class="avatar" square src=${`https://ui-avatars.com/api/?name=P${this.roleType}`}></dy-avatar>
+        <dy-avatar
+          class="avatar"
+          square
+          src=${getCDNSrc(`https://ui-avatars.com/api/?name=P${this.roleType}`)}
+        ></dy-avatar>
         <div class="username">
           ${this.#isHostRole
             ? html`<dy-use class="icon" .element=${icons.loading}></dy-use>`
