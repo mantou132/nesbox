@@ -8,15 +8,18 @@ import {
   connectStore,
   refobject,
   RefObject,
+  history,
 } from '@mantou/gem';
 import { locale } from 'duoyun-ui/lib/locale';
 import init, { Button, Nes } from '@mantou/nes';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { Modal } from 'duoyun-ui/elements/modal';
+import { createPath } from 'duoyun-ui/elements/route';
 
 import type { NesboxRenderElement } from 'src/elements/render';
 import { configure, defaultKeybinding } from 'src/configure';
 import { requestFrame } from 'src/utils';
+import { routes } from 'src/routes';
 
 import 'duoyun-ui/elements/heading';
 import 'src/elements/render';
@@ -90,8 +93,8 @@ export class PEmulatorElement extends GemElement {
   };
 
   #quit = async () => {
-    await Modal.confirm('回到首页？');
-    window.location.replace(`/`);
+    await Modal.confirm('Back to Games');
+    history.replace({ path: createPath(routes.games) });
   };
 
   #onKeyDown = (event: KeyboardEvent) => {

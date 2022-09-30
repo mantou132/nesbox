@@ -66,6 +66,7 @@ export class MAvatarElement extends GemElement {
         title: newGameElement.state.title,
         body: newGameElement.state.description,
         labels: [
+          'game',
           newGameElement.state.kind,
           newGameElement.state.series,
           newGameElement.state.maxPlayer,

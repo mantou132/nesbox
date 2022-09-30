@@ -131,6 +131,7 @@ pub fn get_games(conn: &PgConnection) -> Vec<ScGame> {
 
     games
         .filter(deleted_at.is_null())
+        .order(created_at.asc())
         .load::<Game>(conn)
         .unwrap()
         .iter()

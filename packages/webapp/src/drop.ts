@@ -15,7 +15,7 @@ window.launchQueue?.setConsumer(async (launchParams: any) => {
 
 export const dropHandler = (files: File[]) => {
   if (!matchRoute(routes.emulator)) {
-    history.push({ path: createPath(routes.emulator) });
+    history.replace({ path: createPath(routes.emulator) });
   }
   setNesFile(files.find((e) => e.name.toLowerCase().endsWith('.nes')));
 };
