@@ -49,6 +49,16 @@ pub struct GithubRepo {
     pub owner: GithubUser,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GithubChangeTitle {
+    pub from: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GithubChanges {
+    pub title: Option<GithubChangeTitle>,
+}
+
 // https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#issues
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GithubPayload {
@@ -56,6 +66,7 @@ pub struct GithubPayload {
     pub issue: GithubIssue,
     pub repository: GithubRepo,
     pub sender: GithubUser,
+    pub changes: Option<GithubChanges>,
 }
 
 impl GithubPayload {
@@ -64,7 +75,7 @@ impl GithubPayload {
     }
 }
 
-pub fn get_sc_new_game(payload: &GithubPayload) -> ScNewGame {
+pub fn get_sc_game(payload: &GithubPayload) -> (String, ScNewGame) {
     let parser = Parser::new_ext(&payload.issue.body, Options::all());
 
     let mut preview = String::new();
@@ -87,7 +98,7 @@ pub fn get_sc_new_game(payload: &GithubPayload) -> ScNewGame {
             _ => (),
         }
     }
-    ScNewGame {
+    let game = ScNewGame {
         name: payload.issue.title.clone(),
         description: payload.issue.body.clone(),
         preview,
@@ -121,17 +132,20 @@ pub fn get_sc_new_game(payload: &GithubPayload) -> ScNewGame {
             .find(|label| label.name.starts_with("game.series."))
             .and_then(|label| label.name.split_terminator(".").last())
             .and_then(|s| ScGameSeries::from_str(s).ok()),
-    }
+    };
+    (
+        payload
+            .changes
+            .as_ref()
+            .and_then(|changes| changes.title.as_ref().map(|title| title.from.clone()))
+            .unwrap_or(payload.issue.title.clone()),
+        game,
+    )
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        github::{
-            get_sc_new_game, GithubIssue, GithubLabel, GithubPayload, GithubRepo, GithubUser,
-        },
-        schemas::game::*,
-    };
+    use crate::github::*;
 
     #[test]
     fn parse_github_payload() {
@@ -152,10 +166,13 @@ mod tests {
                 owner: GithubUser { login: "".into() },
             },
             sender: GithubUser { login: "".into() },
+            changes: Some(GithubChanges {
+                title: Some(GithubChangeTitle { from: "old_name".into() })
+            }),
         };
         assert_eq!(
-            get_sc_new_game(&payload),
-            ScNewGame {
+            get_sc_game(&payload),
+            ("old_name".into(), ScNewGame {
                 name: "name".into(),
                 description: "![NekketsuKakutouDensetsu_frontcover](https://user-images.githubusercontent.com/3841872/168952574-26de855e-b7cd-43fe-ab94-093a2903832d.png)\r\n\r\nゲームモードは、ストーリーにそって闘いを進めていく「ストーリーモード」と最高4人でどたばたと闘い合う「バトルモード」の2種類のモードがあるぞ！\r\n![ABUIABACGAAg9eiD9gUo_I7-uQYwmgM4mgM](https://user-images.githubusercontent.com/3841872/168967700-44131eb9-6e33-48d0-9f3d-e71e9fcdb51b.jpg)\r\n[legend.nes.zip](https://github.com/mantou132/nesbox/files/8713065/legend.nes.zip)\r\n".into(),
                 preview: "https://user-images.githubusercontent.com/3841872/168952574-26de855e-b7cd-43fe-ab94-093a2903832d.png".into(),
@@ -165,7 +182,7 @@ mod tests {
                 max_player: Some(1),
                 platform: Some(ScGamePlatform::Nes),
                 series: Some(ScGameSeries::Tmnt),
-            }
+            })
         );
     }
 }

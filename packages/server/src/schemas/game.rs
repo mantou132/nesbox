@@ -180,6 +180,7 @@ pub fn update_game(conn: &PgConnection, gid: i32, req: &ScNewGame) -> FieldResul
     let screenshots_str = &req.screenshots.join(",");
     let game = diesel::update(games.filter(deleted_at.is_null()).filter(id.eq(gid)))
         .set((
+            name.eq(req.name.clone()),
             description.eq(req.description.clone()),
             preview.eq(req.preview.clone()),
             rom.eq(req.rom.clone()),

@@ -10,7 +10,7 @@ use std::time::Duration;
 use crate::{
     auth::{extract_token_from_req, extract_token_from_str, UserToken},
     db::root::DB_POOL,
-    github::{get_sc_new_game, validate, GithubPayload},
+    github::{get_sc_game, validate, GithubPayload},
     schemas::root::{Context, GuestContext, GuestSchema, Schema},
     schemas::{
         game::{create_game, get_game_from_name, update_game},
@@ -123,22 +123,24 @@ pub async fn webhook(
         .is_none()
     {
         if closed || edited || labeled {
-            let sc_game = get_sc_new_game(&payload);
+            let (old_name, sc_game) = get_sc_game(&payload);
             if sc_game.rom.is_empty() {
                 log::debug!("Not rom");
             } else {
-                match get_game_from_name(&conn, &sc_game.name) {
+                match get_game_from_name(&conn, &old_name) {
                     Some(game) => {
                         update_game(&conn, game.id, &sc_game).ok();
                     }
                     None => {
-                        if let Ok(game) = create_game(&conn, &sc_game) {
-                            notify_all(
-                                ScNotifyMessageBuilder::default()
-                                    .new_game(game)
-                                    .build()
-                                    .unwrap(),
-                            );
+                        if closed {
+                            if let Ok(game) = create_game(&conn, &sc_game) {
+                                notify_all(
+                                    ScNotifyMessageBuilder::default()
+                                        .new_game(game)
+                                        .build()
+                                        .unwrap(),
+                                );
+                            }
                         }
                     }
                 };
