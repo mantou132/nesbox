@@ -146,7 +146,7 @@ export class MGameListElement extends GemElement {
   };
 
   render = () => {
-    if (!this.#data || this.#data.length < 4) {
+    if ((this.recent || this.new) && (!this.#data || this.#data.length < 4)) {
       return html`
         <style>
           :host {
