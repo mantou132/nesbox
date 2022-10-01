@@ -13,7 +13,8 @@ export const getCorSrc = (url: string) => {
 };
 
 export const getCDNSrc = (url: string) => {
-  return `https://nesbox-cdn.liuben.fun/${url}`;
+  // return `https://nesbox-cdn.liuben.fun/${url}`;
+  return getCorSrc(url);
 };
 
 export const getAvatar = (username?: string) => {
