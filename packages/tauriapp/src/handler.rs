@@ -1,6 +1,16 @@
 use rodio::{Decoder, OutputStream, Sink};
 use std::io::Cursor;
-use tauri::command;
+use tauri::{command, AppHandle, Runtime};
+
+use crate::settings::SETTINGS;
+
+#[command]
+pub fn set_branch<R: Runtime>(branch: &str, app_handle: AppHandle<R>) {
+    let mut settings = SETTINGS.lock().unwrap();
+    settings.branch = branch.to_owned();
+    settings.save();
+    app_handle.restart();
+}
 
 #[command]
 pub async fn play_sound(kind: &str, volume: f32) -> Result<(), String> {

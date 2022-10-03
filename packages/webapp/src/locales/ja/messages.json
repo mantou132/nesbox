@@ -173,6 +173,12 @@
   "videoSetting": {
     "message": "ビデオ"
   },
+  "uiSetting": {
+    "message": "UI"
+  },
+  "branch": {
+    "message": "ブランチ"
+  },
   "refreshRate": {
     "message": "リフレッシュレート"
   },

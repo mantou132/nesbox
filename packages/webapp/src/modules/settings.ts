@@ -10,6 +10,7 @@ import 'src/modules/sound-settings';
 import 'src/modules/account-settings';
 import 'src/modules/video-settings';
 import 'src/modules/shortcut-settings';
+import 'src/modules/ui-settings';
 
 const style = createCSSSheet(css`
   :host {
@@ -104,6 +105,16 @@ export class MSettingsElement extends GemElement<State> {
               return html`
                 <dy-tab-panel>
                   <m-video-settings></m-video-settings>
+                </dy-tab-panel>
+              `;
+            },
+          },
+          {
+            tab: i18n.get('uiSetting'),
+            getContent() {
+              return html`
+                <dy-tab-panel>
+                  <m-ui-settings></m-ui-settings>
                 </dy-tab-panel>
               `;
             },

@@ -173,6 +173,12 @@
   "videoSetting": {
     "message": "视频"
   },
+  "uiSetting": {
+    "message": "界面"
+  },
+  "branch": {
+    "message": "分支"
+  },
   "refreshRate": {
     "message": "刷新率"
   },

@@ -173,6 +173,12 @@
   "videoSetting": {
     "message": "Video"
   },
+  "uiSetting": {
+    "message": "Interface"
+  },
+  "branch": {
+    "message": "Branch"
+  },
   "refreshRate": {
     "message": "Refresh Rate"
   },

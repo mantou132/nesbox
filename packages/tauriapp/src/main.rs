@@ -6,23 +6,48 @@
 #[cfg(target_os = "macos")]
 #[macro_use]
 extern crate objc;
+#[macro_use]
+extern crate lazy_static;
 
 use std::{env, fs};
 
 #[cfg(target_os = "macos")]
 use tauri::Menu;
-use tauri::{api::path::app_dir, generate_handler, Window, WindowEvent};
+use tauri::{
+    api::path::app_dir,
+    generate_handler,
+    utils::config::{AppUrl, WindowUrl},
+    Window, WindowEvent,
+};
 
-use handler::{play_sound, set_badge};
+use handler::*;
+use settings::*;
 use tauri_plugin_window_state::STATE_FILENAME;
+use url::Url;
 
 mod handler;
 mod preload;
+mod settings;
 mod window_ext;
 
 fn main() {
     let builder = tauri::Builder::default();
-    let context = tauri::generate_context!();
+    let mut context = tauri::generate_context!();
+
+    // release mutex
+    {
+        let mut settings = SETTINGS.lock().unwrap();
+        settings.load(app_dir(context.config()).unwrap());
+
+        let branch_url = match settings.branch.as_str() {
+            "dev" => "https://nesbox-git-dev-mantou132.vercel.app",
+            _ => "",
+        };
+        if !branch_url.is_empty() {
+            context.config_mut().build.dist_dir =
+                AppUrl::Url(WindowUrl::External(Url::parse(branch_url).unwrap()));
+        }
+    }
 
     if env::var("NEW_STATE").is_ok() {
         fs::remove_file(app_dir(context.config()).unwrap().join(STATE_FILENAME)).ok();
@@ -74,7 +99,7 @@ fn main() {
                 .set_auto_show(false)
                 .build(),
         )
-        .invoke_handler(generate_handler![play_sound, set_badge])
+        .invoke_handler(generate_handler![play_sound, set_badge, set_branch])
         .run(context)
         .expect("error while running tauri application");
 }
