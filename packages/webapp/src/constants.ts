@@ -90,8 +90,9 @@ export const enum VideoFilter {
 }
 
 export const enum VideoRefreshRate {
+  AUTO = 'auto',
   FIXED = 'fixed',
-  SYNC = 'SYNC',
+  SYNC = 'sync',
 }
 
 export const pixelFont = new FontFace(

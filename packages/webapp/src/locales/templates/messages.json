@@ -176,6 +176,9 @@
   "refreshRate": {
     "message": "刷新率"
   },
+  "refreshRateAuto": {
+    "message": "自动"
+  },
   "refreshRateFixed": {
     "message": "固定"
   },

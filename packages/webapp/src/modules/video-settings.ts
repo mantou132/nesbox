@@ -39,6 +39,7 @@ export class MVideoSettingsElement extends GemElement {
         <dy-select
           .value=${configure.user.settings.video.refreshRate}
           .options=${[
+            { label: i18n.get('refreshRateAuto'), value: VideoRefreshRate.AUTO },
             { label: i18n.get('refreshRateFixed'), value: VideoRefreshRate.FIXED },
             { label: i18n.get('refreshRateSync'), value: VideoRefreshRate.SYNC },
           ]}

@@ -176,6 +176,9 @@
   "refreshRate": {
     "message": "Refresh Rate"
   },
+  "refreshRateAuto": {
+    "message": "Auto"
+  },
   "refreshRateFixed": {
     "message": "Fixed"
   },

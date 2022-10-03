@@ -2,7 +2,6 @@ import { history, QueryString, render, TemplateResult } from '@mantou/gem';
 import { matchPath, RouteItem } from 'duoyun-ui/elements/route';
 import { Time } from 'duoyun-ui/lib/time';
 import { ValueOf } from 'duoyun-ui/lib/types';
-import { once } from 'duoyun-ui/lib/utils';
 
 import { configure } from 'src/configure';
 import { githubIssue, queryKeys, VideoRefreshRate } from 'src/constants';
@@ -115,14 +114,33 @@ export const preventDefault = (fn: () => void) => {
   };
 };
 
-export function requestFrame(render: () => void, generator = VideoRefreshRate.FIXED) {
+export function requestFrame(render: () => void, generator = VideoRefreshRate.AUTO) {
   const duration = 1000 / 60;
-  const frameGenerator = generator === VideoRefreshRate.FIXED ? (window as Window).setTimeout : requestAnimationFrame;
+  const firstFramesTime: number[] = [];
+  const statsLength = 30;
+  let frameGenerator = generator === VideoRefreshRate.FIXED ? (window as Window).setTimeout : requestAnimationFrame;
   let timer = 0;
   let nextFrameIdealTime = performance.now();
   const nextFrame = () => {
     const now = performance.now();
+
+    if (firstFramesTime.length >= statsLength) {
+      if (generator === VideoRefreshRate.AUTO) {
+        const avgTime = (firstFramesTime[statsLength - 1] - firstFramesTime[statsLength - 10]) / 10;
+        const refreshDeviation = 2;
+        if (avgTime < duration - refreshDeviation) {
+          generator = VideoRefreshRate.FIXED;
+          frameGenerator = (window as Window).setTimeout;
+        } else {
+          generator = VideoRefreshRate.SYNC;
+        }
+      }
+    } else {
+      firstFramesTime.push(now);
+    }
+
     nextFrameIdealTime += duration;
+    // avoid negative delay
     if (nextFrameIdealTime < now) nextFrameIdealTime = now;
     const nextFrameDelay = nextFrameIdealTime - now;
     render();
@@ -130,12 +148,15 @@ export function requestFrame(render: () => void, generator = VideoRefreshRate.FI
   };
   nextFrame();
   return () => {
-    if (generator === VideoRefreshRate.FIXED) {
-      clearTimeout(timer);
-    } else {
+    if (frameGenerator === requestAnimationFrame) {
       cancelAnimationFrame(timer);
+    } else {
+      clearTimeout(timer);
     }
   };
 }
 
-export const fontLoading = once((font: FontFace) => font.load().then((font) => document.fonts.add(font)));
+export const fontLoading = (font: FontFace) => {
+  if (document.fonts.has(font)) return;
+  font.load().then((font) => document.fonts.add(font));
+};

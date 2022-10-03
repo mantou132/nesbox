@@ -83,7 +83,7 @@ const defaultShortcuts = {
 const defaultVideoSettings = {
   render: VideoRenderMethod.PIXELATED,
   filter: VideoFilter.DEFAULT,
-  refreshRate: VideoRefreshRate.FIXED,
+  refreshRate: VideoRefreshRate.AUTO,
 };
 
 export type Cheat = { code: string; enabled: boolean; toggleKey: string; comment: string };

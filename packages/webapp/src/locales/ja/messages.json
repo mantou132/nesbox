@@ -176,6 +176,9 @@
   "refreshRate": {
     "message": "リフレッシュレート"
   },
+  "refreshRateAuto": {
+    "message": "自動"
+  },
   "refreshRateFixed": {
     "message": "修理済み"
   },
