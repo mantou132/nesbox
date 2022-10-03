@@ -54,9 +54,12 @@ render(
   html`
     <style>
       :root {
-        font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-          'Noto Sans', 'PingFang SC', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-          'Noto Color Emoji';
+        font-family: 'HarmonyOS Sans', -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          'Helvetica Neue', Arial, 'Noto Sans', 'PingFang SC', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+          'Segoe UI Symbol', 'Noto Color Emoji';
+        font-weight: 400;
+        font-feature-settings: 'kern' 1;
+        font-kerning: normal;
         -moz-osx-font-smoothing: grayscale;
         -webkit-font-smoothing: antialiased;
         -webkit-tap-highlight-color: transparent;
