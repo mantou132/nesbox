@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::{fs, path::PathBuf, sync::Mutex};
+use tauri::utils::config::{AppUrl, WindowUrl};
+use url::Url;
 
 const SETTINGS_FILENAME: &str = "settings.json";
 
@@ -21,6 +23,20 @@ impl Settings {
             }
         }
         self.path = path;
+    }
+
+    pub fn get_branch_url(&self) -> Option<AppUrl> {
+        let branch_url = match self.branch.as_str() {
+            "dev" => "https://nesbox-dev.xianqiao.wang",
+            _ => "",
+        };
+        if !branch_url.is_empty() {
+            Some(AppUrl::Url(WindowUrl::External(
+                Url::parse(branch_url).unwrap(),
+            )))
+        } else {
+            None
+        }
     }
 
     pub fn save(&mut self) {

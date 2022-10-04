@@ -13,17 +13,11 @@ use std::{env, fs};
 
 #[cfg(target_os = "macos")]
 use tauri::Menu;
-use tauri::{
-    api::path::app_dir,
-    generate_handler,
-    utils::config::{AppUrl, WindowUrl},
-    Window, WindowEvent,
-};
+use tauri::{api::path::app_dir, generate_handler, Window, WindowEvent};
 
 use handler::*;
 use settings::*;
 use tauri_plugin_window_state::STATE_FILENAME;
-use url::Url;
 
 mod handler;
 mod preload;
@@ -39,13 +33,8 @@ fn main() {
         let mut settings = SETTINGS.lock().unwrap();
         settings.load(app_dir(context.config()).unwrap());
 
-        let branch_url = match settings.branch.as_str() {
-            "dev" => "https://nesbox-git-dev-mantou132.vercel.app",
-            _ => "",
-        };
-        if !branch_url.is_empty() {
-            context.config_mut().build.dist_dir =
-                AppUrl::Url(WindowUrl::External(Url::parse(branch_url).unwrap()));
+        if let Some(url) = settings.get_branch_url() {
+            context.config_mut().build.dist_dir = url;
         }
     }
 
