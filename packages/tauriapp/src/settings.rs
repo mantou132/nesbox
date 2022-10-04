@@ -24,7 +24,7 @@ impl Settings {
     }
 
     pub fn save(&mut self) {
-        if self.path.is_file() {
+        if self.path != PathBuf::default() {
             fs::write(&self.path, serde_json::to_string(self).unwrap()).unwrap();
         }
     }
