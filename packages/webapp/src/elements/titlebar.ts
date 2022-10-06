@@ -113,6 +113,8 @@ export class MTitlebarElement extends GemElement<State> {
     super();
     this.addEventListener('mousedown', (event) => {
       this.#window?.startDragging();
+      // compat `<dy-input-capture>`
+      this.dispatchEvent(new PointerEvent('pointerup'));
       // https://github.com/tauri-apps/tauri/issues/4059#issuecomment-1154360504
       event.preventDefault();
 

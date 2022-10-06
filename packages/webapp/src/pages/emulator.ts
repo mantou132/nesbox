@@ -94,7 +94,7 @@ export class PEmulatorElement extends GemElement {
 
   #quit = async () => {
     await Modal.confirm('Back to Games');
-    history.replace({ path: createPath(routes.games) });
+    history.replace({ path: createPath(routes.login) });
   };
 
   #onKeyDown = (event: KeyboardEvent) => {
