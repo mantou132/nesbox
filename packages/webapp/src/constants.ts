@@ -97,6 +97,6 @@ export const enum VideoRefreshRate {
 
 export const pixelFont = new FontFace(
   'Common Pixel',
-  `local('Common Pixel'), url('https://fonts.cdnfonts.com/s/7553/COMMP___.woff') format('woff')`,
+  `local('Common Pixel'), url('/fonts/COMMP___.woff') format('woff')`,
   { weight: '400' },
 );

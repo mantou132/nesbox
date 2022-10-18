@@ -158,5 +158,10 @@ export function requestFrame(render: () => void, generator = VideoRefreshRate.AU
 
 export const fontLoading = (font: FontFace) => {
   if (document.fonts.has(font)) return;
-  font.load().then((font) => document.fonts.add(font));
+  font
+    .load()
+    .then((font) => document.fonts.add(font))
+    .catch(() => {
+      //
+    });
 };
