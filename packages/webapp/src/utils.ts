@@ -18,7 +18,7 @@ export const getCDNSrc = (url: string) => {
 
 export const getAvatar = (username?: string) => {
   if (!username) return '';
-  return getCDNSrc(`joeschmoe.io/api/v1/${username}`);
+  return `https://api.dicebear.com/5.x/pixel-art/svg?seed=${encodeURIComponent(username)}&backgroundColor=c0aede`;
 };
 
 export const getGithubGames = async (s: string) => {
