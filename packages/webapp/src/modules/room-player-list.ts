@@ -226,7 +226,7 @@ export class MRoomPlayerItemElement extends GemElement {
         })}
         .element=${icons.volume}
       ></dy-use>
-      <dy-avatar class="avatar" square src=${getAvatar(this.role?.nickname)}></dy-avatar>
+      <dy-avatar class="avatar" square src=${getAvatar(this.role?.username)}></dy-avatar>
       <div class="username">
         <span>${this.role.nickname}</span>
       </div>
