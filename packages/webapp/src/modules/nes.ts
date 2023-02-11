@@ -369,6 +369,7 @@ export class MNesElement extends GemElement<State> {
 
   #onKeyDown = (event: KeyboardEvent) => {
     if (event.repeat) return;
+    if (event.isComposing) return;
     const button = this.#getButton(event);
     if (button) {
       this.#pressButton(button);
@@ -398,6 +399,7 @@ export class MNesElement extends GemElement<State> {
 
   #onKeyUp = (event: KeyboardEvent) => {
     if (event.repeat) return;
+    if (event.isComposing) return;
     const button = this.#getButton(event);
     if (!button) return;
     this.#releaseButton(button);

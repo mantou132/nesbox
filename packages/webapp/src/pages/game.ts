@@ -79,6 +79,7 @@ const style = createCSSSheet(css`
   .icon {
     width: 1.5rem;
     padding: 0.3rem;
+    border-radius: ${theme.normalRound};
   }
   .icon:hover {
     background-color: ${theme.hoverBackgroundColor};

@@ -97,13 +97,11 @@ export class MRoomChatElement extends GemElement<State> {
 
   #onSubmit = (evt: KeyboardEvent) => {
     evt.preventDefault();
-    this.#stopPropagation(evt);
     this.state.input && this.submit(new TextMsg(this.state.input));
     this.setState({ input: '', silent: true });
   };
 
-  #onEsc = (evt: KeyboardEvent) => {
-    this.#stopPropagation(evt);
+  #onEsc = () => {
     if (this.state.input) {
       this.setState({ input: '' });
     } else {
@@ -112,10 +110,13 @@ export class MRoomChatElement extends GemElement<State> {
     }
   };
 
-  #onKeyDown = hotkeys({
-    enter: this.#onSubmit,
-    esc: this.#onEsc,
-  });
+  #onKeyDown = (evt: KeyboardEvent) => {
+    this.#stopPropagation(evt);
+    hotkeys({
+      enter: this.#onSubmit,
+      esc: this.#onEsc,
+    })(evt);
+  };
 
   #onGlobalKeyDown = (evt: KeyboardEvent) => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;

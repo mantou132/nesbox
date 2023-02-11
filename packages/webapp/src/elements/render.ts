@@ -55,10 +55,6 @@ export class NesboxRenderElement extends GemElement {
     });
   };
 
-  captureStream = () => {
-    return this.#ctx.canvas.captureStream(60).getVideoTracks()[0];
-  };
-
   captureThumbnail = () => {
     return this.#ctx.canvas.toDataURL('image/png', 0.5);
   };
