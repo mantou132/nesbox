@@ -1,5 +1,4 @@
 import { GemElement, html, adoptedStyle, customElement, connectStore } from '@mantou/gem';
-import { throttle } from 'duoyun-ui/lib/utils';
 
 import { configure, Settings } from 'src/configure';
 import { i18n } from 'src/i18n';
@@ -16,8 +15,8 @@ import 'duoyun-ui/elements/slider';
 @adoptedStyle(gridStyle)
 @connectStore(i18n.store)
 export class MSoundSettingsElement extends GemElement {
-  #throttleUpdateVolume = throttle(async (name: string, value: number) => {
-    await updateAccount({
+  #updateVolume = (name: string, value: number) => {
+    updateAccount({
       settings: {
         ...configure.user!.settings,
         volume: {
@@ -27,7 +26,7 @@ export class MSoundSettingsElement extends GemElement {
       },
     });
     playSound('', value);
-  });
+  };
 
   render = () => {
     if (!configure.user) return html``;
@@ -46,12 +45,8 @@ export class MSoundSettingsElement extends GemElement {
             <div>${volumeLabelMap[name as keyof Settings['volume']]}</div>
             <dy-slider
               .value=${value * 100}
-              @change=${(evt: CustomEvent<number>) => {
-                if (Math.round(value * 100) !== evt.detail) {
-                  (evt.target as any).value = evt.detail;
-                  this.#throttleUpdateVolume(name, evt.detail / 100);
-                }
-              }}
+              @change=${(evt: CustomEvent<number>) => ((evt.target as any).value = evt.detail)}
+              @end=${(evt: CustomEvent<number>) => this.#updateVolume(name, evt.detail / 100)}
             ></dy-slider>
           `,
         )}
