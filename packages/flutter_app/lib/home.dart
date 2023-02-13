@@ -141,6 +141,16 @@ class HomeState extends State<Home> {
               case 'battery':
                 _sendMessage(msg['id'], await BatteryInfo().query());
                 break;
+              case 'playsound':
+                switch (msg['data']) {
+                  case 'click':
+                    SystemSound.play(SystemSoundType.click);
+                    break;
+                  case 'alert':
+                    SystemSound.play(SystemSoundType.alert);
+                    break;
+                }
+                break;
               case 'close':
                 exit(0);
             }

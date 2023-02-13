@@ -11,6 +11,7 @@ import {
 } from '@mantou/gem';
 import { createPath } from 'duoyun-ui/elements/route';
 import type { DuoyunActiveLinkElement } from 'duoyun-ui/elements/link';
+import { mtApp } from 'mt-app';
 
 import { configure } from 'src/configure';
 import { theme } from 'src/theme';
@@ -62,6 +63,7 @@ const style = createCSSSheet(css`
   .link {
     padding: 0.4em 1em;
     opacity: 0.5;
+    outline: none;
   }
   .link:where(:--active, [data-active]) {
     opacity: 1;
@@ -101,9 +103,11 @@ export class MMtNavElement extends GemElement {
     const index = links.findIndex((e) => e.active);
     switch (detail) {
       case GamepadBtnIndex.FrontLeftBottom:
+        mtApp.playSound('click');
         links[(index - 1 + links.length) % links.length].click();
         break;
       case GamepadBtnIndex.FrontRightBottom:
+        mtApp.playSound('click');
         links[(index + 1 + links.length) % links.length].click();
         break;
     }
@@ -125,7 +129,7 @@ export class MMtNavElement extends GemElement {
       <div class="links">
         ${this.#links.map(
           ({ path, text, query = '' }) =>
-            html`<dy-active-link class="link" .path=${path} .query=${query}>${text}</dy-active-link>`,
+            html`<dy-active-link class="link" .path=${path} .query=${query} .docTitle=${text}>${text}</dy-active-link>`,
         )}
       </div>
       <div class="status">

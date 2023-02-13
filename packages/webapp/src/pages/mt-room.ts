@@ -12,6 +12,7 @@ import {
 } from '@mantou/gem';
 import { createPath, matchPath } from 'duoyun-ui/elements/route';
 import { waitLoading } from 'duoyun-ui/elements/wait';
+import { mtApp } from 'mt-app';
 
 import { configure } from 'src/configure';
 import type { MNesElement } from 'src/modules/nes';
@@ -76,9 +77,11 @@ export class PMtRoomElement extends GemElement {
   #onPressButtonIndex = ({ detail }: CustomEvent<GamepadBtnIndex>) => {
     switch (detail) {
       case GamepadBtnIndex.FrontLeftTop:
+        mtApp.playSound('click');
         waitLoading(leaveRoom());
         break;
       case GamepadBtnIndex.FrontRightTop:
+        mtApp.playSound('click');
         this.voice.element?.toggleVoice();
         break;
     }

@@ -1,8 +1,8 @@
 const MT_APP_BRIDGE_NAME = Object.getOwnPropertyNames(window).find((e) => e.startsWith('__MT__APP__BRIDGE')) as any;
-
 export const isMtApp = !!MT_APP_BRIDGE_NAME;
+// export const isMtApp = true;
 
-type Type = 'open' | 'statusbarstyle' | 'orientation' | 'battery' | 'close';
+type Type = 'open' | 'statusbarstyle' | 'orientation' | 'battery' | 'close' | 'playsound';
 
 const bridgePostMessage = (message: { type: Type; data?: any }) => {
   const submitMessage = { id: Date.now(), ...message };
@@ -33,6 +33,10 @@ export const mtApp = {
 
   async setStatusBarStyle(style: 'none' | 'light' | 'dark') {
     return await this.call('statusbarstyle', style);
+  },
+
+  async playSound(kind: 'click' | 'alert') {
+    return await this.call('playsound', kind);
   },
 
   async setOrientation(orientation: 'landscape' | 'portrait' | 'default') {

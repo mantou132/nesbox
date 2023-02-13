@@ -25,7 +25,7 @@ const getInitRoutes = () => {
       },
     },
     games: {
-      title: i18n.get('gamesTitle'),
+      title: isMtApp ? undefined : i18n.get('gamesTitle'),
       pattern: '/games',
       async getContent(_params: Record<string, string>) {
         if (isMtApp) {

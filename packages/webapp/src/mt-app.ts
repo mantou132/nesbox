@@ -37,6 +37,7 @@ const style = createCSSSheet(css`
       'nav' auto
       'page' 1fr;
     height: 100vh;
+    min-height: auto;
   }
   .bg {
     position: absolute;

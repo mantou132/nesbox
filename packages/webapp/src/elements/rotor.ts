@@ -16,6 +16,7 @@ import {
   boolattribute,
   randomStr,
 } from '@mantou/gem';
+import { mtApp } from 'mt-app';
 
 import { events } from 'src/constants';
 import { GamepadBtnIndex } from 'src/gamepad';
@@ -110,19 +111,23 @@ export class NesboxRotorElement extends GemElement {
     if (this.inert) return;
     switch (detail) {
       case GamepadBtnIndex.Left:
+        mtApp.playSound('click');
         this.#uidIndex--;
         this.change(this.#addIndex(-1));
         break;
       case GamepadBtnIndex.Right:
+        mtApp.playSound('click');
         this.#uidIndex++;
         this.change(this.#addIndex(1));
         break;
       case GamepadBtnIndex.FrontRightTop:
       case GamepadBtnIndex.Start:
+        mtApp.playSound('click');
         this.data?.[this.index]?.handle();
         break;
       case GamepadBtnIndex.A:
       case GamepadBtnIndex.B:
+        mtApp.playSound('click');
         this.data?.[this.index]?.detail?.();
         break;
     }

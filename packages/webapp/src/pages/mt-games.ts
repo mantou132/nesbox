@@ -12,6 +12,7 @@ import {
   repeat,
 } from '@mantou/gem';
 import { formatDuration, Time } from 'duoyun-ui/lib/time';
+import { mtApp } from 'mt-app';
 
 import { store } from 'src/store';
 import { theme } from 'src/theme';
@@ -39,13 +40,15 @@ const style = createCSSSheet(css`
     display: flex;
     gap: calc(2 * ${theme.gridGutter});
     padding: ${theme.gridGutter} calc(2 * ${theme.gridGutter});
+    height: 100%;
+    box-sizing: border-box;
   }
   .rotor {
     position: relative;
     z-index: 2;
     display: flex;
     flex-direction: column-reverse;
-    height: calc(100vh - 7em);
+    height: 100%;
     transition: all 0.3s ${theme.timingFunction};
   }
   :host(:where([data-detail], :--detail)) {
@@ -123,9 +126,11 @@ export class PMtGamesElement extends GemElement {
     if (!mtGamesStore.focusId) return;
     switch (evt.detail) {
       case GamepadBtnIndex.FrontLeftTop:
+        mtApp.playSound('click');
         updateStore(mtGamesStore, { focusId: 0 });
         break;
       case GamepadBtnIndex.FrontRightTop:
+        mtApp.playSound('click');
         createRoom({ gameId: mtGamesStore.focusId, private: false });
         break;
     }
@@ -167,12 +172,13 @@ export class PMtGamesElement extends GemElement {
     return html`
       <div class="rotor">
         ${this.#data?.length
-          ? repeat(
+          ? html`${repeat(
               [locationStore.query.toString()],
               (key) => key,
               () => html`
                 <nesbox-rotor
                   ?inert=${!!mtGamesStore.focusId}
+                  .finite=${this.#data!.length < 3}
                   @change=${({ detail }: CustomEvent<number>) => updateStore(mtGamesStore, { currentIndex: detail })}
                   .index=${Math.min(mtGamesStore.currentIndex, this.#data!.length - 1)}
                   .data=${this.#data!.map((id) => ({
@@ -184,7 +190,7 @@ export class PMtGamesElement extends GemElement {
                   }))}
                 ></nesbox-rotor>
               `,
-            )
+            )}`
           : html`<dy-heading><dy-empty></dy-empty></dy-heading>`}
         ${mtGamesStore.focusId && record
           ? html`

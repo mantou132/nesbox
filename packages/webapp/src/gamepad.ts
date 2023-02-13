@@ -94,15 +94,20 @@ export const startKeyboardSimulation = () => {
   addEventListener(
     'keydown',
     hotkeys({
+      // scroll
       w: () => dispatchPressEvent(GamepadBtnIndex.Up),
       a: () => dispatchPressEvent(GamepadBtnIndex.Left),
       s: () => dispatchPressEvent(GamepadBtnIndex.Down),
       d: () => dispatchPressEvent(GamepadBtnIndex.Right),
+      // select/switch
       j: () => dispatchPressEvent(GamepadBtnIndex.B),
       k: () => dispatchPressEvent(GamepadBtnIndex.A),
       space: () => dispatchPressEvent(GamepadBtnIndex.A),
+      // back
       4: () => dispatchPressEvent(GamepadBtnIndex.FrontLeftTop),
+      // foreword
       5: () => dispatchPressEvent(GamepadBtnIndex.FrontRightTop),
+      // page/tab navigation
       6: () => dispatchPressEvent(GamepadBtnIndex.FrontLeftBottom),
       7: () => dispatchPressEvent(GamepadBtnIndex.FrontRightBottom),
     }),
