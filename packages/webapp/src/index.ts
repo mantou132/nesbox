@@ -44,7 +44,7 @@ if ([routes.login, routes.register].some(matchRoute)) {
   if (configure.profile) {
     gotoRedirectUri();
   }
-} else if ([routes.download, routes.home, routes.emulator, routes.ramviewer].some(matchRoute)) {
+} else if ([routes.download, routes.home, routes.emulator, routes.privacy, routes.ramviewer].some(matchRoute)) {
   logger.info('Welcome!');
 } else if (!configure.profile || isExpiredProfile(configure.profile)) {
   logout();
@@ -111,6 +111,7 @@ render(
           routes.home,
           routes.download,
           routes.emulator,
+          routes.privacy,
           routes.ramviewer,
           {
             pattern: '*',

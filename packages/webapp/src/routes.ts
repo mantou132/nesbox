@@ -44,6 +44,14 @@ const getInitRoutes = () => {
         return html`<p-emulator></p-emulator>`;
       },
     },
+    privacy: {
+      title: 'Privacy',
+      pattern: '/privacy',
+      async getContent(_params: Record<string, string>) {
+        await import('src/pages/privacy');
+        return html`<p-privacy></p-privacy>`;
+      },
+    },
     ramviewer: {
       title: '内存查看器',
       pattern: '/ramviewer',

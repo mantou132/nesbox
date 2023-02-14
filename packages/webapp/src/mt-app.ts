@@ -14,6 +14,8 @@ import {
 import { createPath } from 'duoyun-ui/elements/route';
 import { forever } from 'duoyun-ui/lib/utils';
 import { Loadbar } from 'duoyun-ui/elements/page-loadbar';
+import { Toast } from 'duoyun-ui/elements/toast';
+import { isNotNullish } from 'duoyun-ui/lib/types';
 
 import { locationStore, routes } from 'src/routes';
 import { getAccount, getFriends, getGames, subscribeEvent } from 'src/services/api';
@@ -79,6 +81,16 @@ export class MTAppRootElement extends GemElement {
     }
   };
 
+  #onClick = () => {
+    const gamepads = navigator
+      .getGamepads()
+      .filter(isNotNullish)
+      .filter((e) => e.connected);
+    if (!gamepads.length) {
+      Toast.open('warning', 'Please connect the gamepad');
+    }
+  };
+
   mounted = () => {
     this.effect(this.#enterRoom, () => [configure.user?.playing?.id]);
     this.effect(
@@ -88,7 +100,9 @@ export class MTAppRootElement extends GemElement {
     forever(getAccount);
     forever(getFriends);
     const subscription = subscribeEvent();
+    addEventListener('click', this.#onClick);
     return () => {
+      removeEventListener('click', this.#onClick);
       subscription.return?.();
     };
   };
