@@ -11,11 +11,10 @@ import {
 } from '@mantou/gem';
 import { createPath } from 'duoyun-ui/elements/route';
 import type { DuoyunActiveLinkElement } from 'duoyun-ui/elements/link';
-import { mtApp } from 'mt-app';
 
 import { configure } from 'src/configure';
 import { theme } from 'src/theme';
-import { getAvatar } from 'src/utils';
+import { getAvatar, playHintSound } from 'src/utils';
 import { i18n } from 'src/i18n';
 import { routes } from 'src/routes';
 import { events, queryKeys } from 'src/constants';
@@ -103,11 +102,11 @@ export class MMtNavElement extends GemElement {
     const index = links.findIndex((e) => e.active);
     switch (detail) {
       case GamepadBtnIndex.FrontLeftBottom:
-        mtApp.playSound('click');
+        playHintSound();
         links[(index - 1 + links.length) % links.length].click();
         break;
       case GamepadBtnIndex.FrontRightBottom:
-        mtApp.playSound('click');
+        playHintSound();
         links[(index + 1 + links.length) % links.length].click();
         break;
     }

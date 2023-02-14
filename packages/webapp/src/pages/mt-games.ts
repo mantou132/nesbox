@@ -12,11 +12,10 @@ import {
   repeat,
 } from '@mantou/gem';
 import { formatDuration, Time } from 'duoyun-ui/lib/time';
-import { mtApp } from 'mt-app';
 
 import { store } from 'src/store';
 import { theme } from 'src/theme';
-import { getCDNSrc } from 'src/utils';
+import { getCDNSrc, playHintSound } from 'src/utils';
 import { createRoom, getComments } from 'src/services/api';
 import { GamepadBtnIndex } from 'src/gamepad';
 import { events, queryKeys } from 'src/constants';
@@ -126,11 +125,11 @@ export class PMtGamesElement extends GemElement {
     if (!mtGamesStore.focusId) return;
     switch (evt.detail) {
       case GamepadBtnIndex.FrontLeftTop:
-        mtApp.playSound('click');
+        playHintSound();
         updateStore(mtGamesStore, { focusId: 0 });
         break;
       case GamepadBtnIndex.FrontRightTop:
-        mtApp.playSound('click');
+        playHintSound();
         createRoom({ gameId: mtGamesStore.focusId, private: false });
         break;
     }

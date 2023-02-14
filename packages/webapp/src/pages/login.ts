@@ -15,6 +15,7 @@ import type { DuoyunFormElement } from 'duoyun-ui/elements/form';
 import { createPath } from 'duoyun-ui/elements/route';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
+import { isMtApp } from 'mt-app';
 
 import { theme } from 'src/theme';
 import { icons } from 'src/icons';
@@ -157,6 +158,31 @@ export class PLoginElement extends GemElement<State> {
 
   #onChange = (evt: CustomEvent<State>) => this.setState({ ...evt.detail });
 
+  #onKeyDown = hotkeys({
+    enter: async () => {
+      const { username, password } = this.state;
+      const { element } = this.formRef;
+      if (!username) {
+        element?.elements.username?.focus();
+      } else if (!password) {
+        element?.elements.password?.focus();
+      } else {
+        (this.shadowRoot?.activeElement as any)?.blur?.();
+        try {
+          await this.#onSubmit();
+        } catch (err) {
+          if (isMtApp) {
+            setTimeout(() => {
+              // re-enter
+              this.setState({ username: '', password: '' });
+            }, 1000);
+          }
+          throw err;
+        }
+      }
+    },
+  });
+
   #onSubmit = async () => {
     if (this.state.loading) return;
     try {
@@ -178,6 +204,10 @@ export class PLoginElement extends GemElement<State> {
     if (configure.profile && !isExpiredProfile(configure.profile)) {
       gotoRedirectUri();
     }
+    addEventListener('keydown', this.#onKeyDown);
+    return () => {
+      removeEventListener('keydown', this.#onKeyDown);
+    };
   };
 
   render = () => {
@@ -199,12 +229,7 @@ export class PLoginElement extends GemElement<State> {
       </div>
       <div class="content">
         <dy-heading lv="1" class="header">${this.register ? routes.register.title : routes.login.title}</dy-heading>
-        <dy-form
-          class="form"
-          ref=${this.formRef.ref}
-          @change=${this.#onChange}
-          @keydown=${hotkeys({ enter: this.#onSubmit })}
-        >
+        <dy-form class="form" ref=${this.formRef.ref} @change=${this.#onChange}>
           <dy-form-item
             name="username"
             required
@@ -223,12 +248,12 @@ export class PLoginElement extends GemElement<State> {
           <dy-button data-cy="submit" @click=${this.#onSubmit} .icon=${loading ? icons.loading : undefined}>
             ${this.register ? i18n.get('register') : i18n.get('login')}
           </dy-button>
-          <dy-action-text @click=${this.#goto}>
+          <dy-action-text @click=${this.#goto} ?hidden=${isMtApp}>
             ${this.register ? i18n.get('goLogin') : i18n.get('goRegister')}
           </dy-action-text>
         </div>
       </div>
-      <m-guest></m-guest>
+      ${isMtApp ? '' : html`<m-guest></m-guest>`}
     `;
   };
 }

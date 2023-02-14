@@ -2,6 +2,7 @@ import { history, QueryString, render, TemplateResult } from '@mantou/gem';
 import { matchPath, RouteItem } from 'duoyun-ui/elements/route';
 import { Time } from 'duoyun-ui/lib/time';
 import { ValueOf } from 'duoyun-ui/lib/types';
+import { mtApp } from 'mt-app';
 
 import { configure } from 'src/configure';
 import { githubIssue, queryKeys, VideoRefreshRate } from 'src/constants';
@@ -40,15 +41,19 @@ export const documentVisible = async () => {
   await new Promise((res) => document.addEventListener('visibilitychange', res, { once: true }));
 };
 
-export const playSound = (kind: string, volume = configure.user?.settings.volume.notification) => {
-  window.__TAURI__?.tauri
-    .invoke('play_sound', {
-      kind,
-      volume: volume || 0,
-    })
-    .catch(() => {
-      //
-    });
+export const playSound = async (kind: string, volume = configure.user?.settings.volume.notification) => {
+  try {
+    if (!kind) {
+      await mtApp.playSound('click');
+    } else {
+      await window.__TAURI__?.tauri.invoke('play_sound', {
+        kind,
+        volume: volume || 0,
+      });
+    }
+  } catch (err) {
+    logger.error(err);
+  }
 };
 
 export const saveFile = async (file: File) => {
@@ -74,7 +79,7 @@ export const saveFile = async (file: File) => {
   }
 };
 
-export const playHintSound = (kind: string) => {
+export const playHintSound = (kind = '') => {
   playSound(kind, configure.user!.settings.volume.hint);
 };
 
