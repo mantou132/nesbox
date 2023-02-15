@@ -47,18 +47,23 @@ const style = createCSSSheet(css`
 @connectStore(friendStore)
 export class MFriendListElement extends GemElement {
   #addFriend = async () => {
-    const input = await Modal.open<DuoyunInputElement>({
-      header: i18n.get('addFriend'),
-      body: html`
-        <dy-input
-          autofocus
-          style="width: 100%"
-          placeholder=${i18n.get('placeholderUsername')}
-          @change=${(e: any) => (e.target.value = e.detail)}
-        ></dy-input>
-      `,
-    });
-    applyFriend(input.value);
+    const activeElement = this.shadowRoot?.activeElement as HTMLElement | null;
+    try {
+      const input = await Modal.open<DuoyunInputElement>({
+        header: i18n.get('addFriend'),
+        body: html`
+          <dy-input
+            autofocus
+            style="width: 100%"
+            placeholder=${i18n.get('placeholderUsername')}
+            @change=${(e: any) => (e.target.value = e.detail)}
+          ></dy-input>
+        `,
+      });
+      applyFriend(input.value);
+    } finally {
+      activeElement?.focus();
+    }
   };
 
   render = () => {

@@ -2,7 +2,7 @@ import { history, QueryString, render, TemplateResult } from '@mantou/gem';
 import { matchPath, RouteItem } from 'duoyun-ui/elements/route';
 import { Time } from 'duoyun-ui/lib/time';
 import { ValueOf } from 'duoyun-ui/lib/types';
-import { mtApp } from 'mt-app';
+import { isMtApp, mtApp } from 'mt-app';
 
 import { configure } from 'src/configure';
 import { githubIssue, queryKeys, VideoRefreshRate } from 'src/constants';
@@ -43,7 +43,7 @@ export const documentVisible = async () => {
 
 export const playSound = async (kind: string, volume = configure.user?.settings.volume.notification) => {
   try {
-    if (!kind) {
+    if (isMtApp) {
       await mtApp.playSound('click');
     } else {
       await window.__TAURI__?.tauri.invoke('play_sound', {
@@ -54,6 +54,10 @@ export const playSound = async (kind: string, volume = configure.user?.settings.
   } catch (err) {
     logger.error(err);
   }
+};
+
+export const playHintSound = (kind = '') => {
+  playSound(kind, configure.user!.settings.volume.hint);
 };
 
 export const saveFile = async (file: File) => {
@@ -77,10 +81,6 @@ export const saveFile = async (file: File) => {
     addEventListener('focus', () => setTimeout(() => URL.revokeObjectURL(a.href), 1000), { once: true });
     return undefined;
   }
-};
-
-export const playHintSound = (kind = '') => {
-  playSound(kind, configure.user!.settings.volume.hint);
 };
 
 export const formatTime = (timestamp: number) => {
