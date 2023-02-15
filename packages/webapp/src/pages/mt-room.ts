@@ -82,6 +82,7 @@ export class PMtRoomElement extends GemElement {
         break;
       case GamepadBtnIndex.FrontRightTop:
         playHintSound();
+        // TODO: settings
         this.voice.element?.toggleVoice();
         break;
     }

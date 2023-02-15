@@ -49,6 +49,7 @@ const style = createCSSSheet(css`
     width: 100%;
     height: 100%;
     filter: blur(4em) brightness(0.3);
+    image-rendering: pixelated;
   }
   m-mt-nav {
     grid-area: nav;

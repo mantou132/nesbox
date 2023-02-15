@@ -128,10 +128,6 @@ export class PMtGamesElement extends GemElement {
         playHintSound();
         updateStore(mtGamesStore, { focusId: 0 });
         break;
-      case GamepadBtnIndex.FrontRightTop:
-        playHintSound();
-        createRoom({ gameId: mtGamesStore.focusId, private: false });
-        break;
     }
   };
 
