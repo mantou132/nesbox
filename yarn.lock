@@ -1878,10 +1878,22 @@
   dependencies:
     "@types/node" "*"
 
+"@types/dom-mediacapture-transform@^0.1.4":
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/@types/dom-mediacapture-transform/-/dom-mediacapture-transform-0.1.4.tgz#f77c1b469f4c33513219dbca46201cf5bf0d082f"
+  integrity sha512-G4DI51gU3zp/nCFVP7O5dv3sZ7nVXy3Dqooup8tDhvdzUNeAMiC0XIFGiwH3UHPh/t6L5odMOHwB3BYlY86WKw==
+  dependencies:
+    "@types/dom-webcodecs" "*"
+
 "@types/dom-speech-recognition@^0.0.1":
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/@types/dom-speech-recognition/-/dom-speech-recognition-0.0.1.tgz#e326761a04b4a49c0eec2ac7948afc1c6aa12baa"
   integrity sha512-udCxb8DvjcDKfk1WTBzDsxFbLgYxmQGKrE/ricoMqHRNjSlSUCcamVTA5lIQqzY10mY5qCY0QDwBfFEwhfoDPw==
+
+"@types/dom-webcodecs@*", "@types/dom-webcodecs@^0.1.5":
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/@types/dom-webcodecs/-/dom-webcodecs-0.1.5.tgz#2252fdb4a3229924d27f054242cc614e2cd5b83b"
+  integrity sha512-dsAE+4ws75W5mmNmIZ7IKZwv4bcz5GgPuA87u+Mk1CeVWB6g7ZwBfizRwBZDeyO12RSxoU3NlRa8jgLYQeSZGg==
 
 "@types/download@^8.0.1":
   version "8.0.1"

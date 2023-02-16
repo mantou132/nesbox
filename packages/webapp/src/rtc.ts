@@ -136,9 +136,9 @@ export class RTC extends EventTarget {
   ];
 
   #stream: MediaStream;
-  #audio: HTMLAudioElement;
+  #onTrack: (evt: RTCTrackEvent) => any;
 
-  #emitMessage = (detail: ChannelMessage | ArrayBuffer) => {
+  #emitMessage = (detail: ChannelMessage) => {
     this.dispatchEvent(new CustomEvent('message', { detail }));
   };
 
@@ -296,14 +296,7 @@ export class RTC extends EventTarget {
 
   #startClient = async () => {
     const conn = this.#createRTCPeerConnection(configure.user!.id);
-
-    /**
-     * 不按顺序接收消息的问题
-     * 1. 帧可能乱序，可以在帧数据上添加帧数，但需要复制内存（性能消耗多少？）
-     * 2. ping 值不准确
-     */
     const channel = conn.createDataChannel('msg', { ordered: false });
-    channel.binaryType = 'arraybuffer';
     channel.onopen = () => {
       clearTimeout(this.#restartTimer);
       // `deleteUser` assign `null`
@@ -318,20 +311,15 @@ export class RTC extends EventTarget {
 
       this.#sendPing();
     };
-    channel.onmessage = ({ data }: MessageEvent<string | ArrayBuffer>) => {
-      if (typeof data === 'string') {
-        const msg = JSON.parse(data) as ChannelMessage;
-        switch (msg.type) {
-          case ChannelMessageType.PING:
-            updateStore(pingStore, { ping: Date.now() - msg.timestamp });
-            break;
-          default:
-            this.#emitMessage(msg);
-            break;
-        }
-      } else {
-        // compressed frame
-        this.#emitMessage(data);
+    channel.onmessage = ({ data }: MessageEvent<string>) => {
+      const msg = JSON.parse(data) as ChannelMessage;
+      switch (msg.type) {
+        case ChannelMessageType.PING:
+          updateStore(pingStore, { ping: Date.now() - msg.timestamp });
+          break;
+        default:
+          this.#emitMessage(msg);
+          break;
       }
     };
 
@@ -347,15 +335,7 @@ export class RTC extends EventTarget {
       logger.error(event);
     });
 
-    conn.addEventListener('track', ({ streams }) => {
-      this.#audio.srcObject = streams[0];
-      if (this.#audio.paused) {
-        this.#audio.muted = true;
-        this.#audio.play().catch(() => {
-          //
-        });
-      }
-    });
+    conn.addEventListener('track', this.#onTrack);
 
     await conn.setLocalDescription(await conn.createOffer());
     await sendSignal(this.#host, {
@@ -375,12 +355,20 @@ export class RTC extends EventTarget {
     this.destroy();
     // logout / leave
     if (configure.user?.playing) {
-      this.start({ host: this.#host, stream: this.#stream, audio: this.#audio });
+      this.start({ host: this.#host, stream: this.#stream, onTrack: this.#onTrack });
     }
   };
 
-  start = async ({ host, stream, audio }: { host: number; stream: MediaStream; audio: HTMLAudioElement }) => {
-    this.#audio = audio;
+  start = async ({
+    host,
+    stream,
+    onTrack,
+  }: {
+    host: number;
+    stream: MediaStream;
+    onTrack: (evt: RTCTrackEvent) => any;
+  }) => {
+    this.#onTrack = onTrack;
     this.#stream = stream;
     this.#host = host;
     this.#isHost = host === configure.user!.id;
@@ -416,29 +404,6 @@ export class RTC extends EventTarget {
 
   needSendFrame = () => {
     return !!this.#channelMap.size;
-  };
-
-  sendFrame = (frame: ArrayBuffer, frameNum: number) => {
-    this.#channelMap.forEach((channel) => {
-      // Wait for client to send ping
-      if (!channel.clientPrevPing) return;
-
-      if (channel.clientPrevPing < 30) {
-        channel.send(frame);
-      } else if (channel.clientPrevPing < 90) {
-        if (frameNum % 2 === 0) {
-          channel.send(frame);
-        }
-      } else if (channel.clientPrevPing < 150) {
-        if (frameNum % 3 === 0) {
-          channel.send(frame);
-        }
-      } else if (channel.clientPrevPing < 300) {
-        if (frameNum % 6 === 0) {
-          channel.send(frame);
-        }
-      }
-    });
   };
 
   kickOutRole = (userId: number) => {

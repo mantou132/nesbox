@@ -40,9 +40,41 @@ export class NesboxRenderElement extends GemElement {
     return this.canvasRef.element!.getContext('2d')!;
   }
 
-  paint = (frame: Uint8Array) => {
+  #writer?: WritableStreamDefaultWriter<VideoFrame>;
+  #reader?: ReadableStreamDefaultReader<VideoFrame>;
+
+  setVideoWriter = (writer: WritableStreamDefaultWriter) => {
+    this.#writer = writer;
+  };
+
+  setVideoReader = (reader: ReadableStreamDefaultReader) => {
+    this.#reader = reader;
+  };
+
+  paint = (frame: Uint8Array, needSendFrame = false) => {
     new Uint8Array(this.#imageData.data.buffer).set(frame);
     this.#ctx.putImageData(this.#imageData, 0, 0);
+
+    if (needSendFrame) {
+      // TODO: 无损画质
+      // FIXME: 延迟
+      const videoFrame = new window.VideoFrame(frame, {
+        timestamp: performance.now() * 1000,
+        format: 'RGBA',
+        codedWidth: 256,
+        codedHeight: 240,
+      });
+      this.#writer?.write(videoFrame).finally(() => videoFrame.close());
+    }
+  };
+
+  paintStream = async () => {
+    if (!this.#reader) return;
+    const result = await this.#reader.read();
+    if (result.value) {
+      this.#ctx.drawImage(result.value, 0, 0);
+      result.value.close();
+    }
   };
 
   screenshot = () => {

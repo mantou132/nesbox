@@ -188,6 +188,11 @@ export class MNesElement extends GemElement<State> {
     this.#gainNode.gain.value = this.#settings?.volume.game || 1;
     this.#gainNode.connect(this.#audioContext.destination);
     stream.addTrack(this.#audioStreamDestination.stream.getAudioTracks()[0]);
+
+    const trackGenerator = new MediaStreamTrackGenerator({ kind: 'video' });
+    this.canvasRef.element!.setVideoWriter(trackGenerator.writable.getWriter());
+    stream.addTrack(trackGenerator);
+
     return stream;
   };
 
@@ -222,19 +227,20 @@ export class MNesElement extends GemElement<State> {
   #bufferSize = this.#sampleRate / 60;
   #nextStartTime = 0;
   #loop = () => {
+    if (!this.#isHost) {
+      this.canvasRef.element!.paintStream();
+      return;
+    }
+
     if (!this.#nes || !this.#isVisible) return;
     this.#execCheat();
     const frameNum = this.#nes.clock_frame();
 
     const memory = Nes.memory();
 
-    const framePtr = this.#nes.frame(!!this.#rtc?.needSendFrame());
+    const framePtr = this.#nes.frame(false);
     const frameLen = this.#nes.frame_len();
-    this.canvasRef.element!.paint(new Uint8Array(memory.buffer, framePtr, frameLen));
-
-    const qoiFramePtr = this.#nes.qoi_frame();
-    const qoiFrameLen = this.#nes.qoi_frame_len();
-    this.#rtc?.sendFrame(new Uint8Array(memory.buffer, qoiFramePtr, qoiFrameLen), frameNum);
+    this.canvasRef.element!.paint(new Uint8Array(memory.buffer, framePtr, frameLen), !!this.#rtc?.needSendFrame());
 
     if (!this.#nes.sound() || !this.#audioContext || !this.#audioStreamDestination || !this.#gainNode) return;
     const audioBuffer = this.#audioContext.createBuffer(1, this.#bufferSize, this.#sampleRate);
@@ -273,16 +279,7 @@ export class MNesElement extends GemElement<State> {
     this.#nextStartTime = 0;
   };
 
-  #onMessage = ({ detail }: CustomEvent<ChannelMessage | ArrayBuffer>) => {
-    if (detail instanceof ArrayBuffer) {
-      if (this.#nes) {
-        const memory = Nes.memory();
-        const framePtr = this.#nes.decode_qoi(new Uint8Array(detail));
-        const frameLen = this.#nes.decode_qoi_len();
-        this.canvasRef.element!.paint(new Uint8Array(memory.buffer, framePtr, frameLen));
-      }
-      return;
-    }
+  #onMessage = ({ detail }: CustomEvent<ChannelMessage>) => {
     switch (detail.type) {
       // both
       case ChannelMessageType.CHAT_TEXT:
@@ -317,8 +314,23 @@ export class MNesElement extends GemElement<State> {
 
     this.#rtc.start({
       host: this.#playing!.host,
-      audio: this.audioRef.element!,
       stream: this.#createStream(),
+      onTrack: ({ track }) => {
+        if (track.kind === 'audio') {
+          const audio = this.audioRef.element!;
+          audio.srcObject = new MediaStream([track]);
+          if (audio.paused) {
+            audio.muted = true;
+            audio.play().catch(() => {
+              //
+            });
+          }
+        }
+        if (track.kind === 'video') {
+          const trackProcessor = new MediaStreamTrackProcessor({ track: track as MediaStreamVideoTrack });
+          this.canvasRef.element!.setVideoReader(trackProcessor.readable.getReader());
+        }
+      },
     });
   };
 
@@ -413,9 +425,7 @@ export class MNesElement extends GemElement<State> {
   mounted = () => {
     this.effect(
       () => {
-        if (this.#isHost) {
-          return requestFrame(this.#loop, this.#settings?.video.refreshRate);
-        }
+        return requestFrame(this.#loop, this.#settings?.video.refreshRate);
       },
       () => [this.#settings?.video.refreshRate],
     );
