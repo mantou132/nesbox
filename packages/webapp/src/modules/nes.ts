@@ -243,6 +243,7 @@ export class MNesElement extends GemElement<State> {
     node.connect(this.#gainNode);
     node.connect(this.#audioStreamDestination);
     node.buffer = audioBuffer;
+    if (!(frameNum % 100)) this.#nextStartTime = 0;
     const start = Math.max(
       this.#nextStartTime,
       this.#audioContext.currentTime + this.#bufferSize / this.#sampleRate / 1000,
