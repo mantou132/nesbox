@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@mantou/gem": "^1.6.0",
-    "@mantou/nes": "^1.0.3",
+    "@mantou/nes": "^1.0.4",
     "duoyun-ui": "^0.0.58",
     "graphql": "^16.2.0",
     "jszip": "^3.10.0",
