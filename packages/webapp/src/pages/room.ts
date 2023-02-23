@@ -31,11 +31,11 @@ import { preventDefault } from 'src/utils';
 import { BcMsgEvent, BcMsgType, queryKeys } from 'src/constants';
 import { createInvite, updateRoomScreenshot } from 'src/services/api';
 import { closeListenerSet } from 'src/elements/titlebar';
-import type { MNesElement } from 'src/modules/nes';
+import type { MStageElement } from 'src/modules/stage';
 
 import 'duoyun-ui/elements/coach-mark';
 import 'duoyun-ui/elements/space';
-import 'src/modules/nes';
+import 'src/modules/stage';
 import 'src/modules/cheat-settings';
 import 'src/elements/list';
 import 'src/elements/game-controller';
@@ -43,7 +43,7 @@ import 'src/elements/fps';
 import 'src/elements/ping';
 
 const style = createCSSSheet(css`
-  .nes,
+  .stage,
   .controller {
     position: absolute;
     inset: 0;
@@ -83,7 +83,7 @@ const style = createCSSSheet(css`
 @adoptedStyle(style)
 @connectStore(i18n.store)
 export class PRoomElement extends GemElement {
-  @refobject nesbox: RefObject<MNesElement>;
+  @refobject stageRef: RefObject<MStageElement>;
 
   get #playing() {
     return configure.user?.playing;
@@ -179,12 +179,12 @@ export class PRoomElement extends GemElement {
   #getCachesName = (auto: boolean) => `${auto ? 'auto_' : ''}state_v5`;
 
   #save = async (auto = false) => {
-    if (!this.nesbox.element!.romBuffer) return;
-    const buffer = this.nesbox.element!.getState();
+    if (!this.stageRef.element!.romBuffer) return;
+    const buffer = this.stageRef.element!.getState();
     if (!buffer) return;
-    const thumbnail = this.nesbox.element!.getThumbnail();
+    const thumbnail = this.stageRef.element!.getThumbnail();
     const cache = await caches.open(this.#getCachesName(auto));
-    const key = await hash(this.nesbox.element!.romBuffer!);
+    const key = await hash(this.stageRef.element!.romBuffer!);
     await cache.put(
       `/${key}?${new URLSearchParams({ timestamp: Date.now().toString(), thumbnail, auto: auto ? 'auto' : '' })}`,
       new Response(new Blob([buffer]), {
@@ -201,8 +201,8 @@ export class PRoomElement extends GemElement {
   #autoSave = () => this.#save(true);
 
   #load = async () => {
-    if (!this.nesbox.element!.romBuffer) return;
-    const key = await hash(this.nesbox.element!.romBuffer);
+    if (!this.stageRef.element!.romBuffer) return;
+    const key = await hash(this.stageRef.element!.romBuffer);
     const cache = await caches.open(this.#getCachesName(false));
     const reqs = [...(await cache.keys(`/${key}`, { ignoreSearch: true }))].splice(0, 10);
     const autoCache = await caches.open(this.#getCachesName(true));
@@ -233,7 +233,7 @@ export class PRoomElement extends GemElement {
                 onClick: async (evt: PointerEvent) => {
                   const res = await (req === autoCacheReq ? autoCache : cache).match(req);
                   if (!res) return;
-                  this.nesbox.element!.loadState(new Uint8Array(await res.arrayBuffer()));
+                  this.stageRef.element!.loadState(new Uint8Array(await res.arrayBuffer()));
                   Toast.open('success', i18n.get('tipGameStateLoad', time.format()));
                   evt.target?.dispatchEvent(new CustomEvent('close', { composed: true }));
                 },
@@ -250,15 +250,15 @@ export class PRoomElement extends GemElement {
   };
 
   #uploadScreenshot = () => {
-    if (!this.nesbox.element!.romBuffer) return;
+    if (!this.stageRef.element!.romBuffer) return;
     updateRoomScreenshot({
       id: this.#playing!.id,
-      screenshot: this.nesbox.element!.getThumbnail(),
+      screenshot: this.stageRef.element!.getThumbnail(),
     });
   };
 
   #saveScreenshot = async () => {
-    if (await this.nesbox.element!.screenshot()) {
+    if (await this.stageRef.element!.screenshot()) {
       Toast.open('success', i18n.get('tipScreenshotSaved'));
     }
   };
@@ -306,7 +306,7 @@ export class PRoomElement extends GemElement {
   #onMessage = ({ data, target }: MessageEvent<BcMsgEvent>) => {
     switch (data.type) {
       case BcMsgType.RAM_REQ: {
-        const res: BcMsgEvent = { id: data.id, type: BcMsgType.RAM_RES, data: this.nesbox.element!.getRam() };
+        const res: BcMsgEvent = { id: data.id, type: BcMsgType.RAM_RES, data: this.stageRef.element!.getRam() };
         (target as BroadcastChannel).postMessage(res);
         break;
       }
@@ -350,7 +350,7 @@ export class PRoomElement extends GemElement {
 
   render = () => {
     return html`
-      <m-nes class="nes" ref=${this.nesbox.ref} @contextmenu=${this.#onContextMenu}></m-nes>
+      <m-stage class="stage" ref=${this.stageRef.ref} @contextmenu=${this.#onContextMenu}></m-stage>
       <nesbox-game-controller class="controller"></nesbox-game-controller>
       <dy-space class="info">
         ${this.#isHost ? html`<nesbox-fps></nesbox-fps>` : html`<nesbox-ping></nesbox-ping>`}

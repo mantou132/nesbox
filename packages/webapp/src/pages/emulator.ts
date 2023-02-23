@@ -11,18 +11,19 @@ import {
   history,
 } from '@mantou/gem';
 import { locale } from 'duoyun-ui/lib/locale';
-import init, { Button, Nes } from '@mantou/nes';
+import { default as initNes, Button, Nes } from '@mantou/nes';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
+import { clamp } from 'duoyun-ui/lib/number';
 import { Modal } from 'duoyun-ui/elements/modal';
 import { createPath } from 'duoyun-ui/elements/route';
 
-import type { NesboxRenderElement } from 'src/elements/render';
+import type { NesboxCanvasElement } from 'src/elements/canvas';
 import { configure, defaultKeybinding } from 'src/configure';
 import { requestFrame } from 'src/utils';
 import { routes } from 'src/routes';
 
 import 'duoyun-ui/elements/heading';
-import 'src/elements/render';
+import 'src/elements/canvas';
 
 const style = createCSSSheet(css`
   .canvas {
@@ -53,21 +54,21 @@ const style = createCSSSheet(css`
 @adoptedStyle(style)
 @connectStore(configure)
 export class PEmulatorElement extends GemElement {
-  @refobject canvasRef: RefObject<NesboxRenderElement>;
+  @refobject canvasRef: RefObject<NesboxCanvasElement>;
 
   get #isVisible() {
     return document.visibilityState === 'visible';
   }
 
-  #nes?: Nes;
+  #game?: Nes;
   #audioContext?: AudioContext;
 
   #enableAudio = () => {
-    this.#nes?.set_sound(true);
+    this.#game?.set_sound(true);
   };
 
   #disableAudio = () => {
-    this.#nes?.set_sound(false);
+    this.#game?.set_sound(false);
   };
 
   #getButton = (event: KeyboardEvent) => {
@@ -104,53 +105,50 @@ export class PEmulatorElement extends GemElement {
       return;
     }
     if (button === Button.Reset) {
-      this.#nes?.reset();
+      this.#game?.reset();
     } else {
       this.#enableAudio();
     }
-    this.#nes?.handle_event(button, true, event.repeat);
+    this.#game?.handle_event(button, true, event.repeat);
   };
 
   #onKeyUp = (event: KeyboardEvent) => {
     const button = this.#getButton(event);
     if (!button) return;
-    this.#nes?.handle_event(button, false, event.repeat);
+    this.#game?.handle_event(button, false, event.repeat);
   };
 
   #sampleRate = 44100;
   #bufferSize = this.#sampleRate / 60;
   #nextStartTime = 0;
   #loop = () => {
-    if (!this.#nes || !this.#isVisible) return;
-    this.#nes.clock_frame();
+    if (!this.#game || !this.#isVisible) return;
+    this.#game.clock_frame();
 
-    const memory = Nes.memory();
+    const memory = this.#game.mem();
 
-    const framePtr = this.#nes.frame(false);
-    const frameLen = this.#nes.frame_len();
+    const framePtr = this.#game.frame(false);
+    const frameLen = this.#game.frame_len();
     this.canvasRef.element!.paint(new Uint8Array(memory.buffer, framePtr, frameLen));
 
-    if (!this.#nes.sound() || !this.#audioContext) return;
+    if (!this.#game.sound() || !this.#audioContext) return;
     const audioBuffer = this.#audioContext.createBuffer(1, this.#bufferSize, this.#sampleRate);
-    this.#nes.audio_callback(audioBuffer.getChannelData(0));
+    this.#game.audio_callback(audioBuffer.getChannelData(0));
     const node = this.#audioContext.createBufferSource();
     node.connect(this.#audioContext.destination);
     node.buffer = audioBuffer;
-    const start = Math.max(
-      this.#nextStartTime,
-      this.#audioContext.currentTime + this.#bufferSize / this.#sampleRate / 1000,
-    );
+    const start = clamp(this.#audioContext.currentTime, this.#nextStartTime, this.#audioContext.currentTime + 4 / 60);
     node.start(start);
-    this.#nextStartTime = start + this.#bufferSize / this.#sampleRate;
+    this.#nextStartTime = start + 1 / 60;
   };
 
-  #initNes = async () => {
+  #loadRom = async () => {
     if (!configure.openNesFile) return;
-    await init();
-    this.#nes = Nes.new(this.#sampleRate);
+    await initNes();
+    this.#game = Nes.new(this.#sampleRate);
 
     const buffer = await configure.openNesFile.arrayBuffer();
-    this.#nes.load_rom(new Uint8Array(buffer));
+    this.#game.load_rom(new Uint8Array(buffer));
     this.#nextStartTime = 0;
   };
 
@@ -160,7 +158,7 @@ export class PEmulatorElement extends GemElement {
       () => requestFrame(this.#loop),
       () => [],
     );
-    this.effect(this.#initNes, () => [configure.openNesFile]);
+    this.effect(this.#loadRom, () => [configure.openNesFile]);
     addEventListener('keydown', this.#onKeyDown);
     addEventListener('keyup', this.#onKeyUp);
     addEventListener('focus', this.#enableAudio);
@@ -176,7 +174,7 @@ export class PEmulatorElement extends GemElement {
 
   render = () => {
     return html`
-      <nesbox-render class="canvas" ref=${this.canvasRef.ref}></nesbox-render>
+      <nesbox-canvas class="canvas" ref=${this.canvasRef.ref}></nesbox-canvas>
       <div class="nodata" ?hidden=${!!configure.openNesFile}>
         <dy-heading lv="1">${locale.noData}</dy-heading>
       </div>

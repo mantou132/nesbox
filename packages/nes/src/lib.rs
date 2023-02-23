@@ -80,6 +80,7 @@ pub struct Nes {
 
 #[wasm_bindgen]
 impl Nes {
+    #[deprecated]
     pub fn memory() -> JsValue {
         wasm_bindgen::memory()
     }
@@ -99,6 +100,10 @@ impl Nes {
             qoi_decode_buffer: Vec::new(),
             frame: 0,
         }
+    }
+
+    pub fn mem(&mut self) -> JsValue {
+        wasm_bindgen::memory()
     }
 
     pub fn set_filter(&mut self, filter: &str) {

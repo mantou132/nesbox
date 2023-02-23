@@ -28,7 +28,7 @@ const style = createCSSSheet(css`
     border-radius: ${theme.normalRound};
   }
   .body {
-    white-space: pre;
+    white-space: pre-wrap;
   }
   .none {
     white-space: normal;

@@ -28,12 +28,12 @@ const style = createCSSSheet(css`
 `);
 
 /**
- * @customElement nesbox-render
+ * @customElement nesbox-canvas
  */
-@customElement('nesbox-render')
+@customElement('nesbox-canvas')
 @adoptedStyle(style)
 @connectStore(configure)
-export class NesboxRenderElement extends GemElement {
+export class NesboxCanvasElement extends GemElement {
   @refobject canvasRef: RefObject<HTMLCanvasElement>;
 
   get #ctx() {

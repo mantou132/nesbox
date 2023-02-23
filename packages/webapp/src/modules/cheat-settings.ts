@@ -14,7 +14,7 @@ import { Toast } from 'duoyun-ui/elements/toast';
 import { Cheat, configure } from 'src/configure';
 import { icons } from 'src/icons';
 import { updateAccount } from 'src/services/api';
-import { MNesElement } from 'src/modules/nes';
+import { MStageElement } from 'src/modules/stage';
 import { i18n } from 'src/i18n';
 import { theme } from 'src/theme';
 
@@ -96,7 +96,7 @@ export class MCheatSettingsElement extends GemElement<State> {
   #addData = async (data: Cheat) => {
     if (this.#cheatSettings.find((e) => e.code === data.code)) {
       Toast.open('error', i18n.get('tipCheatCodeExist'));
-    } else if (MNesElement.parseCheatCode(data)) {
+    } else if (MStageElement.parseCheatCode(data)) {
       await this.#onChangeSettings([...this.#cheatSettings, data]);
       this.setState({ newCheat: undefined });
     } else {

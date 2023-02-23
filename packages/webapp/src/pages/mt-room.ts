@@ -14,7 +14,7 @@ import { createPath, matchPath } from 'duoyun-ui/elements/route';
 import { waitLoading } from 'duoyun-ui/elements/wait';
 
 import { configure } from 'src/configure';
-import type { MNesElement } from 'src/modules/nes';
+import type { MStageElement } from 'src/modules/stage';
 import { routes } from 'src/routes';
 import { leaveRoom, updateRoomScreenshot } from 'src/services/api';
 import { store } from 'src/store';
@@ -24,17 +24,17 @@ import type { MVoiceRoomElement } from 'src/modules/room-voice';
 import { playHintSound } from 'src/utils';
 
 import 'duoyun-ui/elements/space';
-import 'src/modules/nes';
+import 'src/modules/stage';
 import 'src/modules/room-voice';
 import 'src/elements/fps';
 import 'src/elements/ping';
 
 const style = createCSSSheet(css`
-  .nes {
+  .stage {
     position: absolute;
     inset: 0;
   }
-  .nes::part(canvas) {
+  .stage::part(canvas) {
     padding-block-start: 2em;
   }
   .info {
@@ -52,8 +52,8 @@ const style = createCSSSheet(css`
 @connectStore(configure)
 @adoptedStyle(style)
 export class PMtRoomElement extends GemElement {
-  @refobject nesbox: RefObject<MNesElement>;
-  @refobject voice: RefObject<MVoiceRoomElement>;
+  @refobject stageRef: RefObject<MStageElement>;
+  @refobject voiceRef: RefObject<MVoiceRoomElement>;
 
   get #playing() {
     return configure.user?.playing;
@@ -67,10 +67,10 @@ export class PMtRoomElement extends GemElement {
   }
 
   #uploadScreenshot = () => {
-    if (!this.nesbox.element!.romBuffer) return;
+    if (!this.stageRef.element!.romBuffer) return;
     updateRoomScreenshot({
       id: this.#playing!.id,
-      screenshot: this.nesbox.element!.getThumbnail(),
+      screenshot: this.stageRef.element!.getThumbnail(),
     });
   };
 
@@ -83,7 +83,7 @@ export class PMtRoomElement extends GemElement {
       case GamepadBtnIndex.FrontRightTop:
         playHintSound();
         // TODO: settings
-        this.voice.element?.toggleVoice();
+        this.voiceRef.element?.toggleVoice();
         break;
     }
   };
@@ -115,13 +115,13 @@ export class PMtRoomElement extends GemElement {
 
   render = () => {
     return html`
-      <m-nes class="nes" ref=${this.nesbox.ref}></m-nes>
+      <m-stage class="stage" ref=${this.stageRef.ref}></m-stage>
 
       <dy-space class="info">
         ${this.#playing?.host === configure.user?.id
           ? html`<nesbox-fps></nesbox-fps>`
           : html`<nesbox-ping></nesbox-ping>`}
-        <m-room-voice ref=${this.voice.ref}></m-room-voice>
+        <m-room-voice ref=${this.voiceRef.ref}></m-room-voice>
       </dy-space>
     `;
   };

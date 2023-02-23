@@ -27,6 +27,7 @@ const tours = [
   (tour, index, arr) =>
     ({
       ...tour,
+      maskCloseable: false,
       before: () => updateAccount({ settings: { ...configure.user!.settings, tourIndex: index + 1 } }),
       skip: () => updateAccount({ settings: { ...configure.user!.settings, tourIndex: arr.length } }),
     } as Tour),

@@ -12,7 +12,7 @@ import {
 import JSZip from 'jszip';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { waitLoading } from 'duoyun-ui/elements/wait';
-import init, { Nes, Button } from '@mantou/nes';
+import { default as initNes, Nes, Button } from '@mantou/nes';
 import { Toast } from 'duoyun-ui/elements/toast';
 import { isNotNullish } from 'duoyun-ui/lib/types';
 import { clamp } from 'duoyun-ui/lib/number';
@@ -34,12 +34,12 @@ import { i18n } from 'src/i18n';
 import type { MRoomChatElement } from 'src/modules/room-chat';
 import { getCDNSrc, playHintSound, requestFrame } from 'src/utils';
 import { events } from 'src/constants';
-import type { NesboxRenderElement } from 'src/elements/render';
+import type { NesboxCanvasElement } from 'src/elements/canvas';
 
 import 'src/modules/room-player-list';
 import 'src/modules/room-chat';
 import 'src/modules/room-voice';
-import 'src/elements/render';
+import 'src/elements/canvas';
 
 const style = createCSSSheet(css`
   :host {
@@ -77,20 +77,20 @@ const style = createCSSSheet(css`
 type State = {
   messages: TextMsg[];
   roles: Role[];
-  cheats: Exclude<ReturnType<typeof MNesElement.parseCheatCode>, undefined>[];
+  cheats: Exclude<ReturnType<typeof MStageElement.parseCheatCode>, undefined>[];
   cheatKeyHandles: Record<string, (evt: KeyboardEvent) => void>;
 };
 
 /**
- * @customElement m-nes
+ * @customElement m-stage
  */
-@customElement('m-nes')
+@customElement('m-stage')
 @connectStore(store)
 @connectStore(configure)
 @adoptedStyle(style)
 @connectStore(i18n.store)
-export class MNesElement extends GemElement<State> {
-  @refobject canvasRef: RefObject<NesboxRenderElement>;
+export class MStageElement extends GemElement<State> {
+  @refobject canvasRef: RefObject<NesboxCanvasElement>;
   @refobject audioRef: RefObject<HTMLAudioElement>;
   @refobject chatRef: RefObject<MRoomChatElement>;
 
@@ -143,7 +143,7 @@ export class MNesElement extends GemElement<State> {
     return document.visibilityState === 'visible';
   }
 
-  #nes?: Nes;
+  #game?: Nes;
   #audioContext?: AudioContext;
   #audioStreamDestination?: MediaStreamAudioDestinationNode;
   #gainNode?: GainNode;
@@ -151,7 +151,7 @@ export class MNesElement extends GemElement<State> {
 
   #enableAudio = () => {
     // enable audio state, work on host and client
-    this.#nes?.set_sound(true);
+    this.#game?.set_sound(true);
 
     if (this.#isHost) {
       this.#setVolume();
@@ -161,7 +161,7 @@ export class MNesElement extends GemElement<State> {
   };
 
   #resumeAudio = () => {
-    if (this.#nes?.sound()) {
+    if (this.#game?.sound()) {
       this.#enableAudio();
     }
   };
@@ -193,26 +193,26 @@ export class MNesElement extends GemElement<State> {
   };
 
   #execCheat = () => {
-    if (!this.#nes) return;
+    if (!this.#game) return;
     this.state.cheats.forEach((cheat) => {
       const { enabled, addr, type, val } = cheat;
       if (!enabled) return;
       switch (type) {
         case 0:
-          val.forEach((v, i) => this.#nes!.write_ram(addr + i, v));
+          val.forEach((v, i) => this.#game!.write_ram(addr + i, v));
           break;
         case 1:
-          val.forEach((v, i) => this.#nes!.write_ram(addr + i, v));
+          val.forEach((v, i) => this.#game!.write_ram(addr + i, v));
           cheat.enabled = false;
           break;
         case 2:
-          if (this.#nes!.read_ram(addr) > val[0]) {
-            this.#nes!.write_ram(addr, val[0]);
+          if (this.#game!.read_ram(addr) > val[0]) {
+            this.#game!.write_ram(addr, val[0]);
           }
           break;
         case 3:
-          if (this.#nes!.read_ram(addr) < val[0]) {
-            this.#nes!.write_ram(addr, val[0]);
+          if (this.#game!.read_ram(addr) < val[0]) {
+            this.#game!.write_ram(addr, val[0]);
           }
           break;
       }
@@ -223,23 +223,23 @@ export class MNesElement extends GemElement<State> {
   #bufferSize = this.#sampleRate / 60;
   #nextStartTime = 0;
   #loop = () => {
-    if (!this.#nes || !this.#isVisible) return;
+    if (!this.#game || !this.#isVisible) return;
     this.#execCheat();
-    const frameNum = this.#nes.clock_frame();
+    const frameNum = this.#game.clock_frame();
 
-    const memory = Nes.memory();
+    const memory = this.#game.mem();
 
-    const framePtr = this.#nes.frame(!!this.#rtc?.needSendFrame());
-    const frameLen = this.#nes.frame_len();
+    const framePtr = this.#game.frame(!!this.#rtc?.needSendFrame());
+    const frameLen = this.#game.frame_len();
     this.canvasRef.element!.paint(new Uint8Array(memory.buffer, framePtr, frameLen));
 
-    const qoiFramePtr = this.#nes.qoi_frame();
-    const qoiFrameLen = this.#nes.qoi_frame_len();
+    const qoiFramePtr = this.#game.qoi_frame();
+    const qoiFrameLen = this.#game.qoi_frame_len();
     this.#rtc?.sendFrame(new Uint8Array(memory.buffer, qoiFramePtr, qoiFrameLen), frameNum);
 
-    if (!this.#nes.sound() || !this.#audioContext || !this.#audioStreamDestination || !this.#gainNode) return;
+    if (!this.#game.sound() || !this.#audioContext || !this.#audioStreamDestination || !this.#gainNode) return;
     const audioBuffer = this.#audioContext.createBuffer(1, this.#bufferSize, this.#sampleRate);
-    this.#nes.audio_callback(audioBuffer.getChannelData(0));
+    this.#game.audio_callback(audioBuffer.getChannelData(0));
     const node = this.#audioContext.createBufferSource();
     node.connect(this.#gainNode);
     node.connect(this.#audioStreamDestination);
@@ -249,9 +249,9 @@ export class MNesElement extends GemElement<State> {
     this.#nextStartTime = start + 1 / 60;
   };
 
-  #initNes = async () => {
-    await init();
-    this.#nes = Nes.new(this.#sampleRate);
+  #loadRom = async () => {
+    await initNes();
+    this.#game = Nes.new(this.#sampleRate);
     this.#setVideoFilter();
 
     if (!this.#isHost) return;
@@ -262,9 +262,9 @@ export class MNesElement extends GemElement<State> {
       .find((e) => e.name.toLowerCase().endsWith('.nes'))!
       .async('arraybuffer');
     try {
-      this.#nes.load_rom(new Uint8Array(this.romBuffer));
+      this.#game.load_rom(new Uint8Array(this.romBuffer));
     } catch {
-      this.#nes = undefined;
+      this.#game = undefined;
       Toast.open('error', 'ROM 加载错误');
     }
     this.#nextStartTime = 0;
@@ -272,10 +272,10 @@ export class MNesElement extends GemElement<State> {
 
   #onMessage = ({ detail }: CustomEvent<ChannelMessage | ArrayBuffer>) => {
     if (detail instanceof ArrayBuffer) {
-      if (this.#nes) {
-        const memory = Nes.memory();
-        const framePtr = this.#nes.decode_qoi(new Uint8Array(detail));
-        const frameLen = this.#nes.decode_qoi_len();
+      if (this.#game) {
+        const memory = this.#game.mem();
+        const framePtr = this.#game.decode_qoi(new Uint8Array(detail));
+        const frameLen = this.#game.decode_qoi_len();
         this.canvasRef.element!.paint(new Uint8Array(memory.buffer, framePtr, frameLen));
       }
       return;
@@ -299,11 +299,11 @@ export class MNesElement extends GemElement<State> {
         break;
       // host
       case ChannelMessageType.KEYDOWN:
-        this.#nes?.handle_event((detail as KeyDownMsg).button, true, false);
+        this.#game?.handle_event((detail as KeyDownMsg).button, true, false);
         break;
       // host
       case ChannelMessageType.KEYUP:
-        this.#nes?.handle_event((detail as KeyUpMsg).button, false, false);
+        this.#game?.handle_event((detail as KeyUpMsg).button, false, false);
         break;
     }
   };
@@ -350,12 +350,12 @@ export class MNesElement extends GemElement<State> {
 
   #pressButton = (button: Button) => {
     if (button === Button.Reset) {
-      this.#nes?.reset();
+      this.#game?.reset();
     } else {
       this.#enableAudio();
     }
     if (this.#isHost) {
-      this.#nes?.handle_event(button, true, false);
+      this.#game?.handle_event(button, true, false);
     } else {
       this.#rtc?.send(new KeyDownMsg(button));
     }
@@ -385,7 +385,7 @@ export class MNesElement extends GemElement<State> {
 
   #releaseButton = (button: Button) => {
     if (this.#isHost) {
-      this.#nes?.handle_event(button, false, false);
+      this.#game?.handle_event(button, false, false);
     } else {
       this.#rtc?.send(new KeyUpMsg(button));
     }
@@ -404,7 +404,7 @@ export class MNesElement extends GemElement<State> {
   };
 
   #setVideoFilter = () => {
-    this.#settings && this.#nes?.set_filter(this.#settings.video.filter);
+    this.#settings && this.#game?.set_filter(this.#settings.video.filter);
   };
 
   mounted = () => {
@@ -439,7 +439,7 @@ export class MNesElement extends GemElement<State> {
         const cheatSettings = this.#settings?.cheat;
         if (gameId && cheatSettings) {
           const cheats = (cheatSettings[gameId] || [])
-            .map((cheat) => MNesElement.parseCheatCode(cheat))
+            .map((cheat) => MStageElement.parseCheatCode(cheat))
             .filter(isNotNullish);
 
           this.setState({
@@ -462,15 +462,11 @@ export class MNesElement extends GemElement<State> {
     );
 
     this.effect(
-      () => {
-        if (this.#rom) {
-          waitLoading(this.#initNes());
-        }
-      },
+      () => this.#rom && waitLoading(this.#loadRom()),
       () => [this.#rom],
     );
 
-    this.effect(this.#setVideoFilter, () => [this.#nes, this.#settings?.video]);
+    this.effect(this.#setVideoFilter, () => [this.#game, this.#settings?.video]);
 
     addEventListener('keydown', this.#onKeyDown);
     addEventListener('keyup', this.#onKeyUp);
@@ -494,7 +490,7 @@ export class MNesElement extends GemElement<State> {
     const { messages, roles } = this.state;
 
     return html`
-      <nesbox-render class="canvas" part="canvas" ref=${this.canvasRef.ref}></nesbox-render>
+      <nesbox-canvas class="canvas" part="canvas" ref=${this.canvasRef.ref}></nesbox-canvas>
       <audio ref=${this.audioRef.ref} hidden></audio>
       <m-room-chat
         class="chat"
@@ -521,16 +517,16 @@ export class MNesElement extends GemElement<State> {
   };
 
   getState = () => {
-    return this.#nes?.state();
+    return this.#game?.state();
   };
 
   loadState = (buffer: Uint8Array) => {
-    this.#nes?.load_state(buffer);
+    this.#game?.load_state(buffer);
     this.#setVideoFilter();
   };
 
   getRam = () => {
-    return this.#nes?.ram();
+    return this.#game?.ram();
   };
 
   romBuffer?: ArrayBuffer;
