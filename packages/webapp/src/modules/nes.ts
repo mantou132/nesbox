@@ -15,6 +15,7 @@ import { waitLoading } from 'duoyun-ui/elements/wait';
 import init, { Nes, Button } from '@mantou/nes';
 import { Toast } from 'duoyun-ui/elements/toast';
 import { isNotNullish } from 'duoyun-ui/lib/types';
+import { clamp } from 'duoyun-ui/lib/number';
 
 import { Cheat, configure } from 'src/configure';
 import {
@@ -243,13 +244,9 @@ export class MNesElement extends GemElement<State> {
     node.connect(this.#gainNode);
     node.connect(this.#audioStreamDestination);
     node.buffer = audioBuffer;
-    if (!(frameNum % 100)) this.#nextStartTime = 0;
-    const start = Math.max(
-      this.#nextStartTime,
-      this.#audioContext.currentTime + this.#bufferSize / this.#sampleRate / 1000,
-    );
+    const start = clamp(this.#audioContext.currentTime, this.#nextStartTime, this.#audioContext.currentTime + 4 / 60);
     node.start(start);
-    this.#nextStartTime = start + this.#bufferSize / this.#sampleRate;
+    this.#nextStartTime = start + 1 / 60;
   };
 
   #initNes = async () => {
