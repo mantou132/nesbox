@@ -9,7 +9,7 @@
     "declarationMap": true,
     "isolatedModules": true,
     "sourceMap": true,
-    "module": "ES2020",
+    "module": "ES2022",
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "skipLibCheck": true,
@@ -17,7 +17,7 @@
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "downlevelIteration": true,
-    "target": "ES2018",
+    "target": "ES2020",
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "paths": {
       "src/*": ["src/*"]

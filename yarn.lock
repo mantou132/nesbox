@@ -7400,6 +7400,11 @@ q@^1.5.1:
   resolved "https://registry.npmjs.org/q/-/q-1.5.1.tgz"
   integrity sha1-fjL3W0E4EpHQRhHxvxQQmsAGUdc=
 
+qoijs@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/qoijs/-/qoijs-1.0.0.tgz#daa006cf27c3b3a37e1bb66ff63df29333e8432d"
+  integrity sha512-brY7r1RNripCYifPMJ1h0N/uJZ0hpVd17tXqZtbwoHdbXyGRTrpjKSYq0xIwySdqLY0HbIeVAYbLGl1Q97/KCQ==
+
 qs@^6.9.4:
   version "6.10.3"
   resolved "https://registry.npmjs.org/qs/-/qs-6.10.3.tgz"
@@ -7909,6 +7914,11 @@ setimmediate@^1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/setimmediate/-/setimmediate-1.0.5.tgz#290cbb232e306942d7d7ea9b83732ab7856f8285"
   integrity sha1-KQy7Iy4waULX1+qbg3Mqt4VvgoU=
+
+shadowrealm-api@^0.8.2:
+  version "0.8.2"
+  resolved "https://registry.yarnpkg.com/shadowrealm-api/-/shadowrealm-api-0.8.2.tgz#52800fd84c4a2057efc0ad0ff6ed8e85ade74adf"
+  integrity sha512-JJvmduce8QhsyCnabM7Fm+FzEeubuuARCe/iJcSqzdzRKISeQjCvMKFIrbt4ATEIWuFF00mU2uTKG76Ifc1xOQ==
 
 shallow-clone@^3.0.0:
   version "3.0.1"

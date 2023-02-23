@@ -1,0 +1,14 @@
+{
+  "name": "@nesbox/sandbox",
+  "version": "0.0.1",
+  "description": "",
+  "module": "src/index.ts",
+  "dependencies": {
+    "@mantou/nes": "^1.0.4",
+    "qoijs": "^1.0.0",
+    "shadowrealm-api": "^0.8.2"
+  },
+  "devDependencies": {
+    "@nesbox/config": "^0.0.1"
+  }
+}

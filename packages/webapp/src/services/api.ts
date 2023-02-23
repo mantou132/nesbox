@@ -96,7 +96,7 @@ import {
 import { store, friendStore } from 'src/store';
 import { request, subscribe } from 'src/services';
 import { configure, parseAccount, Settings } from 'src/configure';
-import { events, VoiceSignalEvent, Signal, SignalEvent } from 'src/constants';
+import { events, VoiceSignalEvent, Signal, SignalEvent, COMMAND } from 'src/constants';
 import { i18n, isCurrentLang } from 'src/i18n';
 import { logout } from 'src/auth';
 import { documentVisible, playHintSound, playSound } from 'src/utils';
@@ -167,6 +167,7 @@ export const getRooms = async () => {
 };
 
 export const createRoom = async (input: ScNewRoom) => {
+  if (COMMAND === 'serve') input.private = true;
   const { createRoom } = await request<CreateRoomMutation, CreateRoomMutationVariables>(CreateRoom, { input });
   configure.user!.playing = createRoom;
   updateStore(configure);

@@ -16,7 +16,9 @@ import { default as initNes, Nes, Button } from '@mantou/nes';
 import { Toast } from 'duoyun-ui/elements/toast';
 import { isNotNullish } from 'duoyun-ui/lib/types';
 import { clamp } from 'duoyun-ui/lib/number';
+import { getCDNSrc, playHintSound, requestFrame } from 'src/utils';
 
+import { logger } from 'src/logger';
 import { Cheat, configure } from 'src/configure';
 import {
   ChannelMessage,
@@ -32,7 +34,6 @@ import {
 import { store } from 'src/store';
 import { i18n } from 'src/i18n';
 import type { MRoomChatElement } from 'src/modules/room-chat';
-import { getCDNSrc, playHintSound, requestFrame } from 'src/utils';
 import { events, RTCTransportType } from 'src/constants';
 import type { NesboxCanvasElement } from 'src/elements/canvas';
 
@@ -257,10 +258,10 @@ export class MStageElement extends GemElement<State> {
   };
 
   #loadRom = async () => {
+    this.#game = undefined;
+    const { default: initNes, Nes } = await import('@nesbox/sandbox');
     await initNes();
-    this.#game = Nes.new(this.#sampleRate);
-    this.#setVideoFilter();
-    this.setState({ canvasWidth: this.#game.width(), canvasHeight: this.#game.height() });
+    const game = Nes.new(this.#sampleRate);
 
     if (!this.#isHost) return;
 
@@ -270,9 +271,12 @@ export class MStageElement extends GemElement<State> {
       .find((e) => e.name.toLowerCase().endsWith('.nes'))!
       .async('arraybuffer');
     try {
-      this.#game.load_rom(new Uint8Array(this.romBuffer));
-    } catch {
-      this.#game = undefined;
+      await game.load_rom(new Uint8Array(this.romBuffer));
+      this.#setVideoFilter();
+      this.setState({ canvasWidth: game.width(), canvasHeight: game.height() });
+      this.#game = game;
+    } catch (err) {
+      logger.error(err);
       Toast.open('error', 'ROM 加载错误');
     }
     this.#nextStartTime = 0;
