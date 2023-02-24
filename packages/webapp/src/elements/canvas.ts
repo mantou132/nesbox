@@ -9,6 +9,7 @@ import {
   connectStore,
   RefObject,
   refobject,
+  numattribute,
 } from '@mantou/gem';
 import { BaseDirectory } from '@tauri-apps/api/fs';
 import { Time } from 'duoyun-ui/lib/time';
@@ -34,14 +35,41 @@ const style = createCSSSheet(css`
 @adoptedStyle(style)
 @connectStore(configure)
 export class NesboxCanvasElement extends GemElement {
+  @numattribute width: number;
+  @numattribute height: number;
   @refobject canvasRef: RefObject<HTMLCanvasElement>;
 
   get #ctx() {
     return this.canvasRef.element!.getContext('2d')!;
   }
 
-  paint = (frame: Uint8Array) => {
-    new Uint8Array(this.#imageData.data.buffer).set(frame);
+  paint = (frame: Uint8Array, part?: number[]) => {
+    if (!this.#imageData) return;
+    const { data } = this.#imageData;
+    if (part) {
+      // Why not work?
+      // const [x, y, w, h] = part;
+      // for (let i = 0; i < h; i++) {
+      //   const line = new Uint8Array(frame.buffer, i * w * 4, w * 4);
+      //   data.set(line, ((i + y) * this.width + x) * 4);
+      // }
+      const [x, y, ww, _h] = part;
+      const w = ww || this.width;
+      const width = this.width;
+      for (let i = 0; i < frame.length; i += 4) {
+        const xx = x + ((i / 4) % w);
+        const yy = y + Math.trunc(i / 4 / w);
+        const index = (xx + yy * width) * 4;
+        [data[index], data[index + 1], data[index + 2], data[index + 3]] = [
+          frame[i],
+          frame[i + 1],
+          frame[i + 2],
+          frame[i + 3],
+        ];
+      }
+    } else {
+      data.set(frame);
+    }
     this.#ctx.putImageData(this.#imageData, 0, 0);
   };
 
@@ -59,17 +87,21 @@ export class NesboxCanvasElement extends GemElement {
     return this.#ctx.canvas.toDataURL('image/png', 0.5);
   };
 
-  #imageData: ImageData;
+  #imageData?: ImageData;
   mounted = () => {
-    this.#imageData = this.#ctx!.createImageData(this.#ctx!.canvas.width, this.#ctx!.canvas.height);
+    this.effect(() => {
+      if (this.width) {
+        this.#imageData = this.#ctx!.createImageData(this.width, this.height);
+      }
+    });
   };
 
   render = () => {
     return html`
       <canvas
         class="canvas"
-        width="256"
-        height="240"
+        width=${this.width}
+        height=${this.height}
         ref=${this.canvasRef.ref}
         style=${styleMap({ imageRendering: configure.user?.settings.video.render })}
       ></canvas>

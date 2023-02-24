@@ -3,7 +3,7 @@ import { GemElement, html, adoptedStyle, customElement, connectStore } from '@ma
 import { configure, Settings } from 'src/configure';
 import { gridStyle } from 'src/modules/shortcut-settings';
 import { updateAccount } from 'src/services/api';
-import { VideoFilter, VideoRefreshRate, VideoRenderMethod } from 'src/constants';
+import { RTCTransportType, VideoFilter, VideoRefreshRate, VideoRenderMethod } from 'src/constants';
 import { i18n } from 'src/i18n';
 import { icons } from 'src/icons';
 
@@ -67,6 +67,20 @@ export class MVideoSettingsElement extends GemElement {
             { label: 'NTSC', value: VideoFilter.NTSC },
           ]}
           @change=${(evt: CustomEvent<VideoFilter>) => this.#updateVideoSetting('filter', evt.detail)}
+        ></dy-select>
+        <div>
+          Transport
+          <dy-tooltip .content=${i18n.get('tipHostSetting')}>
+            <dy-use class="help" .element=${icons.help}></dy-use>
+          </dy-tooltip>
+        </div>
+        <dy-select
+          .value=${configure.user.settings.video.rtcImprove}
+          .options=${[
+            { label: 'Frame Clip', value: RTCTransportType.CLIP },
+            { label: '30 FPS', value: RTCTransportType.REDUCE },
+          ]}
+          @change=${(evt: CustomEvent<VideoFilter>) => this.#updateVideoSetting('rtcImprove', evt.detail)}
         ></dy-select>
       </div>
     `;

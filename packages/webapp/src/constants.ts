@@ -95,6 +95,11 @@ export const enum VideoRefreshRate {
   SYNC = 'sync',
 }
 
+export const enum RTCTransportType {
+  CLIP = 'clip',
+  REDUCE = 'reduce',
+}
+
 export const pixelFont = new FontFace(
   'Common Pixel',
   `local('Common Pixel'), url('/fonts/COMMP___.woff') format('woff')`,

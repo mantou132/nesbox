@@ -2,7 +2,7 @@ import { createStore, updateStore } from '@mantou/gem';
 import { Button } from '@mantou/nes';
 
 import { configure } from 'src/configure';
-import { events, SignalEvent, SignalType } from 'src/constants';
+import { events, RTCTransportType, SignalEvent, SignalType } from 'src/constants';
 import { LocaleKey } from 'src/i18n';
 import { logger } from 'src/logger';
 import { sendSignal } from 'src/services/api';
@@ -418,23 +418,16 @@ export class RTC extends EventTarget {
     return !!this.#channelMap.size;
   };
 
-  sendFrame = (frame: ArrayBuffer, frameNum: number) => {
+  sendFrame = (frame: Uint8Array, frameNum: number) => {
+    if (!frame.length) return;
     this.#channelMap.forEach((channel) => {
       // Wait for client to send ping
       if (!channel.clientPrevPing) return;
 
-      if (channel.clientPrevPing < 30) {
+      if (configure.user?.settings.video.rtcImprove === RTCTransportType.CLIP) {
         channel.send(frame);
-      } else if (channel.clientPrevPing < 90) {
+      } else {
         if (frameNum % 2 === 0) {
-          channel.send(frame);
-        }
-      } else if (channel.clientPrevPing < 150) {
-        if (frameNum % 3 === 0) {
-          channel.send(frame);
-        }
-      } else if (channel.clientPrevPing < 300) {
-        if (frameNum % 6 === 0) {
           channel.send(frame);
         }
       }

@@ -4,7 +4,14 @@ import { Modify } from 'duoyun-ui/lib/types';
 import { createCacheStore } from 'duoyun-ui/lib/utils';
 
 import { LoginMutation } from 'src/generated/guestgraphql';
-import { events, localStorageKeys, VideoFilter, VideoRefreshRate, VideoRenderMethod } from 'src/constants';
+import {
+  events,
+  localStorageKeys,
+  RTCTransportType,
+  VideoFilter,
+  VideoRefreshRate,
+  VideoRenderMethod,
+} from 'src/constants';
 import type { ThemeName } from 'src/theme';
 import { GetAccountQuery } from 'src/generated/graphql';
 
@@ -84,6 +91,7 @@ const defaultVideoSettings = {
   render: VideoRenderMethod.PIXELATED,
   filter: VideoFilter.DEFAULT,
   refreshRate: VideoRefreshRate.AUTO,
+  rtcImprove: RTCTransportType.CLIP,
 };
 
 export type Cheat = { code: string; enabled: boolean; toggleKey: string; comment: string };

@@ -33,7 +33,7 @@ import { store } from 'src/store';
 import { i18n } from 'src/i18n';
 import type { MRoomChatElement } from 'src/modules/room-chat';
 import { getCDNSrc, playHintSound, requestFrame } from 'src/utils';
-import { events } from 'src/constants';
+import { events, RTCTransportType } from 'src/constants';
 import type { NesboxCanvasElement } from 'src/elements/canvas';
 
 import 'src/modules/room-player-list';
@@ -79,6 +79,8 @@ type State = {
   roles: Role[];
   cheats: Exclude<ReturnType<typeof MStageElement.parseCheatCode>, undefined>[];
   cheatKeyHandles: Record<string, (evt: KeyboardEvent) => void>;
+  canvasWidth: number;
+  canvasHeight: number;
 };
 
 /**
@@ -99,6 +101,8 @@ export class MStageElement extends GemElement<State> {
     roles: [],
     cheats: [],
     cheatKeyHandles: {},
+    canvasWidth: 0,
+    canvasHeight: 0,
   };
 
   static parseCheatCode = (cheat: Cheat) => {
@@ -229,7 +233,10 @@ export class MStageElement extends GemElement<State> {
 
     const memory = this.#game.mem();
 
-    const framePtr = this.#game.frame(!!this.#rtc?.needSendFrame());
+    const framePtr = this.#game.frame(
+      !!this.#rtc?.needSendFrame(),
+      this.#settings?.video.rtcImprove !== RTCTransportType.CLIP || frameNum % 180 === 0,
+    );
     const frameLen = this.#game.frame_len();
     this.canvasRef.element!.paint(new Uint8Array(memory.buffer, framePtr, frameLen));
 
@@ -253,6 +260,7 @@ export class MStageElement extends GemElement<State> {
     await initNes();
     this.#game = Nes.new(this.#sampleRate);
     this.#setVideoFilter();
+    this.setState({ canvasWidth: 256, canvasHeight: 240 });
 
     if (!this.#isHost) return;
 
@@ -274,9 +282,12 @@ export class MStageElement extends GemElement<State> {
     if (detail instanceof ArrayBuffer) {
       if (this.#game) {
         const memory = this.#game.mem();
-        const framePtr = this.#game.decode_qoi(new Uint8Array(detail));
+        const qoiBuffer = new Uint8Array(detail);
+        const part = new Uint8Array(detail, qoiBuffer.length - 4, 4);
+        const framePtr = this.#game.decode_qoi(qoiBuffer);
         const frameLen = this.#game.decode_qoi_len();
-        this.canvasRef.element!.paint(new Uint8Array(memory.buffer, framePtr, frameLen));
+        const frame = new Uint8Array(memory.buffer, framePtr, frameLen);
+        this.canvasRef.element!.paint(frame, [...part]);
       }
       return;
     }
@@ -487,10 +498,16 @@ export class MStageElement extends GemElement<State> {
   };
 
   render = () => {
-    const { messages, roles } = this.state;
+    const { messages, roles, canvasWidth, canvasHeight } = this.state;
 
     return html`
-      <nesbox-canvas class="canvas" part="canvas" ref=${this.canvasRef.ref}></nesbox-canvas>
+      <nesbox-canvas
+        class="canvas"
+        part="canvas"
+        ref=${this.canvasRef.ref}
+        .width=${canvasWidth}
+        .height=${canvasHeight}
+      ></nesbox-canvas>
       <audio ref=${this.audioRef.ref} hidden></audio>
       <m-room-chat
         class="chat"
