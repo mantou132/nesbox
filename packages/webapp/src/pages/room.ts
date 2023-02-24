@@ -20,7 +20,7 @@ import { isNotBoolean } from 'duoyun-ui/lib/types';
 import { Toast } from 'duoyun-ui/elements/toast';
 import { hash } from 'duoyun-ui/lib/encode';
 import { Time } from 'duoyun-ui/lib/time';
-import { getStringFromTemplate } from 'duoyun-ui/lib/utils';
+import { getStringFromTemplate, once } from 'duoyun-ui/lib/utils';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
 import { configure, getShortcut } from 'src/configure';
@@ -313,6 +313,12 @@ export class PRoomElement extends GemElement {
     }
   };
 
+  // each enter room only run once
+  #openTours = once(async () => {
+    const { openTorus } = await import('src/tours');
+    openTorus();
+  });
+
   mounted = () => {
     this.effect(
       () => {
@@ -325,7 +331,7 @@ export class PRoomElement extends GemElement {
           );
           history.replace({ path: returnPath ? roomFrom : createPath(routes.games) });
         } else {
-          if (!mediaQuery.isPhone) import('src/tours');
+          if (!mediaQuery.isPhone) this.#openTours();
           const timer = window.setInterval(this.#uploadScreenshot, 10000);
           return () => {
             clearInterval(timer);

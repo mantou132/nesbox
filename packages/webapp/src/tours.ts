@@ -33,9 +33,11 @@ const tours = [
     } as Tour),
 );
 
-if (configure.user && configure.user.settings.tourIndex < tours.length) {
-  setTours(tours, { currentIndex: configure.user!.settings.tourIndex });
-} else {
-  // test
-  // updateAccount({ settings: { ...configure.user!.settings, tourIndex: 0 } });
-}
+export const openTorus = () => {
+  if (configure.user && configure.user.settings.tourIndex < tours.length) {
+    setTours(tours, { currentIndex: configure.user.settings.tourIndex });
+  } else {
+    // test
+    // updateAccount({ settings: { ...configure.user!.settings, tourIndex: 0 } });
+  }
+};
