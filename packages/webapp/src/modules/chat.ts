@@ -10,7 +10,6 @@ import {
   RefObject,
 } from '@mantou/gem';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
-import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
 import { changeFriendChatDraft, friendStore, toggleFriendChatState } from 'src/store';
 import { createMessage, getMessages, readMessage } from 'src/services/api';
@@ -40,13 +39,6 @@ const style = createCSSSheet(css`
     box-shadow: 0 0.3em 0.75em rgba(0, 0, 0, calc(${theme.maskAlpha} - 0.15));
     box-sizing: border-box;
     border-radius: ${theme.normalRound};
-  }
-  @media ${mediaQuery.PHONE} {
-    :host {
-      inset: 0;
-      width: 100vw;
-      height: 100vh;
-    }
   }
   .header {
     display: flex;

@@ -40,7 +40,7 @@ const style = createCSSSheet(css`
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    width: min(100vw, 30em);
+    width: min(calc(100vw - 2 * ${theme.gridGutter}), 30em);
     height: 70vh;
     font-size: 1.125em;
   }

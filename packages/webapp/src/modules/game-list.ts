@@ -10,6 +10,7 @@ import {
   repeat,
 } from '@mantou/gem';
 import { isNotNullish } from 'duoyun-ui/lib/types';
+import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
 import { store } from 'src/store';
 import { i18n } from 'src/i18n';
@@ -52,6 +53,12 @@ const style = createCSSSheet(css`
     grid-template-columns: repeat(auto-fill, minmax(12em, 1fr));
     grid-template-rows: max-content;
     grid-gap: 2rem;
+  }
+  @media ${mediaQuery.PHONE} {
+    .heading {
+      flex-direction: column;
+      align-items: start;
+    }
   }
 `);
 

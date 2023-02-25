@@ -260,7 +260,7 @@ export class MStageElement extends GemElement<State> {
     await initNes();
     this.#game = Nes.new(this.#sampleRate);
     this.#setVideoFilter();
-    this.setState({ canvasWidth: 256, canvasHeight: 240 });
+    this.setState({ canvasWidth: this.#game.width(), canvasHeight: this.#game.height() });
 
     if (!this.#isHost) return;
 
@@ -429,11 +429,6 @@ export class MStageElement extends GemElement<State> {
     );
 
     this.effect(
-      () => this.#setVolume,
-      () => [this.#settings?.volume.game],
-    );
-
-    this.effect(
       () => {
         if (this.#playing) {
           this.#rtc?.destroy();
@@ -479,12 +474,15 @@ export class MStageElement extends GemElement<State> {
 
     this.effect(this.#setVideoFilter, () => [this.#game, this.#settings?.video]);
 
+    this.effect(
+      (muteArgs) => (muteArgs.every((e) => !e) ? this.#resumeAudio() : this.#pauseAudio()),
+      () => [!configure.windowHasFocus, configure.searchState, configure.settingsState, configure.friendListState],
+    );
+
     addEventListener('keydown', this.#onKeyDown);
     addEventListener('keyup', this.#onKeyUp);
     addEventListener(events.PRESS_BUTTON, this.#onPressButton);
     addEventListener(events.RELEASE_BUTTON, this.#onReleaseButton);
-    addEventListener('focus', this.#resumeAudio);
-    addEventListener('blur', this.#pauseAudio);
     return () => {
       this.#audioContext?.close();
       this.#rtc?.destroy();
@@ -492,8 +490,6 @@ export class MStageElement extends GemElement<State> {
       removeEventListener('keyup', this.#onKeyUp);
       removeEventListener(events.PRESS_BUTTON, this.#onPressButton);
       removeEventListener(events.RELEASE_BUTTON, this.#onReleaseButton);
-      removeEventListener('focus', this.#resumeAudio);
-      removeEventListener('blur', this.#pauseAudio);
     };
   };
 

@@ -1,8 +1,10 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css } from '@mantou/gem';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
+import type { RouteItem } from 'duoyun-ui/elements/route';
 
 import { theme } from 'src/theme';
 import { githubUrl } from 'src/constants';
+import { routes } from 'src/routes';
 
 import 'duoyun-ui/elements/link';
 import 'duoyun-ui/elements/divider';
@@ -74,7 +76,9 @@ export class MFooterElement extends GemElement {
         </dy-link>
       </div>
       <dy-divider></dy-divider>
-      <footer>NESBox © Copyright</footer>
+      <footer>
+        NESBox © Copyright | <dy-link .route=${routes.privacy as RouteItem}>${routes.privacy.title}</dy-link>
+      </footer>
     `;
   };
 }

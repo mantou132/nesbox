@@ -204,14 +204,14 @@ export class PRoomElement extends GemElement {
     if (!this.stageRef.element!.romBuffer) return;
     const key = await hash(this.stageRef.element!.romBuffer);
     const cache = await caches.open(this.#getCachesName(false));
-    const reqs = [...(await cache.keys(`/${key}`, { ignoreSearch: true }))].splice(0, 10);
+    const reqList = [...(await cache.keys(`/${key}`, { ignoreSearch: true }))].splice(0, 10);
     const autoCache = await caches.open(this.#getCachesName(true));
-    const autoCacheReqs = await autoCache.keys(`/${key}`, { ignoreSearch: true });
-    const autoCacheReq = autoCacheReqs[autoCacheReqs.length - 1];
+    const autoCacheReqList = await autoCache.keys(`/${key}`, { ignoreSearch: true });
+    const autoCacheReq = autoCacheReqList[autoCacheReqList.length - 1];
     if (autoCacheReq) {
-      reqs.unshift(autoCacheReq);
+      reqList.unshift(autoCacheReq);
     }
-    if (reqs.length === 0) {
+    if (reqList.length === 0) {
       Toast.open('default', i18n.get('tipGameStateMissing'));
     } else {
       const getQuery = (url: string, { searchParams } = new URL(url)) => ({
@@ -223,7 +223,7 @@ export class PRoomElement extends GemElement {
         header: i18n.get('tipGameStateTitle'),
         body: html`
           <nesbox-list
-            .data=${reqs
+            .data=${reqList
               .map((req) => ({ req, ...getQuery(req.url) }))
               .sort((a, b) => Number(b.time) - Number(a.time))
               .map(({ req, time, thumbnail, tag }) => ({

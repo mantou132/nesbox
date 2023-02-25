@@ -237,6 +237,10 @@ export class PHomepageElement extends GemElement {
   };
 
   #download = async () => {
+    if (navigator.userAgent.includes('Android')) {
+      open(getCorSrc('https://github.com/mantou132/nesbox/releases/download/v1.0.8/nesbox.apk'));
+      return;
+    }
     if (mediaQuery.isPhone) {
       Toast.open('warning', homepageI18n.get('tipNotSupport'));
       return;

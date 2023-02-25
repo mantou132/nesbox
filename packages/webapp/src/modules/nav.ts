@@ -85,6 +85,7 @@ const style = createCSSSheet(css`
       gap: 0.5em;
     }
     .heart,
+    .group,
     .avatar {
       display: none;
     }
@@ -166,7 +167,7 @@ export class MNavElement extends GemElement {
           @click=${toggleSearchState}
         ></dy-use>
         <dy-use
-          class="icon"
+          class="icon group"
           tabindex="0"
           @keydown=${commonHandle}
           .element=${icons.group}

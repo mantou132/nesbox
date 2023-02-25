@@ -152,12 +152,22 @@ interface Configure {
   searchState?: boolean;
   usedRelease?: number;
   openNesFile?: File;
+  windowHasFocus: boolean;
   theme: ThemeName;
 }
+
+addEventListener('focus', () => {
+  updateStore(configure, { windowHasFocus: true });
+});
+
+addEventListener('blur', () => {
+  updateStore(configure, { windowHasFocus: false });
+});
 
 export const [configure] = createCacheStore<Configure>(
   localStorageKeys.CONFIGURE_LOCAL_STORAGE_KEY,
   {
+    windowHasFocus: document.hasFocus(),
     theme: 'default',
   },
   { cacheExcludeKeys: ['openNesFile'] },

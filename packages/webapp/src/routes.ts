@@ -45,7 +45,7 @@ const getInitRoutes = () => {
       },
     },
     privacy: {
-      title: 'Privacy',
+      title: 'Privacy Policy',
       pattern: '/privacy',
       async getContent(_params: Record<string, string>) {
         await import('src/pages/privacy');
