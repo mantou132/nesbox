@@ -11,15 +11,15 @@ import {
   connectStore,
 } from '@mantou/gem';
 import { createPath } from 'duoyun-ui/elements/route';
+import { paramKeys } from 'src/constants';
+import { getCDNSrc } from 'src/utils';
 
 import { icons } from 'src/icons';
 import { Game } from 'src/store';
 import { createRoom, favoriteGame } from 'src/services/api';
 import { routes } from 'src/routes';
-import { paramKeys } from 'src/constants';
 import { i18n } from 'src/i18n';
 import { theme } from 'src/theme';
-import { getCDNSrc } from 'src/utils';
 
 import 'duoyun-ui/elements/use';
 import 'duoyun-ui/elements/button';

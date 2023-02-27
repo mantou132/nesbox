@@ -17,6 +17,7 @@ import { Toast } from 'duoyun-ui/elements/toast';
 import { isNotNullish } from 'duoyun-ui/lib/types';
 import { clamp } from 'duoyun-ui/lib/number';
 import { getCDNSrc, playHintSound, requestFrame } from 'src/utils';
+import { events, RTCTransportType } from 'src/constants';
 
 import { logger } from 'src/logger';
 import { Cheat, configure } from 'src/configure';
@@ -34,7 +35,6 @@ import {
 import { store } from 'src/store';
 import { i18n } from 'src/i18n';
 import type { MRoomChatElement } from 'src/modules/room-chat';
-import { events, RTCTransportType } from 'src/constants';
 import type { NesboxCanvasElement } from 'src/elements/canvas';
 
 import 'src/modules/room-player-list';

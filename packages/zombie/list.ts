@@ -6,7 +6,7 @@ const log = console.log;
 
 const titleList = ['ja', 'zh', 'en', 'publish_date', 'publisher', 'platform'] as const;
 
-export type Item = Record<typeof titleList[number], string>;
+export type Item = Record<(typeof titleList)[number], string>;
 
 export async function fetchList() {
   const text = await agentFetch('https://www.retrowan.com/list-of-fc-fds-nes-games/');

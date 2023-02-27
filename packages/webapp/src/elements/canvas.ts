@@ -13,9 +13,9 @@ import {
 } from '@mantou/gem';
 import { BaseDirectory } from '@tauri-apps/api/fs';
 import { Time } from 'duoyun-ui/lib/time';
+import { saveFile } from 'src/utils';
 
 import { configure } from 'src/configure';
-import { saveFile } from 'src/utils';
 
 const style = createCSSSheet(css`
   :host {

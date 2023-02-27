@@ -16,10 +16,10 @@ import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { clamp } from 'duoyun-ui/lib/number';
 import { Modal } from 'duoyun-ui/elements/modal';
 import { createPath, RouteItem } from 'duoyun-ui/elements/route';
+import { requestFrame } from 'src/utils';
 
 import type { NesboxCanvasElement } from 'src/elements/canvas';
 import { configure, defaultKeybinding } from 'src/configure';
-import { requestFrame } from 'src/utils';
 import { routes } from 'src/routes';
 
 import 'duoyun-ui/elements/heading';

@@ -1,8 +1,8 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css } from '@mantou/gem';
 import type { Column } from 'duoyun-ui/elements/table';
 import { ComparerType, comparer } from 'duoyun-ui/lib/utils';
-
 import { BcMsgEvent, BcMsgType } from 'src/constants';
+
 import { icons } from 'src/icons';
 
 import 'duoyun-ui/elements/table';

@@ -3,9 +3,9 @@ import { matchPath, RouteItem } from 'duoyun-ui/elements/route';
 import { Time } from 'duoyun-ui/lib/time';
 import { ValueOf } from 'duoyun-ui/lib/types';
 import { isMtApp, mtApp } from 'mt-app';
+import { githubIssue, queryKeys, VideoRefreshRate } from 'src/constants';
 
 import { configure } from 'src/configure';
-import { githubIssue, queryKeys, VideoRefreshRate } from 'src/constants';
 import { logger } from 'src/logger';
 
 export const getCorSrc = (url: string) => {

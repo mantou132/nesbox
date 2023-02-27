@@ -4,14 +4,14 @@ import { Toast } from 'duoyun-ui/elements/toast';
 import { DuoyunDropAreaElement } from 'duoyun-ui/elements/drop-area';
 import { createPath } from 'duoyun-ui/elements/route';
 import { isMtApp, mtApp } from 'mt-app';
+import { COMMAND, isApp, isTauriMacApp, isTauriWinApp, RELEASE } from 'src/constants';
+import { matchRoute } from 'src/utils';
 
 import { theme } from 'src/theme';
 import { configure } from 'src/configure';
-import { COMMAND, isApp, isTauriMacApp, isTauriWinApp, RELEASE } from 'src/constants';
 import { logger } from 'src/logger';
 import { routes } from 'src/routes';
 import { gotoRedirectUri, isExpiredProfile, logout } from 'src/auth';
-import { matchRoute } from 'src/utils';
 import { listener, startKeyboardSimulation } from 'src/gamepad';
 import { dropHandler } from 'src/drop';
 

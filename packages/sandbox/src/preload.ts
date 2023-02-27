@@ -40,7 +40,7 @@ export function setVideoFilter(filter: 'default' | 'NTSC') {
 export function getVideoFrame() {
   const frame = new DataView(nesbox._getVideoFrame().buffer);
   let index = 0;
-  return () => frame.getBigUint64(index++ * 8, true);
+  return () => frame.getBigUint64(index++ * 8, false);
 }
 
 export function getAudioFrame() {
@@ -52,8 +52,12 @@ export function getAudioFrame() {
 export function getState() {
   const state = nesbox._getState();
   let index = 0;
+  let lenReport = false;
   return () => {
-    if (index++ === 0) return state.length;
+    if (!lenReport) {
+      lenReport = true;
+      return state.length;
+    }
     return state[index++];
   };
 }

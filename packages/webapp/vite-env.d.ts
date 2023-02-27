@@ -1,4 +1,5 @@
 /// <reference types="vite/client" />
+/// <reference types="network-information-types" />
 
 import type * as window from '@tauri-apps/api/window';
 import type * as shell from '@tauri-apps/api/shell';

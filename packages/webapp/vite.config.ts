@@ -18,7 +18,6 @@ const config = async ({ command }: any) => {
       outDir: resolve(process.cwd(), 'dist'),
       emptyOutDir: false,
       sourcemap: true,
-      brotliSize: false,
     },
     plugins: [VitePluginPrefetchAll()],
     define: {

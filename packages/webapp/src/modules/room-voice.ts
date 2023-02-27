@@ -9,12 +9,12 @@ import {
   connectStore,
   updateStore,
 } from '@mantou/gem';
+import { events, VoiceSignalEvent } from 'src/constants';
 
 import { configure } from 'src/configure';
 import { icons } from 'src/icons';
 import { theme } from 'src/theme';
 import { sendVoiceMsg } from 'src/services/api';
-import { events, VoiceSignalEvent } from 'src/constants';
 import { logger } from 'src/logger';
 import { ScVoiceMsgKind } from 'src/generated/graphql';
 

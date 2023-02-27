@@ -45,7 +45,7 @@ export class NesboxNetElement extends GemElement {
   };
 
   render = () => {
-    const effectiveType = (navigator.connection as any)?.effectiveType;
+    const effectiveType = navigator.connection?.effectiveType;
     const selector =
       effectiveType === 'slow-2g' || effectiveType === '2g'
         ? 'dy-use::part(g3), dy-use::part(g4)'

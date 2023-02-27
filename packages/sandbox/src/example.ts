@@ -10,7 +10,7 @@ export function example() {
     getVideoFrame: () => {
       const frame = new Uint8ClampedArray(4 * height * width).fill(255);
       for (let i = 0; i < index * 4; i += 4) {
-        frame[i + 1] = 0;
+        frame[i] = 0;
       }
       index = (index + 1) % (height * width);
       return frame;
@@ -19,13 +19,13 @@ export function example() {
       return new Float32Array();
     },
     getState: () => {
-      return new Uint8Array([index]);
+      return new Uint8Array(new Uint32Array([index]).buffer);
     },
     setState: (state) => {
       if (!state) {
         index = 0;
       } else {
-        index = state[0];
+        index = new Uint32Array(state.buffer)[0];
       }
     },
   });

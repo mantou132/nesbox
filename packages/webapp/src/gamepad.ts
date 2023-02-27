@@ -2,7 +2,6 @@ import { isNotNullish } from 'duoyun-ui/lib/types';
 import { Button } from '@mantou/nes';
 import { Toast } from 'duoyun-ui/elements/toast';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
-
 import { events } from 'src/constants';
 
 // https://w3c.github.io/gamepad/#remapping

@@ -1,8 +1,8 @@
 import { createStore, updateStore } from '@mantou/gem';
 import { Button } from '@mantou/nes';
+import { events, RTCTransportType, SignalEvent, SignalType } from 'src/constants';
 
 import { configure } from 'src/configure';
-import { events, RTCTransportType, SignalEvent, SignalType } from 'src/constants';
 import { LocaleKey } from 'src/i18n';
 import { logger } from 'src/logger';
 import { sendSignal } from 'src/services/api';

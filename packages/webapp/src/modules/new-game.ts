@@ -1,10 +1,10 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, connectStore } from '@mantou/gem';
+import { githubRelease } from 'src/constants';
+import { getCDNSrc } from 'src/utils';
 
 import { i18n } from 'src/i18n';
 import { theme } from 'src/theme';
-import { githubRelease } from 'src/constants';
 import { gameKindList, gameSeriesList } from 'src/enums';
-import { getCDNSrc } from 'src/utils';
 import { store } from 'src/store';
 
 import 'duoyun-ui/elements/alert';

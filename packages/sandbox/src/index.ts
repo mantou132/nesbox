@@ -82,7 +82,7 @@ export class Nes implements ONes {
     return this.#deQoiLen;
   }
 
-  async load_rom(_bytes: Uint8Array) {
+  async load_rom(bytes: Uint8Array) {
     this.#frameNum = 0;
     const realm = new ShadowRealm();
     realm.evaluate(`(${preload.toString()})()`);
@@ -103,10 +103,19 @@ export class Nes implements ONes {
         const url = `data:text/javascript;base64,${utf8ToBase64(`export ${fn.toString()}`)}`;
         return realm.importValue(url, fn.name);
       }),
-    ).then((list) => {
+    ).then(async (list) => {
       // nesbox init
-      realm.evaluate(`(${example.toString()})()`);
-      // realm.evaluate(new TextDecoder().decode(bytes));
+      if (process.env.NODE_ENV === 'development') {
+        try {
+          const gameOrigin = 'http://localhost:8000';
+          realm.evaluate(new TextDecoder().decode(await (await fetch(`${gameOrigin}/index.js`)).arrayBuffer()));
+          new EventSource(`${gameOrigin}/esbuild`).addEventListener('change', () => location.reload());
+        } catch {
+          realm.evaluate(`(${example.toString()})()`);
+        }
+      } else {
+        realm.evaluate(new TextDecoder().decode(bytes));
+      }
 
       const [
         getAudioFrame,
@@ -124,7 +133,7 @@ export class Nes implements ONes {
         const fn = getVideoFrame();
         const frame = new DataView(this.#mem.buffer, this.#frameSpace[0], this.#frameLen);
         for (let i = 0; i < this.#frameLen; i += 8) {
-          frame.setBigUint64(i, fn() || 0n, true);
+          frame.setBigUint64(i, fn() || 0n, false);
         }
         return ++this.#frameNum;
       };
@@ -142,17 +151,11 @@ export class Nes implements ONes {
         const fn = getState();
         const len = fn();
         if (len > 200 * 1024) throw new Error(`Too much memory`);
-        const state = new Uint8Array(len);
-        for (let i = 0; i < len; i++) {
-          state[i] = fn();
-        }
-        return state;
+        return Uint8Array.from({ length: len }, () => fn());
       };
       this.load_state = (state: Uint8Array) => {
         const fn = setState(state.length);
-        for (let i = 0; i < state.length; i++) {
-          fn(state[i]);
-        }
+        state.forEach((val) => fn(val));
       };
       this.reset = () => reset();
       this.width = () => getWidth();

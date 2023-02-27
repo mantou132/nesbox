@@ -1,6 +1,4 @@
-# Sandbox
-
-A secure runtime for running JavaScript games in NESBox.
+# Tetris for NESBox
 
 ## development
 

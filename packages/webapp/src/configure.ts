@@ -2,8 +2,6 @@ import { updateStore } from '@mantou/gem';
 import { isMac, getDisplayKey } from 'duoyun-ui/lib/hotkeys';
 import { Modify } from 'duoyun-ui/lib/types';
 import { createCacheStore } from 'duoyun-ui/lib/utils';
-
-import { LoginMutation } from 'src/generated/guestgraphql';
 import {
   events,
   localStorageKeys,
@@ -12,6 +10,8 @@ import {
   VideoRefreshRate,
   VideoRenderMethod,
 } from 'src/constants';
+
+import { LoginMutation } from 'src/generated/guestgraphql';
 import type { ThemeName } from 'src/theme';
 import { GetAccountQuery } from 'src/generated/graphql';
 

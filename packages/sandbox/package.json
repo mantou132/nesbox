@@ -2,7 +2,11 @@
   "name": "@nesbox/sandbox",
   "version": "0.0.1",
   "description": "",
-  "module": "src/index.ts",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "tsc --watch",
+    "build": "tsc"
+  },
   "dependencies": {
     "@mantou/nes": "^1.0.4",
     "qoijs": "^1.0.0",

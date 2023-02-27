@@ -1,8 +1,8 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, property } from '@mantou/gem';
+import { getCDNSrc } from 'src/utils';
 
 import { Room, store } from 'src/store';
 import { theme } from 'src/theme';
-import { getCDNSrc } from 'src/utils';
 import { icons } from 'src/icons';
 
 import 'duoyun-ui/elements/heading';

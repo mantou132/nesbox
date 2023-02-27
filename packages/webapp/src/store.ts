@@ -1,6 +1,7 @@
 import { ElementOf } from 'duoyun-ui/lib/types';
 import { createCacheStore } from 'duoyun-ui/lib/utils';
 import { updateStore } from '@mantou/gem';
+import { localStorageKeys } from 'src/constants';
 
 import {
   GetCommentsQuery,
@@ -11,7 +12,6 @@ import {
   EventSubscription,
   EnterLobbyMutation,
 } from 'src/generated/graphql';
-import { localStorageKeys } from 'src/constants';
 import { configure } from 'src/configure';
 
 export type Game = ElementOf<GetGamesQuery['games']>;

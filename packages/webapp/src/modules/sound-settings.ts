@@ -1,10 +1,10 @@
 import { GemElement, html, adoptedStyle, customElement, connectStore } from '@mantou/gem';
+import { playSound } from 'src/utils';
 
 import { configure, Settings } from 'src/configure';
 import { i18n } from 'src/i18n';
 import { gridStyle } from 'src/modules/shortcut-settings';
 import { updateAccount } from 'src/services/api';
-import { playSound } from 'src/utils';
 
 import 'duoyun-ui/elements/slider';
 

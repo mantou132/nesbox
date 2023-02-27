@@ -11,9 +11,9 @@ import {
   RefObject,
 } from '@mantou/gem';
 import type { DuoyunCarouselElement } from 'duoyun-ui/elements/carousel';
+import { getCDNSrc } from 'src/utils';
 
 import { theme } from 'src/theme';
-import { getCDNSrc } from 'src/utils';
 
 import 'duoyun-ui/elements/carousel';
 

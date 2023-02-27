@@ -1,8 +1,8 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, property } from '@mantou/gem';
+import { formatTime } from 'src/utils';
 
 import { LobbyMessage } from 'src/store';
 import { theme } from 'src/theme';
-import { formatTime } from 'src/utils';
 
 const style = createCSSSheet(css`
   :host {

@@ -16,13 +16,13 @@ import { commonHandle } from 'duoyun-ui/lib/hotkeys';
 import { focusStyle } from 'duoyun-ui/lib/styles';
 import { ContextMenu } from 'duoyun-ui/elements/menu';
 import { isNotBoolean } from 'duoyun-ui/lib/types';
+import { getAvatar, getCDNSrc } from 'src/utils';
 
 import { theme } from 'src/theme';
 import { configure } from 'src/configure';
 import { Role, RoleOffer } from 'src/rtc';
 import { icons } from 'src/icons';
 import { i18n } from 'src/i18n';
-import { getAvatar, getCDNSrc } from 'src/utils';
 import { voiceStore } from 'src/modules/room-voice';
 import { applyFriend } from 'src/services/api';
 import { friendStore } from 'src/store';
@@ -54,7 +54,9 @@ export class MRoomPlayerListElement extends GemElement {
     return html`${[
       [this.roles[1], this.roles[2], this.roles[3], this.roles[4]].map(
         (role, index) =>
-          html`<m-room-player-item .host=${this.isHost} .role=${role} .roleType=${index + 1}></m-room-player-item>`,
+          html`
+            <m-room-player-item .host=${this.isHost} .playerRole=${role} .roleType=${index + 1}></m-room-player-item>
+          `,
       ),
     ]}`;
   };
@@ -124,7 +126,7 @@ const itemStyle = createCSSSheet(css`
 @connectStore(i18n.store)
 @connectStore(voiceStore)
 export class MRoomPlayerItemElement extends GemElement {
-  @property role: Role;
+  @property playerRole: Role;
   @property roleType: number;
   @boolattribute host: boolean;
 
@@ -138,7 +140,7 @@ export class MRoomPlayerItemElement extends GemElement {
   }
 
   get #isSelf() {
-    return !!this.role && this.role.userId === configure.user?.id;
+    return !!this.playerRole && this.playerRole.userId === configure.user?.id;
   }
 
   get #isHostRole() {
@@ -146,15 +148,15 @@ export class MRoomPlayerItemElement extends GemElement {
   }
 
   get #isJoinable() {
-    return !this.host && !this.role;
+    return !this.host && !this.playerRole;
   }
 
   get #isAllowKickOut() {
-    return !!(this.host && this.role && !this.#isSelf);
+    return !!(this.host && this.playerRole && !this.#isSelf);
   }
 
   get #isOther() {
-    return !!this.role && !this.#isSelf;
+    return !!this.playerRole && !this.#isSelf;
   }
 
   get #isAllowLeave() {
@@ -162,7 +164,7 @@ export class MRoomPlayerItemElement extends GemElement {
   }
 
   get #audioLevel() {
-    return voiceStore.audioLevel[this.role!.userId];
+    return voiceStore.audioLevel[this.playerRole!.userId];
   }
 
   #onClick = () => {
@@ -174,12 +176,12 @@ export class MRoomPlayerItemElement extends GemElement {
         [
           this.#isAllowKickOut && {
             text: i18n.get('kickOutRole'),
-            handle: () => this.kickout(this.role!.userId),
+            handle: () => this.kickout(this.playerRole!.userId),
           },
           {
             text: i18n.get('addFriend'),
-            disabled: !!friendStore.friends[this.role!.userId],
-            handle: () => applyFriend(this.role!.username),
+            disabled: !!friendStore.friends[this.playerRole!.userId],
+            handle: () => applyFriend(this.playerRole!.username),
           },
         ].filter(isNotBoolean),
         { activeElement: this, width: '10em' },
@@ -191,7 +193,7 @@ export class MRoomPlayerItemElement extends GemElement {
   };
 
   render = () => {
-    if (!this.role) {
+    if (!this.playerRole) {
       return html`
         <style>
           :host {
@@ -226,9 +228,9 @@ export class MRoomPlayerItemElement extends GemElement {
         })}
         .element=${icons.volume}
       ></dy-use>
-      <dy-avatar class="avatar" square src=${getAvatar(this.role?.username)}></dy-avatar>
+      <dy-avatar class="avatar" square src=${getAvatar(this.playerRole?.username)}></dy-avatar>
       <div class="username">
-        <span>${this.role.nickname}</span>
+        <span>${this.playerRole.nickname}</span>
       </div>
     `;
   };

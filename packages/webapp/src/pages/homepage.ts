@@ -15,9 +15,9 @@ import { Toast } from 'duoyun-ui/elements/toast';
 import { GemTitleElement } from 'duoyun-ui/elements/title';
 import { createPath, RouteItem } from 'duoyun-ui/elements/route';
 import { waitLoading } from 'duoyun-ui/elements/wait';
-
 import { fontLoading, getCDNSrc, getCorSrc } from 'src/utils';
 import { githubRelease, pixelFont } from 'src/constants';
+
 import { theme } from 'src/theme';
 import leftSvg from 'src/images/homepage/left.svg';
 import rightSvg from 'src/images/homepage/right.svg';

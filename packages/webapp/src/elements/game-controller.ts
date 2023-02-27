@@ -1,8 +1,8 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, refobject, RefObject } from '@mantou/gem';
 import { Button } from '@mantou/nes';
+import { events } from 'src/constants';
 
 import gamepadImg from 'src/images/gamepad.svg?raw';
-import { events } from 'src/constants';
 
 import 'duoyun-ui/elements/use';
 

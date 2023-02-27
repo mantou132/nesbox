@@ -16,6 +16,8 @@ import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { Loadbar } from 'duoyun-ui/elements/page-loadbar';
 import { createPath } from '@mantou/gem/elements/route';
 import { forever } from 'duoyun-ui/lib/utils';
+import { paramKeys, queryKeys } from 'src/constants';
+import { preventDefault } from 'src/utils';
 
 import {
   configure,
@@ -28,9 +30,7 @@ import {
 } from 'src/configure';
 import { routes, locationStore } from 'src/routes';
 import { enterPubRoom, getAccount, getFriends, getGames, subscribeEvent } from 'src/services/api';
-import { paramKeys, queryKeys } from 'src/constants';
 import { i18n } from 'src/i18n';
-import { preventDefault } from 'src/utils';
 import { clearLobbyMessage, friendStore, toggleFriendChatState } from 'src/store';
 import { ScFriendStatus } from 'src/generated/graphql';
 

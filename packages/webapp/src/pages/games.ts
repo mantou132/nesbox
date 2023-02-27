@@ -14,14 +14,14 @@ import { HexColor, hslToRgb, parseHexColor, rgbToHexColor, rgbToHsl } from 'duoy
 import { marked } from 'marked';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { isNotNullish } from 'duoyun-ui/lib/types';
+import { paramKeys, pixelFont } from 'src/constants';
+import { fontLoading, getCDNSrc } from 'src/utils';
 
 import { store } from 'src/store';
 import { routes } from 'src/routes';
-import { paramKeys, pixelFont } from 'src/constants';
 import { createRoom } from 'src/services/api';
 import { theme, themeStore } from 'src/theme';
 import { i18n } from 'src/i18n';
-import { fontLoading, getCDNSrc } from 'src/utils';
 
 import 'duoyun-ui/elements/carousel';
 import 'duoyun-ui/elements/link';
