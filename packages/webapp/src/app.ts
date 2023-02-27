@@ -18,6 +18,7 @@ import { createPath } from '@mantou/gem/elements/route';
 import { forever } from 'duoyun-ui/lib/utils';
 import { paramKeys, queryKeys } from 'src/constants';
 import { preventDefault } from 'src/utils';
+import { routes, locationStore } from 'src/routes';
 
 import {
   configure,
@@ -28,7 +29,6 @@ import {
   toggleSettingsState,
   SearchCommand,
 } from 'src/configure';
-import { routes, locationStore } from 'src/routes';
 import { enterPubRoom, getAccount, getFriends, getGames, subscribeEvent } from 'src/services/api';
 import { i18n } from 'src/i18n';
 import { clearLobbyMessage, friendStore, toggleFriendChatState } from 'src/store';

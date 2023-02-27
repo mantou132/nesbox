@@ -17,8 +17,8 @@ import { Loadbar } from 'duoyun-ui/elements/page-loadbar';
 import { Toast } from 'duoyun-ui/elements/toast';
 import { isNotNullish } from 'duoyun-ui/lib/types';
 import { paramKeys, queryKeys } from 'src/constants';
-
 import { locationStore, routes } from 'src/routes';
+
 import { getAccount, getFriends, getGames, subscribeEvent } from 'src/services/api';
 import { i18n } from 'src/i18n';
 import { configure } from 'src/configure';

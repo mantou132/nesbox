@@ -1,9 +1,10 @@
 import { GemElement, html, customElement, connectStore } from '@mantou/gem';
-import type { RouteItem } from '@mantou/gem/elements/route';
+import { routes } from 'src/routes';
 
 import { i18n } from 'src/i18n';
-import { routes } from 'src/routes';
 import notfound from 'src/images/notfound.svg?raw';
+
+import type { RouteItem } from '@mantou/gem/elements/route';
 
 import 'duoyun-ui/elements/result';
 import 'duoyun-ui/elements/link';

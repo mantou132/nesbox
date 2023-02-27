@@ -24,13 +24,15 @@ import { getStringFromTemplate, once } from 'duoyun-ui/lib/utils';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { preventDefault } from 'src/utils';
 import { BcMsgEvent, BcMsgType, queryKeys } from 'src/constants';
+import { routes } from 'src/routes';
 
 import { configure, getShortcut } from 'src/configure';
-import { routes } from 'src/routes';
 import { friendStore, store } from 'src/store';
 import { i18n } from 'src/i18n';
 import { createInvite, updateRoomScreenshot } from 'src/services/api';
 import { closeListenerSet } from 'src/elements/titlebar';
+import { logger } from 'src/logger';
+
 import type { MStageElement } from 'src/modules/stage';
 
 import 'duoyun-ui/elements/coach-mark';
@@ -179,23 +181,28 @@ export class PRoomElement extends GemElement {
   #getCachesName = (auto: boolean) => `${auto ? 'auto_' : ''}state_v5`;
 
   #save = async (auto = false) => {
-    if (!this.stageRef.element!.romBuffer) return;
-    const buffer = this.stageRef.element!.getState();
-    if (!buffer) return;
-    const thumbnail = this.stageRef.element!.getThumbnail();
-    const cache = await caches.open(this.#getCachesName(auto));
-    const key = await hash(this.stageRef.element!.romBuffer!);
-    await cache.put(
-      `/${key}?${new URLSearchParams({ timestamp: Date.now().toString(), thumbnail, auto: auto ? 'auto' : '' })}`,
-      new Response(new Blob([buffer]), {
-        headers: {
-          'Content-Type': 'application/octet-stream',
-          'Content-Length': buffer.length.toString(),
-        },
-      }),
-    );
-    if (auto) return;
-    Toast.open('success', i18n.get('tipGameStateSave', new Time().format()));
+    try {
+      if (!this.stageRef.element!.romBuffer) return;
+      const buffer = this.stageRef.element!.getState();
+      if (!buffer) return;
+      const thumbnail = this.stageRef.element!.getThumbnail();
+      const cache = await caches.open(this.#getCachesName(auto));
+      const key = await hash(this.stageRef.element!.romBuffer!);
+      await cache.put(
+        `/${key}?${new URLSearchParams({ timestamp: Date.now().toString(), thumbnail, auto: auto ? 'auto' : '' })}`,
+        new Response(new Blob([buffer]), {
+          headers: {
+            'Content-Type': 'application/octet-stream',
+            'Content-Length': buffer.length.toString(),
+          },
+        }),
+      );
+    } catch (err) {
+      logger.error(err);
+      debugger;
+      if (!auto) throw err;
+    }
+    if (!auto) Toast.open('success', i18n.get('tipGameStateSave', new Time().format()));
   };
 
   #autoSave = () => this.#save(true);

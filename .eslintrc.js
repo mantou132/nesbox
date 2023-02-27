@@ -20,9 +20,16 @@ module.exports = {
   },
   rules: {
     'no-console': 1,
+    'sort-imports': 0,
     'import/no-named-as-default': 0,
     // https://github.com/benmosher/eslint-plugin-import/blob/HEAD/docs/rules/order.md
-    'import/order': ['error', { 'newlines-between': 'always' }],
+    'import/order': [
+      'error',
+      {
+        'newlines-between': 'always',
+        groups: ['builtin', 'external', 'internal', 'unknown', 'parent', 'sibling', 'index', 'object', 'type'],
+      },
+    ],
     'import/newline-after-import': 'error',
     '@typescript-eslint/no-non-null-assertion': 'off',
     '@typescript-eslint/no-var-requires': 'off',

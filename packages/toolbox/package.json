@@ -1,0 +1,21 @@
+{
+  "name": "@nesbox/toolbox",
+  "version": "0.0.1",
+  "description": "",
+  "scripts": {
+    "build": "vite build --mode=production",
+    "build:dev": "vite build --mode=development",
+    "preview": "vite preview",
+    "start": "vite serve",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@mantou/gem": "^1.6.0",
+    "duoyun-ui": "^0.0.60"
+  },
+  "devDependencies": {
+    "@types/offscreencanvas": "^2019.7.0",
+    "@nesbox/config": "^0.0.1",
+    "vite": "^4.1.4"
+  }
+}

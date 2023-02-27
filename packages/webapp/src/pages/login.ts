@@ -11,20 +11,21 @@ import {
   boolattribute,
   history,
 } from '@mantou/gem';
-import type { DuoyunFormElement } from 'duoyun-ui/elements/form';
 import { createPath } from 'duoyun-ui/elements/route';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { isMtApp } from 'mt-app';
 import { getCDNSrc } from 'src/utils';
+import { routes } from 'src/routes';
 
 import { theme } from 'src/theme';
 import { icons } from 'src/icons';
 import { gotoRedirectUri, isExpiredProfile } from 'src/auth';
 import { i18n } from 'src/i18n';
-import { routes } from 'src/routes';
 import { login, register } from 'src/services/guest-api';
 import { configure } from 'src/configure';
+
+import type { DuoyunFormElement } from 'duoyun-ui/elements/form';
 
 import 'duoyun-ui/elements/form';
 import 'duoyun-ui/elements/link';

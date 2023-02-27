@@ -1,9 +1,9 @@
 import { history } from '@mantou/gem';
 import { createPath } from 'duoyun-ui/elements/route';
-import { matchRoute } from 'src/utils';
+import { isValidGameFile, matchRoute } from 'src/utils';
+import { routes } from 'src/routes';
 
 import { setNesFile } from 'src/configure';
-import { routes } from 'src/routes';
 
 window.launchQueue?.setConsumer(async (launchParams: any) => {
   if (!launchParams.files.length) return;
@@ -17,5 +17,5 @@ export const dropHandler = (files: File[]) => {
   if (!matchRoute(routes.emulator)) {
     history.replace({ path: createPath(routes.emulator) });
   }
-  setNesFile(files.find((e) => e.name.toLowerCase().endsWith('.nes')));
+  setNesFile(files.find((e) => isValidGameFile(e.name)));
 };

@@ -1,3 +1,5 @@
+import { Button } from '@mantou/nes';
+
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace globalThis {
@@ -10,6 +12,7 @@ declare global {
       _width: number;
       _height: number;
 
+      buttons: Record<keyof typeof Button, Button>;
       control: Record<Button, boolean>;
       soundEnabled: boolean;
       videoFilter: 'default' | 'NTSC';

@@ -1,17 +1,18 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, connectStore, state } from '@mantou/gem';
-import type { RouteItem } from 'duoyun-ui/elements/route';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { commonHandle } from 'duoyun-ui/lib/hotkeys';
 import { waitLoading } from 'duoyun-ui/elements/wait';
 import { focusStyle } from 'duoyun-ui/lib/styles';
-
 import { locationStore, routes } from 'src/routes';
+
 import { i18n } from 'src/i18n';
 import { configure, SearchCommand, setSearchCommand, toggleFriendListState, toggleSearchState } from 'src/configure';
 import { theme } from 'src/theme';
 import { favoriteGame, leaveRoom } from 'src/services/api';
 import { store } from 'src/store';
 import { icons } from 'src/icons';
+
+import type { RouteItem } from 'duoyun-ui/elements/route';
 
 import 'duoyun-ui/elements/link';
 import 'duoyun-ui/elements/use';

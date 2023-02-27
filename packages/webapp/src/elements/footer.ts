@@ -1,10 +1,11 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css } from '@mantou/gem';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
-import type { RouteItem } from 'duoyun-ui/elements/route';
 import { githubUrl } from 'src/constants';
+import { routes } from 'src/routes';
 
 import { theme } from 'src/theme';
-import { routes } from 'src/routes';
+
+import type { RouteItem } from 'duoyun-ui/elements/route';
 
 import 'duoyun-ui/elements/link';
 import 'duoyun-ui/elements/divider';

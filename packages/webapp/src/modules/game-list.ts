@@ -13,13 +13,13 @@ import { isNotNullish } from 'duoyun-ui/lib/types';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { queryKeys } from 'src/constants';
 import { changeQuery } from 'src/utils';
+import { locationStore } from 'src/routes';
 
 import { store } from 'src/store';
 import { i18n } from 'src/i18n';
 import { theme } from 'src/theme';
 import { gameKindList, gameSeriesList } from 'src/enums';
 import { ScGameKind, ScGameSeries } from 'src/generated/graphql';
-import { locationStore } from 'src/routes';
 
 import 'duoyun-ui/elements/heading';
 import 'duoyun-ui/elements/divider';

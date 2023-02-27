@@ -4,6 +4,7 @@ import { Toast } from 'duoyun-ui/elements/toast';
 import { configure, Settings } from 'src/configure';
 import { updateAccount } from 'src/services/api';
 import { i18n } from 'src/i18n';
+
 import type { GamePadValue } from 'src/elements/gamepad';
 
 import 'duoyun-ui/elements/shortcut-record';

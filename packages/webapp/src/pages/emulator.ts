@@ -17,10 +17,11 @@ import { clamp } from 'duoyun-ui/lib/number';
 import { Modal } from 'duoyun-ui/elements/modal';
 import { createPath, RouteItem } from 'duoyun-ui/elements/route';
 import { requestFrame } from 'src/utils';
+import { routes } from 'src/routes';
+
+import { configure, defaultKeybinding, setNesFile } from 'src/configure';
 
 import type { NesboxCanvasElement } from 'src/elements/canvas';
-import { configure, defaultKeybinding } from 'src/configure';
-import { routes } from 'src/routes';
 
 import 'duoyun-ui/elements/heading';
 import 'duoyun-ui/elements/link';
@@ -158,12 +159,32 @@ export class PEmulatorElement extends GemElement<State> {
 
   #loadRom = async () => {
     if (!configure.openNesFile) return;
-    await initNes();
-    this.#game = Nes.new(this.#sampleRate);
+
+    const romBuffer = await configure.openNesFile.arrayBuffer();
+
+    switch (configure.openNesFile.name.toLowerCase().split('.').pop()) {
+      case 'wasm': {
+        await initNes(new Response(romBuffer));
+        this.#game = Nes.new(this.#sampleRate);
+        break;
+      }
+      case 'js': {
+        const { default: initNes, Nes } = await import('@mantou/nes-sandbox');
+        await initNes();
+        const jsGame = Nes.new(this.#sampleRate);
+        await jsGame.load_rom(new Uint8Array(romBuffer));
+        this.#game = jsGame;
+        break;
+      }
+      default: {
+        await initNes();
+        this.#game = Nes.new(this.#sampleRate);
+        this.#game.load_rom(new Uint8Array(romBuffer));
+      }
+    }
+
     this.setState({ canvasWidth: this.#game.width(), canvasHeight: this.#game.height() });
 
-    const buffer = await configure.openNesFile.arrayBuffer();
-    this.#game.load_rom(new Uint8Array(buffer));
     this.#nextStartTime = 0;
   };
 
@@ -202,4 +223,16 @@ export class PEmulatorElement extends GemElement<State> {
       </div>
     `;
   };
+}
+
+if (process.env.NODE_ENV === 'development') {
+  (async function () {
+    try {
+      const gameOrigin = 'http://localhost:8000';
+      setNesFile(new File([await (await fetch(`${gameOrigin}/index.js`)).blob()], 'index.js'));
+      new EventSource(`${gameOrigin}/esbuild`).addEventListener('change', () => location.reload());
+    } catch {
+      //
+    }
+  })();
 }

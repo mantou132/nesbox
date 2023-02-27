@@ -13,19 +13,20 @@ import {
 } from '@mantou/gem';
 import { locale } from 'duoyun-ui/lib/locale';
 import { isIncludesString } from 'duoyun-ui/lib/utils';
-import type { DuoyunOptionsElement, Option } from 'duoyun-ui/elements/options';
 import { isNotNullish } from 'duoyun-ui/lib/types';
 import { getDisplayKey, hotkeys, isMac } from 'duoyun-ui/lib/hotkeys';
-import type { DuoyunInputElement } from 'duoyun-ui/elements/input';
 import { getCDNSrc, getTempText, matchRoute } from 'src/utils';
+import { routes } from 'src/routes';
 
 import { friendStore, store, toggleFriendChatState } from 'src/store';
 import { theme } from 'src/theme';
 import { i18n } from 'src/i18n';
 import { icons } from 'src/icons';
 import { configure, getShortcut, SearchCommand, setSearchCommand, toggleSearchState } from 'src/configure';
-import { routes } from 'src/routes';
 import { createInvite, createRoom, enterPubRoom, updateRoom } from 'src/services/api';
+
+import type { DuoyunInputElement } from 'duoyun-ui/elements/input';
+import type { DuoyunOptionsElement, Option } from 'duoyun-ui/elements/options';
 
 import 'duoyun-ui/elements/input';
 import 'duoyun-ui/elements/options';

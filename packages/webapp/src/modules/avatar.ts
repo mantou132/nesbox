@@ -6,13 +6,14 @@ import { Modal } from 'duoyun-ui/elements/modal';
 import { locale } from 'duoyun-ui/lib/locale';
 import { getAvatar } from 'src/utils';
 import { githubIssue } from 'src/constants';
+import { routes } from 'src/routes';
 
 import { configure, getShortcut, toggleScreencastMode, toggleSettingsState } from 'src/configure';
 import { logout } from 'src/auth';
 import { changeTheme, theme, ThemeName, themeNames } from 'src/theme';
 import { i18n, langNames } from 'src/i18n';
 import { icons } from 'src/icons';
-import { routes } from 'src/routes';
+
 import type { MNewGameElement } from 'src/modules/new-game';
 
 import 'duoyun-ui/elements/coach-mark';

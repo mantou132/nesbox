@@ -17,6 +17,7 @@ import { createPath, RouteItem } from 'duoyun-ui/elements/route';
 import { waitLoading } from 'duoyun-ui/elements/wait';
 import { fontLoading, getCDNSrc, getCorSrc } from 'src/utils';
 import { githubRelease, pixelFont } from 'src/constants';
+import { routes } from 'src/routes';
 
 import { theme } from 'src/theme';
 import leftSvg from 'src/images/homepage/left.svg';
@@ -25,7 +26,6 @@ import bottomSvg from 'src/images/homepage/bottom.svg';
 import feature1Svg from 'src/images/homepage/feature1.svg';
 import feature2Svg from 'src/images/homepage/feature2.svg';
 import feature3Svg from 'src/images/homepage/feature3.svg';
-import { routes } from 'src/routes';
 import { homepageI18n } from 'src/homepage-i18n';
 import { i18n, langNames } from 'src/i18n';
 

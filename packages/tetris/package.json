@@ -5,14 +5,13 @@
   "scripts": {
     "start": "npm run build:dev -- --watch --servedir=dist",
     "build:dev": "esbuild src/index.ts --bundle --outdir=dist --target=es2020",
-    "build": "npm run build:dev -- --minify && jszip-cli add --output dist dist/index.js",
+    "build": "npm run build:dev -- --minify && jszip-cli add --force --output dist dist/index.js",
     "prepublishOnly": "npm run build"
   },
-  "dependencies": {},
   "devDependencies": {
     "@ffflorian/jszip-cli": "^3.1.9",
+    "@mantou/nes-sandbox": "^0.0.8",
     "@nesbox/config": "^0.0.1",
-    "@nesbox/sandbox": "^0.0.1",
     "esbuild": "^0.17.10"
   }
 }

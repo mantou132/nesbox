@@ -16,9 +16,9 @@ import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { isNotNullish } from 'duoyun-ui/lib/types';
 import { paramKeys, pixelFont } from 'src/constants';
 import { fontLoading, getCDNSrc } from 'src/utils';
+import { routes } from 'src/routes';
 
 import { store } from 'src/store';
-import { routes } from 'src/routes';
 import { createRoom } from 'src/services/api';
 import { theme, themeStore } from 'src/theme';
 import { i18n } from 'src/i18n';

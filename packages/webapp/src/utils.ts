@@ -8,6 +8,8 @@ import { githubIssue, queryKeys, VideoRefreshRate } from 'src/constants';
 import { configure } from 'src/configure';
 import { logger } from 'src/logger';
 
+export const isValidGameFile = (filename: string) => /\.(js|nes|wasm)$/i.test(filename);
+
 export const getCorSrc = (url: string) => {
   return `https://files.xianqiao.wang/${url}`;
 };

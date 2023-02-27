@@ -8,7 +8,6 @@ import {
   connectStore,
   numattribute,
 } from '@mantou/gem';
-import type { Columns } from 'duoyun-ui/elements/table';
 import { Toast } from 'duoyun-ui/elements/toast';
 
 import { Cheat, configure } from 'src/configure';
@@ -17,6 +16,8 @@ import { updateAccount } from 'src/services/api';
 import { MStageElement } from 'src/modules/stage';
 import { i18n } from 'src/i18n';
 import { theme } from 'src/theme';
+
+import type { Columns } from 'duoyun-ui/elements/table';
 
 import 'duoyun-ui/elements/table';
 import 'duoyun-ui/elements/input';

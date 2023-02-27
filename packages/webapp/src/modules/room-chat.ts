@@ -14,7 +14,6 @@ import {
   repeat,
   classMap,
 } from '@mantou/gem';
-import type { DuoyunInputElement } from 'duoyun-ui/elements/input';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { sleep } from 'duoyun-ui/lib/utils';
 import { Time } from 'duoyun-ui/lib/time';
@@ -25,6 +24,8 @@ import { i18n } from 'src/i18n';
 import { theme } from 'src/theme';
 import { configure, getShortcut } from 'src/configure';
 import { icons } from 'src/icons';
+
+import type { DuoyunInputElement } from 'duoyun-ui/elements/input';
 
 import 'duoyun-ui/elements/input';
 import 'duoyun-ui/elements/button';

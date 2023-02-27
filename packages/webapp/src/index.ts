@@ -6,11 +6,11 @@ import { createPath } from 'duoyun-ui/elements/route';
 import { isMtApp, mtApp } from 'mt-app';
 import { COMMAND, isApp, isTauriMacApp, isTauriWinApp, RELEASE } from 'src/constants';
 import { matchRoute } from 'src/utils';
+import { routes } from 'src/routes';
 
 import { theme } from 'src/theme';
 import { configure } from 'src/configure';
 import { logger } from 'src/logger';
-import { routes } from 'src/routes';
 import { gotoRedirectUri, isExpiredProfile, logout } from 'src/auth';
 import { listener, startKeyboardSimulation } from 'src/gamepad';
 import { dropHandler } from 'src/drop';

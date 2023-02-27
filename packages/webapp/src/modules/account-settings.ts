@@ -11,12 +11,13 @@ import {
 } from '@mantou/gem';
 import { throttle } from 'duoyun-ui/lib/utils';
 import { locale } from 'duoyun-ui/lib/locale';
-import type { DuoyunFormElement } from 'duoyun-ui/elements/form';
 import { Toast } from 'duoyun-ui/elements/toast';
 
 import { configure } from 'src/configure';
 import { updateAccount, updatePassword } from 'src/services/api';
 import { i18n } from 'src/i18n';
+
+import type { DuoyunFormElement } from 'duoyun-ui/elements/form';
 
 import 'duoyun-ui/elements/form';
 import 'duoyun-ui/elements/heading';

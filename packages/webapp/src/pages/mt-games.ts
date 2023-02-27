@@ -14,6 +14,7 @@ import {
 import { formatDuration, Time } from 'duoyun-ui/lib/time';
 import { getCDNSrc, playHintSound } from 'src/utils';
 import { events, queryKeys } from 'src/constants';
+import { locationStore } from 'src/routes';
 
 import { store } from 'src/store';
 import { theme } from 'src/theme';
@@ -22,7 +23,6 @@ import { GamepadBtnIndex } from 'src/gamepad';
 import { updateMtApp } from 'src/mt-app';
 import { i18n } from 'src/i18n';
 import { icons } from 'src/icons';
-import { locationStore } from 'src/routes';
 
 import 'duoyun-ui/elements/divider';
 import 'duoyun-ui/elements/empty';
@@ -134,8 +134,8 @@ export class PMtGamesElement extends GemElement {
   #queryWatching = false;
   mounted = () => {
     this.effect(
-      ([recent]) => {
-        if (this.#queryWatching || recent) {
+      (args) => {
+        if (this.#queryWatching || args![0]) {
           updateStore(mtGamesStore, { focusId: 0, currentIndex: 0 });
         } else {
           this.#queryWatching = true;

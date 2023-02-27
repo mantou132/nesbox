@@ -12,8 +12,9 @@ import {
 } from 'src/constants';
 
 import { LoginMutation } from 'src/generated/guestgraphql';
-import type { ThemeName } from 'src/theme';
 import { GetAccountQuery } from 'src/generated/graphql';
+
+import type { ThemeName } from 'src/theme';
 
 export const defaultKeybinding = {
   Up: 'w',

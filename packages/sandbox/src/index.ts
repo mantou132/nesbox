@@ -16,6 +16,7 @@ import {
   getHeight,
   setSound,
   setVideoFilter,
+  definedButtons,
 } from './preload';
 
 export { Button };
@@ -97,6 +98,7 @@ export class Nes implements ONes {
       getHeight,
       setSound,
       setVideoFilter,
+      definedButtons,
     ] as const;
     return Promise.all(
       importList.map((fn) => {
@@ -104,19 +106,6 @@ export class Nes implements ONes {
         return realm.importValue(url, fn.name);
       }),
     ).then(async (list) => {
-      // nesbox init
-      if (process.env.NODE_ENV === 'development') {
-        try {
-          const gameOrigin = 'http://localhost:8000';
-          realm.evaluate(new TextDecoder().decode(await (await fetch(`${gameOrigin}/index.js`)).arrayBuffer()));
-          new EventSource(`${gameOrigin}/esbuild`).addEventListener('change', () => location.reload());
-        } catch {
-          realm.evaluate(`(${example.toString()})()`);
-        }
-      } else {
-        realm.evaluate(new TextDecoder().decode(bytes));
-      }
-
       const [
         getAudioFrame,
         getState,
@@ -128,7 +117,15 @@ export class Nes implements ONes {
         getHeight,
         setSound,
         setVideoFilter,
+        definedButtons,
       ] = list as unknown as typeof importList;
+
+      definedButtons(JSON.stringify(Button));
+
+      // nesbox init
+      // realm.evaluate(`(${example.toString()})()`);
+      realm.evaluate(new TextDecoder().decode(bytes));
+
       this.clock_frame = () => {
         const fn = getVideoFrame();
         const frame = new DataView(this.#mem.buffer, this.#frameSpace[0], this.#frameLen);

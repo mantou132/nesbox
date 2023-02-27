@@ -1,14 +1,14 @@
 import { writeFile } from 'fs/promises';
 import { resolve } from 'path';
 
-import metadata1 from './metadata1.json';
-import metadata2 from './metadata2.json';
-
 import { fetchList, Item } from 'list';
 import { Game, get8BBitGames } from '8bbit';
 import { fetchImage } from 'image';
 import { fetchEnDes, fetchJaDes, fetchZhDes } from 'description';
 import { existGames, incudesString, normalzile, removePunctuation } from 'utils';
+
+import metadata2 from './metadata2.json';
+import metadata1 from './metadata1.json';
 
 export type Data = {
   title: string;

@@ -11,12 +11,13 @@ import {
 } from '@mantou/gem';
 import { polling } from 'duoyun-ui/lib/utils';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
-import type { DuoyunInputElement } from 'duoyun-ui/elements/input';
 
 import { i18n } from 'src/i18n';
 import { enterLobby, leaveLobby, sendLobbyMsg } from 'src/services/api';
 import { store } from 'src/store';
 import { icons } from 'src/icons';
+
+import type { DuoyunInputElement } from 'duoyun-ui/elements/input';
 
 import 'duoyun-ui/elements/input';
 import 'src/modules/lobby-msg';

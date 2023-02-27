@@ -5,12 +5,12 @@ import { readFileSync } from 'fs';
 import * as puppeteer from 'puppeteer';
 import { Data } from 'index';
 
-import metadata1 from './metadata1.json';
-import metadata2 from './metadata2.json';
-
 import { get8BBitGames } from '8bbit';
 import { fetchList, Item } from 'list';
 import { existGames, incudesString, normalzile, removePunctuation } from 'utils';
+
+import metadata2 from './metadata2.json';
+import metadata1 from './metadata1.json';
 
 const roms = JSON.parse(readFileSync('./roms.json', { encoding: 'utf-8' }));
 

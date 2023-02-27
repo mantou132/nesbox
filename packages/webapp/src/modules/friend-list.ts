@@ -1,12 +1,13 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, connectStore } from '@mantou/gem';
 import { Modal } from 'duoyun-ui/elements/modal';
-import type { DuoyunInputElement } from 'duoyun-ui/elements/input';
 
 import { icons } from 'src/icons';
 import { friendStore } from 'src/store';
 import { i18n } from 'src/i18n';
 import { applyFriend } from 'src/services/api';
 import { theme } from 'src/theme';
+
+import type { DuoyunInputElement } from 'duoyun-ui/elements/input';
 
 import 'duoyun-ui/elements/button';
 import 'duoyun-ui/elements/result';

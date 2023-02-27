@@ -14,13 +14,14 @@ import { createPath, matchPath } from 'duoyun-ui/elements/route';
 import { waitLoading } from 'duoyun-ui/elements/wait';
 import { events, queryKeys } from 'src/constants';
 import { playHintSound } from 'src/utils';
-
-import { configure } from 'src/configure';
-import type { MStageElement } from 'src/modules/stage';
 import { routes } from 'src/routes';
-import { leaveRoom, updateRoomScreenshot } from 'src/services/api';
-import { store } from 'src/store';
+
 import { GamepadBtnIndex } from 'src/gamepad';
+import { store } from 'src/store';
+import { leaveRoom, updateRoomScreenshot } from 'src/services/api';
+import { configure } from 'src/configure';
+
+import type { MStageElement } from 'src/modules/stage';
 import type { MVoiceRoomElement } from 'src/modules/room-voice';
 
 import 'duoyun-ui/elements/space';

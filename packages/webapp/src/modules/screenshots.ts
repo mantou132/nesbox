@@ -10,10 +10,11 @@ import {
   refobject,
   RefObject,
 } from '@mantou/gem';
-import type { DuoyunCarouselElement } from 'duoyun-ui/elements/carousel';
 import { getCDNSrc } from 'src/utils';
 
 import { theme } from 'src/theme';
+
+import type { DuoyunCarouselElement } from 'duoyun-ui/elements/carousel';
 
 import 'duoyun-ui/elements/carousel';
 

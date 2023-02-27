@@ -1,16 +1,15 @@
 {
-  "name": "@nesbox/sandbox",
-  "version": "0.0.1",
+  "name": "@mantou/nes-sandbox",
+  "version": "0.0.8",
   "description": "",
-  "main": "dist/index.js",
-  "scripts": {
-    "start": "tsc --watch",
-    "build": "tsc"
-  },
+  "module": "src/index.ts",
+  "types": "src/index.ts",
   "dependencies": {
-    "@mantou/nes": "^1.0.4",
     "qoijs": "^1.0.0",
     "shadowrealm-api": "^0.8.2"
+  },
+  "peerDependencies": {
+    "@mantou/nes": "^1.0.6"
   },
   "devDependencies": {
     "@nesbox/config": "^0.0.1"

@@ -10,15 +10,16 @@ import {
   QueryString,
 } from '@mantou/gem';
 import { createPath } from 'duoyun-ui/elements/route';
-import type { DuoyunActiveLinkElement } from 'duoyun-ui/elements/link';
 import { getAvatar, playHintSound } from 'src/utils';
 import { events, queryKeys } from 'src/constants';
+import { routes } from 'src/routes';
 
 import { configure } from 'src/configure';
 import { theme } from 'src/theme';
 import { i18n } from 'src/i18n';
-import { routes } from 'src/routes';
 import { GamepadBtnIndex } from 'src/gamepad';
+
+import type { DuoyunActiveLinkElement } from 'duoyun-ui/elements/link';
 
 import 'duoyun-ui/elements/avatar';
 import 'duoyun-ui/elements/link';

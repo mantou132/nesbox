@@ -1,1 +1,1 @@
-/// <reference types="@nesbox/sandbox/types" />
+/// <reference types="@mantou/nes-sandbox/types" />

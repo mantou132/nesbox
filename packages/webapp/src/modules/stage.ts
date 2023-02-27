@@ -16,7 +16,7 @@ import { default as initNes, Nes, Button } from '@mantou/nes';
 import { Toast } from 'duoyun-ui/elements/toast';
 import { isNotNullish } from 'duoyun-ui/lib/types';
 import { clamp } from 'duoyun-ui/lib/number';
-import { getCDNSrc, playHintSound, requestFrame } from 'src/utils';
+import { getCDNSrc, isValidGameFile, playHintSound, requestFrame } from 'src/utils';
 import { events, RTCTransportType } from 'src/constants';
 
 import { logger } from 'src/logger';
@@ -34,6 +34,7 @@ import {
 } from 'src/rtc';
 import { store } from 'src/store';
 import { i18n } from 'src/i18n';
+
 import type { MRoomChatElement } from 'src/modules/room-chat';
 import type { NesboxCanvasElement } from 'src/elements/canvas';
 
@@ -258,23 +259,44 @@ export class MStageElement extends GemElement<State> {
   };
 
   #loadRom = async () => {
-    this.#game = undefined;
-    const { default: initNes, Nes } = await import('@nesbox/sandbox');
-    await initNes();
-    const game = Nes.new(this.#sampleRate);
-
     if (!this.#isHost) return;
 
-    const zip = await (await fetch(getCDNSrc(this.#rom!))).arrayBuffer();
-    const folder = await JSZip.loadAsync(zip);
-    this.romBuffer = await Object.values(folder.files)
-      .find((e) => e.name.toLowerCase().endsWith('.nes'))!
-      .async('arraybuffer');
+    this.#game = undefined;
+    this.romBuffer = undefined;
+
     try {
-      await game.load_rom(new Uint8Array(this.romBuffer));
+      const zip = await (await fetch(getCDNSrc(this.#rom!))).arrayBuffer();
+      const folder = await JSZip.loadAsync(zip);
+      const file = Object.values(folder.files).find((e) => isValidGameFile(e.name))!;
+      const romBuffer = await file.async('arraybuffer');
+
+      let game: Nes;
+
+      switch (file.name.toLowerCase().split('.').pop()) {
+        case 'wasm': {
+          await initNes(new Response(romBuffer));
+          game = Nes.new(this.#sampleRate);
+          break;
+        }
+        case 'js': {
+          const { default: initNes, Nes } = await import('@mantou/nes-sandbox');
+          await initNes();
+          const jsGame = Nes.new(this.#sampleRate);
+          await jsGame.load_rom(new Uint8Array(romBuffer));
+          game = jsGame;
+          break;
+        }
+        default: {
+          await initNes();
+          game = Nes.new(this.#sampleRate);
+          game.load_rom(new Uint8Array(romBuffer));
+        }
+      }
+
       this.#setVideoFilter();
       this.setState({ canvasWidth: game.width(), canvasHeight: game.height() });
       this.#game = game;
+      this.romBuffer = romBuffer;
     } catch (err) {
       logger.error(err);
       Toast.open('error', 'ROM 加载错误');
@@ -479,7 +501,7 @@ export class MStageElement extends GemElement<State> {
     this.effect(this.#setVideoFilter, () => [this.#game, this.#settings?.video]);
 
     this.effect(
-      (muteArgs) => (muteArgs.every((e) => !e) ? this.#resumeAudio() : this.#pauseAudio()),
+      (muteArgs) => (muteArgs!.every((e) => !e) ? this.#resumeAudio() : this.#pauseAudio()),
       () => [!configure.windowHasFocus, configure.searchState, configure.settingsState, configure.friendListState],
     );
 

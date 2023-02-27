@@ -1,15 +1,3 @@
 # Sandbox
 
 A secure runtime for running JavaScript games in NESBox.
-
-## development
-
-```bash
-yarn start
-```
-
-## build
-
-```bash
-yarn build
-```

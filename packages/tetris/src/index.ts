@@ -1,4 +1,5 @@
 import { HEIGHT, WIDTH } from 'src/constants';
+import { selectAnItem } from 'src/_assets';
 
 let frameNum = 0;
 
@@ -14,7 +15,9 @@ nesbox.init({
     return frame;
   },
   getAudioFrame: () => {
-    return new Float32Array();
+    const frameLen = 44100 / 60;
+    const len = selectAnItem.length - (selectAnItem.length % frameLen);
+    return new Float32Array(selectAnItem.buffer, (frameNum * frameLen * 4) % (len * 4), frameLen);
   },
   getState: () => {
     return new Uint8Array(new Uint32Array([frameNum]).buffer);

@@ -9,6 +9,7 @@ export function preload() {
     _width: 0,
     _height: 0,
 
+    buttons: {} as Record<keyof typeof Button, Button>,
     control: {} as Record<Button, boolean>,
     soundEnabled: true,
     videoFilter: 'default',
@@ -22,6 +23,10 @@ export function preload() {
       this._width = width;
     },
   };
+}
+
+export function definedButtons(json: string) {
+  nesbox.buttons = JSON.parse(json);
 }
 
 export function setControl(button: Button, pressed: boolean) {
