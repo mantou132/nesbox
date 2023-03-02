@@ -4,9 +4,13 @@
   "description": "",
   "scripts": {
     "start": "npm run build:dev -- --watch --servedir=dist",
-    "build:dev": "esbuild src/index.ts --bundle --outdir=dist --target=es2020",
+    "build:dev": "esbuild src/index.ts --bundle --outdir=dist --target=es2022",
     "build": "npm run build:dev -- --minify && jszip-cli add --force --output dist dist/index.js",
     "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@mantou/ecs": "^0.0.1",
+    "qoijs": "^1.0.0"
   },
   "devDependencies": {
     "@ffflorian/jszip-cli": "^3.1.9",

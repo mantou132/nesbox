@@ -1,0 +1,7 @@
+{
+  "extends": "@nesbox/config/tsconfig",
+  "compilerOptions": {
+    "outDir": "dist",
+    "baseUrl": "./"
+  }
+}

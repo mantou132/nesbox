@@ -29,6 +29,7 @@ render(
         font-size: 0.9rem;
       }
       nav {
+        flex-shrink: 0;
         width: 16em;
         height: 100%;
         display: flex;

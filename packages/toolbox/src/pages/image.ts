@@ -1,12 +1,13 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css } from '@mantou/gem';
-import { clamp } from 'duoyun-ui/lib/number';
 import { theme } from 'duoyun-ui/lib/theme';
-import { normalizeFilename } from 'src/utils';
+import { getInputItemType, getInputItemValue, normalizeFilename } from 'src/utils';
+import QOI from 'qoijs';
 
 import 'duoyun-ui/elements/file-pick';
 import 'duoyun-ui/elements/form';
 import 'duoyun-ui/elements/input';
 import 'duoyun-ui/elements/drop-area';
+import 'duoyun-ui/elements/help-text';
 
 const style = createCSSSheet(css`
   :host {
@@ -25,7 +26,7 @@ const style = createCSSSheet(css`
     width: auto;
     min-height: 50vh;
   }
-  dy-form-item::part(label) {
+  dy-form-item {
     text-transform: capitalize;
   }
 `);
@@ -35,6 +36,7 @@ type State = {
   args: {
     width: number;
     height: number;
+    qoi: boolean;
   };
   result: string;
 };
@@ -50,6 +52,7 @@ export class PImageElement extends GemElement<State> {
     args: {
       width: 16,
       height: 16,
+      qoi: true,
     },
     result: '',
   };
@@ -82,7 +85,19 @@ export class PImageElement extends GemElement<State> {
           await new Promise((res) => (image.onload = res));
           ctx.drawImage(image, 0, 0, args.width, args.height);
           const pixels = ctx.getImageData(0, 0, args.width, args.height).data;
-          map.set(arg, pixels);
+          map.set(
+            arg,
+            args.qoi
+              ? new Uint8ClampedArray(
+                  QOI.encode(pixels, {
+                    width: args.width,
+                    height: args.height,
+                    channels: 4,
+                    colorspace: 0,
+                  }),
+                )
+              : pixels,
+          );
           URL.revokeObjectURL(image.src);
         }
       }),
@@ -91,14 +106,18 @@ export class PImageElement extends GemElement<State> {
     this.setState({
       result: files.reduce((p, c) => {
         const pixels = this.#weakMap.get(c)?.get(arg);
-        return p + `export const ${normalizeFilename(c.name)} = new Uint8ClampedArray([${pixels}]);` + `\n`;
+        const value = args.qoi
+          ? `new Uint8ClampedArray(QOI.decode(new Uint8Array([${pixels}])).data.buffer)`
+          : `new Uint8ClampedArray([${pixels}])`;
+        return p + `export const ${normalizeFilename(c.name)} = ${value};` + `\n`;
       }, ''),
     });
   };
 
-  #onArgChange = (evt: CustomEvent<{ name: string; value: string }>) => {
+  #onArgChange = (evt: CustomEvent<{ name: keyof State['args']; value: string }>) => {
+    const { args } = this.state;
     const { name, value } = evt.detail;
-    this.setState({ args: { ...this.state.args, [name]: clamp(0, Number(value), 100) } });
+    this.setState({ args: { ...args, [name]: getInputItemValue(args[name], value) } });
   };
 
   #onDropChange = (evt: CustomEvent<File[]>) => {
@@ -120,10 +139,20 @@ export class PImageElement extends GemElement<State> {
       </dy-drop-area>
       <dy-form @itemchange=${this.#onArgChange} .inline=${true}>
         ${Object.entries(args).map(
-          ([k, v]) => html`<dy-form-item type="number" .name=${k} .label=${k} .value=${v}></dy-form-item>`,
+          ([k, v]) =>
+            html`
+              <dy-form-item
+                .type=${getInputItemType(v)}
+                .checked=${Boolean(v)}
+                .name=${k}
+                .label=${k}
+                .value=${v}
+              ></dy-form-item>
+            `,
         )}
       </dy-form>
       <dy-input class="output" disabled type="textarea" .value=${result}></dy-input>
+      <dy-help-text>Length: ${result.length}</dy-help-text>
     `;
   };
 }

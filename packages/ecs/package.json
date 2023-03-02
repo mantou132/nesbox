@@ -1,0 +1,10 @@
+{
+  "name": "@mantou/ecs",
+  "version": "0.0.1",
+  "description": "",
+  "module": "src/index.ts",
+  "types": "src/index.ts",
+  "devDependencies": {
+    "@nesbox/config": "^0.0.1"
+  }
+}

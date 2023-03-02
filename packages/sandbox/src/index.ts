@@ -17,6 +17,7 @@ import {
   setSound,
   setVideoFilter,
   definedButtons,
+  getLogs,
 } from './preload';
 
 export { Button };
@@ -75,7 +76,7 @@ export class Nes implements ONes {
   }
   decode_qoi(bytes: Uint8Array): number {
     new Uint8Array(this.#mem.buffer, this.#deQoiSpace[0], this.#deQoiLen).set(
-      new Uint8Array(QOI.decode(bytes.buffer).data),
+      new Uint8Array(QOI.decode(bytes.buffer).data.buffer),
     );
     return this.#deQoiSpace[0];
   }
@@ -99,6 +100,7 @@ export class Nes implements ONes {
       setSound,
       setVideoFilter,
       definedButtons,
+      getLogs,
     ] as const;
     return Promise.all(
       importList.map((fn) => {
@@ -118,6 +120,7 @@ export class Nes implements ONes {
         setSound,
         setVideoFilter,
         definedButtons,
+        getLogs,
       ] = list as unknown as typeof importList;
 
       definedButtons(JSON.stringify(Button));
@@ -126,11 +129,18 @@ export class Nes implements ONes {
       // realm.evaluate(`(${example.toString()})()`);
       realm.evaluate(new TextDecoder().decode(bytes));
 
+      // TODO: realm shared buffer
       this.clock_frame = () => {
+        while (true) {
+          const log = getLogs();
+          if (!log) break;
+          const [type, ...args] = log.split(',');
+          (console as any)[type]?.(args.join(','));
+        }
         const fn = getVideoFrame();
         const frame = new DataView(this.#mem.buffer, this.#frameSpace[0], this.#frameLen);
-        for (let i = 0; i < this.#frameLen; i += 8) {
-          frame.setBigUint64(i, fn() || 0n, false);
+        for (let i = 0; i < this.#frameLen; i += 4) {
+          frame.setUint32(i, fn() || 0, false);
         }
         return ++this.#frameNum;
       };

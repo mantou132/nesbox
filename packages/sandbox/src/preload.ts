@@ -23,6 +23,23 @@ export function preload() {
       this._width = width;
     },
   };
+
+  class SandboxConsole {
+    _logs = [['log', 'NESBox Sandbox Loaded']];
+    _log = (type: string, ...args: any[]) => {
+      this._logs.push([type, args.map((e) => String(e)).join(' ')]);
+    };
+  }
+
+  globalThis.console = new Proxy(new SandboxConsole() as Console & SandboxConsole, {
+    get(target, type: keyof (Console & SandboxConsole)) {
+      return target[type] || target._log.bind(target, type);
+    },
+  });
+}
+
+export function getLogs(): string | undefined {
+  return (globalThis.console as any)._logs.shift()?.join(',');
 }
 
 export function definedButtons(json: string) {
@@ -45,7 +62,7 @@ export function setVideoFilter(filter: 'default' | 'NTSC') {
 export function getVideoFrame() {
   const frame = new DataView(nesbox._getVideoFrame().buffer);
   let index = 0;
-  return () => frame.getBigUint64(index++ * 8, false);
+  return () => frame.getUint32(index++ * 4, false);
 }
 
 export function getAudioFrame() {

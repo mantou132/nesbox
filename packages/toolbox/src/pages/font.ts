@@ -1,6 +1,7 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css } from '@mantou/gem';
-import { clamp } from 'duoyun-ui/lib/number';
 import { theme } from 'duoyun-ui/lib/theme';
+import { getInputItemType, getInputItemValue } from 'src/utils';
+import QOI from 'qoijs';
 
 import type { DuoyunFormItemElement } from 'duoyun-ui/elements/form';
 import type { DuoyunSelectElement } from 'duoyun-ui/elements/select';
@@ -8,6 +9,7 @@ import type { DuoyunSelectElement } from 'duoyun-ui/elements/select';
 import 'duoyun-ui/elements/select';
 import 'duoyun-ui/elements/input';
 import 'duoyun-ui/elements/form';
+import 'duoyun-ui/elements/help-text';
 
 const style = createCSSSheet(css`
   :host {
@@ -33,7 +35,7 @@ const style = createCSSSheet(css`
     height: 100%;
     background-color: ${theme.disabledColor};
   }
-  dy-form-item::part(label) {
+  dy-form-item {
     text-transform: capitalize;
   }
 `);
@@ -47,6 +49,7 @@ type State = {
   args: {
     currentFont: string;
     fontSize: number;
+    qoi: boolean;
   };
 };
 
@@ -65,6 +68,7 @@ export class PFontElement extends GemElement<State> {
     args: {
       currentFont: 'Sans-Serif',
       fontSize: 10,
+      qoi: true,
     },
   };
 
@@ -105,17 +109,18 @@ export class PFontElement extends GemElement<State> {
     }
   };
 
-  #onArgChange = (evt: CustomEvent<{ name: string; value: string }>) => {
+  #onArgChange = (evt: CustomEvent<{ name: keyof State['args']; value: string }>) => {
+    const { args } = this.state;
     const { name, value } = evt.detail;
-    this.setState({ args: { ...this.state.args, [name]: name === 'fontSize' ? clamp(0, Number(value), 40) : value } });
+    this.setState({ args: { ...args, [name]: getInputItemValue(args[name], value) } });
   };
 
   #canvas = new OffscreenCanvas(0, 0);
-  #resultData = new Map<string, Map<string, { width: number; data: Uint8ClampedArray }>>();
+  #resultData = new Map<string, Map<string, { width: number; data: Uint8ClampedArray; origin: Uint8ClampedArray }>>();
   #regenerateResult = async () => {
     const { input, args } = this.state;
     const arg = JSON.stringify(args);
-    const ctx = this.#canvas.getContext('2d')!;
+    const ctx = this.#canvas.getContext('2d', { willReadFrequently: true })!;
 
     const chars = [...new Set([...input])];
     const charData = chars.map((char) => {
@@ -130,25 +135,42 @@ export class PFontElement extends GemElement<State> {
         const { width, fontBoundingBoxDescent, fontBoundingBoxAscent } = ctx.measureText(char);
         const intWidth = Math.trunc(width);
         ctx.fillText(char, 0, args.fontSize - (args.fontSize - (fontBoundingBoxAscent - fontBoundingBoxDescent)) / 2);
+        const data = intWidth ? ctx.getImageData(0, 0, intWidth, args.fontSize).data : new Uint8ClampedArray();
         map.set(char, {
           width: intWidth,
-          data: intWidth ? ctx.getImageData(0, 0, intWidth, args.fontSize).data : new Uint8ClampedArray(),
+          origin: data,
+          data: !intWidth
+            ? new Uint8ClampedArray()
+            : args.qoi
+            ? new Uint8ClampedArray(
+                QOI.encode(data, {
+                  width: intWidth,
+                  height: args.fontSize,
+                  channels: 4,
+                  colorspace: 0,
+                }),
+              )
+            : data,
         });
       }
       return map.get(char)!;
     });
     this.setState({
-      previews: charData.slice(0, 15).map(({ width, data }) => {
+      previews: charData.slice(0, 15).map(({ width, origin }) => {
         const canvas = document.createElement('canvas');
         canvas.width = width;
         canvas.height = args.fontSize;
-        width && canvas.getContext('2d')!.putImageData(new ImageData(data, width), 0, 0);
+        width && canvas.getContext('2d')!.putImageData(new ImageData(origin, width), 0, 0);
         return canvas;
       }),
       result: `export const fonts: Record<string, { width: number; data: Uint8ClampedArray }> = {${charData
         .map(
           (v, index) =>
-            `"${chars[index].replace('"', '\\"')}": {width: ${v.width},data: new Uint8ClampedArray([${v.data}])}`,
+            `"${chars[index].replace('"', '\\"')}": {width: ${v.width},data: ${
+              args.qoi
+                ? `new Uint8ClampedArray(QOI.decode(new Uint8Array([${v.data}])).data.buffer)`
+                : `new Uint8ClampedArray([${v.data}])`
+            }}`,
         )
         .join(',')}};`,
     });
@@ -181,10 +203,23 @@ export class PFontElement extends GemElement<State> {
           }))}
         >
         </dy-form-item>
-        <dy-form-item type="number" .name=${'fontSize'} .label=${'Font Size'} .value=${args.fontSize}></dy-form-item>
+        ${Object.entries(args).map(([k, v]) =>
+          k === 'currentFont'
+            ? ''
+            : html`
+                <dy-form-item
+                  .type=${getInputItemType(v)}
+                  .checked=${Boolean(v)}
+                  .name=${k}
+                  .label=${k}
+                  .value=${v}
+                ></dy-form-item>
+              `,
+        )}
       </dy-form>
       <div class="preview" style="font-size: ${args.fontSize}px">${previews}</div>
       <dy-input class="output" disabled type="textarea" .value=${result}></dy-input>
+      <dy-help-text>Length: ${result.length}</dy-help-text>
     `;
   };
 }

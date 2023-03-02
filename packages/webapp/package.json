@@ -15,7 +15,7 @@
     "@mantou/gem": "^1.6.0",
     "@mantou/nes": "^1.0.6",
     "@mantou/nes-sandbox": "^0.0.8",
-    "duoyun-ui": "^0.0.60",
+    "duoyun-ui": "^0.0.62",
     "graphql": "^16.2.0",
     "jszip": "^3.10.0",
     "marked": "^4.0.16",

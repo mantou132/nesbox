@@ -1,34 +1,32 @@
-import { HEIGHT, WIDTH } from 'src/constants';
-import { selectAnItem } from 'src/_assets';
+import { World, loadFont, loadAudio } from '@mantou/ecs';
 
-let frameNum = 0;
+import { HEIGHT, WIDTH } from 'src/constants';
+import { getScene, Scenes } from 'src/scenes';
+import { fonts, selectAnItem } from 'src/_assets';
+
+loadFont('default', { fontSize: 10, fontSet: fonts });
+loadAudio('selectAnItem', selectAnItem);
+
+const world = new World(WIDTH, HEIGHT).switchScene(getScene(Scenes.Start));
 
 nesbox.init({
   width: WIDTH,
   height: HEIGHT,
   getVideoFrame: () => {
-    const frame = new Uint8ClampedArray(4 * HEIGHT * WIDTH).fill(255);
-    for (let i = 0; i < frameNum * 4; i += 4) {
-      frame[i] = 0;
-    }
-    frameNum = (frameNum + 1) % (HEIGHT * WIDTH);
-    return frame;
+    world.update();
+    return world.getVideoFrame();
   },
   getAudioFrame: () => {
-    const frameLen = 44100 / 60;
-    const len = selectAnItem.length - (selectAnItem.length % frameLen);
-    return new Float32Array(selectAnItem.buffer, (frameNum * frameLen * 4) % (len * 4), frameLen);
+    return world.getAudioFrame();
   },
   getState: () => {
-    return new Uint8Array(new Uint32Array([frameNum]).buffer);
+    return world.getState();
   },
   setState: (state) => {
-    if (!state) {
-      frameNum = 0;
+    if (state) {
+      world.setState(state);
     } else {
-      frameNum = new Uint32Array(state.buffer)[0];
+      world.switchScene(getScene(Scenes.Start));
     }
   },
 });
-
-export {};

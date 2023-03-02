@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "@mantou/gem": "^1.6.0",
-    "duoyun-ui": "^0.0.60"
+    "duoyun-ui": "^0.0.62",
+    "qoijs": "^1.0.0"
   },
   "devDependencies": {
     "@types/offscreencanvas": "^2019.7.0",
