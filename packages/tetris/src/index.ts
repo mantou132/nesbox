@@ -1,13 +1,13 @@
 import { World, loadFont, loadAudio } from '@mantou/ecs';
 
-import { HEIGHT, WIDTH } from 'src/constants';
-import { getScene, Scenes } from 'src/scenes';
+import { HEIGHT, WIDTH, SCENES, WorldDta, getWorldData } from 'src/constants';
+import { getScene } from 'src/scenes';
 import { fonts, selectAnItem } from 'src/_assets';
 
 loadFont('default', { fontSize: 10, fontSet: fonts });
 loadAudio('selectAnItem', selectAnItem);
 
-const world = new World(WIDTH, HEIGHT).switchScene(getScene(Scenes.Start));
+const world = new World<WorldDta>(WIDTH, HEIGHT).loadScene(getScene(SCENES.Start), getWorldData());
 
 nesbox.init({
   width: WIDTH,
@@ -25,8 +25,6 @@ nesbox.init({
   setState: (state) => {
     if (state) {
       world.setState(state);
-    } else {
-      world.switchScene(getScene(Scenes.Start));
     }
   },
 });

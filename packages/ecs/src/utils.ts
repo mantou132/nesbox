@@ -1,12 +1,12 @@
 import type { Color, Font } from './assets';
 
-export function mixColor(bgColor: Color, [fgR, fgG, fgB, fgA]: Color) {
+export function mixColor(bgColor: Color, fgColor: Color, fgA: number) {
   // https://stackoverflow.com/questions/726549/algorithm-for-additive-color-mixing-for-rgb-values
   const bgA = bgColor[3];
   const rA = (bgColor[3] = 255 - (255 - fgA) * (1 - bgColor[3] / 255));
-  bgColor[0] = (fgR * fgA) / rA + (bgColor[0] * bgA * (1 - fgA / 255)) / rA;
-  bgColor[1] = (fgG * fgA) / rA + (bgColor[1] * bgA * (1 - fgA / 255)) / rA;
-  bgColor[2] = (fgB * fgA) / rA + (bgColor[2] * bgA * (1 - fgA / 255)) / rA;
+  bgColor[0] = (fgColor[0] * fgA) / rA + (bgColor[0] * bgA * (1 - fgA / 255)) / rA;
+  bgColor[1] = (fgColor[1] * fgA) / rA + (bgColor[1] * bgA * (1 - fgA / 255)) / rA;
+  bgColor[2] = (fgColor[2] * fgA) / rA + (bgColor[2] * bgA * (1 - fgA / 255)) / rA;
 }
 
 // simple word segmentation rules

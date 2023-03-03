@@ -8,7 +8,7 @@ export type Font = {
 };
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-export type FontType = 'default' | 'heading' | (string & {});
+export type FontType = 'default' | 'heading' | (string & {}) | number;
 
 type Fonts = { [T in FontType]: Font };
 
@@ -85,3 +85,6 @@ export class Color extends Uint8ClampedArray {
 export const COLOR_WHITE = new Color(255, 255, 255, 255);
 export const COLOR_BLACK = new Color(0, 0, 0, 255);
 export const COLOR_GRAY = new Color(128, 128, 128, 255);
+export const COLOR_RED = new Color(255, 0, 0, 255);
+export const COLOR_GREEN = new Color(0, 255, 0, 255);
+export const COLOR_BLUE = new Color(0, 0, 255, 255);

@@ -11,11 +11,15 @@ declare global {
       _setState: (state?: Uint8Array) => void;
       _width: number;
       _height: number;
+      _control: Record<Button, boolean>;
+      _prevControl: Record<Button, boolean>;
 
       buttons: Record<keyof typeof Button, Button>;
-      control: Record<Button, boolean>;
       soundEnabled: boolean;
       videoFilter: 'default' | 'NTSC';
+
+      isTap: (Button) => boolean;
+      isPressed: (Button) => boolean;
 
       init: (options: {
         width: number;

@@ -8,9 +8,10 @@ export function preload() {
     _setState: (_state?: Uint8Array) => void 0,
     _width: 0,
     _height: 0,
+    _control: {} as Record<Button, boolean>,
+    _prevControl: {} as Record<Button, boolean>,
 
     buttons: {} as Record<keyof typeof Button, Button>,
-    control: {} as Record<Button, boolean>,
     soundEnabled: true,
     videoFilter: 'default',
 
@@ -22,12 +23,28 @@ export function preload() {
       this._height = height;
       this._width = width;
     },
+
+    isTap(button: Button) {
+      return !this._prevControl[button] && this._control[button];
+    },
+
+    isPressed(button: Button) {
+      return this._control[button];
+    },
   };
 
   class SandboxConsole {
     _logs = [['log', 'NESBox Sandbox Loaded']];
     _log = (type: string, ...args: any[]) => {
-      this._logs.push([type, args.map((e) => String(e)).join(' ')]);
+      this._logs.push([
+        type,
+        args
+          .map((e) => {
+            if (e && typeof e === 'object') return JSON.stringify(e);
+            return String(e);
+          })
+          .join(' '),
+      ]);
     };
   }
 
@@ -47,7 +64,7 @@ export function definedButtons(json: string) {
 }
 
 export function setControl(button: Button, pressed: boolean) {
-  nesbox.control[button] = pressed;
+  nesbox._control[button] = pressed;
   return true;
 }
 
@@ -61,6 +78,9 @@ export function setVideoFilter(filter: 'default' | 'NTSC') {
 
 export function getVideoFrame() {
   const frame = new DataView(nesbox._getVideoFrame().buffer);
+  Promise.resolve().then(() => {
+    nesbox._prevControl = { ...nesbox._control };
+  });
   let index = 0;
   return () => frame.getUint32(index++ * 4, false);
 }

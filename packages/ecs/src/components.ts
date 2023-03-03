@@ -5,7 +5,7 @@ export class Component {
   toJSON() {
     return {
       ...this,
-      _componentType: this.constructor.name,
+      _ct: this.constructor.name,
     };
   }
   constructor(..._args: any[]) {
@@ -13,11 +13,11 @@ export class Component {
   }
 }
 
-export const registeredComponents = {} as Record<string, typeof Component>;
+export const _registeredComponents = {} as Record<string, typeof Component>;
 
-function registerComponent() {
+export function registerComponent() {
   return function (cls: typeof Component) {
-    registeredComponents[cls.name] = cls;
+    _registeredComponents[cls.name] = cls;
   };
 }
 
@@ -25,10 +25,25 @@ function registerComponent() {
 export class PositionComponent extends Component {
   x = 0;
   y = 0;
-  constructor(x = 0, y = 0) {
+  sx = 0;
+  sy = 0;
+
+  constructor(x = 0, y = 0, sx = 0, sy = 0) {
     super();
     this.x = x;
     this.y = y;
+    this.sx = sx;
+    this.sy = sy;
+  }
+
+  update() {
+    this.x += this.sx;
+    this.y += this.sy;
+  }
+
+  restore() {
+    this.x -= this.sx;
+    this.y -= this.sy;
   }
 }
 
@@ -40,20 +55,6 @@ export class SizeComponent extends Component {
     super();
     this.w = w;
     this.h = h;
-  }
-}
-
-@registerComponent()
-export class SpeedComponent extends Component {
-  value = 0;
-  x = 0;
-  y = 0;
-
-  constructor(value = 0, x = 0, y = 0) {
-    super();
-    this.value = value;
-    this.x = x;
-    this.y = y;
   }
 }
 
@@ -97,7 +98,7 @@ export class TextAreaComponent extends Component {
   width = 0;
   fontType: FontType;
 
-  constructor(text = '', width = 0, fontType: FontType = 'default') {
+  constructor(text = '', width = Infinity, fontType: FontType = 'default') {
     super();
     this.text = text;
     this.width = width;
@@ -108,11 +109,11 @@ export class TextAreaComponent extends Component {
 // only work on world
 @registerComponent()
 export class AudioComponent extends Component {
-  type: string;
+  type: string | number;
   offsetBytes = 0;
   loop = false;
 
-  constructor(type = '', loop = false, offsetBytes = 0) {
+  constructor(type: string | number = '', loop = false, offsetBytes = 0) {
     super();
     this.type = type;
     this.loop = loop;
