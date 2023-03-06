@@ -13,8 +13,8 @@ render(
         font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
           'Noto Sans', 'PingFang SC', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
           'Noto Color Emoji';
-      }
-      html {
+        -moz-osx-font-smoothing: grayscale;
+        -webkit-font-smoothing: antialiased;
         height: 100%;
       }
       body {
@@ -39,6 +39,11 @@ render(
         padding-block: calc(2 * ${theme.gridGutter});
         padding-inline: ${theme.gridGutter};
       }
+      .logo {
+        font-size: 3em;
+        padding: 0.2em;
+        margin-block: 0 0.5em;
+      }
       .main-container {
         height: 100%;
         overflow: auto;
@@ -52,6 +57,7 @@ render(
       }
     </style>
     <nav>
+      <div class="logo">🧰</div>
       <dy-side-navigation .items=${Object.values(routes).filter((e) => !!e.getContent)}></dy-side-navigation>
     </nav>
     <div class="main-container">

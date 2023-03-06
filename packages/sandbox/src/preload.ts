@@ -24,12 +24,14 @@ export function preload() {
       this._width = width;
     },
 
-    isTap(button: Button) {
-      return !this._prevControl[button] && this._control[button];
+    isTap(button?: Button) {
+      return button
+        ? !this._prevControl[button] && this._control[button]
+        : Object.entries(this._control).some(([button, v]) => v && !this._prevControl[button as unknown as Button]);
     },
 
-    isPressed(button: Button) {
-      return this._control[button];
+    isPressed(button?: Button) {
+      return button ? this._control[button] : Object.values(this._control).includes(true);
     },
   };
 
@@ -64,7 +66,11 @@ export function definedButtons(json: string) {
 }
 
 export function setControl(button: Button, pressed: boolean) {
-  nesbox._control[button] = pressed;
+  if (pressed) {
+    nesbox._control[button] = pressed;
+  } else {
+    delete nesbox._control[button];
+  }
   return true;
 }
 

@@ -99,7 +99,7 @@ export class PAudioElement extends GemElement<State> {
           const len = range[1] - range[0];
           const origin = new Float32Array(audioArray.buffer, range[0] * 4, len);
           map.set(arg, {
-            chart: sampleToChart(audioArray).map((v, i) => [i, (v + 1) * 100000]),
+            chart: [[-2, 0], [-1, 2], ...sampleToChart(audioArray).map((v, i) => [i, v + 1])],
             data: args.qoi
               ? (() => {
                   const encodeBuffer = QOI.encode(new Uint8Array(audioArray.buffer, range[0] * 4, len * 4), {
@@ -158,8 +158,9 @@ export class PAudioElement extends GemElement<State> {
     const arg = JSON.stringify(this.state.args);
     const { origin } = this.#weakMap.get(file)!.get(arg)!;
     const node = this.#audioContext.createBufferSource();
-    node.buffer = this.#audioContext.createBuffer(1, origin.length, this.#audioContext.sampleRate);
-    node.buffer.getChannelData(0).set(origin);
+    const buffer = this.#audioContext.createBuffer(1, origin.length, this.#audioContext.sampleRate);
+    buffer.getChannelData(0).set(origin);
+    node.buffer = buffer;
     node.connect(this.#audioContext.destination);
     node.start();
   };
@@ -172,26 +173,36 @@ export class PAudioElement extends GemElement<State> {
   };
 
   render = () => {
-    const { files, args, result, charts: resultData } = this.state;
+    const { files, args, result, charts } = this.state;
 
     return html`
       <dy-drop-area class="input" accept="audio/*" @change=${this.#onDropChange}>
         <dy-file-pick .multiple=${true} .type=${'file'} .value=${files} @change=${this.#onChange}>
-          ${resultData.map(
-            (e, i, _, slot = utf8ToB64(files[i].name, true)) => html`
-              <dy-chart-zoom
-                .values=${e}
-                slot=${slot}
-                .value=${args.ranges[files[i].name] || [0, 1]}
-                @change=${this.#onRangeChange.bind(this, files[i].name)}
-                @dblclick=${this.#onRangeChange.bind(
-                  this,
-                  files[i].name,
-                  new CustomEvent('change', { detail: [0, 1] }),
-                )}
-              ></dy-chart-zoom>
-              <dy-action-text class="play" slot=${slot} @click=${() => this.#onPlay(files[i])}>Play</dy-action-text>
-            `,
+          ${charts.map(
+            (
+              e,
+              i,
+              _,
+              slot = files[i] && utf8ToB64(files[i].name, true),
+              range = (files[i] && args.ranges[files[i].name]) || [0, 1],
+            ) =>
+              slot &&
+              html`
+                <dy-chart-zoom
+                  .values=${e}
+                  slot=${slot}
+                  .value=${range}
+                  @change=${this.#onRangeChange.bind(this, files[i].name)}
+                  @dblclick=${this.#onRangeChange.bind(
+                    this,
+                    files[i].name,
+                    new CustomEvent('change', { detail: [0, 1] }),
+                  )}
+                ></dy-chart-zoom>
+                <dy-action-text class="play" slot=${slot} @click=${() => this.#onPlay(files[i])}>
+                  Play(${range.map((e) => e.toFixed(2)).join()})
+                </dy-action-text>
+              `,
           )}
         </dy-file-pick>
       </dy-drop-area>

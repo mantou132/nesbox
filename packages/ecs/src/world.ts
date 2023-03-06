@@ -255,17 +255,24 @@ export class World<CustomData = any> {
       const textarea = entity.getComponent(TextAreaComponent);
 
       if (textarea) {
-        getLines(textarea.text, textarea.width, fonts[textarea.fontType]).reduce((y, line) => {
-          this.#renderText(line, roundPositionX, y, textarea.fontType, color);
+        getLines(textarea.text, textarea.width, fonts[textarea.fontType]).reduce((y, { text: line, width }) => {
+          this.#renderText(
+            line,
+            textarea.center ? Math.round(roundPositionX + (textarea.width - width) / 2) : roundPositionX,
+            y,
+            textarea.fontType,
+            color,
+          );
           return y + fonts[textarea.fontType].fontSize * 1.2;
         }, roundPositionY);
       } else if (select) {
         select.options.reduce((y, c, i) => {
-          if (select.selected === i) this.#renderText('>', roundPositionX, y, 'default', color);
-          this.#renderText(c.text, roundPositionX + fonts.default.fontSize * 1.5, y, 'default', color);
-          return y + fonts.default.fontSize * 1.2;
+          if (select.selected === i) this.#renderText('>', roundPositionX, y, select.fontType, color);
+          this.#renderText(c.text, roundPositionX + fonts[select.fontType].fontSize * 1.5, y, select.fontType, color);
+          return y + fonts[select.fontType].fontSize * 1.2;
         }, roundPositionY);
       } else if (material) {
+        // TODO: material.sprite
         for (let i = 0; i < sizeH; i++) {
           const yy = roundPositionY + i;
           if (yy < 0) continue;

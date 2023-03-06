@@ -32,12 +32,12 @@ export function getWords(str: string) {
   return result;
 }
 
-const cache = new Map<string, string[]>();
+const cache = new Map<string, { text: string; width: number }[]>();
 export function getLines(text: string, maxWidth: number, font: Font) {
   if (!cache.has(text)) {
     const paragraphs = text.split('\n').map((text) => {
       const words = getWords(text);
-      const lines: string[] = [];
+      const lines: { text: string; width: number }[] = [];
       let lastLine = '';
       let lastLineWidth = 0;
       for (const word of words) {
@@ -46,7 +46,7 @@ export function getLines(text: string, maxWidth: number, font: Font) {
           lastLine += word;
           lastLineWidth += w;
         } else {
-          lines.push(lastLine);
+          lines.push({ text: lastLine, width: lastLineWidth });
           if (/\s/.test(word)) {
             lastLine = '';
             lastLineWidth = 0;
@@ -56,8 +56,8 @@ export function getLines(text: string, maxWidth: number, font: Font) {
           }
         }
       }
-      if (lastLine) lines.push(lastLine);
-      if (!text) lines.push(' ');
+      if (lastLine) lines.push({ text: lastLine, width: lastLineWidth });
+      if (!text) lines.push({ text: ' ', width: 0 });
       return lines;
     });
 

@@ -51,8 +51,10 @@ export class PieceComponent extends Component {
     return this.type.length;
   }
 
-  isCollGrid(grid: number[][]) {
-    if (this.gridY + this.rows > grid.length || this.gridX + this.cols > grid[0].length) return true;
+  isCollisionGrid(grid: number[][]) {
+    const rows = grid.length;
+    const cols = grid[0].length;
+    if (this.gridY + this.rows > rows || this.gridX + this.cols > cols) return true;
     for (let y = 0; y < this.rows; y++) {
       for (let x = 0; x < this.cols; x++) {
         if (this.type[y][x] && grid[y + this.gridY][x + this.gridX]) {
@@ -74,12 +76,19 @@ export class PieceComponent extends Component {
   }
 
   transform(grid: number[][]) {
+    const cols = grid[0].length;
+    const oldGridX = this.gridX;
     const oldType = this.type;
     this.type = Array.from({ length: this.cols }, (_, y) =>
       Array.from({ length: this.rows }, (_, x) => oldType[this.rows - 1 - x][y]),
     );
-    if (this.isCollGrid(grid)) {
+    this.gridX -= Math.max(0, this.gridX + this.cols - cols);
+    if (this.isCollisionGrid(grid)) {
       this.type = oldType;
+      this.gridX = oldGridX;
     }
   }
 }
+
+@registerComponent()
+export class NewPieceComponent extends Component {}

@@ -63,8 +63,7 @@ export abstract class Entity {
   }
 
   hasComponent(constructor: typeof Component) {
-    this.#components.has(constructor);
-    return this;
+    return this.#components.has(constructor);
   }
 
   getComponent<T extends new (...args: any[]) => any>(constructor: T): InstanceType<T> | undefined {

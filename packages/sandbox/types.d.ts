@@ -18,8 +18,8 @@ declare global {
       soundEnabled: boolean;
       videoFilter: 'default' | 'NTSC';
 
-      isTap: (Button) => boolean;
-      isPressed: (Button) => boolean;
+      isTap: (arg?: Button) => boolean;
+      isPressed: (arg?: Button) => boolean;
 
       init: (options: {
         width: number;

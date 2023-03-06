@@ -1,3 +1,6 @@
+/// <reference types="../types" />
+/// <reference types="../env" />
+
 import { Nes as ONes, Button } from '@mantou/nes';
 import QOI from 'qoijs';
 import ShadowRealm from 'shadowrealm-api';

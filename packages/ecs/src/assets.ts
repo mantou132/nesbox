@@ -49,7 +49,7 @@ export const audios = new Proxy({} as Record<string, Float32Array>, {
   },
 });
 
-export function loadAudio(name: string, data: Float32Array) {
+export function loadAudio(name: string | number, data: Float32Array) {
   audios[name] = data;
 }
 
@@ -67,7 +67,7 @@ export function loadSprite(name: string, sprite: Sprite) {
 }
 
 export class Color extends Uint8ClampedArray {
-  constructor(r: ArrayBuffer | number | number[], g = 0, b = 0, a = 0) {
+  constructor(r: ArrayBuffer | number | number[], g = 0, b = 0, a = 255) {
     if (r instanceof ArrayBuffer) {
       super(r, g, b || undefined);
     } else if (Array.isArray(r)) {

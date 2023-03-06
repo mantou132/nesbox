@@ -6,10 +6,8 @@ import {
   TextAreaComponent,
   BasicEntity,
   Scene,
-  COLOR_BLACK,
   COLOR_WHITE,
   COLOR_GRAY,
-  COLOR_RED,
 } from '@mantou/ecs';
 import { PieceEntity } from 'src/entities';
 import { PieceComponent } from 'src/components';
@@ -19,39 +17,68 @@ import {
   STAGE_HEIGHT,
   STAGE_WIDTH,
   WIDTH,
-  SCENES,
-  ENTITIES,
-  HANDLES,
+  SCENE_LABEL,
+  ENTITY_LABEL,
+  SELECT_HANDLE,
   STAGE_MARGIN_LEFT,
   STAGE_MARGIN_BLOCK,
   SIDE_WIDTH,
   BRICK_SIZE,
+  BACKGROUND_COLOR,
+  STAGE_BACKGROUND_COLOR,
+  SCORE_COLOR,
 } from 'src/constants';
 import { commonSystem, moveSystem, modeSelectSystem, pauseSystem, scoreSystem } from 'src/systems';
 
-export function getScene(name: SCENES): Scene {
+export function getScene(name: SCENE_LABEL): Scene {
   switch (name) {
-    case SCENES.Start:
-      return new Scene(SCENES.Start)
+    case SCENE_LABEL.Start:
+      return new Scene(SCENE_LABEL.Start)
         .addEntity(
-          new BasicEntity(ENTITIES.Background)
-            .addComponent(new MaterialComponent(COLOR_BLACK))
+          new BasicEntity(ENTITY_LABEL.Background)
+            .addComponent(new MaterialComponent(BACKGROUND_COLOR))
             .addComponent(new PositionComponent(0, 0)),
         )
         .addEntity(
+          new BasicEntity(ENTITY_LABEL.Background)
+            .addComponent(new MaterialComponent(COLOR_WHITE))
+            .addComponent(
+              new TextAreaComponent('TETRIS', {
+                width: WIDTH,
+                fontType: 'heading',
+                center: true,
+              }),
+            )
+            .addComponent(new PositionComponent(0, 70)),
+        )
+        .addEntity(
+          new BasicEntity(ENTITY_LABEL.Background)
+            .addComponent(new MaterialComponent(COLOR_WHITE))
+            .addComponent(new PositionComponent(WIDTH / 2 - 30, 90))
+            .addComponent(new SizeComponent(61, 3)),
+        )
+        .addEntity(
           new BasicEntity()
-            .addComponent(new PositionComponent(95, 100))
-            .addComponent(new MaterialComponent(COLOR_BLACK))
+            .addComponent(new PositionComponent(90, 120))
+            .addComponent(new MaterialComponent(BACKGROUND_COLOR))
             .addEntity(
-              new BasicEntity(ENTITIES.ModeSelect).addComponent(new MaterialComponent(COLOR_WHITE)).addComponent(
+              new BasicEntity(ENTITY_LABEL.ModeSelect).addComponent(new MaterialComponent(COLOR_WHITE)).addComponent(
                 new SelectComponent([
                   {
                     text: '1 Player',
-                    handle: HANDLES.OneMode,
+                    handle: SELECT_HANDLE.OneMode,
                   },
                   {
                     text: '2 Player',
-                    handle: HANDLES.TwoMode,
+                    handle: SELECT_HANDLE.TwoMode,
+                  },
+                  {
+                    text: '',
+                    handle: '',
+                  },
+                  {
+                    text: 'About',
+                    handle: SELECT_HANDLE.About,
                   },
                 ]),
               ),
@@ -60,54 +87,61 @@ export function getScene(name: SCENES): Scene {
         .addSystem(commonSystem)
         .addSystem(modeSelectSystem);
 
-    case SCENES.OnePlayer:
-      return new Scene(SCENES.OnePlayer)
+    case SCENE_LABEL.OnePlayer:
+      return new Scene(SCENE_LABEL.OnePlayer)
         .addEntity(
-          new BasicEntity(ENTITIES.Background)
-            .addComponent(new MaterialComponent(COLOR_GRAY))
+          new BasicEntity(ENTITY_LABEL.Background)
+            .addComponent(new MaterialComponent(BACKGROUND_COLOR))
             .addComponent(new PositionComponent(0, 0)),
         )
         .addEntity(
-          new BasicEntity(ENTITIES.Stage)
-            .addComponent(new MaterialComponent(COLOR_WHITE))
-            .addComponent(new PositionComponent(STAGE_MARGIN_LEFT, STAGE_MARGIN_BLOCK))
-            .addComponent(new SizeComponent(STAGE_WIDTH, STAGE_HEIGHT))
-            .addEntity(new PieceEntity(PieceComponent.randomType(), ENTITIES.CurrentPiece1).transformX()),
+          new BasicEntity(ENTITY_LABEL.Background)
+            .addComponent(new MaterialComponent(STAGE_BACKGROUND_COLOR))
+            .addComponent(new PositionComponent(STAGE_MARGIN_LEFT - 1, STAGE_MARGIN_BLOCK))
+            .addComponent(new SizeComponent(1, STAGE_HEIGHT)),
         )
         .addEntity(
-          new BasicEntity(ENTITIES.Side)
+          new BasicEntity(ENTITY_LABEL.Stage)
+            .addComponent(new MaterialComponent(STAGE_BACKGROUND_COLOR))
+            .addComponent(new PositionComponent(STAGE_MARGIN_LEFT, STAGE_MARGIN_BLOCK))
+            .addComponent(new SizeComponent(STAGE_WIDTH, STAGE_HEIGHT))
+            .addEntity(new PieceEntity(PieceComponent.randomType(), ENTITY_LABEL.CurrentPiece1).transformX()),
+        )
+        .addEntity(
+          new BasicEntity(ENTITY_LABEL.Side)
             .addComponent(new PositionComponent(STAGE_MARGIN_LEFT + STAGE_WIDTH, STAGE_MARGIN_BLOCK))
             .addComponent(new SizeComponent(SIDE_WIDTH, STAGE_HEIGHT))
             .addEntity(
               new BasicEntity()
-                .addComponent(new MaterialComponent(COLOR_WHITE))
+                .addComponent(new MaterialComponent(STAGE_BACKGROUND_COLOR))
                 .addComponent(new PositionComponent((SIDE_WIDTH - BRICK_SIZE * 4) / 2, 0))
                 .addComponent(new SizeComponent(SIDE_WIDTH, 40))
                 .addEntity(
                   new BasicEntity()
                     .addComponent(new PositionComponent(10, 10))
-                    .addComponent(new MaterialComponent(COLOR_RED))
+                    .addComponent(new MaterialComponent(COLOR_WHITE))
                     .addComponent(new TextAreaComponent('SCORE:')),
                 )
                 .addEntity(
-                  new BasicEntity(ENTITIES.Score)
+                  new BasicEntity(ENTITY_LABEL.Score)
                     .addComponent(new PositionComponent(10, 20))
+                    .addComponent(new MaterialComponent(SCORE_COLOR))
                     .addComponent(new TextAreaComponent('0')),
                 ),
             )
             .addEntity(
               new BasicEntity()
-                .addComponent(new MaterialComponent(COLOR_WHITE))
+                .addComponent(new MaterialComponent(STAGE_BACKGROUND_COLOR))
                 .addComponent(new PositionComponent((SIDE_WIDTH - BRICK_SIZE * 4) / 2, 50))
                 .addComponent(new SizeComponent(SIDE_WIDTH, 40 + BRICK_SIZE * 2))
                 .addEntity(
                   new BasicEntity()
                     .addComponent(new PositionComponent(10, 10))
-                    .addComponent(new MaterialComponent(COLOR_RED))
+                    .addComponent(new MaterialComponent(COLOR_WHITE))
                     .addComponent(new TextAreaComponent('NEXT:')),
                 )
                 .addEntity(
-                  new BasicEntity(ENTITIES.NextStage)
+                  new BasicEntity(ENTITY_LABEL.NextStage)
                     .addComponent(new PositionComponent(10, 30))
                     .addEntity(new PieceEntity(PieceComponent.randomType())),
                 ),
@@ -118,15 +152,81 @@ export function getScene(name: SCENES): Scene {
         .addSystem(moveSystem)
         .addSystem(scoreSystem);
 
-    case SCENES.TwoPlayer:
-      return new Scene(SCENES.TwoPlayer)
+    case SCENE_LABEL.TwoPlayer:
+      return new Scene(SCENE_LABEL.TwoPlayer)
         .addEntity(
-          new BasicEntity(ENTITIES.Background)
+          new BasicEntity(ENTITY_LABEL.Background)
+            .addComponent(new MaterialComponent(BACKGROUND_COLOR))
+            .addComponent(new PositionComponent(0, 0)),
+        )
+        .addEntity(
+          new BasicEntity(ENTITY_LABEL.Background)
+            .addComponent(new MaterialComponent(STAGE_BACKGROUND_COLOR))
+            .addComponent(new PositionComponent(STAGE_MARGIN_LEFT - 1, STAGE_MARGIN_BLOCK))
+            .addComponent(new SizeComponent(1, STAGE_HEIGHT)),
+        )
+        .addEntity(
+          new BasicEntity(ENTITY_LABEL.Stage)
+            .addComponent(new MaterialComponent(STAGE_BACKGROUND_COLOR))
+            .addComponent(new PositionComponent(STAGE_MARGIN_LEFT, STAGE_MARGIN_BLOCK))
+            .addComponent(new SizeComponent(STAGE_WIDTH, STAGE_HEIGHT))
+            .addEntity(new PieceEntity(PieceComponent.randomType(), ENTITY_LABEL.CurrentPiece1).transformX())
+            .addEntity(new PieceEntity(PieceComponent.randomType(), ENTITY_LABEL.CurrentPiece2).transformX()),
+        )
+        .addEntity(
+          new BasicEntity(ENTITY_LABEL.Side)
+            .addComponent(new PositionComponent(STAGE_MARGIN_LEFT + STAGE_WIDTH, STAGE_MARGIN_BLOCK))
+            .addComponent(new SizeComponent(SIDE_WIDTH, STAGE_HEIGHT))
+            .addEntity(
+              new BasicEntity()
+                .addComponent(new MaterialComponent(STAGE_BACKGROUND_COLOR))
+                .addComponent(new PositionComponent((SIDE_WIDTH - BRICK_SIZE * 4) / 2, 0))
+                .addComponent(new SizeComponent(SIDE_WIDTH, 40))
+                .addEntity(
+                  new BasicEntity()
+                    .addComponent(new PositionComponent(10, 10))
+                    .addComponent(new MaterialComponent(COLOR_WHITE))
+                    .addComponent(new TextAreaComponent('SCORE:')),
+                )
+                .addEntity(
+                  new BasicEntity(ENTITY_LABEL.Score)
+                    .addComponent(new PositionComponent(10, 20))
+                    .addComponent(new MaterialComponent(SCORE_COLOR))
+                    .addComponent(new TextAreaComponent('0')),
+                ),
+            )
+            .addEntity(
+              new BasicEntity()
+                .addComponent(new MaterialComponent(STAGE_BACKGROUND_COLOR))
+                .addComponent(new PositionComponent((SIDE_WIDTH - BRICK_SIZE * 4) / 2, 50))
+                .addComponent(new SizeComponent(SIDE_WIDTH, 40 + BRICK_SIZE * 2))
+                .addEntity(
+                  new BasicEntity()
+                    .addComponent(new PositionComponent(10, 10))
+                    .addComponent(new MaterialComponent(COLOR_WHITE))
+                    .addComponent(new TextAreaComponent('NEXT:')),
+                )
+                .addEntity(
+                  new BasicEntity(ENTITY_LABEL.NextStage)
+                    .addComponent(new PositionComponent(10, 30))
+                    .addEntity(new PieceEntity(PieceComponent.randomType())),
+                ),
+            ),
+        )
+        .addSystem(commonSystem)
+        .addSystem(pauseSystem)
+        .addSystem(moveSystem)
+        .addSystem(scoreSystem);
+
+    case SCENE_LABEL.About:
+      return new Scene(SCENE_LABEL.About)
+        .addEntity(
+          new BasicEntity(ENTITY_LABEL.Background)
             .addComponent(new MaterialComponent(COLOR_WHITE))
             .addComponent(new PositionComponent(0, 0)),
         )
         .addEntity(
-          new BasicEntity(ENTITIES.UnImplementInfo)
+          new BasicEntity(ENTITY_LABEL.UnImplementInfo)
             .addComponent(new PositionComponent(40, 40))
             .addComponent(new SizeComponent(WIDTH - 80, HEIGHT - 80))
             .addComponent(new MaterialComponent(COLOR_WHITE))
@@ -135,8 +235,8 @@ export function getScene(name: SCENES): Scene {
                 .addComponent(new MaterialComponent(COLOR_GRAY))
                 .addComponent(
                   new TextAreaComponent(
-                    `This part has not been completed yet. \n\nWhen I finish it, I shouldn't tell you for a long time, please rest assured.\n\nIf you have any suggestions, you can contact me.`,
-                    WIDTH - 80,
+                    `This is the first game released on NESBox mantou132, which is written in JavaScript, which is mainly used for learning goals.\n\nIf you are interested in NESBox, or have any suggestions, please contact me.\n\n\nThanks!`,
+                    { width: WIDTH - 80 },
                   ),
                 ),
             ),
