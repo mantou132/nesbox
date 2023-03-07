@@ -10,29 +10,24 @@ import {
   COLOR_GRAY,
 } from '@mantou/ecs';
 import { PieceEntity } from 'src/entities';
-import { PieceComponent } from 'src/components';
 
 import {
   HEIGHT,
-  STAGE_HEIGHT,
-  STAGE_WIDTH,
   WIDTH,
   SCENE_LABEL,
   ENTITY_LABEL,
   SELECT_HANDLE,
-  STAGE_MARGIN_LEFT,
-  STAGE_MARGIN_BLOCK,
   SIDE_WIDTH,
-  BRICK_SIZE,
   BACKGROUND_COLOR,
   STAGE_BACKGROUND_COLOR,
   SCORE_COLOR,
+  getWorldData,
 } from 'src/constants';
 import { commonSystem, moveSystem, modeSelectSystem, pauseSystem, scoreSystem } from 'src/systems';
 
-export function getScene(name: SCENE_LABEL): Scene {
-  switch (name) {
-    case SCENE_LABEL.Start:
+export function getScene(label: SCENE_LABEL): Scene {
+  switch (label) {
+    case SCENE_LABEL.Start: {
       return new Scene(SCENE_LABEL.Start)
         .addEntity(
           new BasicEntity(ENTITY_LABEL.Background)
@@ -86,8 +81,16 @@ export function getScene(name: SCENE_LABEL): Scene {
         )
         .addSystem(commonSystem)
         .addSystem(modeSelectSystem);
+    }
 
-    case SCENE_LABEL.OnePlayer:
+    case SCENE_LABEL.TwoPlayer:
+    case SCENE_LABEL.OnePlayer: {
+      const data = getWorldData(label);
+      const { brickSize, gridHeight, gridWidth } = data;
+      const stageWidth = brickSize * gridWidth;
+      const stageHeight = brickSize * gridHeight;
+      const stageMarginBlock = (HEIGHT - stageHeight) / 2;
+      const stageMarginLeft = (WIDTH - (stageWidth + SIDE_WIDTH)) / 2;
       return new Scene(SCENE_LABEL.OnePlayer)
         .addEntity(
           new BasicEntity(ENTITY_LABEL.Background)
@@ -97,128 +100,100 @@ export function getScene(name: SCENE_LABEL): Scene {
         .addEntity(
           new BasicEntity(ENTITY_LABEL.Background)
             .addComponent(new MaterialComponent(STAGE_BACKGROUND_COLOR))
-            .addComponent(new PositionComponent(STAGE_MARGIN_LEFT - 1, STAGE_MARGIN_BLOCK))
-            .addComponent(new SizeComponent(1, STAGE_HEIGHT)),
+            .addComponent(new PositionComponent(stageMarginLeft - 1, stageMarginBlock))
+            .addComponent(new SizeComponent(1, stageHeight)),
         )
         .addEntity(
-          new BasicEntity(ENTITY_LABEL.Stage)
-            .addComponent(new MaterialComponent(STAGE_BACKGROUND_COLOR))
-            .addComponent(new PositionComponent(STAGE_MARGIN_LEFT, STAGE_MARGIN_BLOCK))
-            .addComponent(new SizeComponent(STAGE_WIDTH, STAGE_HEIGHT))
-            .addEntity(new PieceEntity(PieceComponent.randomType(), ENTITY_LABEL.CurrentPiece1).transformX()),
+          (() => {
+            const entity = new BasicEntity(ENTITY_LABEL.Stage)
+              .addComponent(new MaterialComponent(STAGE_BACKGROUND_COLOR))
+              .addComponent(new PositionComponent(stageMarginLeft, stageMarginBlock))
+              .addComponent(new SizeComponent(stageWidth, stageHeight));
+            if (label === SCENE_LABEL.TwoPlayer) {
+              entity
+                .addEntity(new PieceEntity(data, { label: ENTITY_LABEL.CurrentPiece1 }).transformX(data, -1))
+                .addEntity(
+                  new PieceEntity(data, {
+                    label: ENTITY_LABEL.CurrentPiece2,
+                    is2Player: true,
+                  }).transformX(data, 1),
+                );
+            } else {
+              entity.addEntity(new PieceEntity(data, { label: ENTITY_LABEL.CurrentPiece1 }).transformX(data));
+            }
+            return entity;
+          })(),
         )
         .addEntity(
-          new BasicEntity(ENTITY_LABEL.Side)
-            .addComponent(new PositionComponent(STAGE_MARGIN_LEFT + STAGE_WIDTH, STAGE_MARGIN_BLOCK))
-            .addComponent(new SizeComponent(SIDE_WIDTH, STAGE_HEIGHT))
-            .addEntity(
-              new BasicEntity()
-                .addComponent(new MaterialComponent(STAGE_BACKGROUND_COLOR))
-                .addComponent(new PositionComponent((SIDE_WIDTH - BRICK_SIZE * 4) / 2, 0))
-                .addComponent(new SizeComponent(SIDE_WIDTH, 40))
-                .addEntity(
-                  new BasicEntity()
-                    .addComponent(new PositionComponent(10, 10))
-                    .addComponent(new MaterialComponent(COLOR_WHITE))
-                    .addComponent(new TextAreaComponent('SCORE:')),
-                )
-                .addEntity(
-                  new BasicEntity(ENTITY_LABEL.Score)
-                    .addComponent(new PositionComponent(10, 20))
-                    .addComponent(new MaterialComponent(SCORE_COLOR))
-                    .addComponent(new TextAreaComponent('0')),
-                ),
-            )
-            .addEntity(
-              new BasicEntity()
-                .addComponent(new MaterialComponent(STAGE_BACKGROUND_COLOR))
-                .addComponent(new PositionComponent((SIDE_WIDTH - BRICK_SIZE * 4) / 2, 50))
-                .addComponent(new SizeComponent(SIDE_WIDTH, 40 + BRICK_SIZE * 2))
-                .addEntity(
-                  new BasicEntity()
-                    .addComponent(new PositionComponent(10, 10))
-                    .addComponent(new MaterialComponent(COLOR_WHITE))
-                    .addComponent(new TextAreaComponent('NEXT:')),
-                )
-                .addEntity(
-                  new BasicEntity(ENTITY_LABEL.NextStage)
-                    .addComponent(new PositionComponent(10, 30))
-                    .addEntity(new PieceEntity(PieceComponent.randomType())),
-                ),
-            ),
+          (() => {
+            const entity = new BasicEntity(ENTITY_LABEL.Side)
+              .addComponent(new PositionComponent(stageMarginLeft + stageWidth, stageMarginBlock))
+              .addComponent(new SizeComponent(SIDE_WIDTH, stageHeight))
+              .addEntity(
+                new BasicEntity()
+                  .addComponent(new MaterialComponent(STAGE_BACKGROUND_COLOR))
+                  .addComponent(new PositionComponent((SIDE_WIDTH - brickSize * 4) / 2, 0))
+                  .addComponent(new SizeComponent(SIDE_WIDTH, 40))
+                  .addEntity(
+                    new BasicEntity()
+                      .addComponent(new PositionComponent(10, 10))
+                      .addComponent(new MaterialComponent(COLOR_WHITE))
+                      .addComponent(new TextAreaComponent('SCORE:')),
+                  )
+                  .addEntity(
+                    new BasicEntity(ENTITY_LABEL.Score)
+                      .addComponent(new PositionComponent(10, 20))
+                      .addComponent(new MaterialComponent(SCORE_COLOR))
+                      .addComponent(new TextAreaComponent('0')),
+                  ),
+              )
+              .addEntity(
+                new BasicEntity()
+                  .addComponent(new MaterialComponent(STAGE_BACKGROUND_COLOR))
+                  .addComponent(new PositionComponent((SIDE_WIDTH - brickSize * 4) / 2, 50))
+                  .addComponent(new SizeComponent(SIDE_WIDTH, 40 + brickSize * 2))
+                  .addEntity(
+                    new BasicEntity()
+                      .addComponent(new PositionComponent(10, 10))
+                      .addComponent(new MaterialComponent(COLOR_WHITE))
+                      .addComponent(new TextAreaComponent('NEXT:')),
+                  )
+                  .addEntity(
+                    new BasicEntity(ENTITY_LABEL.NextStage1)
+                      .addComponent(new PositionComponent(10, 30))
+                      .addEntity(new PieceEntity(data)),
+                  ),
+              );
+
+            if (label === SCENE_LABEL.TwoPlayer) {
+              entity.addEntity(
+                new BasicEntity()
+                  .addComponent(new MaterialComponent(STAGE_BACKGROUND_COLOR))
+                  .addComponent(new PositionComponent((SIDE_WIDTH - brickSize * 4) / 2, 125))
+                  .addComponent(new SizeComponent(SIDE_WIDTH, 40 + brickSize * 2))
+                  .addEntity(
+                    new BasicEntity()
+                      .addComponent(new PositionComponent(10, 10))
+                      .addComponent(new MaterialComponent(COLOR_WHITE))
+                      .addComponent(new TextAreaComponent('NEXT 2:')),
+                  )
+                  .addEntity(
+                    new BasicEntity(ENTITY_LABEL.NextStage2)
+                      .addComponent(new PositionComponent(10, 30))
+                      .addEntity(new PieceEntity(data, { is2Player: true })),
+                  ),
+              );
+            }
+            return entity;
+          })(),
         )
         .addSystem(commonSystem)
         .addSystem(pauseSystem)
         .addSystem(moveSystem)
         .addSystem(scoreSystem);
+    }
 
-    case SCENE_LABEL.TwoPlayer:
-      return new Scene(SCENE_LABEL.TwoPlayer)
-        .addEntity(
-          new BasicEntity(ENTITY_LABEL.Background)
-            .addComponent(new MaterialComponent(BACKGROUND_COLOR))
-            .addComponent(new PositionComponent(0, 0)),
-        )
-        .addEntity(
-          new BasicEntity(ENTITY_LABEL.Background)
-            .addComponent(new MaterialComponent(STAGE_BACKGROUND_COLOR))
-            .addComponent(new PositionComponent(STAGE_MARGIN_LEFT - 1, STAGE_MARGIN_BLOCK))
-            .addComponent(new SizeComponent(1, STAGE_HEIGHT)),
-        )
-        .addEntity(
-          new BasicEntity(ENTITY_LABEL.Stage)
-            .addComponent(new MaterialComponent(STAGE_BACKGROUND_COLOR))
-            .addComponent(new PositionComponent(STAGE_MARGIN_LEFT, STAGE_MARGIN_BLOCK))
-            .addComponent(new SizeComponent(STAGE_WIDTH, STAGE_HEIGHT))
-            .addEntity(new PieceEntity(PieceComponent.randomType(), ENTITY_LABEL.CurrentPiece1).transformX())
-            .addEntity(new PieceEntity(PieceComponent.randomType(), ENTITY_LABEL.CurrentPiece2).transformX()),
-        )
-        .addEntity(
-          new BasicEntity(ENTITY_LABEL.Side)
-            .addComponent(new PositionComponent(STAGE_MARGIN_LEFT + STAGE_WIDTH, STAGE_MARGIN_BLOCK))
-            .addComponent(new SizeComponent(SIDE_WIDTH, STAGE_HEIGHT))
-            .addEntity(
-              new BasicEntity()
-                .addComponent(new MaterialComponent(STAGE_BACKGROUND_COLOR))
-                .addComponent(new PositionComponent((SIDE_WIDTH - BRICK_SIZE * 4) / 2, 0))
-                .addComponent(new SizeComponent(SIDE_WIDTH, 40))
-                .addEntity(
-                  new BasicEntity()
-                    .addComponent(new PositionComponent(10, 10))
-                    .addComponent(new MaterialComponent(COLOR_WHITE))
-                    .addComponent(new TextAreaComponent('SCORE:')),
-                )
-                .addEntity(
-                  new BasicEntity(ENTITY_LABEL.Score)
-                    .addComponent(new PositionComponent(10, 20))
-                    .addComponent(new MaterialComponent(SCORE_COLOR))
-                    .addComponent(new TextAreaComponent('0')),
-                ),
-            )
-            .addEntity(
-              new BasicEntity()
-                .addComponent(new MaterialComponent(STAGE_BACKGROUND_COLOR))
-                .addComponent(new PositionComponent((SIDE_WIDTH - BRICK_SIZE * 4) / 2, 50))
-                .addComponent(new SizeComponent(SIDE_WIDTH, 40 + BRICK_SIZE * 2))
-                .addEntity(
-                  new BasicEntity()
-                    .addComponent(new PositionComponent(10, 10))
-                    .addComponent(new MaterialComponent(COLOR_WHITE))
-                    .addComponent(new TextAreaComponent('NEXT:')),
-                )
-                .addEntity(
-                  new BasicEntity(ENTITY_LABEL.NextStage)
-                    .addComponent(new PositionComponent(10, 30))
-                    .addEntity(new PieceEntity(PieceComponent.randomType())),
-                ),
-            ),
-        )
-        .addSystem(commonSystem)
-        .addSystem(pauseSystem)
-        .addSystem(moveSystem)
-        .addSystem(scoreSystem);
-
-    case SCENE_LABEL.About:
+    case SCENE_LABEL.About: {
       return new Scene(SCENE_LABEL.About)
         .addEntity(
           new BasicEntity(ENTITY_LABEL.Background)
@@ -244,5 +219,6 @@ export function getScene(name: SCENE_LABEL): Scene {
         .addSystem(commonSystem)
         .addSystem(pauseSystem)
         .addSystem(moveSystem);
+    }
   }
 }

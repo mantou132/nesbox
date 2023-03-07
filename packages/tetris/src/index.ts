@@ -29,7 +29,10 @@ loadAudio(
   new Float32Array(eSVideoGameDescend1.buffer, Math.round(eSVideoGameDescend1.length * (1 / 6)) * 4, 400),
 );
 
-const world = new World<WorldDta>(WIDTH, HEIGHT).loadScene(getScene(SCENE_LABEL.Start), getWorldData());
+const world = new World<WorldDta>(WIDTH, HEIGHT).loadScene(
+  getScene(SCENE_LABEL.Start),
+  getWorldData(SCENE_LABEL.Start),
+);
 
 nesbox.init({
   width: WIDTH,

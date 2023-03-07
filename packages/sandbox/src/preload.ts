@@ -12,6 +12,10 @@ export function preload() {
     _prevControl: {} as Record<Button, boolean>,
 
     buttons: {} as Record<keyof typeof Button, Button>,
+    buttons1: {} as Record<string, Button>,
+    buttons2: {} as Record<string, Button>,
+    buttons3: {} as Record<string, Button>,
+    buttons4: {} as Record<string, Button>,
     soundEnabled: true,
     videoFilter: 'default',
 
@@ -63,6 +67,46 @@ export function getLogs(): string | undefined {
 
 export function definedButtons(json: string) {
   nesbox.buttons = JSON.parse(json);
+  nesbox.buttons1 = {
+    JoypadA: nesbox.buttons.Joypad1A,
+    JoypadB: nesbox.buttons.Joypad1B,
+    JoypadTurboA: nesbox.buttons.Joypad1TurboA,
+    JoypadTurboB: nesbox.buttons.Joypad1TurboB,
+    JoypadUp: nesbox.buttons.Joypad1Up,
+    JoypadDown: nesbox.buttons.Joypad1Down,
+    JoypadLeft: nesbox.buttons.Joypad1Left,
+    JoypadRight: nesbox.buttons.Joypad1Right,
+  };
+  nesbox.buttons2 = {
+    JoypadA: nesbox.buttons.Joypad2A,
+    JoypadB: nesbox.buttons.Joypad2B,
+    JoypadTurboA: nesbox.buttons.Joypad2TurboA,
+    JoypadTurboB: nesbox.buttons.Joypad2TurboB,
+    JoypadUp: nesbox.buttons.Joypad2Up,
+    JoypadDown: nesbox.buttons.Joypad2Down,
+    JoypadLeft: nesbox.buttons.Joypad2Left,
+    JoypadRight: nesbox.buttons.Joypad2Right,
+  };
+  nesbox.buttons3 = {
+    JoypadA: nesbox.buttons.Joypad3A,
+    JoypadB: nesbox.buttons.Joypad3B,
+    JoypadTurboA: nesbox.buttons.Joypad3TurboA,
+    JoypadTurboB: nesbox.buttons.Joypad3TurboB,
+    JoypadUp: nesbox.buttons.Joypad3Up,
+    JoypadDown: nesbox.buttons.Joypad3Down,
+    JoypadLeft: nesbox.buttons.Joypad3Left,
+    JoypadRight: nesbox.buttons.Joypad3Right,
+  };
+  nesbox.buttons4 = {
+    JoypadA: nesbox.buttons.Joypad4A,
+    JoypadB: nesbox.buttons.Joypad4B,
+    JoypadTurboA: nesbox.buttons.Joypad4TurboA,
+    JoypadTurboB: nesbox.buttons.Joypad4TurboB,
+    JoypadUp: nesbox.buttons.Joypad4Up,
+    JoypadDown: nesbox.buttons.Joypad4Down,
+    JoypadLeft: nesbox.buttons.Joypad4Left,
+    JoypadRight: nesbox.buttons.Joypad4Right,
+  };
 }
 
 export function setControl(button: Button, pressed: boolean) {

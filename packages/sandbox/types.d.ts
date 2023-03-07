@@ -1,5 +1,15 @@
 import { Button } from '@mantou/nes';
 
+type NesBoxCommonButton =
+  | 'JoypadA'
+  | 'JoypadB'
+  | 'JoypadTurboA'
+  | 'JoypadTurboB'
+  | 'JoypadUp'
+  | 'JoypadDown'
+  | 'JoypadLeft'
+  | 'JoypadRight';
+
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace globalThis {
@@ -15,6 +25,10 @@ declare global {
       _prevControl: Record<Button, boolean>;
 
       buttons: Record<keyof typeof Button, Button>;
+      buttons1: Record<NesBoxCommonButton, Button>;
+      buttons2: Record<NesBoxCommonButton, Button>;
+      buttons3: Record<NesBoxCommonButton, Button>;
+      buttons4: Record<NesBoxCommonButton, Button>;
       soundEnabled: boolean;
       videoFilter: 'default' | 'NTSC';
 
