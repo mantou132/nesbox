@@ -3,10 +3,9 @@
 
 import { Nes as ONes, Button } from '@mantou/nes';
 import QOI from 'qoijs';
-import ShadowRealm from 'shadowrealm-api';
 
+import ShadowRealm from './shadowrealm';
 import { utf8ToBase64 } from './utils';
-import { example } from './example';
 import {
   preload,
   getAudioFrame,
@@ -140,18 +139,22 @@ export class Nes implements ONes {
           const [type, ...args] = log.split(',');
           (console as any)[type]?.(args.join(','));
         }
-        const fn = getVideoFrame();
-        const frame = new DataView(this.#mem.buffer, this.#frameSpace[0], this.#frameLen);
-        for (let i = 0; i < this.#frameLen; i += 4) {
-          frame.setUint32(i, fn() || 0, false);
-        }
+        const frame = getVideoFrame();
+        new Uint8ClampedArray(this.#mem.buffer).set(frame, this.#frameSpace[0]);
+        // const fn = getVideoFrame();
+        // const frame = new DataView(this.#mem.buffer, this.#frameSpace[0], this.#frameLen);
+        // for (let i = 0; i < this.#frameLen; i += 4) {
+        //   frame.setUint32(i, fn() || 0, false);
+        // }
         return ++this.#frameNum;
       };
       this.audio_callback = (out: Float32Array) => {
-        const fn = getAudioFrame();
-        for (let i = 0; i < out.length; i++) {
-          out[i] = fn() || 0;
-        }
+        const frame = getAudioFrame();
+        out.set(frame);
+        // const fn = getAudioFrame();
+        // for (let i = 0; i < out.length; i++) {
+        //   out[i] = fn() || 0;
+        // }
       };
       this.handle_event = (button, pressed, repeat) => {
         if (repeat) return false;

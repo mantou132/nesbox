@@ -5,8 +5,7 @@
   "module": "src/index.ts",
   "types": "src/index.ts",
   "dependencies": {
-    "qoijs": "^1.0.0",
-    "shadowrealm-api": "^0.8.2"
+    "qoijs": "^1.0.0"
   },
   "peerDependencies": {
     "@mantou/nes": "^1.0.6"

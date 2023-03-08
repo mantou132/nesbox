@@ -54,15 +54,17 @@ export function preload() {
     };
   }
 
-  globalThis.console = new Proxy(new SandboxConsole() as Console & SandboxConsole, {
-    get(target, type: keyof (Console & SandboxConsole)) {
-      return target[type] || target._log.bind(target, type);
-    },
-  });
+  globalThis.console =
+    globalThis.console ||
+    new Proxy(new SandboxConsole() as Console & SandboxConsole, {
+      get(target, type: keyof (Console & SandboxConsole)) {
+        return target[type] || target._log.bind(target, type);
+      },
+    });
 }
 
 export function getLogs(): string | undefined {
-  return (globalThis.console as any)._logs.shift()?.join(',');
+  return (globalThis.console as any)._logs?.shift()?.join(',');
 }
 
 export function definedButtons(json: string) {
@@ -127,18 +129,24 @@ export function setVideoFilter(filter: 'default' | 'NTSC') {
 }
 
 export function getVideoFrame() {
-  const frame = new DataView(nesbox._getVideoFrame().buffer);
+  const frame = nesbox._getVideoFrame();
   Promise.resolve().then(() => {
     nesbox._prevControl = { ...nesbox._control };
   });
-  let index = 0;
-  return () => frame.getUint32(index++ * 4, false);
+  return frame;
+  // const frame = new DataView(nesbox._getVideoFrame().buffer);
+  // Promise.resolve().then(() => {
+  //   nesbox._prevControl = { ...nesbox._control };
+  // });
+  // let index = 0;
+  // return () => frame.getUint32(index++ * 4, false);
 }
 
 export function getAudioFrame() {
-  const frame = nesbox._getAudioFrame();
-  let index = 0;
-  return () => frame[index++];
+  // const frame = nesbox._getAudioFrame();
+  // let index = 0;
+  // return () => frame[index++];
+  return nesbox._getAudioFrame();
 }
 
 export function getState() {

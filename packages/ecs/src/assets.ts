@@ -68,12 +68,12 @@ export function loadSprite(name: string, sprite: Sprite) {
 
 export class Color extends Uint8ClampedArray {
   constructor(r: ArrayBuffer | number | number[], g = 0, b = 0, a = 255) {
-    if (r instanceof ArrayBuffer) {
-      super(r, g, b || undefined);
-    } else if (Array.isArray(r)) {
+    if (typeof r === 'number') {
+      super([r, g, b, a]);
+    } else if ('length' in r) {
       super(r);
     } else {
-      super([r, g, b, a]);
+      super(r, g, b || undefined);
     }
   }
 
