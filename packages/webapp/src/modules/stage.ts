@@ -258,9 +258,8 @@ export class MStageElement extends GemElement<State> {
     this.#nextStartTime = start + 1 / 60;
   };
 
+  romBuffer?: ArrayBuffer;
   #loadRom = async () => {
-    if (!this.#isHost) return;
-
     this.#game = undefined;
     this.romBuffer = undefined;
 
@@ -568,5 +567,7 @@ export class MStageElement extends GemElement<State> {
     return this.#game?.ram();
   };
 
-  romBuffer?: ArrayBuffer;
+  isHostReady = () => {
+    return this.#isHost && !!this.romBuffer;
+  };
 }

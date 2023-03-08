@@ -182,7 +182,7 @@ export class PRoomElement extends GemElement {
 
   #save = async (auto = false) => {
     try {
-      if (!this.stageRef.element!.romBuffer) return;
+      if (!this.stageRef.element!.isHostReady()) return;
       const buffer = this.stageRef.element!.getState();
       if (!buffer) return;
       const thumbnail = this.stageRef.element!.getThumbnail();
@@ -208,8 +208,8 @@ export class PRoomElement extends GemElement {
   #autoSave = () => this.#save(true);
 
   #load = async () => {
-    if (!this.stageRef.element!.romBuffer) return;
-    const key = await hash(this.stageRef.element!.romBuffer);
+    if (!this.stageRef.element!.isHostReady()) return;
+    const key = await hash(this.stageRef.element!.romBuffer!);
     const cache = await caches.open(this.#getCachesName(false));
     const reqList = [...(await cache.keys(`/${key}`, { ignoreSearch: true }))].splice(0, 10);
     const autoCache = await caches.open(this.#getCachesName(true));
@@ -257,7 +257,7 @@ export class PRoomElement extends GemElement {
   };
 
   #uploadScreenshot = () => {
-    if (!this.stageRef.element!.romBuffer) return;
+    if (!this.stageRef.element!.isHostReady()) return;
     updateRoomScreenshot({
       id: this.#playing!.id,
       screenshot: this.stageRef.element!.getThumbnail(),
