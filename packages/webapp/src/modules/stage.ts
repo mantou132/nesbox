@@ -308,6 +308,7 @@ export class MStageElement extends GemElement<State> {
       if (this.#game) {
         const memory = this.#game.mem();
         const qoiBuffer = new Uint8Array(detail);
+        if (qoiBuffer.length === 4) return;
         const part = new Uint8Array(detail, qoiBuffer.length - 4, 4);
         const framePtr = this.#game.decode_qoi(qoiBuffer);
         const frameLen = this.#game.decode_qoi_len();

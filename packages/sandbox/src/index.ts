@@ -5,7 +5,7 @@ import { Nes as ONes, Button } from '@mantou/nes';
 import QOI from 'qoijs';
 
 import ShadowRealm from './shadowrealm';
-import { utf8ToBase64 } from './utils';
+import { utf8ToBase64, findDiffIndex } from './utils';
 import {
   preload,
   getAudioFrame,
@@ -44,6 +44,8 @@ export class Nes implements ONes {
   #qoiSpace: number[] = [];
   #deQoiLen = 0;
   #deQoiSpace: number[] = [];
+  #prevFrame = new Uint8ClampedArray();
+  #currentFrame = new Uint8ClampedArray();
 
   mem(): Uint8Array {
     return this.#mem;
@@ -54,36 +56,76 @@ export class Nes implements ONes {
   height() {
     return 0;
   }
-  frame(qoi: boolean, _fullEncode: boolean): number {
+  frame(qoi: boolean, fullEncode: boolean): number {
     if (qoi) {
-      const buffer = QOI.encode(new Uint8Array(this.#mem.buffer, this.#frameSpace[0], this.#frameLen), {
-        width: this.width(),
-        height: this.height(),
-        channels: 4,
-        colorspace: 0,
-      });
-      new Uint32Array(this.#mem.buffer, this.#qoiSpace[0], 1)[0] = buffer.byteLength;
-      new Uint8Array(this.#mem.buffer, this.#qoiSpace[0] + 4, this.#qoiLen - 4).set(new Uint8Array(buffer));
+      const width = this.width();
+      const lineByte = width * 4;
+      const frame = new Uint8ClampedArray(this.#mem.buffer, this.#frameSpace[0], this.#frameLen);
+
+      let start = 0;
+      let end = 0;
+      if (fullEncode) {
+        end = this.#frameLen;
+      } else if (this.#prevFrame.length) {
+        const endIndex = findDiffIndex(this.#prevFrame, frame, true);
+
+        const endLine = Math.trunc(endIndex / lineByte);
+
+        if (endIndex >= 0) {
+          const startIndex = findDiffIndex(this.#prevFrame, frame, false);
+
+          start = Math.trunc(startIndex / lineByte) * lineByte;
+          end = (endLine + 1) * lineByte;
+        }
+      }
+
+      if (end === start) {
+        this.#currentQoiFrameLen = 0;
+      } else {
+        const height = (end - start) / lineByte;
+        const buffer = QOI.encode(new Uint8ClampedArray(frame.buffer, frame.byteOffset + start, end - start), {
+          width: width,
+          height: height,
+          channels: 4,
+          colorspace: 0,
+        });
+        this.#currentQoiFrameLen = buffer.byteLength + 4;
+        new Uint8Array(this.#mem.buffer, this.#qoiSpace[0], this.#qoiLen).set(new Uint8Array(buffer));
+        const part = new Uint8Array(this.#mem.buffer, this.#qoiSpace[0] + buffer.byteLength, 4);
+        // x
+        part[0] = 0;
+        // y
+        part[1] = start / lineByte;
+        // w, RENDER_WIDTH > u8 max value
+        part[2] = width === 256 ? 0 : width;
+        // h
+        part[3] = height;
+      }
+      this.#prevFrame = this.#currentFrame.slice(0);
+    } else {
+      this.#prevFrame = new Uint8ClampedArray();
     }
     return this.#frameSpace[0];
   }
   frame_len(): number {
     return this.#frameLen;
   }
+  #currentQoiFrameLen = 0;
   qoi_frame(): number {
-    return this.#qoiSpace[0] + 4;
+    return this.#qoiSpace[0];
   }
   qoi_frame_len(): number {
-    return new Uint32Array(this.#mem.buffer, this.#qoiSpace[0], 1)[0];
+    return this.#currentQoiFrameLen;
   }
+  #currentDeQoiLen = 0;
   decode_qoi(bytes: Uint8Array): number {
-    new Uint8Array(this.#mem.buffer, this.#deQoiSpace[0], this.#deQoiLen).set(
-      new Uint8Array(QOI.decode(bytes.buffer).data.buffer),
-    );
+    const frame = new Uint8Array(QOI.decode(bytes.buffer).data.buffer);
+    this.#currentDeQoiLen = frame.length;
+    new Uint8Array(this.#mem.buffer, this.#deQoiSpace[0], this.#deQoiLen).set(frame);
     return this.#deQoiSpace[0];
   }
   decode_qoi_len(): number {
-    return this.#deQoiLen;
+    return this.#currentDeQoiLen;
   }
 
   async load_rom(bytes: Uint8Array) {
@@ -140,6 +182,7 @@ export class Nes implements ONes {
           (console as any)[type]?.(args.join(','));
         }
         const frame = getVideoFrame();
+        this.#currentFrame = frame;
         new Uint8ClampedArray(this.#mem.buffer).set(frame, this.#frameSpace[0]);
         // const fn = getVideoFrame();
         // const frame = new DataView(this.#mem.buffer, this.#frameSpace[0], this.#frameLen);

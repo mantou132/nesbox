@@ -48,7 +48,8 @@ export class NesboxCanvasElement extends GemElement {
     const { data } = this.#imageData;
     if (part) {
       // Why not work?
-      // const [x, y, w, h] = part;
+      // const [x, y, ww, h] = part;
+      // const w = ww || this.width;
       // for (let i = 0; i < h; i++) {
       //   const line = new Uint8Array(frame.buffer, i * w * 4, w * 4);
       //   data.set(line, ((i + y) * this.width + x) * 4);
