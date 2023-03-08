@@ -78,6 +78,7 @@ export abstract class Entity {
   toJSON(): EntityJSON {
     return {
       label: this.label,
+      _et: this.constructor.name,
       _es: this.getEntities().map((e) => e.toJSON()),
       _cs: this.getComponents().map((e) => e.toJSON()),
     };
@@ -86,8 +87,19 @@ export abstract class Entity {
 
 export type EntityJSON = {
   label: string | number;
+  _et: string;
   _cs: ReturnType<Component['toJSON']>[];
   _es: EntityJSON[];
 };
 
+export const _registeredEntities = {} as Record<string, new <T extends Entity>(...arg: any[]) => T>;
+
+export function registerEntity() {
+  // first arg must is label, rest is optional
+  return function (cls: new (label?: string | number) => any) {
+    _registeredEntities[cls.name] = cls;
+  };
+}
+
+@registerEntity()
 export class BasicEntity extends Entity {}

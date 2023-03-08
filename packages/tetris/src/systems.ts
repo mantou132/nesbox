@@ -24,12 +24,6 @@ export async function commonSystem(world: World<WorldDta>) {
   // last execute
   await Promise.resolve();
 
-  world.getEntities(true).forEach((entity) => {
-    if (entity.label === ENTITY_LABEL.Background) {
-      entity.remove();
-    }
-  });
-
   if (
     nesbox.isTap(nesbox.buttons.Reset) ||
     (world.data.gameOver && nesbox.isTap(nesbox.buttons.Start)) ||
@@ -40,8 +34,13 @@ export async function commonSystem(world: World<WorldDta>) {
 }
 
 export function pauseSystem(world: World<WorldDta>) {
-  if (nesbox.isTap(nesbox.buttons.Start)) {
-    world.data.paused = !world.data.paused;
+  switch (world.scene) {
+    case SCENE_LABEL.OnePlayer:
+    case SCENE_LABEL.TwoPlayer: {
+      if (nesbox.isTap(nesbox.buttons.Start)) {
+        world.data.paused = !world.data.paused;
+      }
+    }
   }
 }
 
@@ -110,7 +109,7 @@ function replaceCurrentPiece(world: World<WorldDta>, entity: PieceEntity) {
 
   const nextStage = world.getEntities(true).find((entity) => entity.label === stageLabel)!;
   const nextPiece = nextStage.getEntities<PieceEntity>()[0];
-  nextStage.removeEntity(nextPiece).addEntity(new PieceEntity(world.data, { is2Player }));
+  nextStage.removeEntity(nextPiece).addEntity(new PieceEntity().init(world.data, { is2Player }));
 
   nextPiece.label = entity.label;
   entity.label = '';
@@ -126,7 +125,7 @@ function replaceCurrentPiece(world: World<WorldDta>, entity: PieceEntity) {
   if (nextPiece!.getComponent(PieceComponent)!.isCollisionGrid(world.data.grid)) {
     world.addAudio(new AudioComponent(SOUND_NAME.GAME_OVER));
     world.data.gameOver = true;
-    world.addEntity(new FailedEntity(renderScore(world)));
+    world.addEntity(new FailedEntity().init(renderScore(world)));
   }
 }
 

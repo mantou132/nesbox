@@ -2,6 +2,7 @@ import { World, loadFont, loadAudio } from '@mantou/ecs';
 
 import { HEIGHT, WIDTH, SCENE_LABEL, WorldDta, getWorldData, SOUND_NAME } from 'src/constants';
 import { getScene } from 'src/scenes';
+import { commonSystem, modeSelectSystem, moveSystem, pauseSystem, scoreSystem } from 'src/systems';
 import { eSVideoGameDescend1, fonts, headingFonts } from 'src/_assets';
 
 loadFont('default', { fontSize: 10, fontSet: fonts });
@@ -29,10 +30,13 @@ loadAudio(
   new Float32Array(eSVideoGameDescend1.buffer, Math.round(eSVideoGameDescend1.length * (1 / 6)) * 4, 400),
 );
 
-const world = new World<WorldDta>(WIDTH, HEIGHT).loadScene(
-  getScene(SCENE_LABEL.Start),
-  getWorldData(SCENE_LABEL.Start),
-);
+const world = new World<WorldDta>(WIDTH, HEIGHT)
+  .loadScene(getScene(SCENE_LABEL.Start), getWorldData(SCENE_LABEL.Start))
+  .addSystem(commonSystem)
+  .addSystem(modeSelectSystem)
+  .addSystem(pauseSystem)
+  .addSystem(moveSystem)
+  .addSystem(scoreSystem);
 
 nesbox.init({
   width: WIDTH,

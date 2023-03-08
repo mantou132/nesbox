@@ -65,7 +65,6 @@ export enum SELECT_HANDLE {
 export enum ENTITY_LABEL {
   ModeSelect,
   UnImplementInfo,
-  Background,
   Stage,
   NextStage1,
   NextStage2,

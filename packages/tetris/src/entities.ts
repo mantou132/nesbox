@@ -7,6 +7,7 @@ import {
   TextAreaComponent,
   Color,
   COLOR_WHITE,
+  registerEntity,
 } from '@mantou/ecs';
 import { NewPieceComponent, PieceComponent } from 'src/components';
 
@@ -25,15 +26,10 @@ const colors = [
   new Color(0, 134, 198),
 ];
 
+@registerEntity()
 export class PieceEntity extends Entity {
-  constructor(
-    data: WorldDta,
-    { type, label, is2Player = false }: { type?: number[][]; label?: string | number; is2Player?: boolean } = {},
-  ) {
-    super(label);
+  init(data: WorldDta, { type, is2Player = false }: { type?: number[][]; is2Player?: boolean } = {}) {
     const pieceComponent = new PieceComponent(type);
-
-    this.addComponent(new NewPieceComponent()).addComponent(pieceComponent).addComponent(new PositionComponent());
 
     const len = Math.floor(colors.length / 2);
     const color = colors[(is2Player ? len : 0) + Math.floor(Math.random() * len)];
@@ -50,6 +46,10 @@ export class PieceEntity extends Entity {
         }
       });
     });
+
+    return this.addComponent(new NewPieceComponent())
+      .addComponent(pieceComponent)
+      .addComponent(new PositionComponent());
   }
 
   transformX(data: WorldDta, offsetDir: 0 | -1 | 1 = 0) {
@@ -123,10 +123,10 @@ export class PieceEntity extends Entity {
   }
 }
 
+@registerEntity()
 export class FailedEntity extends Entity {
-  constructor(score: string) {
-    super();
-    this.addComponent(new PositionComponent(WIDTH / 4, HEIGHT / 4))
+  init(score: string) {
+    return this.addComponent(new PositionComponent(WIDTH / 4, HEIGHT / 4))
       .addComponent(new SizeComponent(WIDTH / 2, HEIGHT / 2))
       .addComponent(new MaterialComponent(BORDER_COLOR))
       .addEntity(

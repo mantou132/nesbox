@@ -6,8 +6,9 @@ import {
   SelectComponent,
   SizeComponent,
   TextAreaComponent,
+  RenderOnceComponent,
 } from './components';
-import { BasicEntity, Entity } from './entities';
+import { Entity, _registeredEntities } from './entities';
 import { Color, COLOR_BLACK, fonts, FontType } from './assets';
 import { getLines, mixColor } from './utils';
 
@@ -70,6 +71,11 @@ export class World<CustomData = any> {
     return this;
   }
 
+  removeAllEntity() {
+    this.#entities.forEach((e) => e.remove());
+    return this;
+  }
+
   addSystem(system: (world: World) => void) {
     this.#systems.add(system);
     return this;
@@ -84,6 +90,11 @@ export class World<CustomData = any> {
     return this;
   }
 
+  removeAllSystem() {
+    this.#systems.clear();
+    return this;
+  }
+
   addAudio(audio: AudioComponent) {
     this.#audios.add(audio);
     return this;
@@ -94,15 +105,19 @@ export class World<CustomData = any> {
     return this;
   }
 
+  removeAllAudio() {
+    this.#audios.clear();
+    return this;
+  }
+
   getAudios() {
     return [...this.#audios];
   }
 
   loadScene(scene: Scene, data?: CustomData) {
     this.#entities.forEach((e) => this.removeEntity(e));
-    this.#systems.clear();
+    this.#audios.clear();
     scene.getEntities().forEach((e) => this.addEntity(e));
-    scene.getSystems().forEach((e) => this.addSystem(e));
     scene.getAudios().forEach((e) => this.addAudio(e));
     this.scene = scene.scene;
     if (data) this.setData(data);
@@ -131,13 +146,14 @@ export class World<CustomData = any> {
       this.height = object.height;
       this.sampleRate = object.sampleRate;
       this.frameNum = object.frameNum;
+      this.removeAllAudio();
       object._as.forEach((e) => {
         const audio = new AudioComponent();
         Object.assign(audio, e);
         this.addAudio(audio);
       });
       const parseEntity = (entityObj: ReturnType<Entity['toJSON']>) => {
-        const entity = new BasicEntity();
+        const entity = new _registeredEntities[entityObj._et]();
         entityObj._es.forEach((e) => {
           entity.addEntity(parseEntity(e));
         });
@@ -149,9 +165,11 @@ export class World<CustomData = any> {
           });
           entity.addComponent(com);
         });
+        entity.label = entityObj.label;
         return entity;
       };
-      object._es.forEach((e: any) => {
+      this.removeAllEntity();
+      object._es.forEach((e) => {
         this.addEntity(parseEntity(e));
       });
     } catch {
@@ -222,6 +240,7 @@ export class World<CustomData = any> {
     }, x);
   }
 
+  #renderOnceEntities = new WeakSet<Entity>();
   #render() {
     const handleEntity = (
       entity: Entity,
@@ -230,6 +249,14 @@ export class World<CustomData = any> {
       parentSizeW: number,
       parentSizeH: number,
     ) => {
+      if (entity.hasComponent(RenderOnceComponent)) {
+        if (this.#renderOnceEntities.has(entity)) {
+          return;
+        } else {
+          this.#renderOnceEntities.add(entity);
+        }
+      }
+
       const p = entity.getComponent(PositionComponent);
       const px = p?.x || 0;
       const py = p?.y || 0;
@@ -298,5 +325,9 @@ export class Scene extends World {
   constructor(label: number | string = '') {
     super(0, 0);
     this.scene = label;
+  }
+
+  addSystem(_system: (world: World<any>) => void): this {
+    throw new Error('Should add system at world!');
   }
 }

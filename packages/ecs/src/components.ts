@@ -1,22 +1,20 @@
 import { audios, Color, COLOR_BLACK, FontType } from './assets';
 import { World } from './world';
 
-export class Component {
+export abstract class Component {
   toJSON() {
     return {
       ...this,
       _ct: this.constructor.name,
     };
   }
-  constructor(..._args: any[]) {
-    //
-  }
 }
 
-export const _registeredComponents = {} as Record<string, typeof Component>;
+export const _registeredComponents = {} as Record<string, new <T extends Component>(...arg: any[]) => T>;
 
 export function registerComponent() {
-  return function (cls: typeof Component) {
+  // arg must is optional
+  return function (cls: new () => any) {
     _registeredComponents[cls.name] = cls;
   };
 }
@@ -70,6 +68,9 @@ export class MaterialComponent extends Component {
     this.color = color;
   }
 }
+
+@registerComponent()
+export class RenderOnceComponent extends Component {}
 
 export type Option = { text: string; handle: string | number };
 
