@@ -15,9 +15,9 @@ import { PieceEntity } from 'src/entities';
 import {
   HEIGHT,
   WIDTH,
-  SCENE_LABEL,
-  ENTITY_LABEL,
-  SELECT_HANDLE,
+  SCENE,
+  ENTITY,
+  MODE,
   SIDE_WIDTH,
   BACKGROUND_COLOR,
   STAGE_BACKGROUND_COLOR,
@@ -25,10 +25,12 @@ import {
   getWorldData,
 } from 'src/constants';
 
-export function getScene(label: SCENE_LABEL): Scene {
+export function getSceneAndData(label: SCENE) {
+  const scene = new Scene(label);
+  const data = getWorldData(label);
   switch (label) {
-    case SCENE_LABEL.Start: {
-      return new Scene(SCENE_LABEL.Start)
+    case SCENE.Start: {
+      scene
         .addEntity(
           new BasicEntity()
             .addComponent(new RenderOnceComponent())
@@ -60,39 +62,22 @@ export function getScene(label: SCENE_LABEL): Scene {
             .addComponent(new PositionComponent(90, 120))
             .addComponent(new MaterialComponent(BACKGROUND_COLOR))
             .addEntity(
-              new BasicEntity(ENTITY_LABEL.ModeSelect).addComponent(new MaterialComponent(COLOR_WHITE)).addComponent(
-                new SelectComponent([
-                  {
-                    text: '1 Player',
-                    handle: SELECT_HANDLE.OneMode,
-                  },
-                  {
-                    text: '2 Player',
-                    handle: SELECT_HANDLE.TwoMode,
-                  },
-                  {
-                    text: '',
-                    handle: '',
-                  },
-                  {
-                    text: 'About',
-                    handle: SELECT_HANDLE.About,
-                  },
-                ]),
-              ),
+              new BasicEntity(ENTITY.ModeSelect)
+                .addComponent(new MaterialComponent(COLOR_WHITE))
+                .addComponent(new SelectComponent([MODE.OneMode, MODE.TwoMode, MODE.None, MODE.About])),
             ),
         );
+      break;
     }
 
-    case SCENE_LABEL.TwoPlayer:
-    case SCENE_LABEL.OnePlayer: {
-      const data = getWorldData(label);
+    case SCENE.TwoPlayer:
+    case SCENE.OnePlayer: {
       const { brickSize, gridHeight, gridWidth } = data;
       const stageWidth = brickSize * gridWidth;
       const stageHeight = brickSize * gridHeight;
       const stageMarginBlock = (HEIGHT - stageHeight) / 2;
       const stageMarginLeft = (WIDTH - (stageWidth + SIDE_WIDTH)) / 2;
-      return new Scene(SCENE_LABEL.OnePlayer)
+      scene
         .addEntity(
           new BasicEntity()
             .addComponent(new RenderOnceComponent())
@@ -108,25 +93,23 @@ export function getScene(label: SCENE_LABEL): Scene {
         )
         .addEntity(
           (() => {
-            const entity = new BasicEntity(ENTITY_LABEL.Stage)
+            const entity = new BasicEntity(ENTITY.Stage)
               .addComponent(new MaterialComponent(STAGE_BACKGROUND_COLOR))
               .addComponent(new PositionComponent(stageMarginLeft, stageMarginBlock))
               .addComponent(new SizeComponent(stageWidth, stageHeight));
-            if (label === SCENE_LABEL.TwoPlayer) {
+            if (label === SCENE.TwoPlayer) {
               entity
-                .addEntity(new PieceEntity(ENTITY_LABEL.CurrentPiece1).init(data).transformX(data, -1))
-                .addEntity(
-                  new PieceEntity(ENTITY_LABEL.CurrentPiece2).init(data, { is2Player: true }).transformX(data, 1),
-                );
+                .addEntity(new PieceEntity(ENTITY.CurrentPiece1).init(data).transformX(data, -1))
+                .addEntity(new PieceEntity(ENTITY.CurrentPiece2).init(data, { is2Player: true }).transformX(data, 1));
             } else {
-              entity.addEntity(new PieceEntity(ENTITY_LABEL.CurrentPiece1).init(data).transformX(data));
+              entity.addEntity(new PieceEntity(ENTITY.CurrentPiece1).init(data).transformX(data));
             }
             return entity;
           })(),
         )
         .addEntity(
           (() => {
-            const entity = new BasicEntity(ENTITY_LABEL.Side)
+            const entity = new BasicEntity(ENTITY.Side)
               .addComponent(new PositionComponent(stageMarginLeft + stageWidth, stageMarginBlock))
               .addComponent(new SizeComponent(SIDE_WIDTH, stageHeight))
               .addEntity(
@@ -141,7 +124,7 @@ export function getScene(label: SCENE_LABEL): Scene {
                       .addComponent(new TextAreaComponent('SCORE:')),
                   )
                   .addEntity(
-                    new BasicEntity(ENTITY_LABEL.Score)
+                    new BasicEntity(ENTITY.Score)
                       .addComponent(new PositionComponent(10, 20))
                       .addComponent(new MaterialComponent(SCORE_COLOR))
                       .addComponent(new TextAreaComponent('0')),
@@ -159,13 +142,13 @@ export function getScene(label: SCENE_LABEL): Scene {
                       .addComponent(new TextAreaComponent('NEXT:')),
                   )
                   .addEntity(
-                    new BasicEntity(ENTITY_LABEL.NextStage1)
+                    new BasicEntity()
                       .addComponent(new PositionComponent(10, 30))
-                      .addEntity(new PieceEntity().init(data)),
+                      .addEntity(new PieceEntity(ENTITY.NextPiece1).init(data)),
                   ),
               );
 
-            if (label === SCENE_LABEL.TwoPlayer) {
+            if (label === SCENE.TwoPlayer) {
               entity.addEntity(
                 new BasicEntity()
                   .addComponent(new MaterialComponent(STAGE_BACKGROUND_COLOR))
@@ -178,19 +161,20 @@ export function getScene(label: SCENE_LABEL): Scene {
                       .addComponent(new TextAreaComponent('NEXT 2:')),
                   )
                   .addEntity(
-                    new BasicEntity(ENTITY_LABEL.NextStage2)
+                    new BasicEntity()
                       .addComponent(new PositionComponent(10, 30))
-                      .addEntity(new PieceEntity().init(data, { is2Player: true })),
+                      .addEntity(new PieceEntity(ENTITY.NextPiece2).init(data, { is2Player: true })),
                   ),
               );
             }
             return entity;
           })(),
         );
+      break;
     }
 
-    case SCENE_LABEL.About: {
-      return new Scene(SCENE_LABEL.About)
+    case SCENE.About: {
+      scene
         .addEntity(
           new BasicEntity()
             .addComponent(new RenderOnceComponent())
@@ -198,8 +182,9 @@ export function getScene(label: SCENE_LABEL): Scene {
             .addComponent(new PositionComponent(0, 0)),
         )
         .addEntity(
-          new BasicEntity(ENTITY_LABEL.UnImplementInfo)
+          new BasicEntity(ENTITY.UnImplementInfo)
             .addComponent(new PositionComponent(40, 40))
+            .addComponent(new RenderOnceComponent())
             .addComponent(new SizeComponent(WIDTH - 80, HEIGHT - 80))
             .addComponent(new MaterialComponent(COLOR_WHITE))
             .addEntity(
@@ -213,6 +198,8 @@ export function getScene(label: SCENE_LABEL): Scene {
                 ),
             ),
         );
+      break;
     }
   }
+  return [scene, data] as const;
 }

@@ -85,7 +85,7 @@ export class PieceEntity extends Entity {
   transform(data: WorldDta) {
     const pieceComponent = this.getComponent(PieceComponent)!;
     const positionComponent = this.getComponent(PositionComponent)!;
-    const entities = this.getEntities();
+    const entities = this.getEntities().values();
 
     pieceComponent.transform(data.grid);
 
@@ -96,8 +96,8 @@ export class PieceEntity extends Entity {
       line.forEach((v, x) => {
         if (v) {
           entities
-            .pop()!
-            .removeComponent(PositionComponent)
+            .next()
+            .value!.removeComponent(PositionComponent)
             .addComponent(new PositionComponent(data.brickSize * x, data.brickSize * y));
         }
       });

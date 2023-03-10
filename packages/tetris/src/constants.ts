@@ -15,8 +15,8 @@ export const BORDER_COLOR = new Color(102, 120, 228);
 export const SCORE_COLOR = new Color(0, 184, 198);
 
 export const getWorldData = (
-  scene: SCENE_LABEL,
-  { brickSize, gridWidth, gridHeight } = scene === SCENE_LABEL.TwoPlayer
+  scene: SCENE,
+  { brickSize, gridWidth, gridHeight } = scene === SCENE.TwoPlayer
     ? {
         brickSize: 10,
         gridWidth: 14,
@@ -40,14 +40,14 @@ export const getWorldData = (
 
 export type WorldDta = ReturnType<typeof getWorldData>;
 
-export enum SCENE_LABEL {
+export enum SCENE {
   Start,
   OnePlayer,
   TwoPlayer,
   About,
 }
 
-export enum SOUND_NAME {
+export enum SOUND {
   SELECT,
   MOVE_PIECE,
   FIXED_PIECE,
@@ -56,18 +56,19 @@ export enum SOUND_NAME {
   PIECE_TRANSFORM,
 }
 
-export enum SELECT_HANDLE {
-  OneMode,
-  TwoMode,
-  About,
+export enum MODE {
+  OneMode = '1 Player',
+  TwoMode = '2 Player',
+  About = 'About',
+  None = '',
 }
 
-export enum ENTITY_LABEL {
+export enum ENTITY {
   ModeSelect,
   UnImplementInfo,
   Stage,
-  NextStage1,
-  NextStage2,
+  NextPiece1,
+  NextPiece2,
   Score,
   CurrentPiece1,
   CurrentPiece2,

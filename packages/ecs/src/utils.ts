@@ -1,7 +1,18 @@
+import type { Entity } from './entities';
 import type { Color, Font } from './assets';
+
+export function* entitiesGenerator(list: Entity[] | Set<Entity>): Generator<Entity> {
+  for (const entity of list) {
+    yield entity;
+  }
+  for (const entity of list) {
+    yield* entitiesGenerator(entity.getEntities());
+  }
+}
 
 export function mixColor(bgColor: Color, fgColor: Color, fgA: number) {
   // https://stackoverflow.com/questions/726549/algorithm-for-additive-color-mixing-for-rgb-values
+  if (fgA === 0) return;
   const bgA = bgColor[3];
   const rA = (bgColor[3] = 255 - (255 - fgA) * (1 - bgColor[3] / 255));
   bgColor[0] = (fgColor[0] * fgA) / rA + (bgColor[0] * bgA * (1 - fgA / 255)) / rA;

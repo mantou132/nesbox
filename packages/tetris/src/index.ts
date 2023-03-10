@@ -1,37 +1,37 @@
 import { World, loadFont, loadAudio } from '@mantou/ecs';
 
-import { HEIGHT, WIDTH, SCENE_LABEL, WorldDta, getWorldData, SOUND_NAME } from 'src/constants';
-import { getScene } from 'src/scenes';
+import { HEIGHT, WIDTH, SCENE, WorldDta, SOUND } from 'src/constants';
+import { getSceneAndData } from 'src/scenes';
 import { commonSystem, modeSelectSystem, moveSystem, pauseSystem, scoreSystem } from 'src/systems';
 import { eSVideoGameDescend1, fonts, headingFonts } from 'src/_assets';
 
 loadFont('default', { fontSize: 10, fontSet: fonts });
 loadFont('heading', { fontSize: 16, fontSet: headingFonts });
 
-loadAudio(SOUND_NAME.GAME_OVER, eSVideoGameDescend1);
+loadAudio(SOUND.GAME_OVER, eSVideoGameDescend1);
 loadAudio(
-  SOUND_NAME.CLEAR_LINE,
+  SOUND.CLEAR_LINE,
   new Float32Array(eSVideoGameDescend1.buffer, Math.round(eSVideoGameDescend1.length * 0.66) * 4, 2000),
 );
 loadAudio(
-  SOUND_NAME.SELECT,
+  SOUND.SELECT,
   new Float32Array(eSVideoGameDescend1.buffer, Math.round(eSVideoGameDescend1.length * 0.48) * 4, 800),
 );
 loadAudio(
-  SOUND_NAME.MOVE_PIECE,
+  SOUND.MOVE_PIECE,
   new Float32Array(eSVideoGameDescend1.buffer, Math.round(eSVideoGameDescend1.length * (3 / 5)) * 4, 50),
 );
 loadAudio(
-  SOUND_NAME.FIXED_PIECE,
+  SOUND.FIXED_PIECE,
   new Float32Array(eSVideoGameDescend1.buffer, Math.round(eSVideoGameDescend1.length * (3 / 5)) * 4, 500),
 );
 loadAudio(
-  SOUND_NAME.PIECE_TRANSFORM,
+  SOUND.PIECE_TRANSFORM,
   new Float32Array(eSVideoGameDescend1.buffer, Math.round(eSVideoGameDescend1.length * (1 / 6)) * 4, 400),
 );
 
 const world = new World<WorldDta>(WIDTH, HEIGHT)
-  .loadScene(getScene(SCENE_LABEL.Start), getWorldData(SCENE_LABEL.Start))
+  .loadScene(...getSceneAndData(SCENE.Start))
   .addSystem(commonSystem)
   .addSystem(modeSelectSystem)
   .addSystem(pauseSystem)

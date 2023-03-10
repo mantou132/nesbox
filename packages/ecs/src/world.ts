@@ -9,11 +9,12 @@ import {
   RenderOnceComponent,
 } from './components';
 import { Entity, _registeredEntities } from './entities';
-import { Color, COLOR_BLACK, fonts, FontType } from './assets';
-import { getLines, mixColor } from './utils';
+import { Color, COLOR_BLACK, fonts, FontType, sprites } from './assets';
+import { getLines, mixColor, entitiesGenerator } from './utils';
 
 export class World<CustomData = any> {
   #entities = new Set<Entity>();
+  #idEntities = new Map<string | number, Set<Entity>>();
   #systems = new Set<(world: World) => void>();
   #audios = new Set<AudioComponent>();
 
@@ -36,6 +37,38 @@ export class World<CustomData = any> {
     this.#audioFrame = new Float32Array(this.sampleRate / fps);
   }
 
+  _registerEntity(entity: Entity, sub: boolean) {
+    const reg = (entity: Entity) => {
+      entity._setWorld(this);
+      const set = this.#idEntities.get(entity.id) || new Set();
+      set.add(entity);
+      this.#idEntities.set(entity.id, set);
+    };
+    reg(entity);
+    if (sub) {
+      for (const e of entity.getEntitiesIter()) {
+        reg(e);
+      }
+    }
+  }
+
+  _logoutEntity(entity: Entity, sub: boolean) {
+    const logout = (entity: Entity) => {
+      entity._removeWorld();
+      const set = this.#idEntities.get(entity.id);
+      if (set) {
+        set.delete(entity);
+        if (!set.size) this.#idEntities.delete(entity.id);
+      }
+    };
+    logout(entity);
+    if (sub) {
+      for (const e of entity.getEntitiesIter()) {
+        logout(e);
+      }
+    }
+  }
+
   getVideoFrame() {
     return this.#videoFrame;
   }
@@ -44,29 +77,28 @@ export class World<CustomData = any> {
   }
 
   addEntity(entity: Entity) {
-    entity.setParent(this);
+    entity.remove();
+    entity._setParent(this);
+    this._registerEntity(entity, true);
     this.#entities.add(entity);
     return this;
   }
 
-  #flatCache?: Entity[] = undefined;
-  getEntities(flat = false) {
-    if (flat) {
-      if (this.#flatCache) return this.#flatCache;
-      this.#flatCache = [];
-      const handleEntity = (entity: Entity) => {
-        this.#flatCache!.push(entity);
-        entity.getEntities().forEach((entity) => handleEntity(entity));
-      };
-      this.#entities.forEach((entity) => handleEntity(entity));
-      Promise.resolve().then(() => (this.#flatCache = undefined));
-      return this.#flatCache;
-    }
-    return [...this.#entities];
+  getEntity<T extends Entity>(id: string | number) {
+    return this.#idEntities.get(id)?.values().next().value as T | undefined;
+  }
+
+  getEntities<T extends Entity>() {
+    return this.#entities as Set<T>;
+  }
+
+  getEntitiesIter() {
+    return entitiesGenerator(this.getEntities());
   }
 
   removeEntity(entity: Entity) {
-    entity.removeParent();
+    entity._removeParent();
+    this._logoutEntity(entity, true);
     this.#entities.delete(entity);
     return this;
   }
@@ -165,7 +197,7 @@ export class World<CustomData = any> {
           });
           entity.addComponent(com);
         });
-        entity.label = entityObj.label;
+        entity.id = entityObj.id;
         return entity;
       };
       this.removeAllEntity();
@@ -191,7 +223,7 @@ export class World<CustomData = any> {
       height: this.height,
       sampleRate: this.sampleRate,
       frameNum: this.frameNum,
-      _es: this.getEntities().map((e) => e.toJSON()),
+      _es: [...this.getEntities()].map((e) => e.toJSON()),
       _as: this.getAudios().map((e) => e.toJSON()),
     };
   }
@@ -255,6 +287,8 @@ export class World<CustomData = any> {
         } else {
           this.#renderOnceEntities.add(entity);
         }
+      } else {
+        this.#renderOnceEntities.delete(entity);
       }
 
       const p = entity.getComponent(PositionComponent);
@@ -282,35 +316,39 @@ export class World<CustomData = any> {
       const textarea = entity.getComponent(TextAreaComponent);
 
       if (textarea) {
-        getLines(textarea.text, textarea.width, fonts[textarea.fontType]).reduce((y, { text: line, width }) => {
+        getLines(textarea.text, textarea.width, fonts[textarea.fontType]).forEach(({ text, width }, index) => {
           this.#renderText(
-            line,
+            text,
             textarea.center ? Math.round(roundPositionX + (textarea.width - width) / 2) : roundPositionX,
-            y,
+            roundPositionY + index * fonts[textarea.fontType].fontSize * 1.2,
             textarea.fontType,
             color,
           );
-          return y + fonts[textarea.fontType].fontSize * 1.2;
-        }, roundPositionY);
+        });
       } else if (select) {
-        select.options.reduce((y, c, i) => {
-          if (select.selected === i) this.#renderText('>', roundPositionX, y, select.fontType, color);
-          this.#renderText(c.text, roundPositionX + fonts[select.fontType].fontSize * 1.5, y, select.fontType, color);
-          return y + fonts[select.fontType].fontSize * 1.2;
-        }, roundPositionY);
+        const marginLeft = roundPositionX + fonts[select.fontType].fontSize * 1.5;
+        select.options.forEach((option, index) => {
+          const y = roundPositionY + index * fonts[select.fontType].fontSize * 1.2;
+          if (select.selected === index) this.#renderText('>', roundPositionX, y, select.fontType, color);
+          this.#renderText(option, marginLeft, y, select.fontType, color);
+        });
       } else if (material) {
-        // TODO: material.sprite
-        for (let i = 0; i < sizeH; i++) {
-          const yy = roundPositionY + i;
-          if (yy < 0) continue;
-          for (let j = 0; j < sizeW; j++) {
-            const xx = roundPositionX + j;
-            if (xx < 0) continue;
-            const index = (yy * this.width + xx) * 4;
-            this.#videoFrame[index] = material.color[0];
-            this.#videoFrame[index + 1] = material.color[1];
-            this.#videoFrame[index + 2] = material.color[2];
-            this.#videoFrame[index + 3] = material.color[3];
+        if (material.sprite) {
+          const sprite = sprites[material.sprite];
+          this.#renderSprite(sprite.data, roundPositionX, roundPositionY, sprite.width, material.color);
+        } else {
+          for (let i = 0; i < sizeH; i++) {
+            const yy = roundPositionY + i;
+            if (yy < 0) continue;
+            for (let j = 0; j < sizeW; j++) {
+              const xx = roundPositionX + j;
+              if (xx < 0) continue;
+              const index = (yy * this.width + xx) * 4;
+              this.#videoFrame[index] = material.color[0];
+              this.#videoFrame[index + 1] = material.color[1];
+              this.#videoFrame[index + 2] = material.color[2];
+              this.#videoFrame[index + 3] = material.color[3];
+            }
           }
         }
       }

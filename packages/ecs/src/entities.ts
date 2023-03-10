@@ -1,44 +1,70 @@
+import { entitiesGenerator } from './utils';
 import { World } from './world';
 import { Component } from './components';
 
 export abstract class Entity {
-  label: number | string = '';
+  #id: number | string = '';
   #entities = new Set<Entity>();
   #components = new Map<typeof Component, Component>();
   #parent?: Entity | World;
+  #world?: World;
 
-  constructor(label: number | string = '') {
-    this.label = label;
+  get id() {
+    return this.#id;
   }
 
-  setParent(parent: Entity | World) {
+  set id(id) {
+    // `_logoutEntity` will call `this._removeWorld`
+    const world = this.#world;
+    world?._logoutEntity(this, false);
+    this.#id = id;
+    world?._registerEntity(this, false);
+  }
+
+  constructor(id: number | string = '') {
+    this.#id = id;
+  }
+
+  _setWorld(world: World) {
+    this.#world = world;
+  }
+
+  _removeWorld() {
+    this.#world = undefined;
+  }
+
+  _setParent(parent: Entity | World) {
     this.#parent = parent;
   }
 
-  removeParent() {
+  _removeParent() {
     this.#parent = undefined;
   }
 
   addEntity(entity: Entity) {
-    entity.setParent(this);
+    entity.remove();
+    entity._setParent(this);
+    this.#world?._registerEntity(entity, true);
     this.#entities.add(entity);
     return this;
   }
 
   addSiblingEntity(entity: Entity) {
-    if (this.#parent) {
-      entity.setParent(this.#parent);
-      this.#parent.addEntity(entity);
-    }
+    this.#parent?.addEntity(entity);
     return this;
   }
 
   getEntities<T extends Entity>() {
-    return [...this.#entities] as T[];
+    return this.#entities as Set<T>;
+  }
+
+  getEntitiesIter() {
+    return entitiesGenerator(this.getEntities());
   }
 
   removeEntity(entity: Entity) {
-    entity.removeParent();
+    entity._removeParent();
+    this.#world?._logoutEntity(entity, true);
     this.#entities.delete(entity);
     return this;
   }
@@ -58,10 +84,6 @@ export abstract class Entity {
     return this;
   }
 
-  getComponents() {
-    return [...this.#components].map(([_, v]) => v);
-  }
-
   hasComponent(constructor: typeof Component) {
     return this.#components.has(constructor);
   }
@@ -77,16 +99,16 @@ export abstract class Entity {
 
   toJSON(): EntityJSON {
     return {
-      label: this.label,
+      id: this.id,
       _et: this.constructor.name,
-      _es: this.getEntities().map((e) => e.toJSON()),
-      _cs: this.getComponents().map((e) => e.toJSON()),
+      _es: [...this.#entities].map((e) => e.toJSON()),
+      _cs: [...this.#components.values()].map((e) => e.toJSON()),
     };
   }
 }
 
 export type EntityJSON = {
-  label: string | number;
+  id: string | number;
   _et: string;
   _cs: ReturnType<Component['toJSON']>[];
   _es: EntityJSON[];
@@ -95,8 +117,8 @@ export type EntityJSON = {
 export const _registeredEntities = {} as Record<string, new <T extends Entity>(...arg: any[]) => T>;
 
 export function registerEntity() {
-  // first arg must is label, rest is optional
-  return function (cls: new (label?: string | number) => any) {
+  // first arg must is id, rest is optional
+  return function (cls: new (id?: string | number) => any) {
     _registeredEntities[cls.name] = cls;
   };
 }

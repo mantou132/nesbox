@@ -72,16 +72,14 @@ export class MaterialComponent extends Component {
 @registerComponent()
 export class RenderOnceComponent extends Component {}
 
-export type Option = { text: string; handle: string | number };
-
 @registerComponent()
 export class SelectComponent extends Component {
-  options: Option[] = [];
+  options: string[] = [];
   selected = 0;
   fontType: FontType;
 
   constructor(
-    options: Option[] = [],
+    options: string[] = [],
     { selected = 0, fontType = 'default' }: { selected?: number; fontType?: FontType } = {},
   ) {
     super();
@@ -92,11 +90,11 @@ export class SelectComponent extends Component {
 
   change(step: number) {
     this.selected = (this.options.length + this.selected + step) % this.options.length;
-    if (!this.options[this.selected].text) this.change(step);
+    if (!this.options[this.selected]) this.change(step);
   }
 
-  getHandle() {
-    return this.options[this.selected].handle;
+  getCurrent() {
+    return this.options[this.selected];
   }
 }
 
