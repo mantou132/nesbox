@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@mantou/gem": "^1.6.0",
-    "duoyun-ui": "^0.0.62",
+    "duoyun-ui": "^0.0.63",
     "qoijs": "^1.0.0"
   },
   "devDependencies": {

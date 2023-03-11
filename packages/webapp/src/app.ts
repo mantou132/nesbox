@@ -16,7 +16,7 @@ import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { Loadbar } from 'duoyun-ui/elements/page-loadbar';
 import { createPath } from '@mantou/gem/elements/route';
 import { forever } from 'duoyun-ui/lib/utils';
-import { paramKeys, queryKeys } from 'src/constants';
+import { paramKeys, queryKeys, viewTransitionName } from 'src/constants';
 import { preventDefault } from 'src/utils';
 import { routes, locationStore } from 'src/routes';
 
@@ -58,6 +58,7 @@ const style = createCSSSheet(css`
     display: block;
     overflow-y: auto;
     scrollbar-width: none;
+    view-transition-name: ${viewTransitionName.MAIN};
   }
   .content::-webkit-scrollbar {
     width: 0;
@@ -158,12 +159,13 @@ export class AppRootElement extends GemElement {
     return html`
       <m-nav></m-nav>
       <div tabindex="-1" class="content" ref=${this.contentRef.ref}>
-        <main style="display: centents">
+        <main style="display: contents">
           <dy-route
             @loading=${this.#onLoading}
             @routechange=${this.#onChange}
             .routes=${routes}
             .locationStore=${locationStore}
+            .transition=${!!configure.user?.settings.ui.viewTransition}
           >
             <div style="height: 100vh"></div>
           </dy-route>

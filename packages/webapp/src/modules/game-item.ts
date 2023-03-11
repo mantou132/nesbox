@@ -11,8 +11,8 @@ import {
   connectStore,
 } from '@mantou/gem';
 import { createPath } from 'duoyun-ui/elements/route';
-import { paramKeys } from 'src/constants';
-import { getCDNSrc } from 'src/utils';
+import { paramKeys, viewTransitionName } from 'src/constants';
+import { getCDNSrc, setViewTransitionName } from 'src/utils';
 import { routes } from 'src/routes';
 
 import { icons } from 'src/icons';
@@ -84,6 +84,7 @@ export class MGameItemElement extends GemElement {
   };
 
   #onMoreClick = (evt: Event) => {
+    setViewTransitionName(this, viewTransitionName.PREVIEW);
     evt.stopPropagation();
     history.push({
       path: createPath(routes.game, {

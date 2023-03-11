@@ -18,6 +18,12 @@ export const paramKeys = {
   GAME_ID: 'gid',
 };
 
+export const viewTransitionName = {
+  PREVIEW: 'game-preview',
+  HEADER: 'main-header',
+  MAIN: 'main',
+};
+
 export const events = {
   SIGNAL: 'signal',
   VOICE_SIGNAL: 'voice-signal',

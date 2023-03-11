@@ -8,6 +8,12 @@ import { githubIssue, queryKeys, VideoRefreshRate } from 'src/constants';
 import { configure } from 'src/configure';
 import { logger } from 'src/logger';
 
+export const setViewTransitionName = (ele: HTMLElement | null, name: string) => {
+  if (ele instanceof HTMLElement) {
+    ele.style.setProperty('view-transition-name', name);
+  }
+};
+
 export const isValidGameFile = (filename: string) => /\.(js|nes|wasm)$/i.test(filename);
 
 export const getCorSrc = (url: string) => {

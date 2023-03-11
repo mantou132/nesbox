@@ -4,9 +4,11 @@ import { waitLoading } from 'duoyun-ui/elements/wait';
 import { i18n, langNames } from 'src/i18n';
 import { gridStyle } from 'src/modules/shortcut-settings';
 import { changeTheme, ThemeName, themeNames } from 'src/theme';
-import { configure } from 'src/configure';
+import { configure, Settings } from 'src/configure';
+import { updateAccount } from 'src/services/api';
 
 import 'duoyun-ui/elements/select';
+import 'duoyun-ui/elements/switch';
 
 /**
  * @customElement m-ui-settings
@@ -16,6 +18,18 @@ import 'duoyun-ui/elements/select';
 @connectStore(i18n.store)
 @connectStore(configure)
 export class MUiSettingsElement extends GemElement {
+  #updateVideoSetting = async (name: keyof Settings['ui'], value: Settings['ui'][keyof Settings['ui']]) => {
+    await updateAccount({
+      settings: {
+        ...configure.user!.settings,
+        ui: {
+          ...configure.user!.settings.video,
+          [name]: value,
+        },
+      },
+    });
+  };
+
   render = () => {
     return html`
       <div class="grid">
@@ -37,6 +51,15 @@ export class MUiSettingsElement extends GemElement {
           }))}
           @change=${({ detail }: CustomEvent<ThemeName>) => changeTheme(detail)}
         ></dy-select>
+        ${'startViewTransition' in document
+          ? html`
+              <div>Transition</div>
+              <dy-switch
+                .checked=${!!configure.user?.settings.ui.viewTransition}
+                @change=${({ detail }: CustomEvent<boolean>) => this.#updateVideoSetting('viewTransition', detail)}
+              ></dy-switch>
+            `
+          : ''}
         ${window.__TAURI__ && location.hostname !== 'localhost'
           ? html`
               <div>${i18n.get('branch')}</div>

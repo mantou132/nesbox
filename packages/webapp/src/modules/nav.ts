@@ -4,6 +4,7 @@ import { commonHandle } from 'duoyun-ui/lib/hotkeys';
 import { waitLoading } from 'duoyun-ui/elements/wait';
 import { focusStyle } from 'duoyun-ui/lib/styles';
 import { locationStore, routes } from 'src/routes';
+import { viewTransitionName } from 'src/constants';
 
 import { i18n } from 'src/i18n';
 import { configure, SearchCommand, setSearchCommand, toggleFriendListState, toggleSearchState } from 'src/configure';
@@ -28,6 +29,7 @@ const style = createCSSSheet(css`
     z-index: 1;
     display: flex;
     background: ${theme.backgroundColor};
+    view-transition-name: ${viewTransitionName.HEADER};
   }
   :host(:where(:--room, [data-room])) {
     background-color: black;

@@ -95,6 +95,10 @@ const defaultVideoSettings = {
   rtcImprove: RTCTransportType.CLIP,
 };
 
+const defaultUISettings = {
+  viewTransition: false,
+};
+
 export type Cheat = { code: string; enabled: boolean; toggleKey: string; comment: string };
 
 export type Settings = {
@@ -102,6 +106,7 @@ export type Settings = {
   volume: typeof defaultVolume;
   shortcuts: typeof defaultShortcuts;
   video: typeof defaultVideoSettings;
+  ui: typeof defaultUISettings;
   cheat: Record<number, Cheat[] | undefined>;
   tourIndex: number;
 };
@@ -124,6 +129,7 @@ export const parseAccount = (account: GetAccountQuery['account']): User => {
       volume: mergeSettings(defaultVolume, settings.volume),
       shortcuts: mergeSettings(defaultShortcuts, settings.shortcuts),
       video: mergeSettings(defaultVideoSettings, settings.video),
+      ui: mergeSettings(defaultUISettings, settings.ui),
       cheat: settings.cheat || {},
       tourIndex: settings.tourIndex || 0,
     },

@@ -14,7 +14,7 @@ import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { waitLoading } from 'duoyun-ui/elements/wait';
 import { formatDuration, Time } from 'duoyun-ui/lib/time';
 import { getCDNSrc, getGithubGames } from 'src/utils';
-import { githubIssue } from 'src/constants';
+import { githubIssue, viewTransitionName } from 'src/constants';
 
 import { createComment, createRoom, getComments } from 'src/services/api';
 import { store } from 'src/store';
@@ -52,6 +52,7 @@ const style = createCSSSheet(css`
   }
   .preview {
     filter: ${theme.imageFilter};
+    view-transition-name: ${viewTransitionName.PREVIEW};
   }
   .info {
     flex-grow: 1;

@@ -14,8 +14,8 @@ import { HexColor, hslToRgb, parseHexColor, rgbToHexColor, rgbToHsl } from 'duoy
 import { marked } from 'marked';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { isNotNullish } from 'duoyun-ui/lib/types';
-import { paramKeys, pixelFont } from 'src/constants';
-import { fontLoading, getCDNSrc } from 'src/utils';
+import { paramKeys, pixelFont, viewTransitionName } from 'src/constants';
+import { fontLoading, getCDNSrc, setViewTransitionName } from 'src/utils';
 import { routes } from 'src/routes';
 
 import { store } from 'src/store';
@@ -159,7 +159,10 @@ export class PGamesElement extends GemElement<State> {
 
   render = () => {
     const topData = store.topGameIds?.map((id) => ({
-      onClick: () => history.push({ path: createPath(routes.game, { params: { [paramKeys.GAME_ID]: String(id) } }) }),
+      onClick: (evt: PointerEvent) => {
+        setViewTransitionName((evt.currentTarget as HTMLElement).querySelector('img'), viewTransitionName.PREVIEW);
+        history.push({ path: createPath(routes.game, { params: { [paramKeys.GAME_ID]: String(id) } }) });
+      },
       description: domParser
         .parseFromString(marked.parse(store.games[id]?.description || ''), 'text/html')
         .body.textContent?.trim()
