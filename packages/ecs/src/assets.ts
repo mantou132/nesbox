@@ -55,14 +55,14 @@ export function loadAudio(name: string | number, data: Float32Array) {
 
 export type Sprite = { width: number; data: Uint8ClampedArray };
 
-const defaultSprite = { width: 0, data: new Uint8ClampedArray() };
+const defaultSprite = { width: 1, data: new Uint8ClampedArray([0, 0, 0, 0]) };
 export const sprites = new Proxy({} as Record<string, Sprite>, {
   get(target, type) {
     return target[type as string] || defaultSprite;
   },
 });
 
-export function loadSprite(name: string, sprite: Sprite) {
+export function loadSprite(name: string | number, sprite: Sprite) {
   sprites[name] = sprite;
 }
 

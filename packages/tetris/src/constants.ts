@@ -19,7 +19,7 @@ export const getWorldData = (
   { brickSize, gridWidth, gridHeight } = scene === SCENE.TwoPlayer
     ? {
         brickSize: 10,
-        gridWidth: 14,
+        gridWidth: 15,
         gridHeight: 21,
       }
     : {
@@ -36,9 +36,10 @@ export const getWorldData = (
   grid: Array.from({ length: gridHeight }, () => Array.from({ length: gridWidth }, () => 0)),
   score: 0,
   gameOver: false,
+  fullLineNum: [] as number[],
 });
 
-export type WorldDta = ReturnType<typeof getWorldData>;
+export type WorldData = ReturnType<typeof getWorldData>;
 
 export enum SCENE {
   Start,
@@ -48,12 +49,17 @@ export enum SCENE {
 }
 
 export enum SOUND {
-  SELECT,
-  MOVE_PIECE,
-  FIXED_PIECE,
-  CLEAR_LINE,
-  GAME_OVER,
-  PIECE_TRANSFORM,
+  Select,
+  MovePiece,
+  FixedPiece,
+  ClearLine,
+  GameOver,
+  PieceTransform,
+}
+
+export enum SPRITE {
+  ClearLineAnimate1,
+  ClearLineAnimate2,
 }
 
 export enum MODE {
@@ -73,4 +79,5 @@ export enum ENTITY {
   CurrentPiece1,
   CurrentPiece2,
   Side,
+  AnimateWrap,
 }

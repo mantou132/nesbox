@@ -8,10 +8,11 @@ import {
   Color,
   COLOR_WHITE,
   registerEntity,
+  AnimateComponent,
 } from '@mantou/ecs';
 import { NewPieceComponent, PieceComponent } from 'src/components';
 
-import { BORDER_COLOR, HEIGHT, STAGE_BACKGROUND_COLOR, WIDTH, SCORE_COLOR, WorldDta } from 'src/constants';
+import { BORDER_COLOR, HEIGHT, STAGE_BACKGROUND_COLOR, WIDTH, SCORE_COLOR, WorldData, SPRITE } from 'src/constants';
 
 const colors = [
   new Color(88, 114, 255),
@@ -28,7 +29,7 @@ const colors = [
 
 @registerEntity()
 export class PieceEntity extends Entity {
-  init(data: WorldDta, { type, is2Player = false }: { type?: number[][]; is2Player?: boolean } = {}) {
+  init(data: WorldData, { type, is2Player = false }: { type?: number[][]; is2Player?: boolean } = {}) {
     const pieceComponent = new PieceComponent(type);
 
     const len = Math.floor(colors.length / 2);
@@ -52,7 +53,7 @@ export class PieceEntity extends Entity {
       .addComponent(new PositionComponent());
   }
 
-  transformX(data: WorldDta, offsetDir: 0 | -1 | 1 = 0) {
+  transformX(data: WorldData, offsetDir: 0 | -1 | 1 = 0) {
     const offset = offsetDir * Math.round(data.gridWidth / 6);
     const pieceComponent = this.getComponent(PieceComponent)!;
     const positionComponent = this.getComponent(PositionComponent)!;
@@ -61,7 +62,22 @@ export class PieceEntity extends Entity {
     return this;
   }
 
-  removeBrickFromLine(data: WorldDta, lineNum: number) {
+  removeBrickFromLine(data: WorldData, lineNum: number) {
+    const pieceComponent = this.getComponent(PieceComponent)!;
+    if (pieceComponent.gridY > lineNum) return;
+
+    if (pieceComponent.gridY + pieceComponent.rows > lineNum) {
+      this.getEntities().forEach((entity) => {
+        const position = entity.getComponent(PositionComponent)!;
+        const y = (lineNum - pieceComponent.gridY) * data.brickSize;
+        if (position.y === y) {
+          entity.remove();
+        }
+      });
+    }
+  }
+
+  fallLineFromLine(data: WorldData, lineNum: number) {
     const pieceComponent = this.getComponent(PieceComponent)!;
     const positionComponent = this.getComponent(PositionComponent)!;
     if (pieceComponent.gridY > lineNum) return;
@@ -73,9 +89,7 @@ export class PieceEntity extends Entity {
       this.getEntities().forEach((entity) => {
         const position = entity.getComponent(PositionComponent)!;
         const y = (lineNum - pieceComponent.gridY) * data.brickSize;
-        if (position.y === y) {
-          entity.remove();
-        } else if (position.y < y) {
+        if (position.y < y) {
           position.y += data.brickSize;
         }
       });
@@ -94,10 +108,10 @@ export class PieceEntity extends Entity {
     }
   }
 
-  transform(data: WorldDta) {
+  transform(data: WorldData) {
     const pieceComponent = this.getComponent(PieceComponent)!;
     const positionComponent = this.getComponent(PositionComponent)!;
-    const entities = this.getEntities().values();
+    const entities = [...this.getEntities()];
 
     pieceComponent.transform(data.grid);
 
@@ -108,8 +122,8 @@ export class PieceEntity extends Entity {
       line.forEach((v, x) => {
         if (v) {
           entities
-            .next()
-            .value!.removeComponent(PositionComponent)
+            .pop()!
+            .removeComponent(PositionComponent)
             .addComponent(new PositionComponent(data.brickSize * x, data.brickSize * y));
         }
       });
@@ -117,7 +131,7 @@ export class PieceEntity extends Entity {
     return this;
   }
 
-  update(data: WorldDta) {
+  update(data: WorldData) {
     const pieceComponent = this.getComponent(PieceComponent)!;
     const positionComponent = this.getComponent(PositionComponent)!;
 
@@ -163,5 +177,43 @@ export class FailedEntity extends Entity {
               ),
           ),
       );
+  }
+}
+
+@registerEntity()
+export class AnimateWrapEntity extends Entity {
+  init(data: WorldData) {
+    data.fullLineNum.forEach((lineNum) => {
+      this.addEntity(
+        new BasicEntity()
+          .addComponent(new PositionComponent(1, lineNum * data.brickSize))
+          .addComponent(new SizeComponent(data.gridWidth * data.brickSize - 1, data.brickSize - 1))
+          .addComponent(
+            new AnimateComponent(
+              [
+                { frame: 1, sprite: SPRITE.ClearLineAnimate1 },
+                { frame: 1, sprite: SPRITE.ClearLineAnimate2 },
+                { frame: 1, sprite: SPRITE.ClearLineAnimate1 },
+                { frame: 1, sprite: SPRITE.ClearLineAnimate2 },
+                { frame: 1, sprite: SPRITE.ClearLineAnimate1 },
+                { frame: 1, sprite: SPRITE.ClearLineAnimate2 },
+                { frame: 1, sprite: SPRITE.ClearLineAnimate1 },
+                { frame: 1, sprite: SPRITE.ClearLineAnimate2 },
+                { frame: 1, sprite: SPRITE.ClearLineAnimate1 },
+                { frame: 1, sprite: SPRITE.ClearLineAnimate2 },
+                { frame: 1, sprite: SPRITE.ClearLineAnimate1 },
+                { frame: 1, sprite: SPRITE.ClearLineAnimate2 },
+                { frame: 1, sprite: SPRITE.ClearLineAnimate1 },
+              ].map((e) => ({ ...e, repeatX: true, repeatY: true })),
+            ),
+          ),
+      );
+    });
+
+    return this;
+  }
+
+  getProgress() {
+    return [...this.getEntities()].pop()!.getComponent(AnimateComponent)!.getProgress();
   }
 }

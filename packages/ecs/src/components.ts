@@ -60,12 +60,76 @@ export class SizeComponent extends Component {
 @registerComponent()
 export class MaterialComponent extends Component {
   color: Color;
-  sprite = '';
+  sprite: string | number;
+  repeatX = false;
+  repeatY = false;
 
-  constructor(color = COLOR_BLACK, sprite = '') {
+  constructor(color = COLOR_BLACK, sprite: string | number = '', repeatX = false, repeatY = false) {
     super();
     this.sprite = sprite;
     this.color = color;
+    this.repeatX = repeatX;
+    this.repeatY = repeatY;
+  }
+}
+
+type AnimateSequence = { sprite: string | number; repeatX?: boolean; repeatY?: boolean; color?: Color; frame: number };
+
+@registerComponent()
+export class AnimateComponent extends Component {
+  #total = 0;
+
+  _sequences: AnimateSequence[] = [];
+  _index = 0;
+  _frame = 0;
+  _accumulate = 0;
+
+  loop = false;
+
+  constructor(sequences: AnimateSequence[] = [], loop = false) {
+    super();
+    this._sequences = sequences;
+    this.loop = loop;
+  }
+
+  getProgress() {
+    if (!this.#total) this.#total = this._sequences.reduce((p, c) => p + c.frame, 0);
+    return this._accumulate / this.#total;
+  }
+
+  getSprite() {
+    return this._sequences[this._index].sprite;
+  }
+
+  isRepeatX() {
+    return this._sequences[this._index].repeatX;
+  }
+
+  isRepeatY() {
+    return this._sequences[this._index].repeatY;
+  }
+
+  getColor() {
+    return this._sequences[this._index].color;
+  }
+
+  update() {
+    if (this.getProgress() === 1) {
+      if (this.loop) {
+        this._frame = 0;
+        this._index = 0;
+        this._accumulate = 0;
+      } else {
+        return;
+      }
+    }
+    if (this._frame >= this._sequences[this._index].frame) {
+      this._frame = 0;
+      this._index++;
+    } else {
+      this._frame++;
+    }
+    this._accumulate++;
   }
 }
 

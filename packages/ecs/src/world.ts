@@ -7,6 +7,7 @@ import {
   SizeComponent,
   TextAreaComponent,
   RenderOnceComponent,
+  AnimateComponent,
 } from './components';
 import { Entity, _registeredEntities } from './entities';
 import { Color, COLOR_BLACK, fonts, FontType, sprites } from './assets';
@@ -246,8 +247,9 @@ export class World<CustomData = any> {
     });
   }
 
-  #renderSprite(array: Uint8ClampedArray, x: number, y: number, w: number, color?: Color) {
-    const h = array.length / 4 / w;
+  #renderSprite(sprite: { data: Uint8ClampedArray; width: number }, x: number, y: number, color?: Color) {
+    const w = sprite.width;
+    const h = sprite.data.length / 4 / w;
     for (let i = 0; i < h; i++) {
       const yy = y + i;
       if (yy >= this.height || yy < 0) continue;
@@ -256,10 +258,31 @@ export class World<CustomData = any> {
         if (xx >= this.width || xx < 0) continue;
         const index = (yy * this.width + xx) * 4;
         const idx = (i * w + j) * 4;
+        const fgA = sprite.data[idx + 3];
+        if (fgA === 0) continue;
 
         const bgColor = new Color(this.#videoFrame.buffer, index, 4);
-        const fgColor = color || new Color(array.buffer, idx, 4);
-        mixColor(bgColor, fgColor, array[idx + 3]);
+        const fgColor = color || new Color(sprite.data.buffer, idx, 4);
+        mixColor(bgColor, fgColor, fgA);
+      }
+    }
+  }
+
+  #renderSpriteRepeat(
+    sprite: { data: Uint8ClampedArray; width: number },
+    x: number,
+    y: number,
+    color?: Color,
+    w?: number | false,
+    h?: number | false,
+  ) {
+    const width = sprite.width;
+    const height = sprite.data.length / 4 / width;
+    const repeatX = w ? w / width : 1;
+    const repeatY = h ? h / height : 1;
+    for (let i = 0; i < repeatX; i++) {
+      for (let j = 0; j < repeatY; j++) {
+        this.#renderSprite(sprite, x + i * width, y + j * height, color);
       }
     }
   }
@@ -267,9 +290,46 @@ export class World<CustomData = any> {
   #renderText(text: string, x: number, y: number, fontType: FontType, color?: Color) {
     [...text].reduce((x, char) => {
       const sprite = fonts[fontType].fontSet[char];
-      this.#renderSprite(sprite.data, x, y, sprite.width, color);
+      this.#renderSprite(sprite, x, y, color);
       return x + sprite.width;
     }, x);
+  }
+
+  #renderTextArea(textarea: TextAreaComponent, x: number, y: number, color: Color) {
+    getLines(textarea.text, textarea.width, fonts[textarea.fontType]).forEach(({ text, width }, index) => {
+      this.#renderText(
+        text,
+        textarea.center ? Math.round(x + (textarea.width - width) / 2) : x,
+        y + index * fonts[textarea.fontType].fontSize * 1.2,
+        textarea.fontType,
+        color,
+      );
+    });
+  }
+
+  #renderSelect(select: SelectComponent, x: number, y: number, color: Color) {
+    const marginLeft = x + fonts[select.fontType].fontSize * 1.5;
+    select.options.forEach((option, index) => {
+      const yy = y + index * fonts[select.fontType].fontSize * 1.2;
+      if (select.selected === index) this.#renderText('>', x, yy, select.fontType, color);
+      this.#renderText(option, marginLeft, yy, select.fontType, color);
+    });
+  }
+
+  #renderRect(x: number, y: number, w: number, h: number, color: Color) {
+    for (let i = 0; i < h; i++) {
+      const yy = y + i;
+      if (yy < 0) continue;
+      for (let j = 0; j < w; j++) {
+        const xx = x + j;
+        if (xx < 0) continue;
+        const index = (yy * this.width + xx) * 4;
+        this.#videoFrame[index] = color[0];
+        this.#videoFrame[index + 1] = color[1];
+        this.#videoFrame[index + 2] = color[2];
+        this.#videoFrame[index + 3] = color[3];
+      }
+    }
   }
 
   #renderOnceEntities = new WeakSet<Entity>();
@@ -311,45 +371,46 @@ export class World<CustomData = any> {
         (Math.max(parentPositionY + parentSizeH, positionY + sh) - Math.min(parentPositionY, positionY));
 
       const material = entity.getComponent(MaterialComponent);
-      const color = material?.color || COLOR_BLACK;
-      const select = entity.getComponent(SelectComponent);
-      const textarea = entity.getComponent(TextAreaComponent);
+      const color = material ? material.color : COLOR_BLACK;
 
+      const textarea = entity.getComponent(TextAreaComponent);
       if (textarea) {
-        getLines(textarea.text, textarea.width, fonts[textarea.fontType]).forEach(({ text, width }, index) => {
-          this.#renderText(
-            text,
-            textarea.center ? Math.round(roundPositionX + (textarea.width - width) / 2) : roundPositionX,
-            roundPositionY + index * fonts[textarea.fontType].fontSize * 1.2,
-            textarea.fontType,
-            color,
+        this.#renderTextArea(textarea, roundPositionX, roundPositionY, color);
+        return;
+      }
+
+      const select = entity.getComponent(SelectComponent);
+      if (select) {
+        this.#renderSelect(select, roundPositionX, roundPositionY, color);
+        return;
+      }
+
+      const animate = entity.getComponent(AnimateComponent);
+      if (animate) {
+        this.#renderSpriteRepeat(
+          sprites[animate.getSprite()],
+          roundPositionX,
+          roundPositionY,
+          animate.getColor() || material?.color,
+          animate.isRepeatX() && sizeW,
+          animate.isRepeatY() && sizeH,
+        );
+        animate.update();
+        return;
+      }
+
+      if (material) {
+        if (material.sprite || material.sprite === 0) {
+          this.#renderSpriteRepeat(
+            sprites[material.sprite],
+            roundPositionX,
+            roundPositionY,
+            material.color,
+            material.repeatX && sizeW,
+            material.repeatY && sizeH,
           );
-        });
-      } else if (select) {
-        const marginLeft = roundPositionX + fonts[select.fontType].fontSize * 1.5;
-        select.options.forEach((option, index) => {
-          const y = roundPositionY + index * fonts[select.fontType].fontSize * 1.2;
-          if (select.selected === index) this.#renderText('>', roundPositionX, y, select.fontType, color);
-          this.#renderText(option, marginLeft, y, select.fontType, color);
-        });
-      } else if (material) {
-        if (material.sprite) {
-          const sprite = sprites[material.sprite];
-          this.#renderSprite(sprite.data, roundPositionX, roundPositionY, sprite.width, material.color);
         } else {
-          for (let i = 0; i < sizeH; i++) {
-            const yy = roundPositionY + i;
-            if (yy < 0) continue;
-            for (let j = 0; j < sizeW; j++) {
-              const xx = roundPositionX + j;
-              if (xx < 0) continue;
-              const index = (yy * this.width + xx) * 4;
-              this.#videoFrame[index] = material.color[0];
-              this.#videoFrame[index + 1] = material.color[1];
-              this.#videoFrame[index + 2] = material.color[2];
-              this.#videoFrame[index + 3] = material.color[3];
-            }
-          }
+          this.#renderRect(roundPositionX, roundPositionY, sizeW, sizeH, material.color);
         }
       }
 
