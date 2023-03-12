@@ -134,9 +134,13 @@ const updateXOffsetFrame = {
   [ENTITY.CurrentPiece2]: 0,
 } as Record<string | number, number>;
 
-function handleCurrentPieceEntity(world: World<WorldDta>, entity: PieceEntity, buttons: typeof nesbox.buttons1) {
+function handleCurrentPieceEntity(world: World<WorldDta>, entity: PieceEntity) {
+  const is1P = entity.id === ENTITY.CurrentPiece1;
+  const buttons = is1P ? nesbox.buttons1 : nesbox.buttons2;
   const piece = entity.getComponent(PieceComponent)!;
   const position = entity.getComponent(PositionComponent)!;
+  const otherEntity = is1P ? world.getEntity(ENTITY.CurrentPiece2) : world.getEntity(ENTITY.CurrentPiece1);
+  const otherPiece = otherEntity?.getComponent(PieceComponent);
 
   if (entity.hasComponent(NewPieceComponent)) {
     entity.removeComponent(NewPieceComponent);
@@ -157,66 +161,74 @@ function handleCurrentPieceEntity(world: World<WorldDta>, entity: PieceEntity, b
     );
   }
 
-  const shouldUpdateY = !(world.frameNum % world.data.updateFrame);
-  if (shouldUpdateY) {
-    position.sy = world.data.brickSize;
+  let shouldMoveX = 0;
+  let shouldMoveY = 0;
+
+  if (!(world.frameNum % world.data.updateFrame)) {
+    shouldMoveY = world.data.brickSize;
   } else {
-    position.sy = 0;
+    shouldMoveY = 0;
   }
 
   // Tap the direction and adjust the position immediately
   // wait for a period of time and then accelerate to adjust the position
   const shouldUpdateXFrame =
     world.frameNum > updateXOffsetFrame[entity.id] && !((world.frameNum - updateXOffsetFrame[entity.id]) % 2);
-  if (nesbox.isTap(buttons.JoypadLeft) && piece.gridX > 0) {
-    position.sx = -world.data.brickSize;
+  if (nesbox.isTap(buttons.JoypadLeft)) {
+    shouldMoveX = -world.data.brickSize;
     updateXOffsetFrame[entity.id] = world.frameNum + UPDATE_X_DELAY;
-  } else if (nesbox.isTap(buttons.JoypadRight) && piece.gridX + piece.cols < world.data.gridWidth) {
-    position.sx = world.data.brickSize;
+  } else if (nesbox.isTap(buttons.JoypadRight)) {
+    shouldMoveX = world.data.brickSize;
     updateXOffsetFrame[entity.id] = world.frameNum + UPDATE_X_DELAY;
-  } else if (shouldUpdateXFrame && nesbox.isPressed(buttons.JoypadLeft) && piece.gridX > 0) {
-    position.sx = -world.data.brickSize;
-  } else if (
-    shouldUpdateXFrame &&
-    nesbox.isPressed(buttons.JoypadRight) &&
-    piece.gridX + piece.cols < world.data.gridWidth
-  ) {
-    position.sx = world.data.brickSize;
+  } else if (shouldUpdateXFrame && nesbox.isPressed(buttons.JoypadLeft)) {
+    shouldMoveX = -world.data.brickSize;
+  } else if (shouldUpdateXFrame && nesbox.isPressed(buttons.JoypadRight)) {
+    shouldMoveX = world.data.brickSize;
   } else {
-    position.sx = 0;
+    shouldMoveX = 0;
   }
 
-  const shouldUpdateX = !!position.sx;
-
-  if (shouldUpdateX || shouldUpdateY) {
+  if (shouldMoveX || shouldMoveY) {
     // avoid dup sound
-    if (shouldUpdateX || entity.id === ENTITY.CurrentPiece1) {
+    if (shouldMoveX || is1P) {
       world.addAudio(new AudioComponent(SOUND.MOVE_PIECE));
     }
 
-    // try move
-    const restore = entity.update(world.data);
+    // move x
+    if (shouldMoveX) {
+      position.sx = shouldMoveX;
+      position.sy = 0;
+      const restore = entity.update(world.data);
 
-    const overflow = piece.gridY + piece.rows > world.data.grid.length;
-
-    // edge check
-    if (!overflow && shouldUpdateX && piece.isCollisionGrid(world.data.grid)) {
-      restore();
-      position.sx = 0;
-      entity.update(world.data);
+      // edge check
+      if (piece.isCollisionGrid(world.data.grid) || piece.isCollisionPiece(otherPiece)) {
+        restore();
+      }
     }
 
-    // should fixed
-    if (overflow || piece.isCollisionGrid(world.data.grid)) {
-      world.addAudio(new AudioComponent(SOUND.FIXED_PIECE));
+    // move y
+    if (shouldMoveY) {
+      position.sx = 0;
+      position.sy = shouldMoveY;
+      const restore = entity.update(world.data);
 
-      // restore to before collision
-      restore();
+      if (piece.isCollisionPiece(otherPiece)) {
+        restore();
+        return;
+      }
 
-      piece.updateGrid(world.data.grid);
+      // should fixed
+      if (piece.isCollisionGrid(world.data.grid)) {
+        world.addAudio(new AudioComponent(SOUND.FIXED_PIECE));
 
-      clearFullLine(world);
-      replaceCurrentPiece(world, entity);
+        // restore to before collision
+        restore();
+
+        piece.updateGrid(world.data.grid);
+
+        clearFullLine(world);
+        replaceCurrentPiece(world, entity);
+      }
     }
   }
 }
@@ -226,11 +238,16 @@ export function moveSystem(world: World<WorldDta>) {
 
   const entity1 = world.getEntity<PieceEntity>(ENTITY.CurrentPiece1);
   const entity2 = world.getEntity<PieceEntity>(ENTITY.CurrentPiece2);
-  entity1 && handleCurrentPieceEntity(world, entity1, nesbox.buttons1);
-  entity2 && handleCurrentPieceEntity(world, entity2, nesbox.buttons2);
+
+  [entity1, entity2]
+    .filter((v): v is PieceEntity => !!v)
+    .sort((a, b) => (a.isUnderPiece(b) ? -1 : 0))
+    .forEach((entity) => handleCurrentPieceEntity(world, entity));
 
   for (const entity of world.getEntitiesIter()) {
-    if (entity instanceof PieceEntity && !entity.getEntities().size) entity.remove();
+    if (entity instanceof PieceEntity) {
+      !entity.getEntities().size && entity.remove();
+    }
   }
 }
 

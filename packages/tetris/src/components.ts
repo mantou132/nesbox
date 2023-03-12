@@ -54,7 +54,8 @@ export class PieceComponent extends Component {
   isCollisionGrid(grid: number[][]) {
     const rows = grid.length;
     const cols = grid[0].length;
-    if (this.gridY + this.rows > rows || this.gridX + this.cols > cols) return true;
+    if (this.gridX < 0 || this.gridX + this.cols > cols) return true;
+    if (this.gridY < 0 || this.gridY + this.rows > rows) return true;
     for (let y = 0; y < this.rows; y++) {
       for (let x = 0; x < this.cols; x++) {
         if (this.type[y][x] && grid[y + this.gridY][x + this.gridX]) {
@@ -63,6 +64,29 @@ export class PieceComponent extends Component {
       }
     }
     return false;
+  }
+
+  isCollisionPiece(piece?: PieceComponent) {
+    if (!piece) return false;
+
+    for (let y = 0; y < this.rows; y++) {
+      const line = piece.type[this.gridY + y - piece.gridY];
+      if (!line) continue;
+      for (let x = 0; x < this.cols; x++) {
+        if (this.type[y][x] && line[this.gridX + x - piece.gridX]) {
+          return true;
+        }
+      }
+    }
+  }
+
+  findMaxYWithX(x: number) {
+    for (let i = this.rows - 1; i >= 0; i--) {
+      if (this.type[i][x - this.gridX]) {
+        return this.gridY + i;
+      }
+    }
+    return -1;
   }
 
   updateGrid(grid: number[][]) {

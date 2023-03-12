@@ -82,6 +82,18 @@ export class PieceEntity extends Entity {
     }
   }
 
+  isUnderPiece(piece: PieceEntity) {
+    const pieceComponent = this.getComponent(PieceComponent)!;
+    const otherPieceComponent = piece.getComponent(PieceComponent)!;
+    for (let i = 0; i < pieceComponent.cols; i++) {
+      // cross col
+      const col = pieceComponent.gridX + i;
+      if (col >= otherPieceComponent.gridX && col < otherPieceComponent.gridX + otherPieceComponent.cols) {
+        return pieceComponent.findMaxYWithX(col) > otherPieceComponent.findMaxYWithX(col);
+      }
+    }
+  }
+
   transform(data: WorldDta) {
     const pieceComponent = this.getComponent(PieceComponent)!;
     const positionComponent = this.getComponent(PositionComponent)!;
