@@ -73,7 +73,7 @@ export class MaterialComponent extends Component {
   }
 }
 
-type AnimateSequence = { sprite: string | number; repeatX?: boolean; repeatY?: boolean; color?: Color; frame: number };
+type AnimateSequence = { sprite: string | number; color?: Color; frame?: number };
 
 @registerComponent()
 export class AnimateComponent extends Component {
@@ -85,28 +85,24 @@ export class AnimateComponent extends Component {
   _accumulate = 0;
 
   loop = false;
+  repeatX?: boolean;
+  repeatY?: boolean;
 
-  constructor(sequences: AnimateSequence[] = [], loop = false) {
+  constructor(sequences: AnimateSequence[] = [], repeatX = false, repeatY = false, loop = false) {
     super();
     this._sequences = sequences;
+    this.repeatX = repeatX;
+    this.repeatY = repeatY;
     this.loop = loop;
   }
 
   getProgress() {
-    if (!this.#total) this.#total = this._sequences.reduce((p, c) => p + c.frame, 0);
+    if (!this.#total) this.#total = this._sequences.reduce((p, { frame = 1 }) => p + frame, 0);
     return this._accumulate / this.#total;
   }
 
   getSprite() {
     return this._sequences[this._index].sprite;
-  }
-
-  isRepeatX() {
-    return this._sequences[this._index].repeatX;
-  }
-
-  isRepeatY() {
-    return this._sequences[this._index].repeatY;
   }
 
   getColor() {
@@ -123,7 +119,8 @@ export class AnimateComponent extends Component {
         return;
       }
     }
-    if (this._frame >= this._sequences[this._index].frame) {
+    const { frame = 1 } = this._sequences[this._index];
+    if (this._frame >= frame) {
       this._frame = 0;
       this._index++;
     } else {

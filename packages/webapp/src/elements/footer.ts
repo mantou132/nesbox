@@ -1,8 +1,8 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css } from '@mantou/gem';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
-import { githubUrl } from 'src/constants';
 import { routes } from 'src/routes';
 
+import { githubUrl } from 'src/constants';
 import { theme } from 'src/theme';
 
 import type { RouteItem } from 'duoyun-ui/elements/route';

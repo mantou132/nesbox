@@ -1,9 +1,7 @@
-const iframe = document.createElement('iframe');
-iframe.hidden = true;
-document.body.append(iframe);
+let iframe = document.createElement('iframe');
 
 // https://github.com/ambit-tsai/shadowrealm-api/blob/6d550297c2/src/helpers.ts
-const globalReservedProps = [
+const defaultExposeAPIs = [
   // The global properties of ECMAScript 2022
   'globalThis',
   'Infinity',
@@ -72,13 +70,60 @@ type GlobalObject = Omit<typeof window, 'globalThis'> & {
   globalThis: GlobalObject;
 };
 
-function genGlobal(context: Record<string, any>, reservedProps: Set<string>) {
+type ExposeAPI = {
+  [s: string]: ExposeAPI | boolean;
+};
+
+type VMOptions = {
+  handleError?: (err: any) => void;
+  exposeAPIs?: ExposeAPI;
+};
+
+function genGlobal(options: VMOptions = {}, defaultExposeAPIs: Set<string>) {
+  addEventListener('error', (err: ErrorEvent) => {
+    options.handleError?.(err.error);
+  });
+
+  addEventListener('unhandledrejection', ({ reason }: PromiseRejectionEvent) => {
+    if (reason) {
+      const errors = reason.errors || reason;
+      if (Array.isArray(errors)) {
+        errors.forEach((err) => options.handleError?.(err));
+      } else {
+        options.handleError?.(reason.reason || reason);
+      }
+    }
+  });
+
+  const mapProp = (result: Record<string, any> = {}, origin: Record<string, any> = {}, map: ExposeAPI) => {
+    for (const [k, v] of Object.entries(map)) {
+      if (v === true) {
+        if (typeof origin[k] === 'function') {
+          result[k] = origin[k].bind(origin);
+        } else {
+          result[k] = origin[k];
+        }
+      } else if (v) {
+        result[k] = mapProp(result[k], origin[k], v);
+      }
+    }
+    return result;
+  };
+
   const globalObject = {
     ...Object.getOwnPropertyNames(window).reduce((p, c) => {
-      p[c] = reservedProps.has(c) ? window[c as keyof Window] : undefined;
+      const v = options.exposeAPIs?.[c];
+      if (defaultExposeAPIs.has(c) || v === true) {
+        p[c] = window[c as keyof Window];
+      } else if (v) {
+        p[c] = mapProp(p[c], window[c as keyof Window], v);
+      } else if (Object.getOwnPropertyDescriptor(window, c)?.configurable) {
+        delete window[c as keyof Window];
+      } else {
+        p[c] = undefined;
+      }
       return p;
     }, {} as Record<string, any>),
-    ...context,
   } as unknown as GlobalObject;
 
   globalObject.globalThis = globalObject;
@@ -107,13 +152,17 @@ function genGlobal(context: Record<string, any>, reservedProps: Set<string>) {
   return globalObject;
 }
 
-export default class ShadowRealm {
+export class VM {
   #global: ReturnType<typeof genGlobal>;
 
-  constructor(context: Record<string, any> = {}) {
+  constructor(options: VMOptions = {}) {
+    iframe.remove();
+    iframe = document.createElement('iframe');
+    iframe.hidden = true;
+    document.body.append(iframe);
     this.#global = (iframe.contentWindow as unknown as any)
       .Function(`return (${genGlobal.toString()})(...arguments);`)
-      .apply(null, [context, new Set(globalReservedProps)]);
+      .apply(null, [options, new Set(defaultExposeAPIs)]);
   }
 
   evaluate(sourceText: string) {

@@ -11,10 +11,10 @@ import {
   connectStore,
 } from '@mantou/gem';
 import { createPath } from 'duoyun-ui/elements/route';
-import { paramKeys, viewTransitionName } from 'src/constants';
 import { getCDNSrc, setViewTransitionName } from 'src/utils';
 import { routes } from 'src/routes';
 
+import { paramKeys, viewTransitionName } from 'src/constants';
 import { icons } from 'src/icons';
 import { Game } from 'src/store';
 import { createRoom, favoriteGame } from 'src/services/api';

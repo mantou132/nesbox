@@ -23,20 +23,22 @@ import { Time } from 'duoyun-ui/lib/time';
 import { getStringFromTemplate, once } from 'duoyun-ui/lib/utils';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { preventDefault } from 'src/utils';
-import { BcMsgEvent, BcMsgType, queryKeys } from 'src/constants';
 import { routes } from 'src/routes';
 
+import { BcMsgEvent, BcMsgType, queryKeys } from 'src/constants';
 import { configure, getShortcut } from 'src/configure';
 import { friendStore, store } from 'src/store';
 import { i18n } from 'src/i18n';
 import { createInvite, updateRoomScreenshot } from 'src/services/api';
 import { closeListenerSet } from 'src/elements/titlebar';
 import { logger } from 'src/logger';
+import { ScUserStatus } from 'src/generated/graphql';
 
 import type { MStageElement } from 'src/modules/stage';
 
 import 'duoyun-ui/elements/coach-mark';
 import 'duoyun-ui/elements/space';
+import 'duoyun-ui/elements/status-light';
 import 'src/modules/stage';
 import 'src/modules/cheat-settings';
 import 'src/elements/list';
@@ -104,6 +106,10 @@ export class PRoomElement extends GemElement {
           text: i18n.get('inviteValidFriend'),
           menu: friendStore.friendIds?.map((id) => ({
             text: friendStore.friends[id]?.user.nickname || '',
+            tag:
+              friendStore.friends[id]?.user.status === ScUserStatus.Online
+                ? html`<dy-status-light status="positive"></dy-status-light>`
+                : undefined,
             handle: () => createInvite({ roomId: this.#playing!.id, targetId: id }),
           })),
         },

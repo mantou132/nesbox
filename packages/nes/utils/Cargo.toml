@@ -1,0 +1,27 @@
+[package]
+name = "nesbox-utils"
+version = "0.0.1"
+authors = ["mantou132"]
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = ["console_error_panic_hook"]
+
+[dependencies]
+qoi = "0.4.0"
+bevy_ecs = "0.10"
+bevy_app = "0.10"
+bevy_input = "0.10"
+bevy_math = "0.10"
+bincode = "1.3.3"
+rand = "0.8"
+wasm-bindgen = "0.2.63"
+
+# The `console_error_panic_hook` crate provides better debugging of panics by
+# logging them with `console.error`. This is great for development, but requires
+# all the `std::fmt` and `std::panicking` infrastructure, so isn't great for
+# code size when deploying.
+console_error_panic_hook = { version = "0.1.6", optional = true }

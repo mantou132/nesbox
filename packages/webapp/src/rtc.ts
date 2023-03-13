@@ -1,7 +1,7 @@
 import { createStore, updateStore } from '@mantou/gem';
-import { Button } from '@mantou/nes';
-import { events, RTCTransportType, SignalEvent, SignalType } from 'src/constants';
+import { Button, Player } from '@mantou/nes';
 
+import { events, RTCTransportType, SignalEvent, SignalType } from 'src/constants';
 import { configure } from 'src/configure';
 import { LocaleKey } from 'src/i18n';
 import { logger } from 'src/logger';
@@ -9,15 +9,49 @@ import { sendSignal } from 'src/services/api';
 
 export const pingStore = createStore<{ ping?: number }>({});
 
-const buttonMap: Record<Button, Record<string, Button | undefined>> = {
-  [Button.Joypad1Up]: { '2': Button.Joypad2Up, '3': Button.Joypad3Up, '4': Button.Joypad4Up },
-  [Button.Joypad1Left]: { '2': Button.Joypad2Left, '3': Button.Joypad3Left, '4': Button.Joypad4Left },
-  [Button.Joypad1Down]: { '2': Button.Joypad2Down, '3': Button.Joypad3Down, '4': Button.Joypad4Down },
-  [Button.Joypad1Right]: { '2': Button.Joypad2Right, '3': Button.Joypad3Right, '4': Button.Joypad4Right },
-  [Button.Joypad1A]: { '2': Button.Joypad2A, '3': Button.Joypad3A, '4': Button.Joypad4A },
-  [Button.Joypad1B]: { '2': Button.Joypad2B, '3': Button.Joypad3B, '4': Button.Joypad4B },
-  [Button.Joypad1TurboA]: { '2': Button.Joypad2TurboA, '3': Button.Joypad3TurboA, '4': Button.Joypad4TurboA },
-  [Button.Joypad1TurboB]: { '2': Button.Joypad2TurboB, '3': Button.Joypad3TurboB, '4': Button.Joypad4TurboB },
+const buttonMap: Partial<Record<Button, Record<string, Button | undefined>>> = {
+  [Button.Joypad1Up]: {
+    [Player.Two]: Button.Joypad2Up,
+    [Player.Three]: Button.Joypad3Up,
+    [Player.Four]: Button.Joypad4Up,
+  },
+  [Button.Joypad1Left]: {
+    [Player.Two]: Button.Joypad2Left,
+    [Player.Three]: Button.Joypad3Left,
+    [Player.Four]: Button.Joypad4Left,
+  },
+  [Button.Joypad1Down]: {
+    [Player.Two]: Button.Joypad2Down,
+    [Player.Three]: Button.Joypad3Down,
+    [Player.Four]: Button.Joypad4Down,
+  },
+  [Button.Joypad1Right]: {
+    [Player.Two]: Button.Joypad2Right,
+    [Player.Three]: Button.Joypad3Right,
+    [Player.Four]: Button.Joypad4Right,
+  },
+  [Button.Joypad1A]: { [Player.Two]: Button.Joypad2A, [Player.Three]: Button.Joypad3A, [Player.Four]: Button.Joypad4A },
+  [Button.Joypad1B]: { [Player.Two]: Button.Joypad2B, [Player.Three]: Button.Joypad3B, [Player.Four]: Button.Joypad4B },
+  [Button.Joypad1TurboA]: {
+    [Player.Two]: Button.Joypad2TurboA,
+    [Player.Three]: Button.Joypad3TurboA,
+    [Player.Four]: Button.Joypad4TurboA,
+  },
+  [Button.Joypad1TurboB]: {
+    [Player.Two]: Button.Joypad2TurboB,
+    [Player.Three]: Button.Joypad3TurboB,
+    [Player.Four]: Button.Joypad4TurboB,
+  },
+  [Button.Pointer1Left]: {
+    [Player.Two]: Button.Pointer2Left,
+    [Player.Three]: Button.Pointer3Left,
+    [Player.Four]: Button.Pointer4Left,
+  },
+  [Button.Pointer1Right]: {
+    [Player.Two]: Button.Pointer2Right,
+    [Player.Three]: Button.Pointer3Right,
+    [Player.Four]: Button.Pointer4Right,
+  },
   [Button.Select]: {},
   [Button.Start]: {},
   [Button.Reset]: {},
@@ -30,6 +64,7 @@ export enum ChannelMessageType {
   ROLE_OFFER,
   ROLE_ANSWER,
   PING,
+  POINTER_MOVE,
 }
 
 export type Role =
@@ -77,6 +112,24 @@ export class TextMsg extends ChannelMessageBase {
   }
 }
 
+export class PointerMoveMsg extends ChannelMessageBase {
+  type = ChannelMessageType.POINTER_MOVE;
+
+  player = Player.One;
+  x = 0;
+  y = 0;
+  dx = 0;
+  dy = 0;
+
+  constructor(x: number, y: number, dx: number, dy: number) {
+    super();
+    this.x = x;
+    this.y = y;
+    this.dx = dx;
+    this.dy = dy;
+  }
+}
+
 export class KeyDownMsg extends ChannelMessageBase {
   type = ChannelMessageType.KEYDOWN;
 
@@ -93,8 +146,10 @@ export class KeyUpMsg extends KeyDownMsg {
 export class RoleOffer extends ChannelMessageBase {
   type = ChannelMessageType.ROLE_OFFER;
 
-  roleType?: number;
-  constructor(roleType?: number) {
+  // null 表示踢出
+  // undefined 表示自动
+  roleType?: Player | null;
+  constructor(roleType?: Player | null) {
     super();
     this.roleType = roleType;
   }
@@ -103,8 +158,8 @@ export class RoleOffer extends ChannelMessageBase {
 export class RoleAnswer extends ChannelMessageBase {
   type = ChannelMessageType.ROLE_ANSWER;
 
-  roles: Role[];
-  constructor(roles: Role[]) {
+  roles: Partial<Record<Player, Role>>;
+  constructor(roles: Partial<Record<Player, Role>>) {
     super();
     this.roles = roles;
   }
@@ -120,7 +175,7 @@ export class Ping extends ChannelMessageBase {
   }
 }
 
-export type ChannelMessage = TextMsg | KeyDownMsg | KeyUpMsg | RoleOffer | RoleAnswer | Ping;
+export type ChannelMessage = TextMsg | KeyDownMsg | KeyUpMsg | RoleOffer | RoleAnswer | Ping | PointerMoveMsg;
 
 export class RTC extends EventTarget {
   #host = 0;
@@ -130,10 +185,13 @@ export class RTC extends EventTarget {
 
   #connMap = new Map<number, RTCPeerConnection>();
   #channelMap = new Map<RTCPeerConnection, RTCDataChannel>();
-  #roles: Role[] = [
-    ,
-    { userId: configure.user!.id, username: configure.user!.username, nickname: configure.user!.nickname },
-  ];
+  #roles: Partial<Record<Player, Role>> = {
+    [Player.One]: {
+      userId: configure.user!.id,
+      username: configure.user!.username,
+      nickname: configure.user!.nickname,
+    },
+  };
 
   #stream: MediaStream;
   #audio: HTMLAudioElement;
@@ -173,39 +231,46 @@ export class RTC extends EventTarget {
     }
   };
 
+  #getPlayer = (userId: number) => {
+    const player = (Object.keys(this.#roles) as unknown as Player[]).find(
+      (role) => this.#roles[role]?.userId === userId,
+    );
+    // rust 生成的 enum 值为数字
+    return player !== undefined ? (Number(player) as Player) : player;
+  };
+
   #getButton = (userId: number, button: Button) => {
     if (userId === configure.user!.id) return button;
-    const index = this.#roles.findIndex((role) => role?.userId === userId);
-    return buttonMap[button]?.[index];
+    return buttonMap[button]?.[this.#getPlayer(userId)!];
   };
 
   #setRoles = (userId: number, msg: RoleOffer) => {
     const role: Role = { userId, username: msg.username, nickname: msg.nickname };
-    const index = this.#roles.findIndex((role) => role?.userId === userId);
+    const player = this.#getPlayer(userId);
 
-    if (msg.roleType === 0) {
+    if (msg.roleType === null) {
       // leave
-      this.#roles[index] = undefined;
-    } else if (msg.roleType && [2, 3, 4].includes(msg.roleType) && !this.#roles[msg.roleType]) {
+      delete this.#roles[player!];
+    } else if ([Player.Two, Player.Three, Player.Four].includes(msg.roleType!) && !this.#roles[msg.roleType!]) {
       // join
-      if (index > 1) this.#roles[index] = undefined;
-      this.#roles[msg.roleType] = role;
+      delete this.#roles[player!];
+      this.#roles[msg.roleType!] = role;
     } else {
       // auto
-      if (index === -1) {
-        if (!this.#roles[2]) {
-          this.#roles[2] = role;
-        } else if (!this.#roles[3]) {
-          this.#roles[3] = role;
-        } else if (!this.#roles[4]) {
-          this.#roles[4] = role;
+      if (player === undefined) {
+        if (!this.#roles[Player.Two]) {
+          this.#roles[Player.Two] = role;
+        } else if (!this.#roles[Player.Three]) {
+          this.#roles[Player.Three] = role;
+        } else if (!this.#roles[Player.Four]) {
+          this.#roles[Player.Four] = role;
         }
       }
     }
   };
 
   #emitAnswer = () => {
-    const roleAnswer = new RoleAnswer([...this.#roles]);
+    const roleAnswer = new RoleAnswer(this.#roles);
     this.#channelMap.forEach((channel) => channel.send(roleAnswer.toString()));
     this.#emitMessage(roleAnswer);
   };
@@ -215,10 +280,10 @@ export class RTC extends EventTarget {
       this.#channelMap.set(conn, channel);
 
       channel.onclose = () => {
-        const nickname = this.#roles.find((role) => role?.userId === userId)?.nickname || '';
+        const nickname = Object.values(this.#roles).find((role) => role?.userId === userId)?.nickname || '';
 
         this.#deleteUser(userId);
-        this.#roles = this.#roles.map((role) => (role?.userId === userId ? undefined : role));
+        delete this.#roles[this.#getPlayer(userId)!];
         this.#emitAnswer();
 
         const textMsg = new TextMsg(['leaveRoomMsg', nickname]).toSystemRole();
@@ -238,6 +303,12 @@ export class RTC extends EventTarget {
           const button = this.#getButton(userId, (msg as KeyDownMsg).button);
           if (button) {
             this.#emitMessage({ ...msg, button } as KeyDownMsg);
+          }
+          break;
+        case ChannelMessageType.POINTER_MOVE:
+          const player = this.#getPlayer(userId);
+          if (player !== undefined) {
+            this.#emitMessage({ ...msg, player } as PointerMoveMsg);
           }
           break;
         case ChannelMessageType.ROLE_OFFER:
@@ -308,10 +379,13 @@ export class RTC extends EventTarget {
       clearTimeout(this.#restartTimer);
       // `deleteUser` assign `null`
       channel.onclose = () => {
+        delete this.#roles[Player.One];
+        this.#emitMessage(new RoleAnswer(this.#roles));
         this.#restart();
       };
       this.#channelMap.set(conn, channel);
-      this.send(new RoleOffer(this.#roles.findIndex((role) => role?.userId === configure.user!.id)));
+      // 也许是重连
+      this.send(new RoleOffer(this.#getPlayer(configure.user!.id)));
 
       const textMsg = new TextMsg(['enterRoomMsg', configure.user!.nickname]).toSystemRole();
       this.send(textMsg);
@@ -324,6 +398,10 @@ export class RTC extends EventTarget {
         switch (msg.type) {
           case ChannelMessageType.PING:
             updateStore(pingStore, { ping: Date.now() - msg.timestamp });
+            break;
+          case ChannelMessageType.ROLE_ANSWER:
+            this.#roles = (msg as RoleAnswer).roles;
+            this.#emitMessage(msg);
             break;
           default:
             this.#emitMessage(msg);
@@ -436,7 +514,7 @@ export class RTC extends EventTarget {
 
   kickOutRole = (userId: number) => {
     if (!this.#isHost) return;
-    this.#setRoles(userId, new RoleOffer(0));
+    this.#setRoles(userId, new RoleOffer(null));
     this.send(new RoleAnswer(this.#roles));
   };
 }

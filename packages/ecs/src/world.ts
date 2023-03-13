@@ -392,8 +392,8 @@ export class World<CustomData = any> {
           roundPositionX,
           roundPositionY,
           animate.getColor() || material?.color,
-          animate.isRepeatX() && sizeW,
-          animate.isRepeatY() && sizeH,
+          animate.repeatX && sizeW,
+          animate.repeatY && sizeH,
         );
         animate.update();
         return;

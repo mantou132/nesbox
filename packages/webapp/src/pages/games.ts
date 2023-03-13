@@ -14,10 +14,10 @@ import { HexColor, hslToRgb, parseHexColor, rgbToHexColor, rgbToHsl } from 'duoy
 import { marked } from 'marked';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { isNotNullish } from 'duoyun-ui/lib/types';
-import { paramKeys, pixelFont, viewTransitionName } from 'src/constants';
 import { fontLoading, getCDNSrc, setViewTransitionName } from 'src/utils';
 import { routes } from 'src/routes';
 
+import { paramKeys, pixelFont, viewTransitionName } from 'src/constants';
 import { store } from 'src/store';
 import { createRoom } from 'src/services/api';
 import { theme, themeStore } from 'src/theme';

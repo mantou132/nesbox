@@ -12,10 +12,10 @@ import {
 } from '@mantou/gem';
 import { createPath, matchPath } from 'duoyun-ui/elements/route';
 import { waitLoading } from 'duoyun-ui/elements/wait';
-import { events, queryKeys } from 'src/constants';
 import { playHintSound } from 'src/utils';
 import { routes } from 'src/routes';
 
+import { events, queryKeys } from 'src/constants';
 import { GamepadBtnIndex } from 'src/gamepad';
 import { store } from 'src/store';
 import { leaveRoom, updateRoomScreenshot } from 'src/services/api';
@@ -34,9 +34,6 @@ const style = createCSSSheet(css`
   .stage {
     position: absolute;
     inset: 0;
-  }
-  .stage::part(canvas) {
-    padding-block-start: 2em;
   }
   .info {
     position: absolute;

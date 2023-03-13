@@ -8,17 +8,19 @@ import {
   connectStore,
   refobject,
   RefObject,
+  styleMap,
 } from '@mantou/gem';
 import JSZip from 'jszip';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { waitLoading } from 'duoyun-ui/elements/wait';
-import { default as initNes, Nes, Button } from '@mantou/nes';
+import { default as initNes, Nes, Button, Player } from '@mantou/nes';
 import { Toast } from 'duoyun-ui/elements/toast';
 import { isNotNullish } from 'duoyun-ui/lib/types';
 import { clamp } from 'duoyun-ui/lib/number';
-import { getCDNSrc, isValidGameFile, playHintSound, requestFrame } from 'src/utils';
-import { events, RTCTransportType } from 'src/constants';
+import { isMtApp } from 'mt-app';
+import { getCDNSrc, isValidGameFile, playHintSound, positionMapping, requestFrame } from 'src/utils';
 
+import { events, RTCTransportType } from 'src/constants';
 import { logger } from 'src/logger';
 import { Cheat, configure } from 'src/configure';
 import {
@@ -26,6 +28,7 @@ import {
   ChannelMessageType,
   KeyDownMsg,
   KeyUpMsg,
+  PointerMoveMsg,
   Role,
   RoleAnswer,
   RoleOffer,
@@ -47,15 +50,13 @@ const style = createCSSSheet(css`
   :host {
     position: relative;
     display: block;
+    background: black;
   }
   .canvas {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
-    box-sizing: border-box;
-    padding: 5em;
-    object-fit: contain;
     background-color: black;
     pointer-events: none;
   }
@@ -78,7 +79,7 @@ const style = createCSSSheet(css`
 
 type State = {
   messages: TextMsg[];
-  roles: Role[];
+  roles: Partial<Record<Player, Role>>;
   cheats: Exclude<ReturnType<typeof MStageElement.parseCheatCode>, undefined>[];
   cheatKeyHandles: Record<string, (evt: KeyboardEvent) => void>;
   canvasWidth: number;
@@ -100,7 +101,7 @@ export class MStageElement extends GemElement<State> {
 
   state: State = {
     messages: [],
-    roles: [],
+    roles: {},
     cheats: [],
     cheatKeyHandles: {},
     canvasWidth: 0,
@@ -273,7 +274,7 @@ export class MStageElement extends GemElement<State> {
 
       switch (file.name.toLowerCase().split('.').pop()) {
         case 'wasm': {
-          await initNes(new Response(romBuffer));
+          await initNes(new Response(romBuffer, { headers: { 'content-type': 'application/wasm' } }));
           game = Nes.new(this.#sampleRate);
           break;
         }
@@ -308,7 +309,7 @@ export class MStageElement extends GemElement<State> {
       if (this.#game) {
         const memory = this.#game.mem();
         const qoiBuffer = new Uint8Array(detail);
-        if (qoiBuffer.length === 4) return;
+        if (qoiBuffer.length <= 4) return;
         const part = new Uint8Array(detail, qoiBuffer.length - 4, 4);
         const framePtr = this.#game.decode_qoi(qoiBuffer);
         const frameLen = this.#game.decode_qoi_len();
@@ -327,20 +328,25 @@ export class MStageElement extends GemElement<State> {
         break;
       // both
       case ChannelMessageType.ROLE_ANSWER:
-        const roleIds = new Set(this.state.roles.map((role) => role?.userId));
+        const roleIds = new Set(Object.values(this.state.roles).map((role) => role?.userId));
         const newRoles = (detail as RoleAnswer).roles;
-        if (newRoles.some((role) => role && !roleIds.has(role.userId) && role.userId !== this.#userId)) {
+        if (Object.values(newRoles).some((role) => role && !roleIds.has(role.userId) && role.userId !== this.#userId)) {
           playHintSound('joined');
         }
-        this.setState({ roles: [...newRoles] });
+        this.setState({ roles: { ...newRoles } });
         break;
       // host
       case ChannelMessageType.KEYDOWN:
-        this.#game?.handle_event((detail as KeyDownMsg).button, true, false);
+        this.#game?.handle_button_event((detail as KeyDownMsg).button, true, false);
         break;
       // host
       case ChannelMessageType.KEYUP:
-        this.#game?.handle_event((detail as KeyUpMsg).button, false, false);
+        this.#game?.handle_button_event((detail as KeyUpMsg).button, false, false);
+        break;
+      // host
+      case ChannelMessageType.POINTER_MOVE:
+        const { player, x, y, dx, dy } = detail as PointerMoveMsg;
+        this.#game?.handle_motion_event(player, x, y, dx, dy);
         break;
     }
   };
@@ -356,9 +362,9 @@ export class MStageElement extends GemElement<State> {
     });
   };
 
-  #getButton = ({ key, metaKey, ctrlKey, shiftKey, altKey }: KeyboardEvent) => {
+  #getButton = (event: KeyboardEvent | PointerEvent) => {
     const { keybinding } = this.#settings!;
-    if (metaKey || ctrlKey || shiftKey || altKey) return;
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     const map: Record<string, Button> = {
       [keybinding.Up_2]: Button.Joypad2Up,
       [keybinding.Left_2]: Button.Joypad2Left,
@@ -382,7 +388,28 @@ export class MStageElement extends GemElement<State> {
       [keybinding.Start]: Button.Start,
       [keybinding.Reset]: Button.Reset,
     };
-    return map[key.toLowerCase()];
+
+    if (event instanceof MouseEvent) {
+      switch (event.button) {
+        case 0:
+          return Button.Pointer1Left;
+        case 2:
+          return Button.Pointer1Right;
+        default:
+          return;
+      }
+    }
+    return map[event.key.toLowerCase()];
+  };
+
+  #onPointerMove = (event: PointerEvent) => {
+    if (!this.#game) return;
+    const [x, y, dx, dy] = positionMapping(event, this.canvasRef.element!);
+    if (this.#isHost) {
+      this.#game.handle_motion_event(Player.One, x, y, dx, dy);
+    } else {
+      this.#rtc?.send(new PointerMoveMsg(x, y, dx, dy));
+    }
   };
 
   #pressButton = (button: Button) => {
@@ -392,7 +419,7 @@ export class MStageElement extends GemElement<State> {
       this.#enableAudio();
     }
     if (this.#isHost) {
-      this.#game?.handle_event(button, true, false);
+      this.#game?.handle_button_event(button, true, false);
     } else {
       this.#rtc?.send(new KeyDownMsg(button));
     }
@@ -420,9 +447,15 @@ export class MStageElement extends GemElement<State> {
     }
   };
 
+  #onPointerDown = (event: PointerEvent) => {
+    const button = this.#getButton(event);
+    if (!button) return;
+    this.#pressButton(button);
+  };
+
   #releaseButton = (button: Button) => {
     if (this.#isHost) {
-      this.#game?.handle_event(button, false, false);
+      this.#game?.handle_button_event(button, false, false);
     } else {
       this.#rtc?.send(new KeyUpMsg(button));
     }
@@ -435,6 +468,12 @@ export class MStageElement extends GemElement<State> {
   #onKeyUp = (event: KeyboardEvent) => {
     if (event.repeat) return;
     if (event.isComposing) return;
+    const button = this.#getButton(event);
+    if (!button) return;
+    this.#releaseButton(button);
+  };
+
+  #onPointerUp = (event: PointerEvent) => {
     const button = this.#getButton(event);
     if (!button) return;
     this.#releaseButton(button);
@@ -505,15 +544,22 @@ export class MStageElement extends GemElement<State> {
       () => [!configure.windowHasFocus, configure.searchState, configure.settingsState, configure.friendListState],
     );
 
+    addEventListener('pointermove', this.#onPointerMove);
     addEventListener('keydown', this.#onKeyDown);
+    this.addEventListener('pointerdown', this.#onPointerDown);
     addEventListener('keyup', this.#onKeyUp);
+    this.addEventListener('pointerup', this.#onPointerUp);
     addEventListener(events.PRESS_BUTTON, this.#onPressButton);
     addEventListener(events.RELEASE_BUTTON, this.#onReleaseButton);
     return () => {
+      this.#game?.free();
       this.#audioContext?.close();
       this.#rtc?.destroy();
+      removeEventListener('pointermove', this.#onPointerMove);
       removeEventListener('keydown', this.#onKeyDown);
+      this.removeEventListener('pointerdown', this.#onPointerDown);
       removeEventListener('keyup', this.#onKeyUp);
+      this.removeEventListener('pointerup', this.#onPointerUp);
       removeEventListener(events.PRESS_BUTTON, this.#onPressButton);
       removeEventListener(events.RELEASE_BUTTON, this.#onReleaseButton);
     };
@@ -525,10 +571,13 @@ export class MStageElement extends GemElement<State> {
     return html`
       <nesbox-canvas
         class="canvas"
-        part="canvas"
         ref=${this.canvasRef.ref}
         .width=${canvasWidth}
         .height=${canvasHeight}
+        style=${styleMap({
+          padding: isMtApp ? '2em 5em 5em' : '5em',
+          imageRendering: configure.user ? configure.user.settings.video.render : 'pixelated',
+        })}
       ></nesbox-canvas>
       <audio ref=${this.audioRef.ref} hidden></audio>
       <m-room-chat

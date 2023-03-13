@@ -1,4 +1,4 @@
-import { Button } from '@mantou/nes';
+import { Button, Player } from '@mantou/nes';
 
 type NesBoxCommonButton =
   | 'JoypadA'
@@ -8,7 +8,9 @@ type NesBoxCommonButton =
   | 'JoypadUp'
   | 'JoypadDown'
   | 'JoypadLeft'
-  | 'JoypadRight';
+  | 'JoypadRight'
+  | 'PointerLeft'
+  | 'PointerRight';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -21,16 +23,18 @@ declare global {
       _setState: (state?: Uint8Array) => void;
       _width: number;
       _height: number;
-      _control: Record<Button, boolean>;
-      _prevControl: Record<Button, boolean>;
+      _pressedControl: Set<Button>;
+      _tapControl: Set<Button>;
 
       buttons: Record<keyof typeof Button, Button>;
+      players: Record<keyof typeof Player, Player>;
       buttons1: Record<NesBoxCommonButton, Button>;
       buttons2: Record<NesBoxCommonButton, Button>;
       buttons3: Record<NesBoxCommonButton, Button>;
       buttons4: Record<NesBoxCommonButton, Button>;
       soundEnabled: boolean;
       videoFilter: 'default' | 'NTSC';
+      cursorPosition: Map<Player, { x: number; y: number }>;
 
       isTap: (arg?: Button) => boolean;
       isPressed: (arg?: Button) => boolean;

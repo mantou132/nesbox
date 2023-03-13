@@ -1,9 +1,9 @@
 import { history, QueryString } from '@mantou/gem';
 import { createPath } from 'duoyun-ui/elements/route';
-import { queryKeys } from 'src/constants';
 import { matchRoute } from 'src/utils';
 import { routes } from 'src/routes';
 
+import { queryKeys } from 'src/constants';
 import { deleteUser, Profile } from 'src/configure';
 
 export const gotoRedirectUri = () => {

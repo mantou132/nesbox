@@ -11,7 +11,6 @@ import {
   AnimateComponent,
 } from '@mantou/ecs';
 import { NewPieceComponent, PieceComponent } from 'src/components';
-
 import { BORDER_COLOR, HEIGHT, STAGE_BACKGROUND_COLOR, WIDTH, SCORE_COLOR, WorldData, SPRITE } from 'src/constants';
 
 const colors = [
@@ -191,20 +190,22 @@ export class AnimateWrapEntity extends Entity {
           .addComponent(
             new AnimateComponent(
               [
-                { frame: 1, sprite: SPRITE.ClearLineAnimate1 },
-                { frame: 1, sprite: SPRITE.ClearLineAnimate2 },
-                { frame: 1, sprite: SPRITE.ClearLineAnimate1 },
-                { frame: 1, sprite: SPRITE.ClearLineAnimate2 },
-                { frame: 1, sprite: SPRITE.ClearLineAnimate1 },
-                { frame: 1, sprite: SPRITE.ClearLineAnimate2 },
-                { frame: 1, sprite: SPRITE.ClearLineAnimate1 },
-                { frame: 1, sprite: SPRITE.ClearLineAnimate2 },
-                { frame: 1, sprite: SPRITE.ClearLineAnimate1 },
-                { frame: 1, sprite: SPRITE.ClearLineAnimate2 },
-                { frame: 1, sprite: SPRITE.ClearLineAnimate1 },
-                { frame: 1, sprite: SPRITE.ClearLineAnimate2 },
-                { frame: 1, sprite: SPRITE.ClearLineAnimate1 },
-              ].map((e) => ({ ...e, repeatX: true, repeatY: true })),
+                { sprite: SPRITE.ClearLineAnimate1 },
+                { sprite: SPRITE.ClearLineAnimate2 },
+                { sprite: SPRITE.ClearLineAnimate1 },
+                { sprite: SPRITE.ClearLineAnimate2 },
+                { sprite: SPRITE.ClearLineAnimate1 },
+                { sprite: SPRITE.ClearLineAnimate2 },
+                { sprite: SPRITE.ClearLineAnimate1 },
+                { sprite: SPRITE.ClearLineAnimate2 },
+                { sprite: SPRITE.ClearLineAnimate1 },
+                { sprite: SPRITE.ClearLineAnimate2 },
+                { sprite: SPRITE.ClearLineAnimate1 },
+                { sprite: SPRITE.ClearLineAnimate2 },
+                { sprite: SPRITE.ClearLineAnimate1 },
+              ],
+              true,
+              true,
             ),
           ),
       );

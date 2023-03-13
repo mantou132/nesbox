@@ -1,8 +1,11 @@
+games/*/pkg
+games/*/dist
+games/**/_assets.ts
+
 packages/*/dist
 packages/*/bin
 packages/*/coverage
 packages/*/extension
-packages/**/_assets.ts
 deps
 generated
 public

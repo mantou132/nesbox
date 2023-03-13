@@ -8,7 +8,6 @@ import {
 } from '@mantou/ecs';
 import { AnimateWrapEntity, FailedEntity, PieceEntity } from 'src/entities';
 import { NewPieceComponent, PieceComponent } from 'src/components';
-
 import {
   SCENE,
   ENTITY,
@@ -20,6 +19,7 @@ import {
   SOUND,
   UPDATE_X_DELAY,
 } from 'src/constants';
+
 import { getSceneAndData } from 'src/scenes';
 
 function renderScore(world: World<WorldData>) {

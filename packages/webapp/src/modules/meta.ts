@@ -13,6 +13,9 @@ const style = createCSSSheet(css`
   }
 `);
 
+/**
+ * @customElement m-meta
+ */
 @customElement('m-meta')
 @connectStore(themeStore)
 @connectStore(i18n.store)

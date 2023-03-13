@@ -1,11 +1,12 @@
 [workspace]
 members = [
+  "games/gomoku",
   "packages/nes",
   "packages/server",
   "packages/tauriapp"
 ]
 
-exclude = ["deps/tetanes", "deps/tauri-plugin-window-state"]
+exclude = ["deps"]
 
 [profile.release.package.nes]
 # Tell `rustc` to optimize for small code size.

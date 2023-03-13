@@ -17,6 +17,7 @@ import { focusStyle } from 'duoyun-ui/lib/styles';
 import { ContextMenu } from 'duoyun-ui/elements/menu';
 import { isNotBoolean } from 'duoyun-ui/lib/types';
 import { getAvatar, getCDNSrc } from 'src/utils';
+import { Player } from '@mantou/nes';
 
 import { theme } from 'src/theme';
 import { configure } from 'src/configure';
@@ -47,15 +48,19 @@ const style = createCSSSheet(css`
 @customElement('m-room-player-list')
 @adoptedStyle(style)
 export class MRoomPlayerListElement extends GemElement {
-  @property roles: Role[];
+  @property roles: Partial<Record<Player, Role>>;
   @property isHost: boolean;
 
   render = () => {
     return html`${[
-      [this.roles[1], this.roles[2], this.roles[3], this.roles[4]].map(
-        (role, index) =>
+      [Player.One, Player.Two, Player.Three, Player.Four].map(
+        (roleType) =>
           html`
-            <m-room-player-item .host=${this.isHost} .playerRole=${role} .roleType=${index + 1}></m-room-player-item>
+            <m-room-player-item
+              .host=${this.isHost}
+              .playerRole=${this.roles[roleType]}
+              .roleType=${roleType}
+            ></m-room-player-item>
           `,
       ),
     ]}`;
@@ -127,7 +132,7 @@ const itemStyle = createCSSSheet(css`
 @connectStore(voiceStore)
 export class MRoomPlayerItemElement extends GemElement {
   @property playerRole: Role;
-  @property roleType: number;
+  @property roleType: Player;
   @boolattribute host: boolean;
 
   @globalemitter rolechange: Emitter<RoleOffer>;
@@ -144,7 +149,7 @@ export class MRoomPlayerItemElement extends GemElement {
   }
 
   get #isHostRole() {
-    return this.roleType === 1;
+    return this.roleType === Player.One;
   }
 
   get #isJoinable() {
@@ -188,7 +193,7 @@ export class MRoomPlayerItemElement extends GemElement {
       );
     }
     if (this.#isAllowLeave) {
-      this.rolechange(new RoleOffer(0));
+      this.rolechange(new RoleOffer(null));
     }
   };
 
@@ -203,7 +208,7 @@ export class MRoomPlayerItemElement extends GemElement {
         <dy-avatar
           class="avatar"
           square
-          src=${getCDNSrc(`https://ui-avatars.com/api/?name=P${this.roleType}`)}
+          src=${getCDNSrc(`https://ui-avatars.com/api/?name=P${Number(this.roleType) + 1}`)}
         ></dy-avatar>
         <div class="username">
           ${this.#isHostRole

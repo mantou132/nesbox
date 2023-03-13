@@ -9,8 +9,8 @@ import {
   connectStore,
   updateStore,
 } from '@mantou/gem';
-import { events, VoiceSignalEvent } from 'src/constants';
 
+import { events, VoiceSignalEvent } from 'src/constants';
 import { configure } from 'src/configure';
 import { icons } from 'src/icons';
 import { theme } from 'src/theme';

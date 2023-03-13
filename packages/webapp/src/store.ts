@@ -1,8 +1,8 @@
 import { ElementOf } from 'duoyun-ui/lib/types';
 import { createCacheStore } from 'duoyun-ui/lib/utils';
 import { updateStore } from '@mantou/gem';
-import { localStorageKeys } from 'src/constants';
 
+import { localStorageKeys } from 'src/constants';
 import {
   GetCommentsQuery,
   GetFriendsQuery,

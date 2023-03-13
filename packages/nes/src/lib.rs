@@ -1,96 +1,17 @@
 // ref: https://github.com/lukexor/tetanes/blob/main/tetanes-web/src/lib.rs
 
-use qoi::{decode_to_vec, encode_to_vec};
+use nesbox_utils::{
+    input::{Button, Player},
+    prelude::*,
+};
 use tetanes::{
     audio::{AudioMixer, NesAudioCallback},
     common::{Kind, Reset},
     control_deck::ControlDeck,
     input::GamepadSlot,
     memory::{MemRead, MemWrite, RamState},
-    ppu::{VideoFilter, RENDER_CHANNELS, RENDER_HEIGHT, RENDER_SIZE, RENDER_WIDTH},
+    ppu::{VideoFilter, RENDER_HEIGHT, RENDER_SIZE, RENDER_WIDTH},
 };
-use wasm_bindgen::prelude::*;
-
-const LINE_BYTE: i32 = RENDER_WIDTH as i32 * RENDER_CHANNELS as i32;
-
-#[wasm_bindgen(start)]
-pub fn run() {
-    #[cfg(debug_assertions)]
-    console_error_panic_hook::set_once();
-}
-
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = console)]
-    fn log(s: &str);
-}
-
-#[wasm_bindgen]
-pub enum Button {
-    Poweroff,
-    Reset,
-    Select,
-    Start,
-
-    Joypad1A,
-    Joypad1B,
-    Joypad1TurboA,
-    Joypad1TurboB,
-    Joypad1Up,
-    Joypad1Down,
-    Joypad1Left,
-    Joypad1Right,
-
-    Joypad2A,
-    Joypad2B,
-    Joypad2TurboA,
-    Joypad2TurboB,
-    Joypad2Up,
-    Joypad2Down,
-    Joypad2Left,
-    Joypad2Right,
-
-    Joypad3A,
-    Joypad3B,
-    Joypad3TurboA,
-    Joypad3TurboB,
-    Joypad3Up,
-    Joypad3Down,
-    Joypad3Left,
-    Joypad3Right,
-
-    Joypad4A,
-    Joypad4B,
-    Joypad4TurboA,
-    Joypad4TurboB,
-    Joypad4Up,
-    Joypad4Down,
-    Joypad4Left,
-    Joypad4Right,
-}
-
-fn find_diff_index(old: &[u8], new: &[u8], reverse: bool) -> i32 {
-    let len = new.len() as i32;
-    let mut index = if reverse { len - 4 } else { 0 };
-
-    if old.len() == new.len() {
-        loop {
-            if index < 0 || index >= len {
-                break;
-            }
-            let i = index as usize;
-            if old[i] != new[i] || old[i + 1] != new[i + 1] || old[i + 2] != new[i + 2] {
-                break;
-            }
-            if reverse {
-                index -= 4;
-            } else {
-                index += 4;
-            }
-        }
-    }
-    index
-}
 
 #[wasm_bindgen]
 pub struct Nes {
@@ -105,12 +26,8 @@ pub struct Nes {
 
 #[wasm_bindgen]
 impl Nes {
-    #[deprecated]
-    pub fn memory() -> JsValue {
-        wasm_bindgen::memory()
-    }
-
     pub fn new(output_sample_rate: f32) -> Self {
+        log!("Create nes emulator...");
         let mut control_deck = ControlDeck::new(RamState::default());
         control_deck.set_filter(VideoFilter::Pixellate);
         control_deck.set_fourscore(true);
@@ -158,41 +75,15 @@ impl Nes {
         self.control_deck.reset(Kind::Hard);
     }
 
-    pub fn frame(&mut self, qoi: bool, full_encode: bool) -> *const u8 {
+    pub fn frame(&mut self, qoi: bool, qoi_whole_frame: bool) -> *const u8 {
         let buffer = self.control_deck.frame_buffer();
         if qoi {
-            let mut start = 0;
-            let mut end = 0;
-            if full_encode {
-                end = buffer.len();
-            } else if self.prev_frame_buffer.len() > 0 {
-                let end_index = find_diff_index(&self.prev_frame_buffer, buffer, true);
-
-                let end_line = end_index / LINE_BYTE;
-
-                if end_index >= 0 {
-                    let start_index = find_diff_index(&self.prev_frame_buffer, buffer, false);
-
-                    start = (start_index / LINE_BYTE * LINE_BYTE) as usize;
-                    end = ((end_line + 1) * LINE_BYTE) as usize;
-                }
-            }
-
-            if end - start == 0 {
-                self.qoi_buffer = Vec::new();
-            } else {
-                let h = ((end - start) / LINE_BYTE as usize) as u8;
-                self.qoi_buffer =
-                    encode_to_vec(&buffer[start..end], RENDER_WIDTH, h as u32).unwrap();
-                // x
-                self.qoi_buffer.push(0);
-                // y
-                self.qoi_buffer.push((start / LINE_BYTE as usize) as u8);
-                // w, RENDER_WIDTH > u8 max value
-                self.qoi_buffer.push(0);
-                // h
-                self.qoi_buffer.push(h);
-            }
+            self.qoi_buffer = encode_qoi_frame(
+                &self.prev_frame_buffer,
+                buffer,
+                RENDER_WIDTH,
+                qoi_whole_frame,
+            );
             self.prev_frame_buffer = buffer.to_vec();
         } else {
             self.prev_frame_buffer = Vec::new();
@@ -213,7 +104,7 @@ impl Nes {
     }
 
     pub fn decode_qoi(&mut self, bytes: &[u8]) -> *const u8 {
-        self.qoi_decode_buffer = decode_to_vec(bytes).unwrap().1;
+        self.qoi_decode_buffer = decode_qoi_frame(bytes);
         self.qoi_decode_buffer.as_ptr()
     }
 
@@ -241,11 +132,10 @@ impl Nes {
             .expect("valid rom");
     }
 
-    pub fn handle_event(&mut self, button: Button, pressed: bool, repeat: bool) -> bool {
+    pub fn handle_button_event(&mut self, button: Button, pressed: bool, repeat: bool) {
         if repeat {
-            return false;
+            return;
         }
-        let mut matched = true;
 
         let gamepad1 = &mut self.control_deck.gamepad_mut(GamepadSlot::One);
         match button {
@@ -317,7 +207,7 @@ impl Nes {
                                     Button::Joypad4Down => gamepad4.down = pressed,
                                     Button::Joypad4Left => gamepad4.left = pressed,
                                     Button::Joypad4Right => gamepad4.right = pressed,
-                                    _ => matched = false,
+                                    _ => {}
                                 }
                             }
                         }
@@ -325,15 +215,18 @@ impl Nes {
                 }
             }
         }
-        matched
+    }
+
+    pub fn handle_motion_event(&mut self, _player: Player, _x: u32, _y: u32, _dx: f32, _dy: f32) {
+        //
     }
 
     pub fn state(&mut self) -> Vec<u8> {
-        bincode::serialize(self.control_deck.cpu()).unwrap_or_default()
+        serialize(self.control_deck.cpu()).unwrap_or_default()
     }
 
     pub fn load_state(&mut self, state: &[u8]) {
-        if let Ok(cpu) = bincode::deserialize(&state) {
+        if let Ok(cpu) = deserialize(&state) {
             self.control_deck.load_cpu(cpu);
         }
     }

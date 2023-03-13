@@ -2,9 +2,9 @@ import { updateStore } from '@mantou/gem';
 import { Toast } from 'duoyun-ui/elements/toast';
 import { debounce } from 'duoyun-ui/lib/utils';
 import { isNotNullish } from 'duoyun-ui/lib/types';
-import { events, VoiceSignalEvent, Signal, SignalEvent, COMMAND } from 'src/constants';
 import { documentVisible, playHintSound, playSound } from 'src/utils';
 
+import { events, VoiceSignalEvent, Signal, SignalEvent, COMMAND } from 'src/constants';
 import {
   AcceptFriend,
   AcceptFriendMutation,

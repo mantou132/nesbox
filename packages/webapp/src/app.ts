@@ -16,10 +16,10 @@ import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { Loadbar } from 'duoyun-ui/elements/page-loadbar';
 import { createPath } from '@mantou/gem/elements/route';
 import { forever } from 'duoyun-ui/lib/utils';
-import { paramKeys, queryKeys, viewTransitionName } from 'src/constants';
 import { preventDefault } from 'src/utils';
 import { routes, locationStore } from 'src/routes';
 
+import { paramKeys, queryKeys, viewTransitionName } from 'src/constants';
 import {
   configure,
   getShortcut,
@@ -59,12 +59,16 @@ const style = createCSSSheet(css`
     overflow-y: auto;
     scrollbar-width: none;
     view-transition-name: ${viewTransitionName.MAIN};
+    outline: none;
   }
   .content::-webkit-scrollbar {
     width: 0;
   }
 `);
 
+/**
+ * @customElement app-root
+ */
 @customElement('app-root')
 @connectStore(configure)
 @adoptedStyle(style)

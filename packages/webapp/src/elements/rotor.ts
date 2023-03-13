@@ -16,9 +16,9 @@ import {
   boolattribute,
   randomStr,
 } from '@mantou/gem';
-import { events } from 'src/constants';
 import { playHintSound } from 'src/utils';
 
+import { events } from 'src/constants';
 import { GamepadBtnIndex } from 'src/gamepad';
 import { theme } from 'src/theme';
 import { updateMtApp } from 'src/mt-app';

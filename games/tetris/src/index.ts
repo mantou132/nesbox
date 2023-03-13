@@ -1,6 +1,6 @@
 import { World, loadFont, loadAudio, loadSprite } from '@mantou/ecs';
-
 import { HEIGHT, WIDTH, SCENE, WorldData, SOUND, SPRITE, BORDER_COLOR } from 'src/constants';
+
 import { getSceneAndData } from 'src/scenes';
 import { commonSystem, modeSelectSystem, moveSystem, pauseSystem, scoreSystem } from 'src/systems';
 import { sound, fonts, headingFonts } from 'src/_assets';

@@ -11,9 +11,9 @@ import {
 } from '@mantou/gem';
 import { createPath } from 'duoyun-ui/elements/route';
 import { getAvatar, playHintSound } from 'src/utils';
-import { events, queryKeys } from 'src/constants';
 import { routes } from 'src/routes';
 
+import { events, queryKeys } from 'src/constants';
 import { configure } from 'src/configure';
 import { theme } from 'src/theme';
 import { i18n } from 'src/i18n';

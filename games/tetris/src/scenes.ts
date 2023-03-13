@@ -11,7 +11,6 @@ import {
   RenderOnceComponent,
 } from '@mantou/ecs';
 import { PieceEntity } from 'src/entities';
-
 import {
   HEIGHT,
   WIDTH,

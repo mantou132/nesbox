@@ -1,0 +1,14 @@
+[package]
+name = "gomoku"
+version = "0.1.0"
+authors = ["mantou132 <709922234@qq.com>"]
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+nesbox-utils = { path = "../../packages/nes/utils" }
+
+# fixed ecs macro
+bevy_ecs = "0.10"

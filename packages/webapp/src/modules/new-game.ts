@@ -1,7 +1,7 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, connectStore } from '@mantou/gem';
-import { githubRelease } from 'src/constants';
 import { getCDNSrc } from 'src/utils';
 
+import { githubRelease } from 'src/constants';
 import { i18n } from 'src/i18n';
 import { theme } from 'src/theme';
 import { gameKindList, gameSeriesList } from 'src/enums';

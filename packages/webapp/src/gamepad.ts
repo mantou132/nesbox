@@ -2,6 +2,7 @@ import { isNotNullish } from 'duoyun-ui/lib/types';
 import { Button } from '@mantou/nes';
 import { Toast } from 'duoyun-ui/elements/toast';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
+
 import { events } from 'src/constants';
 
 // https://w3c.github.io/gamepad/#remapping
@@ -23,7 +24,7 @@ export enum GamepadBtnIndex {
   FrontRightBottom = 7,
 }
 
-const buttonMap: Record<Button, Button[]> = {
+const buttonMap: Partial<Record<GamepadBtnIndex, Button[]>> = {
   [GamepadBtnIndex.Up]: [Button.Joypad1Up, Button.Joypad2Up, Button.Joypad3Up, Button.Joypad4Up],
   [GamepadBtnIndex.Left]: [Button.Joypad1Left, Button.Joypad2Left, Button.Joypad3Left, Button.Joypad4Left],
   [GamepadBtnIndex.Down]: [Button.Joypad1Down, Button.Joypad2Down, Button.Joypad3Down, Button.Joypad4Down],

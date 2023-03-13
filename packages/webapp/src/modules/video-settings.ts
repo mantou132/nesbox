@@ -1,6 +1,6 @@
 import { GemElement, html, adoptedStyle, customElement, connectStore } from '@mantou/gem';
-import { RTCTransportType, VideoFilter, VideoRefreshRate, VideoRenderMethod } from 'src/constants';
 
+import { RTCTransportType, VideoFilter, VideoRefreshRate, VideoRenderMethod } from 'src/constants';
 import { configure, Settings } from 'src/configure';
 import { gridStyle } from 'src/modules/shortcut-settings';
 import { updateAccount } from 'src/services/api';

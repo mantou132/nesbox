@@ -13,9 +13,9 @@ import {
 } from '@mantou/gem';
 import { formatDuration, Time } from 'duoyun-ui/lib/time';
 import { getCDNSrc, playHintSound } from 'src/utils';
-import { events, queryKeys } from 'src/constants';
 import { locationStore } from 'src/routes';
 
+import { events, queryKeys } from 'src/constants';
 import { store } from 'src/store';
 import { theme } from 'src/theme';
 import { createRoom, getComments } from 'src/services/api';

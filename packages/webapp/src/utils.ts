@@ -3,10 +3,14 @@ import { matchPath, RouteItem } from 'duoyun-ui/elements/route';
 import { Time } from 'duoyun-ui/lib/time';
 import { ValueOf } from 'duoyun-ui/lib/types';
 import { isMtApp, mtApp } from 'mt-app';
-import { githubIssue, queryKeys, VideoRefreshRate } from 'src/constants';
+import { debounce } from 'duoyun-ui/lib/utils';
+import { clamp } from 'duoyun-ui/lib/number';
 
+import { githubIssue, queryKeys, VideoRefreshRate } from 'src/constants';
 import { configure } from 'src/configure';
 import { logger } from 'src/logger';
+
+import type { NesboxCanvasElement } from 'src/elements/canvas';
 
 export const setViewTransitionName = (ele: HTMLElement | null, name: string) => {
   if (ele instanceof HTMLElement) {
@@ -177,4 +181,31 @@ export const fontLoading = (font: FontFace) => {
     .catch(() => {
       //
     });
+};
+
+const getRectCache = new WeakMap<HTMLElement, () => DOMRect>();
+export const positionMapping = (event: PointerEvent, canvas: NesboxCanvasElement) => {
+  if (!getRectCache.has(canvas)) {
+    const fn = debounce(() => canvas.canvasRef.element!.getBoundingClientRect());
+    getRectCache.set(canvas, fn);
+  }
+  const stage = getRectCache.get(canvas)!();
+  const aspectRadio = canvas.width / canvas.height;
+  const width = aspectRadio > stage.width / stage.height ? stage.width : aspectRadio * stage.height;
+  const halfWidth = width / 2;
+  const height = width / aspectRadio;
+  const halfHeight = height / 2;
+
+  const centerX = stage.x + stage.width / 2;
+  const centerY = stage.y + stage.height / 2;
+
+  const result = [
+    clamp(0, event.x - centerX + halfWidth, width),
+    clamp(0, event.y - centerY + halfHeight, height),
+    event.movementX,
+    event.movementY,
+  ];
+
+  const scale = width / canvas.width;
+  return result.map((e) => e / scale);
 };

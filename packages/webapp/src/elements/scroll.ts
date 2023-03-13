@@ -1,7 +1,7 @@
 import { createCSSSheet, customElement, css, adoptedStyle } from '@mantou/gem';
 import { DuoyunScrollBaseElement } from 'duoyun-ui/elements/base/scroll';
-import { events } from 'src/constants';
 
+import { events } from 'src/constants';
 import { GamepadBtnIndex } from 'src/gamepad';
 
 const style = createCSSSheet(css`

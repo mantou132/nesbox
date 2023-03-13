@@ -1,4 +1,4 @@
-import { Button } from '@mantou/nes';
+import type { Button, Player } from '@mantou/nes';
 
 export function preload() {
   globalThis.nesbox = {
@@ -8,16 +8,18 @@ export function preload() {
     _setState: (_state?: Uint8Array) => void 0,
     _width: 0,
     _height: 0,
-    _control: {} as Record<Button, boolean>,
-    _prevControl: {} as Record<Button, boolean>,
+    _pressedControl: new Set(),
+    _tapControl: new Set(),
 
     buttons: {} as Record<keyof typeof Button, Button>,
+    players: {} as Record<keyof typeof Player, Player>,
     buttons1: {} as Record<string, Button>,
     buttons2: {} as Record<string, Button>,
     buttons3: {} as Record<string, Button>,
     buttons4: {} as Record<string, Button>,
     soundEnabled: true,
     videoFilter: 'default',
+    cursorPosition: new Map(),
 
     init({ getAudioFrame, getState, getVideoFrame, setState, width, height }) {
       this._getVideoFrame = getVideoFrame;
@@ -29,13 +31,11 @@ export function preload() {
     },
 
     isTap(button?: Button) {
-      return button
-        ? !this._prevControl[button] && this._control[button]
-        : Object.entries(this._control).some(([button, v]) => v && !this._prevControl[button as unknown as Button]);
+      return button ? this._tapControl.has(button) : !!this._tapControl.size;
     },
 
     isPressed(button?: Button) {
-      return button ? this._control[button] : Object.values(this._control).includes(true);
+      return button ? this._pressedControl.has(button) : !!this._pressedControl.size;
     },
   };
 
@@ -67,8 +67,13 @@ export function getLogs(): string | undefined {
   return (globalThis.console as any)._logs?.shift()?.join(',');
 }
 
-export function definedButtons(json: string) {
+export function setCursorPosition(player: Player, x: number, y: number) {
+  nesbox.cursorPosition.set(player, { x, y });
+}
+
+export function definedEnums(json: string, playerJson: string) {
   nesbox.buttons = JSON.parse(json);
+  nesbox.players = JSON.parse(playerJson);
   nesbox.buttons1 = {
     JoypadA: nesbox.buttons.Joypad1A,
     JoypadB: nesbox.buttons.Joypad1B,
@@ -78,6 +83,8 @@ export function definedButtons(json: string) {
     JoypadDown: nesbox.buttons.Joypad1Down,
     JoypadLeft: nesbox.buttons.Joypad1Left,
     JoypadRight: nesbox.buttons.Joypad1Right,
+    PointerLeft: nesbox.buttons.Pointer1Left,
+    PointerRight: nesbox.buttons.Pointer1Right,
   };
   nesbox.buttons2 = {
     JoypadA: nesbox.buttons.Joypad2A,
@@ -88,6 +95,8 @@ export function definedButtons(json: string) {
     JoypadDown: nesbox.buttons.Joypad2Down,
     JoypadLeft: nesbox.buttons.Joypad2Left,
     JoypadRight: nesbox.buttons.Joypad2Right,
+    PointerLeft: nesbox.buttons.Pointer2Left,
+    PointerRight: nesbox.buttons.Pointer2Right,
   };
   nesbox.buttons3 = {
     JoypadA: nesbox.buttons.Joypad3A,
@@ -98,6 +107,8 @@ export function definedButtons(json: string) {
     JoypadDown: nesbox.buttons.Joypad3Down,
     JoypadLeft: nesbox.buttons.Joypad3Left,
     JoypadRight: nesbox.buttons.Joypad3Right,
+    PointerLeft: nesbox.buttons.Pointer3Left,
+    PointerRight: nesbox.buttons.Pointer3Right,
   };
   nesbox.buttons4 = {
     JoypadA: nesbox.buttons.Joypad4A,
@@ -108,14 +119,20 @@ export function definedButtons(json: string) {
     JoypadDown: nesbox.buttons.Joypad4Down,
     JoypadLeft: nesbox.buttons.Joypad4Left,
     JoypadRight: nesbox.buttons.Joypad4Right,
+    PointerLeft: nesbox.buttons.Pointer4Left,
+    PointerRight: nesbox.buttons.Pointer4Right,
   };
 }
 
 export function setControl(button: Button, pressed: boolean) {
   if (pressed) {
-    nesbox._control[button] = pressed;
+    if (!nesbox._pressedControl.has(button)) {
+      nesbox._tapControl.add(button);
+    }
+    nesbox._pressedControl.add(button);
   } else {
-    delete nesbox._control[button];
+    nesbox._pressedControl.delete(button);
+    nesbox._tapControl.delete(button);
   }
   return true;
 }
@@ -130,14 +147,10 @@ export function setVideoFilter(filter: 'default' | 'NTSC') {
 
 export function getVideoFrame() {
   const frame = nesbox._getVideoFrame();
-  Promise.resolve().then(() => {
-    nesbox._prevControl = { ...nesbox._control };
-  });
+  Promise.resolve().then(() => nesbox._tapControl.clear());
   return frame;
   // const frame = new DataView(nesbox._getVideoFrame().buffer);
-  // Promise.resolve().then(() => {
-  //   nesbox._prevControl = { ...nesbox._control };
-  // });
+  // Promise.resolve().then(() => nesbox._tapControl.clear());
   // let index = 0;
   // return () => frame.getUint32(index++ * 4, false);
 }

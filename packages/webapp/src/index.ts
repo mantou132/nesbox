@@ -4,10 +4,10 @@ import { Toast } from 'duoyun-ui/elements/toast';
 import { DuoyunDropAreaElement } from 'duoyun-ui/elements/drop-area';
 import { createPath } from 'duoyun-ui/elements/route';
 import { isMtApp, mtApp } from 'mt-app';
-import { COMMAND, isApp, isTauriMacApp, isTauriWinApp, RELEASE } from 'src/constants';
 import { matchRoute } from 'src/utils';
 import { routes } from 'src/routes';
 
+import { COMMAND, isApp, isTauriMacApp, isTauriWinApp, RELEASE } from 'src/constants';
 import { theme } from 'src/theme';
 import { configure } from 'src/configure';
 import { logger } from 'src/logger';

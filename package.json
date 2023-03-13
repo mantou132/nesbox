@@ -27,10 +27,7 @@
     "*.ts": "eslint --fix"
   },
   "workspaces": [
-    "packages/*",
-    "!packages/nes",
-    "!packages/server",
-    "!packages/flutter_app",
-    "!packages/tauriapp"
+    "games/*",
+    "packages/*"
   ]
 }

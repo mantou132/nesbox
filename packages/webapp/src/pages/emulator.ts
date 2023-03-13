@@ -11,12 +11,12 @@ import {
   history,
 } from '@mantou/gem';
 import { locale } from 'duoyun-ui/lib/locale';
-import { default as initNes, Button, Nes } from '@mantou/nes';
+import { default as initNes, Button, Nes, Player } from '@mantou/nes';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { clamp } from 'duoyun-ui/lib/number';
 import { Modal } from 'duoyun-ui/elements/modal';
 import { createPath, RouteItem } from 'duoyun-ui/elements/route';
-import { requestFrame } from 'src/utils';
+import { positionMapping, requestFrame } from 'src/utils';
 import { routes } from 'src/routes';
 
 import { configure, defaultKeybinding, setNesFile } from 'src/configure';
@@ -33,7 +33,6 @@ const style = createCSSSheet(css`
     position: absolute;
     width: 100%;
     height: 100%;
-    object-fit: contain;
     background-color: black;
     image-rendering: pixelated;
   }
@@ -86,7 +85,7 @@ export class PEmulatorElement extends GemElement<State> {
     this.#game?.set_sound(false);
   };
 
-  #getButton = (event: KeyboardEvent) => {
+  #getButton = (event: KeyboardEvent | PointerEvent) => {
     const map: Record<string, Button> = {
       [defaultKeybinding.Up]: Button.Joypad1Up,
       [defaultKeybinding.Left]: Button.Joypad1Left,
@@ -105,7 +104,23 @@ export class PEmulatorElement extends GemElement<State> {
       [defaultKeybinding.A_2]: Button.Joypad2A,
       [defaultKeybinding.B_2]: Button.Joypad2B,
     };
+    if (event instanceof MouseEvent) {
+      switch (event.button) {
+        case 0:
+          return Button.Pointer1Left;
+        case 2:
+          return Button.Pointer1Right;
+        default:
+          return;
+      }
+    }
     return map[event.key.toLowerCase()];
+  };
+
+  #onPointerMove = (event: PointerEvent) => {
+    if (!this.#game) return;
+    const [x, y, dx, dy] = positionMapping(event, this.canvasRef.element!);
+    this.#game.handle_motion_event(Player.One, x, y, dx, dy);
   };
 
   #quit = async () => {
@@ -124,13 +139,20 @@ export class PEmulatorElement extends GemElement<State> {
     } else {
       this.#enableAudio();
     }
-    this.#game?.handle_event(button, true, event.repeat);
+    this.#game?.handle_button_event(button, true, event.repeat);
   };
 
-  #onKeyUp = (event: KeyboardEvent) => {
+  #onPointerDown = (event: PointerEvent) => {
     const button = this.#getButton(event);
     if (!button) return;
-    this.#game?.handle_event(button, false, event.repeat);
+    this.#enableAudio();
+    this.#game?.handle_button_event(button, true, false);
+  };
+
+  #onKeyOrPointerUp = (event: KeyboardEvent | PointerEvent) => {
+    const button = this.#getButton(event);
+    if (!button) return;
+    this.#game?.handle_button_event(button, false, event instanceof KeyboardEvent ? event.repeat : false);
   };
 
   #sampleRate = 44100;
@@ -164,7 +186,7 @@ export class PEmulatorElement extends GemElement<State> {
 
     switch (configure.openNesFile.name.toLowerCase().split('.').pop()) {
       case 'wasm': {
-        await initNes(new Response(romBuffer));
+        await initNes(new Response(romBuffer, { headers: { 'content-type': 'application/wasm' } }));
         this.#game = Nes.new(this.#sampleRate);
         break;
       }
@@ -198,12 +220,19 @@ export class PEmulatorElement extends GemElement<State> {
       () => [configure.windowHasFocus],
     );
 
+    addEventListener('pointermove', this.#onPointerMove);
     addEventListener('keydown', this.#onKeyDown);
-    addEventListener('keyup', this.#onKeyUp);
+    this.addEventListener('pointerdown', this.#onPointerDown);
+    addEventListener('keyup', this.#onKeyOrPointerUp);
+    this.addEventListener('pointerup', this.#onKeyOrPointerUp);
     return () => {
+      this.#game?.free();
       this.#audioContext?.close();
+      removeEventListener('pointermove', this.#onPointerMove);
       removeEventListener('keydown', this.#onKeyDown);
-      removeEventListener('keyup', this.#onKeyUp);
+      this.removeEventListener('pointerdown', this.#onPointerDown);
+      removeEventListener('keyup', this.#onKeyOrPointerUp);
+      this.removeEventListener('pointerup', this.#onKeyOrPointerUp);
     };
   };
 
@@ -229,7 +258,11 @@ if (process.env.NODE_ENV === 'development') {
   (async function () {
     try {
       const gameOrigin = 'http://localhost:8000';
-      setNesFile(new File([await (await fetch(`${gameOrigin}/index.js`)).blob()], 'index.js'));
+      let filename = 'index_bg.wasm';
+      if (!(await fetch(`${gameOrigin}/${filename}`)).ok) {
+        filename = 'index.js';
+      }
+      setNesFile(new File([await (await fetch(`${gameOrigin}/${filename}`)).blob()], filename));
       new EventSource(`${gameOrigin}/esbuild`).addEventListener('change', () => location.reload());
     } catch {
       //

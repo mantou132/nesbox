@@ -4,8 +4,8 @@ import { commonHandle } from 'duoyun-ui/lib/hotkeys';
 import { waitLoading } from 'duoyun-ui/elements/wait';
 import { focusStyle } from 'duoyun-ui/lib/styles';
 import { locationStore, routes } from 'src/routes';
-import { viewTransitionName } from 'src/constants';
 
+import { viewTransitionName } from 'src/constants';
 import { i18n } from 'src/i18n';
 import { configure, SearchCommand, setSearchCommand, toggleFriendListState, toggleSearchState } from 'src/configure';
 import { theme } from 'src/theme';
