@@ -20,6 +20,7 @@ import { positionMapping, requestFrame } from 'src/utils';
 import { routes } from 'src/routes';
 
 import { configure, defaultKeybinding, setNesFile } from 'src/configure';
+import { MStageElement } from 'src/modules/stage';
 
 import type { NesboxCanvasElement } from 'src/elements/canvas';
 
@@ -104,15 +105,8 @@ export class PEmulatorElement extends GemElement<State> {
       [defaultKeybinding.A_2]: Button.Joypad2A,
       [defaultKeybinding.B_2]: Button.Joypad2B,
     };
-    if (event instanceof MouseEvent) {
-      switch (event.button) {
-        case 0:
-          return Button.Pointer1Left;
-        case 2:
-          return Button.Pointer1Right;
-        default:
-          return;
-      }
+    if (event instanceof PointerEvent) {
+      return MStageElement.mapPointerButton(event);
     }
     return map[event.key.toLowerCase()];
   };

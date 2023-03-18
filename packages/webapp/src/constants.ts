@@ -24,6 +24,11 @@ export const viewTransitionName = {
   MAIN: 'main',
 };
 
+export const gameStateType = {
+  WASM: 'wasm-memory',
+  NORMAL: 'normal',
+};
+
 export const events = {
   SIGNAL: 'signal',
   VOICE_SIGNAL: 'voice-signal',

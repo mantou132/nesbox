@@ -184,28 +184,33 @@ export class PRoomElement extends GemElement {
     );
   };
 
-  #getCachesName = (auto: boolean) => `${auto ? 'auto_' : ''}state_v5`;
+  #getCachesName = (auto: boolean) => `${auto ? 'auto_' : ''}state_v6`;
 
   #save = async (auto = false) => {
     try {
-      if (!this.stageRef.element!.isHostReady()) return;
-      const buffer = this.stageRef.element!.getState();
-      if (!buffer) return;
+      if (!this.stageRef.element!.hostRomBuffer) return;
+      const state = this.stageRef.element!.getState();
+      if (!state) return;
       const thumbnail = this.stageRef.element!.getThumbnail();
       const cache = await caches.open(this.#getCachesName(auto));
-      const key = await hash(this.stageRef.element!.romBuffer!);
+      const key = await hash(this.stageRef.element!.hostRomBuffer);
       await cache.put(
-        `/${key}?${new URLSearchParams({ timestamp: Date.now().toString(), thumbnail, auto: auto ? 'auto' : '' })}`,
-        new Response(new Blob([buffer]), {
+        `/${key}?${new URLSearchParams({
+          type: state.type,
+          ptr: state.ptr || '',
+          timestamp: Date.now().toString(),
+          thumbnail,
+          auto: auto ? 'auto' : '',
+        })}`,
+        new Response(state.buffer, {
           headers: {
             'Content-Type': 'application/octet-stream',
-            'Content-Length': buffer.length.toString(),
+            'Content-Length': state.buffer.byteLength.toString(),
           },
         }),
       );
     } catch (err) {
       logger.error(err);
-      debugger;
       if (!auto) throw err;
     }
     if (!auto) Toast.open('success', i18n.get('tipGameStateSave', new Time().format()));
@@ -214,8 +219,8 @@ export class PRoomElement extends GemElement {
   #autoSave = () => this.#save(true);
 
   #load = async () => {
-    if (!this.stageRef.element!.isHostReady()) return;
-    const key = await hash(this.stageRef.element!.romBuffer!);
+    if (!this.stageRef.element!.hostRomBuffer) return;
+    const key = await hash(this.stageRef.element!.hostRomBuffer);
     const cache = await caches.open(this.#getCachesName(false));
     const reqList = [...(await cache.keys(`/${key}`, { ignoreSearch: true }))].splice(0, 10);
     const autoCache = await caches.open(this.#getCachesName(true));
@@ -228,6 +233,8 @@ export class PRoomElement extends GemElement {
       Toast.open('default', i18n.get('tipGameStateMissing'));
     } else {
       const getQuery = (url: string, { searchParams } = new URL(url)) => ({
+        type: searchParams.get('type') || '',
+        ptr: searchParams.get('ptr') || '',
         time: new Time(Number(searchParams.get('timestamp'))),
         thumbnail: searchParams.get('thumbnail') || '',
         tag: searchParams.get('auto') ? 'AUTO' : '',
@@ -239,14 +246,14 @@ export class PRoomElement extends GemElement {
             .data=${reqList
               .map((req) => ({ req, ...getQuery(req.url) }))
               .sort((a, b) => Number(b.time) - Number(a.time))
-              .map(({ req, time, thumbnail, tag }) => ({
+              .map(({ req, type, ptr, time, thumbnail, tag }) => ({
                 img: thumbnail,
                 label: time.format(),
                 tag,
                 onClick: async (evt: PointerEvent) => {
                   const res = await (req === autoCacheReq ? autoCache : cache).match(req);
                   if (!res) return;
-                  this.stageRef.element!.loadState(new Uint8Array(await res.arrayBuffer()));
+                  this.stageRef.element!.loadState({ type, ptr, buffer: await res.arrayBuffer() });
                   Toast.open('success', i18n.get('tipGameStateLoad', time.format()));
                   evt.target?.dispatchEvent(new CustomEvent('close', { composed: true }));
                 },
@@ -263,7 +270,7 @@ export class PRoomElement extends GemElement {
   };
 
   #uploadScreenshot = () => {
-    if (!this.stageRef.element!.isHostReady()) return;
+    if (!this.stageRef.element!.hostRomBuffer) return;
     updateRoomScreenshot({
       id: this.#playing!.id,
       screenshot: this.stageRef.element!.getThumbnail(),

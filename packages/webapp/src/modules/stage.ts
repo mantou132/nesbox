@@ -20,7 +20,7 @@ import { clamp } from 'duoyun-ui/lib/number';
 import { isMtApp } from 'mt-app';
 import { getCDNSrc, isValidGameFile, playHintSound, positionMapping, requestFrame } from 'src/utils';
 
-import { events, RTCTransportType } from 'src/constants';
+import { events, gameStateType, RTCTransportType } from 'src/constants';
 import { logger } from 'src/logger';
 import { Cheat, configure } from 'src/configure';
 import {
@@ -107,6 +107,17 @@ export class MStageElement extends GemElement<State> {
     canvasWidth: 0,
     canvasHeight: 0,
   };
+
+  static mapPointerButton(event: PointerEvent) {
+    switch (event.button) {
+      case 0:
+        return Button.Pointer1Left;
+      case 2:
+        return Button.Pointer1Right;
+      default:
+        return;
+    }
+  }
 
   static parseCheatCode = (cheat: Cheat) => {
     const result = cheat.code.match(/^(?<addr>[0-9A-F]{4})-(?<type>[0-3])(?<len>[1-4])-(?<val>([0-9A-F]{2})+)$/);
@@ -259,10 +270,12 @@ export class MStageElement extends GemElement<State> {
     this.#nextStartTime = start + 1 / 60;
   };
 
-  romBuffer?: ArrayBuffer;
+  hostRomBuffer?: ArrayBuffer;
   #loadRom = async () => {
+    // 在这里 free 的原因是卸载时需要自动保存状态，可能会读取 wasm 内存
+    this.#game?.free();
     this.#game = undefined;
-    this.romBuffer = undefined;
+    this.hostRomBuffer = undefined;
 
     try {
       const zip = await (await fetch(getCDNSrc(this.#rom!))).arrayBuffer();
@@ -296,7 +309,9 @@ export class MStageElement extends GemElement<State> {
       this.#setVideoFilter();
       this.setState({ canvasWidth: game.width(), canvasHeight: game.height() });
       this.#game = game;
-      this.romBuffer = romBuffer;
+      if (this.#isHost) {
+        this.hostRomBuffer = romBuffer;
+      }
     } catch (err) {
       logger.error(err);
       Toast.open('error', 'ROM 加载错误');
@@ -389,15 +404,8 @@ export class MStageElement extends GemElement<State> {
       [keybinding.Reset]: Button.Reset,
     };
 
-    if (event instanceof MouseEvent) {
-      switch (event.button) {
-        case 0:
-          return Button.Pointer1Left;
-        case 2:
-          return Button.Pointer1Right;
-        default:
-          return;
-      }
+    if (event instanceof PointerEvent) {
+      return MStageElement.mapPointerButton(event);
     }
     return map[event.key.toLowerCase()];
   };
@@ -552,7 +560,6 @@ export class MStageElement extends GemElement<State> {
     addEventListener(events.PRESS_BUTTON, this.#onPressButton);
     addEventListener(events.RELEASE_BUTTON, this.#onReleaseButton);
     return () => {
-      this.#game?.free();
       this.#audioContext?.close();
       this.#rtc?.destroy();
       removeEventListener('pointermove', this.#onPointerMove);
@@ -604,20 +611,52 @@ export class MStageElement extends GemElement<State> {
     return this.canvasRef.element!.screenshot();
   };
 
-  getState = () => {
-    return this.#game?.state();
+  getState = (): GameState | undefined => {
+    if (!this.#game) return;
+    const state = this.#game.state();
+    if (state.length === 0) {
+      const buffer = this.#game.mem().buffer;
+      logger.warn(`Saved wasm memory: ${(buffer.byteLength / 1024).toFixed(0)}KB`);
+      return {
+        type: gameStateType.WASM,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        ptr: String(this.#game.ptr),
+        buffer,
+      };
+    } else {
+      return {
+        type: gameStateType.NORMAL,
+        buffer: state.buffer,
+      };
+    }
   };
 
-  loadState = (buffer: Uint8Array) => {
-    this.#game?.load_state(buffer);
+  loadState = ({ buffer, type, ptr }: GameState) => {
+    if (!this.#game) return;
+    const stateArray = new Uint8Array(buffer);
+    if (type === gameStateType.WASM) {
+      const mem: WebAssembly.Memory = this.#game.mem();
+      if (stateArray.length > mem.buffer.byteLength) {
+        mem.grow((stateArray.length - mem.buffer.byteLength) / (64 * 1024));
+      }
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      this.#game.ptr = Number(ptr);
+      new Uint8Array(mem.buffer).set(stateArray);
+    } else {
+      this.#game.load_state(stateArray);
+    }
     this.#setVideoFilter();
   };
 
   getRam = () => {
     return this.#game?.ram();
   };
-
-  isHostReady = () => {
-    return this.#isHost && !!this.romBuffer;
-  };
 }
+
+export type GameState = {
+  type: string;
+  buffer: ArrayBuffer;
+  ptr?: string;
+};
