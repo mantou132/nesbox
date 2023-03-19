@@ -231,8 +231,8 @@ impl Nes {
         }
     }
 
-    /// 2k(0u16..=0x07FF) ram + 8K(0x6000u16..=0x7FFF) sram
     pub fn ram(&mut self) -> Vec<u8> {
+        // 2k(0u16..=0x07FF) ram + 8K(0x6000u16..=0x7FFF) sram
         let mut ram = Vec::new();
         for addr in 0u16..=0x07FF {
             ram.push(self.control_deck.cpu().bus.peek(addr));

@@ -1,8 +1,5 @@
 use game::*;
-use nesbox_utils::{
-    bevy_app::App, bevy_ecs::prelude::*, bevy_ecs::system::*, bevy_math::Vec2, input::*,
-    prelude::*, render::*,
-};
+use nesbox_utils::{bevy::ecs::system::*, input::*, prelude::*};
 
 mod game;
 

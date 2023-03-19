@@ -1,6 +1,6 @@
-pub use bevy_input::*;
+pub use bevy::input::*;
 
-use bevy_math::Vec2;
+use bevy::prelude::*;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]

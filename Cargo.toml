@@ -7,8 +7,3 @@ members = [
 ]
 
 exclude = ["deps"]
-
-[profile.release.package.nes]
-# Tell `rustc` to optimize for small code size.
-opt-level = "s"
-debug = true

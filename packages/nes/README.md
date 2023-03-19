@@ -12,7 +12,7 @@ git submodule update
 
 ```bash
 # development
-cargo watch -s "wasm-pack build --out-dir ../nes-pkg --target web --scope mantou"
+cargo watch -s "wasm-pack build --out-dir ../nes-pkg --target web --scope mantou --debug"
 # build
 wasm-pack build --out-dir ../nes-pkg --target web --scope mantou
 ```

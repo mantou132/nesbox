@@ -3,7 +3,7 @@
 ## Development
 
 ```bash
-cargo watch -s "wasm-pack build --target web --out-name=index"
+cargo watch -s "wasm-pack build --target web --out-name=index --debug"
 ```
 
 ## Serve
