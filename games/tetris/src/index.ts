@@ -1,12 +1,17 @@
-import { World, loadFont, loadAudio, loadSprite } from '@mantou/ecs';
+import { World, loadFont, loadAudio, loadSprite, decodeFontBuf } from '@mantou/ecs';
 import { HEIGHT, WIDTH, SCENE, WorldData, SOUND, SPRITE, BORDER_COLOR } from 'src/constants';
+import QOI from 'qoijs';
 
+import soundBytes from 'assets/game_over.data';
+import courierNewBuf from 'assets/courierNew.data';
+import arialBlackBuf from 'assets/arialBlack.data';
 import { getSceneAndData } from 'src/scenes';
 import { commonSystem, modeSelectSystem, moveSystem, pauseSystem, scoreSystem } from 'src/systems';
-import { sound, fonts, headingFonts } from 'src/_assets';
 
-loadFont('default', { fontSize: 10, fontSet: fonts });
-loadFont('heading', { fontSize: 16, fontSet: headingFonts });
+loadFont('default', decodeFontBuf(QOI.decode(courierNewBuf).data));
+loadFont('heading', decodeFontBuf(QOI.decode(arialBlackBuf).data));
+
+const sound = new Float32Array(QOI.decode(soundBytes).data.buffer);
 
 loadAudio(SOUND.GameOver, sound);
 loadAudio(SOUND.ClearLine, new Float32Array(sound.buffer, Math.round(sound.length * 0.66) * 4, 2000));

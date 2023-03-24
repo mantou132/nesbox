@@ -132,87 +132,87 @@ impl Nes {
             .expect("valid rom");
     }
 
-    pub fn handle_button_event(&mut self, button: Button, pressed: bool, repeat: bool) {
-        if repeat {
-            return;
-        }
-
-        let gamepad1 = &mut self.control_deck.gamepad_mut(GamepadSlot::One);
-        match button {
-            Button::Start => gamepad1.start = pressed,
-            Button::Select => gamepad1.select = pressed,
-            Button::Joypad1A => gamepad1.a = pressed,
-            Button::Joypad1B => gamepad1.b = pressed,
-            Button::Joypad1TurboA => {
-                gamepad1.a = pressed;
-                gamepad1.turbo_a = pressed;
-            }
-            Button::Joypad1TurboB => {
-                gamepad1.b = pressed;
-                gamepad1.turbo_b = pressed;
-            }
-            Button::Joypad1Up => gamepad1.up = pressed,
-            Button::Joypad1Down => gamepad1.down = pressed,
-            Button::Joypad1Left => gamepad1.left = pressed,
-            Button::Joypad1Right => gamepad1.right = pressed,
-            _ => {
-                let gamepad2 = &mut self.control_deck.gamepad_mut(GamepadSlot::Two);
-                match button {
-                    Button::Joypad2A => gamepad2.a = pressed,
-                    Button::Joypad2B => gamepad2.b = pressed,
-                    Button::Joypad2TurboA => {
-                        gamepad2.a = pressed;
-                        gamepad2.turbo_a = pressed;
-                    }
-                    Button::Joypad2TurboB => {
-                        gamepad2.b = pressed;
-                        gamepad2.turbo_b = pressed;
-                    }
-                    Button::Joypad2Up => gamepad2.up = pressed,
-                    Button::Joypad2Down => gamepad2.down = pressed,
-                    Button::Joypad2Left => gamepad2.left = pressed,
-                    Button::Joypad2Right => gamepad2.right = pressed,
-                    _ => {
-                        let gamepad3 = &mut self.control_deck.gamepad_mut(GamepadSlot::Three);
-                        match button {
-                            Button::Joypad3A => gamepad3.a = pressed,
-                            Button::Joypad3B => gamepad3.b = pressed,
-                            Button::Joypad3TurboA => {
-                                gamepad3.a = pressed;
-                                gamepad3.turbo_a = pressed;
-                            }
-                            Button::Joypad3TurboB => {
-                                gamepad3.b = pressed;
-                                gamepad3.turbo_b = pressed;
-                            }
-                            Button::Joypad3Up => gamepad3.up = pressed,
-                            Button::Joypad3Down => gamepad3.down = pressed,
-                            Button::Joypad3Left => gamepad3.left = pressed,
-                            Button::Joypad3Right => gamepad3.right = pressed,
-                            _ => {
-                                let gamepad4 =
-                                    &mut self.control_deck.gamepad_mut(GamepadSlot::Four);
-                                match button {
-                                    Button::Joypad4A => gamepad4.a = pressed,
-                                    Button::Joypad4B => gamepad4.b = pressed,
-                                    Button::Joypad4TurboA => {
-                                        gamepad4.a = pressed;
-                                        gamepad4.turbo_a = pressed;
-                                    }
-                                    Button::Joypad4TurboB => {
-                                        gamepad4.b = pressed;
-                                        gamepad4.turbo_b = pressed;
-                                    }
-                                    Button::Joypad4Up => gamepad4.up = pressed,
-                                    Button::Joypad4Down => gamepad4.down = pressed,
-                                    Button::Joypad4Left => gamepad4.left = pressed,
-                                    Button::Joypad4Right => gamepad4.right = pressed,
-                                    _ => {}
-                                }
-                            }
-                        }
-                    }
+    pub fn handle_button_event(&mut self, button: Button, pressed: bool) {
+        {
+            let gamepad1 = &mut self.control_deck.gamepad_mut(GamepadSlot::One);
+            match button {
+                Button::Start => gamepad1.start = pressed,
+                Button::Select => gamepad1.select = pressed,
+                Button::Joypad1A => gamepad1.a = pressed,
+                Button::Joypad1B => gamepad1.b = pressed,
+                Button::Joypad1TurboA => {
+                    gamepad1.a = pressed;
+                    gamepad1.turbo_a = pressed;
                 }
+                Button::Joypad1TurboB => {
+                    gamepad1.b = pressed;
+                    gamepad1.turbo_b = pressed;
+                }
+                Button::Joypad1Up => gamepad1.up = pressed,
+                Button::Joypad1Down => gamepad1.down = pressed,
+                Button::Joypad1Left => gamepad1.left = pressed,
+                Button::Joypad1Right => gamepad1.right = pressed,
+                _ => {}
+            }
+        }
+        {
+            let gamepad2 = &mut self.control_deck.gamepad_mut(GamepadSlot::Two);
+            match button {
+                Button::Joypad2A => gamepad2.a = pressed,
+                Button::Joypad2B => gamepad2.b = pressed,
+                Button::Joypad2TurboA => {
+                    gamepad2.a = pressed;
+                    gamepad2.turbo_a = pressed;
+                }
+                Button::Joypad2TurboB => {
+                    gamepad2.b = pressed;
+                    gamepad2.turbo_b = pressed;
+                }
+                Button::Joypad2Up => gamepad2.up = pressed,
+                Button::Joypad2Down => gamepad2.down = pressed,
+                Button::Joypad2Left => gamepad2.left = pressed,
+                Button::Joypad2Right => gamepad2.right = pressed,
+                _ => {}
+            }
+        }
+        {
+            let gamepad3 = &mut self.control_deck.gamepad_mut(GamepadSlot::Three);
+            match button {
+                Button::Joypad3A => gamepad3.a = pressed,
+                Button::Joypad3B => gamepad3.b = pressed,
+                Button::Joypad3TurboA => {
+                    gamepad3.a = pressed;
+                    gamepad3.turbo_a = pressed;
+                }
+                Button::Joypad3TurboB => {
+                    gamepad3.b = pressed;
+                    gamepad3.turbo_b = pressed;
+                }
+                Button::Joypad3Up => gamepad3.up = pressed,
+                Button::Joypad3Down => gamepad3.down = pressed,
+                Button::Joypad3Left => gamepad3.left = pressed,
+                Button::Joypad3Right => gamepad3.right = pressed,
+                _ => {}
+            }
+        }
+        {
+            let gamepad4 = &mut self.control_deck.gamepad_mut(GamepadSlot::Four);
+            match button {
+                Button::Joypad4A => gamepad4.a = pressed,
+                Button::Joypad4B => gamepad4.b = pressed,
+                Button::Joypad4TurboA => {
+                    gamepad4.a = pressed;
+                    gamepad4.turbo_a = pressed;
+                }
+                Button::Joypad4TurboB => {
+                    gamepad4.b = pressed;
+                    gamepad4.turbo_b = pressed;
+                }
+                Button::Joypad4Up => gamepad4.up = pressed,
+                Button::Joypad4Down => gamepad4.down = pressed,
+                Button::Joypad4Left => gamepad4.left = pressed,
+                Button::Joypad4Right => gamepad4.right = pressed,
+                _ => {}
             }
         }
     }

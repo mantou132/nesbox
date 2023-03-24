@@ -4,7 +4,8 @@ export const normalizeFilename = (filename: string) =>
   filename
     .split(/\.|,|-/)[0]
     .replace(/^./, (e) => e.toLowerCase())
-    .replace(/[^a-zA-Z](.)/g, (_, char) => char.toUpperCase());
+    .replace(/[^a-zA-Z](.)/g, (_, char) => char.toUpperCase())
+    .trim();
 
 export const getInputItemType = (value: any) => {
   switch (typeof value) {
@@ -38,4 +39,14 @@ export const sampleToChart = (audio: Float32Array) => {
     flag = !flag;
   }
   return value;
+};
+
+export const saveFile = async (file: File) => {
+  const a = document.createElement('a');
+  a.download = file.name;
+  a.href = URL.createObjectURL(file);
+  document.body.append(a);
+  a.click();
+  a.remove();
+  addEventListener('focus', () => setTimeout(() => URL.revokeObjectURL(a.href), 1000), { once: true });
 };

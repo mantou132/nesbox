@@ -2,16 +2,17 @@ import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css } fr
 import { theme } from 'duoyun-ui/lib/theme';
 import { utf8ToB64 } from 'duoyun-ui/lib/encode';
 import { throttle } from 'duoyun-ui/lib/utils';
-import { getInputItemType, getInputItemValue, normalizeFilename, sampleToChart } from 'src/utils';
+import { getInputItemType, getInputItemValue, normalizeFilename, sampleToChart, saveFile } from 'src/utils';
 import QOI from 'qoijs';
+import JSZip from 'jszip';
 
 import 'duoyun-ui/elements/drop-area';
 import 'duoyun-ui/elements/file-pick';
 import 'duoyun-ui/elements/form';
 import 'duoyun-ui/elements/input';
-import 'duoyun-ui/elements/help-text';
 import 'duoyun-ui/elements/action-text';
 import 'duoyun-ui/elements/chart-zoom';
+import 'duoyun-ui/elements/button';
 
 const style = createCSSSheet(css`
   :host {
@@ -122,15 +123,33 @@ export class PAudioElement extends GemElement<State> {
 
     this.setState({
       charts,
-      result: files.reduce((p, c) => {
-        const array = this.#weakMap.get(c)?.get(arg);
-        const value = args.qoi
-          ? `new Float32Array(QOI.decode(new Uint8Array([${array?.data}])).data.buffer)`
-          : `new Float32Array([${array?.data}])`;
-        return p + `export const ${normalizeFilename(c.name)} = ${value};` + `\n`;
-      }, ''),
+      result:
+        files.reduce((p, c) => {
+          return p + `import ${normalizeFilename(c.name)}Buf from 'assets/${normalizeFilename(c.name)}.data';\n`;
+        }, '') +
+        files.reduce((p, c) => {
+          const value = args.qoi
+            ? `new Float32Array(QOI.decode(${normalizeFilename(c.name)}Buf).data.buffer)`
+            : `new Float32Array(${normalizeFilename(c.name)}Buf.buffer)`;
+          return p + `export const ${normalizeFilename(c.name)} = ${value};` + `\n`;
+        }, '\n'),
     });
   });
+
+  #onDownload = async () => {
+    const { files, args } = this.state;
+    const arg = JSON.stringify(args);
+    const zip = new JSZip();
+    files.forEach((file) => {
+      const res = this.#weakMap.get(file)!.get(arg)!;
+      zip.file(
+        `${normalizeFilename(file.name)}.data`,
+        new Uint8Array(res.data.buffer, res.data.byteOffset, res.data.byteLength),
+      );
+    });
+    const content = await zip.generateAsync({ type: 'blob' });
+    saveFile(new File([content], 'assets.zip'));
+  };
 
   #onArgChange = (evt: CustomEvent<{ name: keyof State['args']; value: string }>) => {
     const { args } = this.state;
@@ -220,9 +239,9 @@ export class PAudioElement extends GemElement<State> {
                 ></dy-form-item>
               `,
         )}
+        <dy-button @click=${this.#onDownload}>Download</dy-button>
       </dy-form>
       <dy-input class="output" disabled type="textarea" .value=${result}></dy-input>
-      <dy-help-text>Length: ${result.length}</dy-help-text>
     `;
   };
 }

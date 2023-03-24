@@ -134,7 +134,6 @@ export function setControl(button: Button, pressed: boolean) {
     nesbox._pressedControl.delete(button);
     nesbox._tapControl.delete(button);
   }
-  return true;
 }
 
 export function setSound(enabled: boolean) {

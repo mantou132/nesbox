@@ -4,8 +4,9 @@ use bevy::prelude::*;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
-#[derive(Copy, Hash, Clone, PartialEq, Eq, Debug)]
+#[derive(Copy, Hash, Clone, PartialEq, Eq, Debug, Default)]
 pub enum Player {
+    #[default]
     One,
     Two,
     Three,

@@ -1,6 +1,5 @@
 games/*/pkg
 games/*/dist
-games/**/_assets.ts
 
 packages/*/dist
 packages/*/bin

@@ -65,7 +65,7 @@ export class PMtRoomElement extends GemElement {
   }
 
   #uploadScreenshot = () => {
-    if (!this.stageRef.element!.isHostReady()) return;
+    if (!this.stageRef.element!.hostRomBuffer) return;
     updateRoomScreenshot({
       id: this.#playing!.id,
       screenshot: this.stageRef.element!.getThumbnail(),

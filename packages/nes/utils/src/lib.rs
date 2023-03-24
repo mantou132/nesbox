@@ -1,14 +1,20 @@
 pub mod prelude {
+    pub use crate::assets::*;
+    pub use crate::audio::*;
     pub use crate::codes::*;
     pub use crate::create_bevy_app;
+    pub use crate::input::*;
     pub use crate::log;
     pub use crate::pixels::*;
+    pub use crate::render::*;
     pub use bevy::prelude::*;
     pub use rand::prelude::random;
     pub use wasm_bindgen;
     pub use wasm_bindgen::prelude::*;
 }
 
+use assets::AssetsPlugin;
+use audio::AudioPlugin;
 use bevy::{prelude::*, time::TimePlugin};
 use input::{Button, Input, MouseEvent};
 use pixels::Color;
@@ -17,6 +23,8 @@ use render::RenderPlugin;
 pub use bevy;
 pub use wasm_bindgen;
 pub use wasm_bindgen::prelude::*;
+pub mod assets;
+pub mod audio;
 pub mod codes;
 pub mod input;
 pub mod pixels;
@@ -36,17 +44,21 @@ macro_rules! log {
 }
 
 pub fn create_bevy_app(width: u32, height: u32, clear_color: Color) -> App {
+    if height > 0xff {
+        panic!("height too much big");
+    }
     let mut app = App::new();
 
     #[cfg(debug_assertions)]
     app.add_plugin(bevy::log::LogPlugin::default());
 
-    // TODO: audio
     app.add_plugin(RenderPlugin {
         width,
         height,
         clear_color,
     })
+    .add_plugin(AudioPlugin::default())
+    .add_plugin(AssetsPlugin::default())
     .add_plugin(TaskPoolPlugin::default())
     .add_plugin(TypeRegistrationPlugin::default())
     .add_plugin(FrameCountPlugin::default())

@@ -20,7 +20,8 @@
     "target": "ES2020",
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "paths": {
-      "src/*": ["src/*"]
+      "src/*": ["src/*"],
+      "assets/*": ["assets/*"]
     }
   }
 }

@@ -21,6 +21,7 @@ import { routes } from 'src/routes';
 
 import { configure, defaultKeybinding, setNesFile } from 'src/configure';
 import { MStageElement } from 'src/modules/stage';
+import { logger } from 'src/logger';
 
 import type { NesboxCanvasElement } from 'src/elements/canvas';
 
@@ -128,25 +129,29 @@ export class PEmulatorElement extends GemElement<State> {
       hotkeys({ esc: this.#quit })(event);
       return;
     }
+    if (event.repeat) return;
     if (button === Button.Reset) {
       this.#game?.reset();
     } else {
       this.#enableAudio();
     }
-    this.#game?.handle_button_event(button, true, event.repeat);
+    this.#game?.handle_button_event(button, true);
   };
 
   #onPointerDown = (event: PointerEvent) => {
     const button = this.#getButton(event);
     if (!button) return;
     this.#enableAudio();
-    this.#game?.handle_button_event(button, true, false);
+    const [x, y, dx, dy] = positionMapping(event, this.canvasRef.element!);
+    this.#game?.handle_motion_event(Player.One, x, y, dx, dy);
+    this.#game?.handle_button_event(button, true);
   };
 
   #onKeyOrPointerUp = (event: KeyboardEvent | PointerEvent) => {
     const button = this.#getButton(event);
     if (!button) return;
-    this.#game?.handle_button_event(button, false, event instanceof KeyboardEvent ? event.repeat : false);
+    if (event instanceof KeyboardEvent && event.repeat) return;
+    this.#game?.handle_button_event(button, false);
   };
 
   #sampleRate = 44100;
@@ -182,6 +187,7 @@ export class PEmulatorElement extends GemElement<State> {
       case 'wasm': {
         await initNes(new Response(romBuffer, { headers: { 'content-type': 'application/wasm' } }));
         this.#game = Nes.new(this.#sampleRate);
+        logger.info(`WASM memory ${this.#game.mem().buffer.byteLength / 1024}KB`);
         break;
       }
       case 'js': {
@@ -220,7 +226,6 @@ export class PEmulatorElement extends GemElement<State> {
     addEventListener('keyup', this.#onKeyOrPointerUp);
     this.addEventListener('pointerup', this.#onKeyOrPointerUp);
     return () => {
-      this.#game?.free();
       this.#audioContext?.close();
       removeEventListener('pointermove', this.#onPointerMove);
       removeEventListener('keydown', this.#onKeyDown);

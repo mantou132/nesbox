@@ -10,8 +10,10 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
+    "@mantou/ecs": "^0.0.1",
     "@mantou/gem": "^1.6.0",
     "duoyun-ui": "^0.0.63",
+    "jszip": "^3.10.0",
     "qoijs": "^1.0.0"
   },
   "devDependencies": {

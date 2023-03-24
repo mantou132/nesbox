@@ -1,7 +1,8 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css } from '@mantou/gem';
 import { theme } from 'duoyun-ui/lib/theme';
-import { getInputItemType, getInputItemValue } from 'src/utils';
+import { getInputItemType, getInputItemValue, normalizeFilename, saveFile } from 'src/utils';
 import QOI from 'qoijs';
+import { Font, encodeFont } from '@mantou/ecs';
 
 import type { DuoyunFormItemElement } from 'duoyun-ui/elements/form';
 import type { DuoyunSelectElement } from 'duoyun-ui/elements/select';
@@ -9,7 +10,7 @@ import type { DuoyunSelectElement } from 'duoyun-ui/elements/select';
 import 'duoyun-ui/elements/select';
 import 'duoyun-ui/elements/input';
 import 'duoyun-ui/elements/form';
-import 'duoyun-ui/elements/help-text';
+import 'duoyun-ui/elements/button';
 
 const style = createCSSSheet(css`
   :host {
@@ -116,7 +117,7 @@ export class PFontElement extends GemElement<State> {
   };
 
   #canvas = new OffscreenCanvas(0, 0);
-  #resultData = new Map<string, Map<string, { width: number; data: Uint8ClampedArray; origin: Uint8ClampedArray }>>();
+  #resultData = new Map<string, Map<string, { width: number; data: Uint8ClampedArray }>>();
   #regenerateResult = async () => {
     const { input, args } = this.state;
     const arg = JSON.stringify(args);
@@ -136,44 +137,59 @@ export class PFontElement extends GemElement<State> {
         const intWidth = Math.trunc(width);
         ctx.fillText(char, 0, args.fontSize - (args.fontSize - (fontBoundingBoxAscent - fontBoundingBoxDescent)) / 2);
         const data = intWidth ? ctx.getImageData(0, 0, intWidth, args.fontSize).data : new Uint8ClampedArray();
-        map.set(char, {
-          width: intWidth,
-          origin: data,
-          data: !intWidth
-            ? new Uint8ClampedArray()
-            : args.qoi
-            ? new Uint8ClampedArray(
-                QOI.encode(data, {
-                  width: intWidth,
-                  height: args.fontSize,
-                  channels: 4,
-                  colorspace: 0,
-                }),
-              )
-            : data,
-        });
+        map.set(char, { width: intWidth, data: data });
       }
       return map.get(char)!;
     });
     this.setState({
-      previews: charData.slice(0, 15).map(({ width, origin }) => {
+      previews: charData.slice(0, 15).map(({ width, data }) => {
         const canvas = document.createElement('canvas');
         canvas.width = width;
         canvas.height = args.fontSize;
-        width && canvas.getContext('2d')!.putImageData(new ImageData(origin, width), 0, 0);
+        width && canvas.getContext('2d')!.putImageData(new ImageData(data, width), 0, 0);
         return canvas;
       }),
-      result: `export const fonts: Record<string, { width: number; data: Uint8ClampedArray }> = {${charData
-        .map(
-          (v, index) =>
-            `"${chars[index].replace('"', '\\"')}": {width: ${v.width},data: ${
-              args.qoi
-                ? `new Uint8ClampedArray(QOI.decode(new Uint8Array([${v.data}])).data.buffer)`
-                : `new Uint8ClampedArray([${v.data}])`
-            }}`,
-        )
-        .join(',')}};`,
+      result:
+        `import ${normalizeFilename(args.currentFont)}Buf from 'assets/${normalizeFilename(
+          args.currentFont,
+        )}.data';\n\n` +
+        (args.qoi
+          ? `parseFontBuf(QOI.decode(${normalizeFilename(args.currentFont)}Buf).data)`
+          : `parseFontBuf(${normalizeFilename(args.currentFont)}Buf)`),
     });
+  };
+
+  #onDownload = async () => {
+    const { args, input } = this.state;
+    const arg = JSON.stringify(args);
+    const map = this.#resultData.get(arg)!;
+    const chars = new Set([...input]);
+
+    const font: Font = { fontSize: args.fontSize, fontSet: {} };
+    chars.forEach((char) => {
+      font.fontSet[char] = map.get(char)!;
+    });
+
+    const buf = encodeFont(font);
+    saveFile(
+      new File(
+        [
+          new Blob([
+            args.qoi
+              ? new Uint8ClampedArray(
+                  QOI.encode(buf, {
+                    width: buf.length / 4,
+                    height: 1,
+                    channels: 4,
+                    colorspace: 0,
+                  }),
+                )
+              : buf,
+          ]),
+        ],
+        `${normalizeFilename(args.currentFont)}.data`,
+      ),
+    );
   };
 
   mounted = () => {
@@ -216,10 +232,10 @@ export class PFontElement extends GemElement<State> {
                 ></dy-form-item>
               `,
         )}
+        <dy-button @click=${this.#onDownload}>Download</dy-button>
       </dy-form>
       <div class="preview" style="font-size: ${args.fontSize}px">${previews}</div>
       <dy-input class="output" disabled type="textarea" .value=${result}></dy-input>
-      <dy-help-text>Length: ${result.length}</dy-help-text>
     `;
   };
 }

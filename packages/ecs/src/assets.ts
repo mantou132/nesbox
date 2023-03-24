@@ -41,6 +41,45 @@ export function loadFont(type: FontType, font: Font) {
   fonts[type] = getProxyFont(font);
 }
 
+// | fontSize | char = 4 bytes| width | data | ...
+export function encodeFont(font: Font) {
+  const entries = Object.entries(font.fontSet);
+  const len = entries.reduce((p, [_, { data }]) => p + data.length, 0);
+  const buf = new Uint8Array(Math.ceil((1 + len + 5 * entries.length) / 4) * 4);
+  buf[0] = font.fontSize;
+  let offset = 1;
+  entries.forEach(([char, { data, width }]) => {
+    const charBuf = new Uint32Array(1);
+    charBuf[0] = char.codePointAt(0) || 0;
+    buf.set(new Uint8Array(charBuf.buffer), offset);
+    offset += 4;
+    buf[offset] = width;
+    offset += 1;
+    buf.set(data, offset);
+    offset += data.length;
+  });
+  return buf;
+}
+
+export function decodeFontBuf(buf: Uint8Array) {
+  const fontSize = buf[0];
+  const font: Font = { fontSize, fontSet: {} };
+  let offset = 1;
+  while (true) {
+    if (buf.length - offset < 4) {
+      return font;
+    }
+    const charBuf = new Uint32Array(new Uint8Array([...new Uint8Array(buf.buffer, offset, 4)]).buffer);
+    const char = String.fromCodePoint(charBuf[0]);
+    offset += 4;
+    const width = buf[offset];
+    offset += 1;
+    const len = fontSize * width * 4;
+    font.fontSet[char] = { width, data: new Uint8ClampedArray(buf.buffer, offset, len) };
+    offset += len;
+  }
+}
+
 const defaultAudio = new Float32Array(44100 / 60);
 
 export const audios = new Proxy({} as Record<string, Float32Array>, {

@@ -1,0 +1,6 @@
+This is the first game released on NESBox mantou132, which is written in Rust, which is mainly used for learning goals.
+
+If you are interested in NESBox, or have any suggestions, please contact me.
+
+
+Thanks!

@@ -1,5 +1,5 @@
 use game::*;
-use nesbox_utils::{bevy::ecs::system::*, input::*, prelude::*};
+use nesbox_utils::{bevy::ecs::system::*, prelude::*};
 
 mod game;
 
@@ -23,7 +23,7 @@ impl Nes {
             prev_frame_buffer: Vec::new(),
             qoi_buffer: Vec::new(),
             qoi_decode_buffer: Vec::new(),
-            app: game::create_app(),
+            app: create_app(),
         };
         nes
     }
@@ -33,11 +33,11 @@ impl Nes {
     }
 
     pub fn width(&self) -> u32 {
-        RENDER_WIDTH
+        WIDTH
     }
 
     pub fn height(&self) -> u32 {
-        RENDER_HEIGHT
+        HEIGHT
     }
 
     pub fn set_filter(&mut self, _filter: &str) {
@@ -53,19 +53,18 @@ impl Nes {
     }
 
     pub fn reset(&mut self) {
-        //
+        let mut next: SystemState<ResMut<NextState<AppState>>> =
+            SystemState::new(&mut self.app.world);
+        let mut next = next.get_mut(&mut self.app.world);
+        next.set(AppState::Menu);
     }
 
     pub fn frame(&mut self, qoi: bool, qoi_whole_frame: bool) -> *const u8 {
         let binding = self.app.world.get_resource::<PixelsResource>().unwrap();
         let buffer = binding.frame();
         if qoi {
-            self.qoi_buffer = encode_qoi_frame(
-                &self.prev_frame_buffer,
-                buffer,
-                RENDER_WIDTH,
-                qoi_whole_frame,
-            );
+            self.qoi_buffer =
+                encode_qoi_frame(&self.prev_frame_buffer, buffer, WIDTH, qoi_whole_frame);
             self.prev_frame_buffer = buffer.to_vec();
         } else {
             self.prev_frame_buffer = Vec::new();
@@ -74,7 +73,7 @@ impl Nes {
     }
 
     pub fn frame_len(&self) -> usize {
-        RENDER_SIZE as usize
+        (4 * WIDTH * HEIGHT) as usize
     }
 
     pub fn qoi_frame(&mut self) -> *const u8 {
@@ -94,8 +93,10 @@ impl Nes {
         self.qoi_decode_buffer.len()
     }
 
-    pub fn audio_callback(&mut self, _out: &mut [f32]) {
-        // TODO
+    pub fn audio_callback(&mut self, out: &mut [f32]) {
+        let binding = self.app.world.get_resource::<AudioResource>().unwrap();
+        let buffer = binding.frame();
+        out.copy_from_slice(buffer);
     }
 
     pub fn clock_frame(&mut self) -> u32 {
@@ -113,10 +114,7 @@ impl Nes {
         //
     }
 
-    pub fn handle_button_event(&mut self, button: Button, pressed: bool, repeat: bool) {
-        if repeat {
-            return;
-        }
+    pub fn handle_button_event(&mut self, button: Button, pressed: bool) {
         let mut input = self.app.world.get_resource_mut::<Input<Button>>().unwrap();
         if pressed {
             input.press(button);
@@ -132,8 +130,8 @@ impl Nes {
 
         mouse_motion.send(MouseEvent {
             player,
-            delta: Vec2::new(x, y),
-            position: Vec2::new(dx, dy),
+            delta: Vec2::new(dx, dy),
+            position: Vec2::new(x, y),
         });
     }
 

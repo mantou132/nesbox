@@ -1,13 +1,14 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css } from '@mantou/gem';
 import { theme } from 'duoyun-ui/lib/theme';
-import { getInputItemType, getInputItemValue, normalizeFilename } from 'src/utils';
+import { getInputItemType, getInputItemValue, normalizeFilename, saveFile } from 'src/utils';
 import QOI from 'qoijs';
+import JSZip from 'jszip';
 
 import 'duoyun-ui/elements/file-pick';
 import 'duoyun-ui/elements/form';
 import 'duoyun-ui/elements/input';
+import 'duoyun-ui/elements/button';
 import 'duoyun-ui/elements/drop-area';
-import 'duoyun-ui/elements/help-text';
 
 const style = createCSSSheet(css`
   :host {
@@ -104,13 +105,16 @@ export class PImageElement extends GemElement<State> {
     );
 
     this.setState({
-      result: files.reduce((p, c) => {
-        const pixels = this.#weakMap.get(c)?.get(arg);
-        const value = args.qoi
-          ? `new Uint8ClampedArray(QOI.decode(new Uint8Array([${pixels}])).data.buffer)`
-          : `new Uint8ClampedArray([${pixels}])`;
-        return p + `export const ${normalizeFilename(c.name)} = ${value};` + `\n`;
-      }, ''),
+      result:
+        files.reduce((p, c) => {
+          return p + `import ${normalizeFilename(c.name)}Buf from 'assets/${normalizeFilename(c.name)}.data';\n`;
+        }, '') +
+        files.reduce((p, c) => {
+          const value = args.qoi
+            ? `new Uint8ClampedArray(QOI.decode(${normalizeFilename(c.name)}Buf).data.buffer)`
+            : `new Uint8ClampedArray(${normalizeFilename(c.name)}Buf.buffer)`;
+          return p + `export const ${normalizeFilename(c.name)} = ${value};` + `\n`;
+        }, '\n'),
     });
   };
 
@@ -122,6 +126,18 @@ export class PImageElement extends GemElement<State> {
 
   #onDropChange = (evt: CustomEvent<File[]>) => {
     this.setState({ files: [...this.state.files, ...evt.detail] });
+  };
+
+  #onDownload = async () => {
+    const { files, args } = this.state;
+    const arg = JSON.stringify(args);
+    const zip = new JSZip();
+    files.forEach((file) => {
+      const res = this.#weakMap.get(file)!.get(arg)!;
+      zip.file(`${normalizeFilename(file.name)}.data`, new Uint8Array(res.buffer, res.byteOffset, res.byteLength));
+    });
+    const content = await zip.generateAsync({ type: 'blob' });
+    saveFile(new File([content], 'assets.zip'));
   };
 
   mounted = () => {
@@ -150,9 +166,9 @@ export class PImageElement extends GemElement<State> {
               ></dy-form-item>
             `,
         )}
+        <dy-button @click=${this.#onDownload}>Download</dy-button>
       </dy-form>
       <dy-input class="output" disabled type="textarea" .value=${result}></dy-input>
-      <dy-help-text>Length: ${result.length}</dy-help-text>
     `;
   };
 }

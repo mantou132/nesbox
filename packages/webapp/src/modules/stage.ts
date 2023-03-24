@@ -272,8 +272,6 @@ export class MStageElement extends GemElement<State> {
 
   hostRomBuffer?: ArrayBuffer;
   #loadRom = async () => {
-    // 在这里 free 的原因是卸载时需要自动保存状态，可能会读取 wasm 内存
-    this.#game?.free();
     this.#game = undefined;
     this.hostRomBuffer = undefined;
 
@@ -305,6 +303,16 @@ export class MStageElement extends GemElement<State> {
           game.load_rom(new Uint8Array(romBuffer));
         }
       }
+
+      // {
+      //   // test wasm
+      //   await initNes(
+      //     new Response(await (await fetch('http://localhost:8000/index_bg.wasm')).arrayBuffer(), {
+      //       headers: { 'content-type': 'application/wasm' },
+      //     }),
+      //   );
+      //   game = Nes.new(this.#sampleRate);
+      // }
 
       this.#setVideoFilter();
       this.setState({ canvasWidth: game.width(), canvasHeight: game.height() });
@@ -352,11 +360,11 @@ export class MStageElement extends GemElement<State> {
         break;
       // host
       case ChannelMessageType.KEYDOWN:
-        this.#game?.handle_button_event((detail as KeyDownMsg).button, true, false);
+        this.#game?.handle_button_event((detail as KeyDownMsg).button, true);
         break;
       // host
       case ChannelMessageType.KEYUP:
-        this.#game?.handle_button_event((detail as KeyUpMsg).button, false, false);
+        this.#game?.handle_button_event((detail as KeyUpMsg).button, false);
         break;
       // host
       case ChannelMessageType.POINTER_MOVE:
@@ -427,7 +435,7 @@ export class MStageElement extends GemElement<State> {
       this.#enableAudio();
     }
     if (this.#isHost) {
-      this.#game?.handle_button_event(button, true, false);
+      this.#game?.handle_button_event(button, true);
     } else {
       this.#rtc?.send(new KeyDownMsg(button));
     }
@@ -458,12 +466,13 @@ export class MStageElement extends GemElement<State> {
   #onPointerDown = (event: PointerEvent) => {
     const button = this.#getButton(event);
     if (!button) return;
+    this.#onPointerMove(event);
     this.#pressButton(button);
   };
 
   #releaseButton = (button: Button) => {
     if (this.#isHost) {
-      this.#game?.handle_button_event(button, false, false);
+      this.#game?.handle_button_event(button, false);
     } else {
       this.#rtc?.send(new KeyUpMsg(button));
     }
@@ -616,7 +625,7 @@ export class MStageElement extends GemElement<State> {
     const state = this.#game.state();
     if (state.length === 0) {
       const buffer = this.#game.mem().buffer;
-      logger.warn(`Saved wasm memory: ${(buffer.byteLength / 1024).toFixed(0)}KB`);
+      logger.warn(`Saved wasm memory: ${buffer.byteLength / 1024}KB`);
       return {
         type: gameStateType.WASM,
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment

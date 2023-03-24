@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "start": "npm run build:dev -- --watch --servedir=dist",
-    "build:dev": "esbuild src/index.ts --bundle --outdir=dist --target=es2022",
+    "build:dev": "esbuild src/index.ts --bundle --outdir=dist --target=es2022 --loader:.data=binary",
     "build": "npm run build:dev -- --minify && jszip-cli add --force --output dist dist/index.js",
     "prepublishOnly": "npm run build"
   },
