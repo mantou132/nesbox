@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{assets::AssetsResource, pixels::*};
+use crate::{assets::AssetsResource, pixels::*, prelude::MouseEvent};
 
 #[derive(Debug, Default)]
 pub struct RenderPlugin {
@@ -56,6 +56,7 @@ pub struct UISelect {
     pub selected: usize,
     pub font: String,
     pub line_height: f32,
+    pub positions: Vec<(f32, f32, f32, f32)>,
 }
 
 impl Default for UISelect {
@@ -65,6 +66,7 @@ impl Default for UISelect {
             selected: 0,
             font: String::new(),
             line_height: 1.5,
+            positions: Vec::new(),
         }
     }
 }
@@ -80,6 +82,25 @@ impl UISelect {
 
     pub fn value(&self) -> &str {
         &self.options[self.selected]
+    }
+
+    pub fn is_enter_hover(&mut self, event: Option<&MouseEvent>) -> (bool, bool) {
+        if let Some(evt) = event {
+            if let Some(index) = self.positions.iter().position(|&(x, y, w, h)| {
+                evt.position.x > x
+                    && evt.position.y > y
+                    && evt.position.x < x + w
+                    && evt.position.y < y + h
+            }) {
+                if self.selected != index {
+                    self.selected = index;
+                    return (true, true);
+                } else {
+                    return (false, true);
+                }
+            }
+        }
+        (false, false)
     }
 }
 
@@ -144,9 +165,9 @@ impl RenderPlugin {
     fn render_select(
         mut pixels_resource: ResMut<PixelsResource>,
         assets_resource: Res<AssetsResource>,
-        query: Query<(&UISelect, &GlobalTransform, Option<&Color>)>,
+        mut query: Query<(&mut UISelect, &GlobalTransform, Option<&Color>)>,
     ) {
-        for (select, global_transform, color) in query.iter() {
+        for (mut select, global_transform, color) in query.iter_mut() {
             let global_translation = global_transform.translation();
             if global_translation.z < 0. {
                 continue;
@@ -154,6 +175,8 @@ impl RenderPlugin {
             let (font_size, font_chars) = assets_resource.get_font(&select.font);
             let default_char_width = *font_size as i32 / 2;
             let line_height = select.line_height * *font_size;
+            let mut positions = Vec::with_capacity(select.options.len());
+
             for (index, option) in select.options.iter().enumerate() {
                 let mut x = global_translation.x;
                 let y = global_translation.y + index as f32 * line_height;
@@ -184,7 +207,14 @@ impl RenderPlugin {
                         x += default_char_width as f32;
                     }
                 }
+                positions.push((
+                    global_translation.x,
+                    y,
+                    x - global_translation.x,
+                    line_height,
+                ));
             }
+            select.positions = positions;
         }
     }
 

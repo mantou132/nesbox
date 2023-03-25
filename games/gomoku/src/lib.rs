@@ -1,6 +1,7 @@
 use game::*;
 use nesbox_utils::{bevy::ecs::system::*, prelude::*};
 
+mod algo;
 mod game;
 
 #[wasm_bindgen]

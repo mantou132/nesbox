@@ -1,5 +1,7 @@
 use nesbox_utils::prelude::*;
 
+use crate::algo::find;
+
 pub const WIDTH: u32 = 256;
 pub const HEIGHT: u32 = 240;
 
@@ -28,14 +30,20 @@ pub enum GameMode {
     Two,
 }
 
+impl GameMode {
+    fn is_1p(&self) -> bool {
+        self == &GameMode::One
+    }
+    fn is_2p(&self) -> bool {
+        self == &GameMode::Two
+    }
+}
+
 #[derive(Component, Debug, Default)]
 struct Cursor1;
 
 #[derive(Component, Debug, Default)]
 struct Cursor2;
-
-#[derive(Component, Debug, Default)]
-struct CursorPosition(usize, usize);
 
 #[derive(Component, Debug, Default)]
 struct Checkerboard {
@@ -122,48 +130,8 @@ impl Checkerboard {
         max_len >= 5
     }
 
-    fn get_default(&self) -> (usize, usize) {
-        let start_x = BOARD_ROWS / 2;
-        let start_y = BOARD_ROWS / 2;
-        if self.valid(start_x, start_y) {
-            (start_x, start_y)
-        } else {
-            (start_x + 1, start_y + 1)
-        }
-    }
-
-    fn score(&self, x: usize, y: usize) -> usize {
-        // TODO: Improve
-        let mut score = 0;
-        for dx in -1..=1 {
-            for dy in 0..=1 {
-                if dx != 0 || dy != 0 {
-                    let l1 = self.max_len(x, y, dx, dy);
-                    let l2 = self.max_len(x, y, -dx, -dy);
-                    if l1 + l2 > 2 {
-                        score += 1;
-                    }
-                }
-            }
-        }
-        score
-    }
-
     fn suggestion(&self) -> (usize, usize) {
-        let mut result = self.get_default();
-        let mut max_score = 0;
-        for x in 0..BOARD_ROWS {
-            for y in 0..BOARD_ROWS {
-                if self.valid(x, y) {
-                    let score = self.score(x, y);
-                    if score > max_score {
-                        result = (x, y);
-                        max_score = score;
-                    }
-                }
-            }
-        }
-        result
+        find(&self.grid, self.current, self.next)
     }
 }
 
@@ -193,7 +161,7 @@ fn draw_cursor(parent: &mut ChildBuilder, color: Color) {
     ));
 }
 
-fn setup_game(mut commands: Commands, mode: Res<GameMode>) {
+fn setup_game(mut commands: Commands) {
     commands.insert_resource(ClearColor(Color(238, 226, 183, 0xff)));
     commands
         // stage
@@ -241,60 +209,56 @@ fn setup_game(mut commands: Commands, mode: Res<GameMode>) {
                         ));
                     }
                 });
-        });
 
-    commands
-        .spawn((
-            Cursor1,
-            CursorPosition(BOARD_ROWS / 2, BOARD_ROWS / 2),
-            SpatialBundle {
-                transform: Transform::from_xyz(
-                    get_position(BOARD_ROWS / 2, MARGIN_LEFT),
-                    get_position(BOARD_ROWS / 2, MARGIN_TOP),
-                    0.,
-                ),
-                ..default()
-            },
-        ))
-        .with_children(|parent| {
-            draw_cursor(parent, CURSOR_1_COLOR);
-        });
+            parent
+                .spawn((
+                    Cursor1,
+                    SpatialBundle {
+                        transform: Transform::from_xyz(
+                            get_canvas_position(BOARD_ROWS / 2),
+                            get_canvas_position(BOARD_ROWS / 2),
+                            2.,
+                        ),
+                        ..default()
+                    },
+                ))
+                .with_children(|parent| {
+                    draw_cursor(parent, CURSOR_1_COLOR);
+                });
 
-    if mode.into_inner() == &GameMode::Two {
-        commands
-            .spawn((
-                Cursor2,
-                CursorPosition(BOARD_ROWS / 2, BOARD_ROWS / 2),
-                SpatialBundle {
-                    transform: Transform::from_xyz(
-                        get_position(BOARD_ROWS / 2, MARGIN_LEFT),
-                        get_position(BOARD_ROWS / 2, MARGIN_TOP),
-                        -1.,
-                    ),
-                    ..default()
-                },
-            ))
-            .with_children(|parent| {
-                draw_cursor(parent, CURSOR_2_COLOR);
-            });
-    }
+            parent
+                .spawn((
+                    Cursor2,
+                    SpatialBundle {
+                        transform: Transform::from_xyz(
+                            get_canvas_position(BOARD_ROWS / 2),
+                            get_canvas_position(BOARD_ROWS / 2),
+                            1.,
+                        ),
+                        ..default()
+                    },
+                ))
+                .with_children(|parent| {
+                    draw_cursor(parent, CURSOR_2_COLOR);
+                });
+        });
 }
 
-fn get_grid(x: f32, offset: f32) -> usize {
-    ((x - offset) / BOARD_LINE_WIDTH)
+fn get_board_position(x: f32) -> usize {
+    (x / BOARD_LINE_WIDTH)
         .floor()
         .clamp(0., BOARD_ROWS as f32 - 1.) as usize
 }
 
-fn get_position(x: usize, offset: f32) -> f32 {
-    x as f32 * BOARD_LINE_WIDTH + offset + BOARD_LINE_WIDTH / 2. - 1.0
+fn get_canvas_position(x: usize) -> f32 {
+    x as f32 * BOARD_LINE_WIDTH + BOARD_LINE_WIDTH / 2. - 1.0
 }
 
 fn mouse_motion(
     mut mouse_evt: EventReader<MouseEvent>,
     mut set: ParamSet<(
-        Query<(&mut Transform, &mut CursorPosition), With<Cursor1>>,
-        Query<(&mut Transform, &mut CursorPosition), With<Cursor2>>,
+        Query<&mut Transform, With<Cursor1>>,
+        Query<&mut Transform, With<Cursor2>>,
     )>,
     board_query: Query<&Checkerboard>,
     mut audio_resource: ResMut<AudioResource>,
@@ -305,28 +269,23 @@ fn mouse_motion(
             return;
         }
 
-        let mut change = |mut transform: Mut<Transform>, mut cursor: Mut<CursorPosition>| {
-            let x = get_grid(event.position.x, MARGIN_LEFT);
-            let y = get_grid(event.position.y, MARGIN_TOP);
+        let mut change = |mut transform: Mut<Transform>| {
+            let x = get_board_position(transform.translation.x);
+            let y = get_board_position(transform.translation.y);
+            let new_x = get_board_position(event.position.x - MARGIN_LEFT);
+            let new_y = get_board_position(event.position.y - MARGIN_TOP);
 
-            if x != cursor.0 || y != cursor.1 {
-                cursor.0 = x;
-                cursor.1 = y;
-                transform.translation.x = get_position(cursor.0, MARGIN_LEFT);
-                transform.translation.y = get_position(cursor.1, MARGIN_TOP);
+            if new_x != x || new_y != y {
+                transform.translation.x = get_canvas_position(new_x);
+                transform.translation.y = get_canvas_position(new_y);
                 audio_resource.play("move_cursor");
             }
         };
 
         if checkerboard.current == Player::One {
-            let mut query = set.p0();
-            let (transform, cursor) = query.single_mut();
-            change(transform, cursor);
+            change(set.p0().single_mut());
         } else {
-            let mut query = set.p1();
-            if let Ok((transform, cursor)) = query.get_single_mut() {
-                change(transform, cursor);
-            }
+            change(set.p1().single_mut());
         }
     }
 }
@@ -334,70 +293,58 @@ fn mouse_motion(
 fn handle_dir(
     input: Res<Input<Button>>,
     mut set: ParamSet<(
-        Query<(&mut Transform, &mut CursorPosition), With<Cursor1>>,
-        Query<(&mut Transform, &mut CursorPosition), With<Cursor2>>,
+        Query<&mut Transform, With<Cursor1>>,
+        Query<&mut Transform, With<Cursor2>>,
     )>,
     board_query: Query<&Checkerboard>,
     mut audio_resource: ResMut<AudioResource>,
 ) {
-    let mut change = |mut transform: Mut<Transform>,
-                      mut cursor: Mut<CursorPosition>,
-                      left: Button,
-                      right: Button,
-                      up: Button,
-                      down: Button| {
-        let mut pressed = false;
-        if input.just_pressed(left) {
-            cursor.0 = cursor.0.max(1) - 1;
-            pressed = true;
-        }
+    let mut change =
+        |mut transform: Mut<Transform>, left: Button, right: Button, up: Button, down: Button| {
+            if input.just_pressed(left) {
+                transform.translation.x =
+                    get_canvas_position(get_board_position(transform.translation.x).max(1) - 1);
+                audio_resource.play("move_cursor");
+            }
 
-        if input.just_pressed(right) {
-            cursor.0 = cursor.0.min(BOARD_ROWS - 2) + 1;
-            pressed = true;
-        }
+            if input.just_pressed(right) {
+                transform.translation.x = get_canvas_position(
+                    get_board_position(transform.translation.x).min(BOARD_ROWS - 2) + 1,
+                );
+                audio_resource.play("move_cursor");
+            }
 
-        if input.just_pressed(up) {
-            cursor.1 = cursor.1.max(1) - 1;
-            pressed = true;
-        }
+            if input.just_pressed(up) {
+                transform.translation.y =
+                    get_canvas_position(get_board_position(transform.translation.y).max(1) - 1);
+                audio_resource.play("move_cursor");
+            }
 
-        if input.just_pressed(down) {
-            cursor.1 = cursor.1.min(BOARD_ROWS - 2) + 1;
-            pressed = true;
-        }
-
-        if pressed {
-            audio_resource.play("move_cursor");
-            transform.translation.x = get_position(cursor.0, MARGIN_LEFT);
-            transform.translation.y = get_position(cursor.1, MARGIN_TOP);
-        }
-    };
+            if input.just_pressed(down) {
+                transform.translation.y = get_canvas_position(
+                    get_board_position(transform.translation.y).min(BOARD_ROWS - 2) + 1,
+                );
+                audio_resource.play("move_cursor");
+            }
+        };
 
     let checkerboard = board_query.single();
     if checkerboard.current == Player::One {
-        let mut query = set.p0();
-        let (transform, cursor) = query.single_mut();
         change(
-            transform,
-            cursor,
+            set.p0().single_mut(),
             Button::Joypad1Left,
             Button::Joypad1Right,
             Button::Joypad1Up,
             Button::Joypad1Down,
         );
     } else {
-        let mut query = set.p1();
-        if let Ok((transform, cursor)) = query.get_single_mut() {
-            change(
-                transform,
-                cursor,
-                Button::Joypad2Left,
-                Button::Joypad2Right,
-                Button::Joypad2Up,
-                Button::Joypad2Down,
-            );
-        }
+        change(
+            set.p1().single_mut(),
+            Button::Joypad2Left,
+            Button::Joypad2Right,
+            Button::Joypad2Up,
+            Button::Joypad2Down,
+        );
     }
 }
 
@@ -429,49 +376,49 @@ fn handle_submit(
     mut commands: Commands,
     input: Res<Input<Button>>,
     mut set: ParamSet<(
-        Query<(&CursorPosition, &mut Transform), With<Cursor1>>,
-        Query<(&CursorPosition, &mut Transform), With<Cursor2>>,
+        Query<&mut Transform, With<Cursor1>>,
+        Query<&mut Transform, With<Cursor2>>,
     )>,
     mut board_query: Query<(Entity, &mut Checkerboard)>,
     mut next: ResMut<NextState<AppState>>,
     mut audio_resource: ResMut<AudioResource>,
+    mode: Res<GameMode>,
 ) {
     let (board_entity, mut checkerboard) = board_query.single_mut();
 
     let (x, y) = if checkerboard.current == Player::One {
         let mut query = set.p0();
-        let (cursor1, mut transform) = query.single_mut();
-        transform.translation.z = 1.;
+        let transform = query.single_mut();
         if !input.any_just_pressed([Button::Joypad1A, Button::Joypad1B, Button::Pointer1Left]) {
             return;
         }
-        transform.translation.z = -1.;
-        (cursor1.0, cursor1.1)
+        (transform.translation.x, transform.translation.y)
     } else {
         let mut query2 = set.p1();
-        let cursor2_result = query2.get_single_mut();
+        let mut transform = query2.single_mut();
 
-        if cursor2_result.is_err() {
-            // p2 auto
+        if mode.is_1p() {
             let (x, y) = checkerboard.suggestion();
             let piece = spawn_piece(&mut commands, x, y, get_piece_color(checkerboard.current));
             commands.entity(board_entity).add_child(piece);
 
             let is_over = checkerboard.put(x, y);
+            transform.translation.x = get_canvas_position(x);
+            transform.translation.y = get_canvas_position(y);
             audio_resource.play("put_piece");
             if is_over {
                 next.set(AppState::GameOver);
             }
             return;
         };
-        let (cursor2, mut transform) = cursor2_result.unwrap();
-        transform.translation.z = 1.;
         if !input.any_just_pressed([Button::Joypad2A, Button::Joypad2B, Button::Pointer2Left]) {
             return;
         }
-        transform.translation.z = -1.;
-        (cursor2.0, cursor2.1)
+        (transform.translation.x, transform.translation.y)
     };
+
+    let x = get_board_position(x);
+    let y = get_board_position(y);
 
     if !checkerboard.valid(x, y) {
         return;
@@ -533,6 +480,7 @@ fn select(
     mut audio_resource: ResMut<AudioResource>,
     mut next: ResMut<NextState<AppState>>,
     mut query: Query<&mut UISelect>,
+    mut mouse_evt: EventReader<MouseEvent>,
 ) {
     let mut select = query.single_mut();
     let sound = Audio {
@@ -541,7 +489,11 @@ fn select(
         ..default()
     };
 
-    if input.just_pressed(Button::Joypad1Up) {
+    let (enter, hover) = select.is_enter_hover(mouse_evt.iter().last());
+
+    if enter {
+        audio_resource.play_audio(sound);
+    } else if input.just_pressed(Button::Joypad1Up) {
         select.change(-1);
         audio_resource.play_audio(sound);
     } else if input.any_just_pressed([Button::Joypad1Down, Button::Select]) {
@@ -550,7 +502,9 @@ fn select(
     }
 
     let select_mode = select.value();
-    if input.any_just_pressed([Button::Start, Button::Joypad1A, Button::Joypad1B]) {
+    if (hover && input.just_pressed(Button::Pointer1Left))
+        || input.any_just_pressed([Button::Start, Button::Joypad1A, Button::Joypad1B])
+    {
         if select_mode == SELECT_OPTIONS[0] {
             commands.insert_resource(GameMode::One);
             next.set(AppState::InGame);
@@ -565,7 +519,7 @@ fn select(
     }
 }
 
-fn setup_game_over(mut commands: Commands, board_query: Query<&Checkerboard>) {
+fn setup_game_over(mut commands: Commands, board_query: Query<&Checkerboard>, mode: Res<GameMode>) {
     let board = board_query.single();
     let frame_width = 150.;
     let frame_height = 120.;
@@ -620,7 +574,13 @@ fn setup_game_over(mut commands: Commands, board_query: Query<&Checkerboard>) {
                         value: if let Some(player) = board.victory {
                             match player {
                                 Player::One => "1P wins!".into(),
-                                _ => "2P wins!".into(),
+                                _ => {
+                                    if mode.is_2p() {
+                                        "2P wins!".into()
+                                    } else {
+                                        "CPU wins!".into()
+                                    }
+                                }
                             }
                         } else {
                             "No one wins!".into()
