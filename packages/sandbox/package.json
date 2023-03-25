@@ -8,7 +8,7 @@
     "qoijs": "^1.0.0"
   },
   "peerDependencies": {
-    "@mantou/nes": "^1.0.6"
+    "@mantou/nes": "^1.0.9"
   },
   "devDependencies": {
     "@nesbox/config": "^0.0.1"
