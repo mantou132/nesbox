@@ -561,7 +561,7 @@ export class MStageElement extends GemElement<State> {
       () => [!configure.windowHasFocus, configure.searchState, configure.settingsState, configure.friendListState],
     );
 
-    addEventListener('pointermove', this.#onPointerMove);
+    this.addEventListener('pointermove', this.#onPointerMove);
     addEventListener('keydown', this.#onKeyDown);
     this.addEventListener('pointerdown', this.#onPointerDown);
     addEventListener('keyup', this.#onKeyUp);
@@ -571,7 +571,7 @@ export class MStageElement extends GemElement<State> {
     return () => {
       this.#audioContext?.close();
       this.#rtc?.destroy();
-      removeEventListener('pointermove', this.#onPointerMove);
+      this.removeEventListener('pointermove', this.#onPointerMove);
       removeEventListener('keydown', this.#onKeyDown);
       this.removeEventListener('pointerdown', this.#onPointerDown);
       removeEventListener('keyup', this.#onKeyUp);

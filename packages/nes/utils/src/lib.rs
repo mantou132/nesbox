@@ -39,6 +39,7 @@ extern "C" {
 #[macro_export]
 macro_rules! log {
     ($($arg:tt)*) => {{
+        #[cfg(target_arch = "wasm32")]
         $crate::_log(&format!($($arg)*));
     }};
 }

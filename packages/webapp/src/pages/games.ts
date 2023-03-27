@@ -53,6 +53,7 @@ const style = createCSSSheet(css`
     object-fit: cover;
     border-radius: calc(2 * ${theme.normalRound});
     box-shadow: 0 0 0 0.5px ${theme.borderColor};
+    image-rendering: pixelated;
   }
   .list {
     padding-inline: ${theme.gridGutter};

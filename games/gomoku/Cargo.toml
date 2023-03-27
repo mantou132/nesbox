@@ -9,6 +9,8 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 nesbox-utils = { path = "../../packages/nes/utils" }
+strum = "0.24"
+strum_macros = "0.24"
 
 # fixed ecs macro
 bevy = { version = "0.10", default-features = false }

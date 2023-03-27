@@ -1,4 +1,7 @@
 use nesbox_utils::prelude::*;
+use std::{str::FromStr, time::Duration};
+use strum::IntoEnumIterator;
+use strum_macros::{Display, EnumIter, EnumString};
 
 use crate::algo::find;
 
@@ -23,19 +26,32 @@ const CURSOR_1_COLOR: Color = Color(0, 120, 203, 0xff);
 const CURSOR_2_COLOR: Color = Color(0, 0xff, 0, 0xff);
 const CURSOR_SIZE: f32 = 7.;
 
+const ROUND_TIME: u64 = 30;
+
 #[derive(Resource, PartialEq, Debug, Default)]
 pub enum GameMode {
     #[default]
-    One,
+    OneBlack,
+    OneWhite,
     Two,
 }
 
 impl GameMode {
     fn is_1p(&self) -> bool {
-        self == &GameMode::One
+        self == &GameMode::OneBlack || self == &GameMode::OneWhite
+    }
+    fn is_1p_white(&self) -> bool {
+        self == &GameMode::OneWhite
     }
     fn is_2p(&self) -> bool {
         self == &GameMode::Two
+    }
+    fn get_1p(&self) -> Player {
+        if self == &GameMode::OneWhite {
+            Player::Two
+        } else {
+            Player::One
+        }
     }
 }
 
@@ -44,6 +60,15 @@ struct Cursor1;
 
 #[derive(Component, Debug, Default)]
 struct Cursor2;
+
+#[derive(Component, Debug, Default)]
+struct GameOverModal;
+
+#[derive(Component, Debug, Default)]
+struct RoundPiece;
+
+#[derive(Component, Debug, Default)]
+struct RoundTimer(Timer);
 
 #[derive(Component, Debug, Default)]
 struct Checkerboard {
@@ -133,6 +158,10 @@ impl Checkerboard {
     fn suggestion(&self) -> (usize, usize) {
         find(&self.grid, self.current, self.next)
     }
+
+    fn random(&self) -> (usize, usize) {
+        self.suggestion()
+    }
 }
 
 fn draw_cursor(parent: &mut ChildBuilder, color: Color) {
@@ -217,7 +246,7 @@ fn setup_game(mut commands: Commands) {
                         transform: Transform::from_xyz(
                             get_canvas_position(BOARD_ROWS / 2),
                             get_canvas_position(BOARD_ROWS / 2),
-                            2.,
+                            -1.,
                         ),
                         ..default()
                     },
@@ -233,7 +262,7 @@ fn setup_game(mut commands: Commands) {
                         transform: Transform::from_xyz(
                             get_canvas_position(BOARD_ROWS / 2),
                             get_canvas_position(BOARD_ROWS / 2),
-                            1.,
+                            -1.,
                         ),
                         ..default()
                     },
@@ -242,6 +271,40 @@ fn setup_game(mut commands: Commands) {
                     draw_cursor(parent, CURSOR_2_COLOR);
                 });
         });
+
+    commands.spawn((
+        RoundPiece,
+        SpatialBundle {
+            transform: Transform::from_xyz(
+                MARGIN_LEFT + BOARD_LINE_WIDTH / 2.,
+                BOARD_WIDTH + BOARD_LINE_WIDTH - 2.,
+                0.,
+            ),
+            ..default()
+        },
+        Sprite("piece".into()),
+        Color::default(),
+    ));
+
+    commands.spawn((
+        RoundTimer(Timer::new(
+            Duration::from_secs(ROUND_TIME),
+            TimerMode::Repeating,
+        )),
+        SpatialBundle {
+            transform: Transform::from_xyz(
+                MARGIN_LEFT + BOARD_LINE_WIDTH * 2.,
+                BOARD_WIDTH + BOARD_LINE_WIDTH,
+                0.,
+            ),
+            ..default()
+        },
+        UITextArea {
+            value: "0s".into(),
+            width: BOARD_WIDTH,
+            ..default()
+        },
+    ));
 }
 
 fn get_board_position(x: f32) -> usize {
@@ -254,6 +317,50 @@ fn get_canvas_position(x: usize) -> f32 {
     x as f32 * BOARD_LINE_WIDTH + BOARD_LINE_WIDTH / 2. - 1.0
 }
 
+fn update_state(
+    mut commands: Commands,
+    time: Res<Time>,
+    mut timer: Query<(&mut UITextArea, &mut RoundTimer)>,
+    mut query: Query<&mut Color, With<RoundPiece>>,
+    mut board_query: Query<(Entity, &mut Checkerboard)>,
+    mut set: ParamSet<(
+        Query<&mut Transform, With<Cursor1>>,
+        Query<&mut Transform, With<Cursor2>>,
+    )>,
+    mode: Res<GameMode>,
+    mut audio_resource: ResMut<AudioResource>,
+) {
+    let (board_entity, mut board) = board_query.single_mut();
+    let (mut textarea, mut round_timer) = timer.single_mut();
+
+    let mut color = query.single_mut();
+    *color = get_piece_color(board.current);
+
+    round_timer.0.tick(time.delta());
+    let mut time_string = (round_timer.0.remaining_secs() as u32).to_string();
+    time_string.push('s');
+    textarea.value = time_string;
+
+    let mut change = |mut transform: Mut<Transform>, x: usize, y: usize| {
+        transform.translation.x = get_canvas_position(x);
+        transform.translation.y = get_canvas_position(y);
+        audio_resource.play("put_piece");
+    };
+
+    if round_timer.0.finished() {
+        let (x, y) = board.random();
+        let piece = spawn_piece(&mut commands, x, y, get_piece_color(board.current));
+        commands.entity(board_entity).add_child(piece);
+        board.put(x, y);
+        round_timer.0.reset();
+        if board.current == mode.get_1p() {
+            change(set.p0().single_mut(), x, y);
+        } else {
+            change(set.p1().single_mut(), x, y);
+        }
+    }
+}
+
 fn mouse_motion(
     mut mouse_evt: EventReader<MouseEvent>,
     mut set: ParamSet<(
@@ -262,10 +369,20 @@ fn mouse_motion(
     )>,
     board_query: Query<&Checkerboard>,
     mut audio_resource: ResMut<AudioResource>,
+    mode: Res<GameMode>,
 ) {
     if let Some(event) = mouse_evt.iter().last() {
         let checkerboard = board_query.single();
-        if checkerboard.current != event.player {
+        let current_player = if mode.is_1p_white() {
+            if checkerboard.current == Player::Two {
+                Player::One
+            } else {
+                Player::Two
+            }
+        } else {
+            checkerboard.current
+        };
+        if event.player != current_player {
             return;
         }
 
@@ -282,7 +399,7 @@ fn mouse_motion(
             }
         };
 
-        if checkerboard.current == Player::One {
+        if checkerboard.current == mode.get_1p() {
             change(set.p0().single_mut());
         } else {
             change(set.p1().single_mut());
@@ -298,6 +415,7 @@ fn handle_dir(
     )>,
     board_query: Query<&Checkerboard>,
     mut audio_resource: ResMut<AudioResource>,
+    mode: Res<GameMode>,
 ) {
     let mut change =
         |mut transform: Mut<Transform>, left: Button, right: Button, up: Button, down: Button| {
@@ -329,7 +447,9 @@ fn handle_dir(
         };
 
     let checkerboard = board_query.single();
-    if checkerboard.current == Player::One {
+    if checkerboard.current == mode.get_1p() {
+        set.p0().single_mut().translation.z = 2.;
+        set.p1().single_mut().translation.z = 1.;
         change(
             set.p0().single_mut(),
             Button::Joypad1Left,
@@ -338,6 +458,8 @@ fn handle_dir(
             Button::Joypad1Down,
         );
     } else {
+        set.p0().single_mut().translation.z = 1.;
+        set.p1().single_mut().translation.z = 2.;
         change(
             set.p1().single_mut(),
             Button::Joypad2Left,
@@ -383,10 +505,12 @@ fn handle_submit(
     mut next: ResMut<NextState<AppState>>,
     mut audio_resource: ResMut<AudioResource>,
     mode: Res<GameMode>,
+    mut timer: Query<&mut RoundTimer>,
 ) {
     let (board_entity, mut checkerboard) = board_query.single_mut();
+    let mut round_timer = timer.single_mut();
 
-    let (x, y) = if checkerboard.current == Player::One {
+    let (x, y) = if checkerboard.current == mode.get_1p() {
         let mut query = set.p0();
         let transform = query.single_mut();
         if !input.any_just_pressed([Button::Joypad1A, Button::Joypad1B, Button::Pointer1Left]) {
@@ -398,11 +522,15 @@ fn handle_submit(
         let mut transform = query2.single_mut();
 
         if mode.is_1p() {
+            if round_timer.0.elapsed_secs() < 1. {
+                return;
+            }
             let (x, y) = checkerboard.suggestion();
             let piece = spawn_piece(&mut commands, x, y, get_piece_color(checkerboard.current));
             commands.entity(board_entity).add_child(piece);
 
             let is_over = checkerboard.put(x, y);
+            round_timer.0.reset();
             transform.translation.x = get_canvas_position(x);
             transform.translation.y = get_canvas_position(y);
             audio_resource.play("put_piece");
@@ -428,6 +556,7 @@ fn handle_submit(
     commands.entity(board_entity).add_child(piece);
 
     let is_over = checkerboard.put(x, y);
+    round_timer.0.reset();
     audio_resource.play("put_piece");
     if is_over {
         next.set(AppState::GameOver);
@@ -444,7 +573,19 @@ pub enum AppState {
     About,
 }
 
-const SELECT_OPTIONS: &[&str] = &["1 Player", "2 Player", "", "About"];
+#[derive(EnumString, Display, EnumIter, PartialEq, Debug)]
+enum MenuOption {
+    #[strum(serialize = "1 Player(Black)")]
+    OneBlack,
+    #[strum(serialize = "1 Player(White)")]
+    OneWhite,
+    #[strum(serialize = "2 Player")]
+    Two,
+    #[strum(serialize = "")]
+    Empty,
+    #[strum(serialize = "About")]
+    About,
+}
 
 fn setup_menu(mut commands: Commands) {
     commands.insert_resource(ClearColor(Color(0xff, 0xff, 0xff, 0xff)));
@@ -463,11 +604,11 @@ fn setup_menu(mut commands: Commands) {
     ));
     commands.spawn((
         SpatialBundle {
-            transform: Transform::from_xyz(WIDTH as f32 / 2. - 43., WIDTH as f32 / 2. - 20., 0.),
+            transform: Transform::from_xyz(WIDTH as f32 / 2. - 55., WIDTH as f32 / 2. - 20., 0.),
             ..default()
         },
         UISelect {
-            options: SELECT_OPTIONS.iter().map(|v| v.to_string()).collect(),
+            options: MenuOption::iter().map(|opt| opt.to_string()).collect(),
             ..default()
         },
         Color(0x0, 0x0, 0x0, 0xff),
@@ -501,19 +642,23 @@ fn select(
         audio_resource.play_audio(sound);
     }
 
-    let select_mode = select.value();
+    let select_mode = MenuOption::from_str(select.value()).unwrap();
     if (hover && input.just_pressed(Button::Pointer1Left))
         || input.any_just_pressed([Button::Start, Button::Joypad1A, Button::Joypad1B])
     {
-        if select_mode == SELECT_OPTIONS[0] {
-            commands.insert_resource(GameMode::One);
+        if select_mode == MenuOption::OneBlack {
+            commands.insert_resource(GameMode::OneBlack);
             next.set(AppState::InGame);
         }
-        if select_mode == SELECT_OPTIONS[1] {
+        if select_mode == MenuOption::OneWhite {
+            commands.insert_resource(GameMode::OneWhite);
+            next.set(AppState::InGame);
+        }
+        if select_mode == MenuOption::Two {
             commands.insert_resource(GameMode::Two);
             next.set(AppState::InGame);
         }
-        if select_mode == SELECT_OPTIONS[3] {
+        if select_mode == MenuOption::About {
             next.set(AppState::About);
         }
     }
@@ -521,21 +666,22 @@ fn select(
 
 fn setup_game_over(mut commands: Commands, board_query: Query<&Checkerboard>, mode: Res<GameMode>) {
     let board = board_query.single();
-    let frame_width = 150.;
-    let frame_height = 120.;
+    let modal_width = 150.;
+    let modal_height = 120.;
     commands
         .spawn((
+            GameOverModal,
             SpatialBundle {
                 transform: Transform::from_xyz(
-                    (WIDTH as f32 - frame_width) / 2.,
-                    (HEIGHT as f32 - frame_height) / 2.,
-                    0.,
+                    (WIDTH as f32 - modal_width) / 2.,
+                    (HEIGHT as f32 - modal_height) / 2.,
+                    3.,
                 ),
                 ..default()
             },
             Size {
-                width: frame_width,
-                height: frame_height,
+                width: modal_width,
+                height: modal_height,
             },
             Color(255, 255, 255, 180),
         ))
@@ -546,8 +692,8 @@ fn setup_game_over(mut commands: Commands, board_query: Query<&Checkerboard>, mo
                     ..default()
                 },
                 Size {
-                    width: frame_width - 4.,
-                    height: frame_height - 4.,
+                    width: modal_width - 4.,
+                    height: modal_height - 4.,
                 },
                 Color(0, 0, 0, 180),
             ));
@@ -559,52 +705,61 @@ fn setup_game_over(mut commands: Commands, board_query: Query<&Checkerboard>, mo
                 UITextArea {
                     value: "GAME OVER!".into(),
                     font: "arial_black".into(),
-                    width: frame_width,
+                    width: modal_width,
                     center: true,
                 },
                 Color(255, 255, 255, 255),
             ));
-            for _ in 0..2 {
-                parent.spawn((
-                    SpatialBundle {
-                        transform: Transform::from_xyz(0., 70., 0.),
-                        ..default()
-                    },
-                    UITextArea {
-                        value: if let Some(player) = board.victory {
-                            match player {
-                                Player::One => "1P wins!".into(),
-                                _ => {
-                                    if mode.is_2p() {
-                                        "2P wins!".into()
-                                    } else {
-                                        "CPU wins!".into()
-                                    }
+            parent.spawn((
+                SpatialBundle {
+                    transform: Transform::from_xyz(0., 70., 0.),
+                    ..default()
+                },
+                UITextArea {
+                    value: if let Some(player) = board.victory {
+                        match player {
+                            Player::One if mode.is_2p() => "1P wins!".into(),
+                            Player::Two if mode.is_2p() => "2P wins!".into(),
+                            _ => {
+                                if mode.get_1p() == player {
+                                    "You wins!".into()
+                                } else {
+                                    "CPU wins!".into()
                                 }
                             }
-                        } else {
-                            "No one wins!".into()
-                        },
-                        width: frame_width,
-                        center: true,
-                        ..default()
-                    },
-                    if let Some(player) = board.victory {
-                        match player {
-                            Player::One => CURSOR_1_COLOR,
-                            _ => CURSOR_2_COLOR,
                         }
                     } else {
-                        Color(255, 255, 255, 255)
+                        "No one wins!".into()
                     },
-                ));
-            }
+                    width: modal_width,
+                    center: true,
+                    ..default()
+                },
+                if let Some(player) = board.victory {
+                    if player == mode.get_1p() {
+                        CURSOR_1_COLOR
+                    } else {
+                        CURSOR_2_COLOR
+                    }
+                } else {
+                    Color(255, 255, 255, 255)
+                },
+            ));
         });
 }
 
-fn handle_game_over(input: Res<Input<Button>>, mut next: ResMut<NextState<AppState>>) {
+fn handle_game_over(
+    mut commands: Commands,
+    input: Res<Input<Button>>,
+    mut next: ResMut<NextState<AppState>>,
+    query: Query<Entity, With<GameOverModal>>,
+) {
     if input.any_just_pressed([Button::Joypad1A, Button::Joypad1B, Button::Pointer1Left]) {
-        next.set(AppState::InGame);
+        if let Ok(entity) = query.get_single() {
+            commands.get_entity(entity).unwrap().despawn_recursive();
+        } else {
+            next.set(AppState::InGame);
+        }
     }
 }
 
@@ -648,7 +803,10 @@ pub fn create_app() -> App {
 
     assets_resource.load_sprite(
         "piece",
-        (13, decode_qoi_frame(include_bytes!("../assets/piece.data"))),
+        (
+            PIECE_SIZE as u32,
+            decode_qoi_frame(include_bytes!("../assets/piece.data")),
+        ),
     );
 
     assets_resource.load_font(
@@ -677,6 +835,7 @@ pub fn create_app() -> App {
                 mouse_motion,
                 handle_dir,
                 handle_submit.after(handle_dir).after(mouse_motion),
+                update_state,
             )
                 .in_set(OnUpdate(AppState::InGame)),
         )

@@ -34,6 +34,7 @@ const style = createCSSSheet(css`
   .carousel::part(img) {
     --mask-range: 0;
     object-fit: contain;
+    image-rendering: pixelated;
   }
   .carousel::part(nav),
   .carousel::part(content) {

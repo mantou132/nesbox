@@ -3179,6 +3179,8 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "nesbox-utils",
+ "strum",
+ "strum_macros",
 ]
 
 [[package]]

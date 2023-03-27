@@ -48,6 +48,7 @@ const style = createCSSSheet(css`
     border-radius: ${theme.normalRound};
     object-fit: cover;
     box-shadow: 0 0 0 0.5px ${theme.borderColor};
+    image-rendering: pixelated;
     filter: ${theme.imageFilter};
   }
   :host(:hover) .cover {

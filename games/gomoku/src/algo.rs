@@ -15,7 +15,7 @@ fn get_shape(
     loop {
         let len = shape.len();
 
-        if x == rows || y == rows || len > 6 || con_some_none == 5 {
+        if x == rows || y == rows || len == 6 || con_some_none == 5 {
             break;
         }
 
@@ -45,24 +45,29 @@ fn get_shape(
     shape
 }
 
+const SCORE_LV_1: i32 = 99999999;
+const SCORE_LV_2: i32 = 500000;
+const SCORE_LV_3: i32 = 5000;
+const SCORE_LV_4: i32 = 500;
+const SCORE_LV_5: i32 = 200;
 fn match_score(shape: &[u8]) -> i32 {
     match shape[..] {
-        [1, 1, 1, 1, 1] => 99999999,
-        [0, 1, 1, 1, 1, 0] => 500000,
+        [1, 1, 1, 1, 1] => SCORE_LV_1,
+        [0, 1, 1, 1, 1, 0] => SCORE_LV_2,
 
-        [0, 1, 1, 1, 1] => 5000,
-        [1, 1, 1, 1, 0] => 5000,
-        [1, 0, 1, 1, 1] => 5000,
-        [1, 1, 0, 1, 1] => 5000,
-        [1, 1, 1, 0, 1] => 5000,
-        [0, 1, 1, 0, 1, 0] => 5000,
-        [0, 1, 0, 1, 1, 0] => 5000,
+        [0, 1, 1, 1, 1] => SCORE_LV_3,
+        [1, 1, 1, 1, 0] => SCORE_LV_3,
+        [1, 0, 1, 1, 1] => SCORE_LV_3,
+        [1, 1, 0, 1, 1] => SCORE_LV_3,
+        [1, 1, 1, 0, 1] => SCORE_LV_3,
+        [0, 1, 1, 0, 1, 0] => SCORE_LV_3,
+        [0, 1, 0, 1, 1, 0] => SCORE_LV_3,
 
-        [0, 1, 1, 1, 0] => 5000,
+        [0, 1, 1, 1, 0] => SCORE_LV_3,
 
-        [1, 1, 1, 0, 0] => 500,
-        [0, 0, 1, 1, 1] => 500,
-        [1, 1, 0, 1, 0] => 200,
+        [1, 1, 1, 0, 0] => SCORE_LV_4,
+        [0, 0, 1, 1, 1] => SCORE_LV_4,
+        [1, 1, 0, 1, 0] => SCORE_LV_5,
         [0, 0, 1, 1, 0] => 50,
         [0, 1, 1, 0, 0] => 50,
         [0, 0, 1, 0, 0] => 1,
@@ -109,7 +114,13 @@ fn is_maybe(grid: &Vec<Vec<Option<Player>>>, x: usize, y: usize, player: Player)
 
 fn find_point(grid: &mut Vec<Vec<Option<Player>>>, player: Player) -> (i32, usize, usize) {
     let rows = grid.len();
-    let mut result = (i32::MIN, 0, 0);
+    let start = rows / 2;
+    let mut result = if grid[start][start].is_none() {
+        (i32::MIN, start, start)
+    } else {
+        // use for first piece
+        (i32::MIN, start + 1, start + 1)
+    };
     for y in 0..rows {
         for x in 0..rows {
             if grid[y][x].is_none() && is_maybe(&grid, x, y, player) {
@@ -125,29 +136,6 @@ fn find_point(grid: &mut Vec<Vec<Option<Player>>>, player: Player) -> (i32, usiz
     result
 }
 
-fn find_center(grid: &Vec<Vec<Option<Player>>>) -> (usize, usize) {
-    let rows = grid.len();
-    let half_rows = rows / 2;
-    let start = half_rows;
-    for i in 0..half_rows {
-        for j in 0..half_rows {
-            if grid[start + j][start + i].is_none() {
-                return (start + i, start + j);
-            }
-            if grid[start + j][start - i].is_none() {
-                return (start - i, start + j);
-            }
-            if grid[start - j][start + i].is_none() {
-                return (start + i, start - j);
-            }
-            if grid[start - j][start - i].is_none() {
-                return (start - i, start - j);
-            }
-        }
-    }
-    return (start, start);
-}
-
 pub fn find(
     origin_grid: &Vec<Vec<Option<Player>>>,
     player: Player,
@@ -155,37 +143,23 @@ pub fn find(
 ) -> (usize, usize) {
     let mut grid = origin_grid.clone();
 
-    let rows = grid.len();
+    let next_point = find_point(&mut grid, player);
+    let opponent_next_point = find_point(&mut grid, next);
 
-    let score = evaluate(&grid, player);
-    let opponent_score = evaluate(&grid, next);
-    let is_advantage = score > opponent_score;
+    // Putting oneself first
+    let result = if next_point.0 >= opponent_next_point.0 / 2 {
+        next_point
+    } else {
+        opponent_next_point
+    };
 
-    let start = find_center(&grid);
-    let mut result = (i32::MIN, start.0, start.1);
-
-    for y in 0..rows {
-        for x in 0..rows {
-            if grid[y][x].is_none() && is_maybe(&grid, x, y, player) {
-                grid[y][x] = Some(player);
-                let next_score = evaluate(&grid, player);
-                let opponent_next = find_point(&mut grid, next);
-                if is_advantage {
-                    let diff = next_score - opponent_next.0;
-                    if diff > result.0 {
-                        result = (diff, x, y);
-                    }
-                } else {
-                    if opponent_next.0 > result.0 {
-                        result = opponent_next;
-                    }
-                };
-                grid[y][x] = None;
-            }
-        }
-    }
-
-    log!("CPU is advantage: {is_advantage}, result: {:?}", result);
+    log!(
+        "Player::{:?} score: {:?}, Player::{:?} next score: {:?}",
+        player,
+        next_point,
+        next,
+        opponent_next_point
+    );
 
     (result.1, result.2)
 }
@@ -196,6 +170,7 @@ mod tests {
 
     fn make_board(temp: Vec<Vec<u8>>) -> Vec<Vec<Option<Player>>> {
         let rows = temp.len();
+        assert!(rows > 6, "rows <= 6");
         assert!(rows == temp[0].len(), "rows != cols");
         let mut board = Vec::with_capacity(rows);
         for y in 0..rows {
@@ -212,18 +187,56 @@ mod tests {
     }
 
     #[test]
-    fn test_start_1() {
+    fn test_basic_1() {
+        let board = make_board(vec![
+            vec![0, 0, 0, 0, 0, 0, 0],
+            vec![0, 0, 0, 0, 0, 1, 0],
+            vec![0, 0, 0, 0, 1, 0, 0],
+            vec![0, 0, 0, 1, 0, 0, 0],
+            vec![0, 0, 1, 0, 0, 0, 0],
+            vec![0, 0, 0, 0, 0, 0, 0],
+            vec![0, 0, 0, 0, 0, 0, 0],
+        ]);
+        assert_eq!(
+            get_shape(&board, Player::One, 6, 0, -1, 1),
+            vec![0, 1, 1, 1, 1, 0]
+        );
+        assert!(evaluate(&board, Player::One) > SCORE_LV_2);
+    }
+
+    #[test]
+    fn test_basic_2() {
+        let board = make_board(vec![
+            vec![0, 0, 0, 0, 0, 0, 0],
+            vec![0, 0, 0, 0, 0, 0, 0],
+            vec![0, 1, 1, 1, 1, 0, 0],
+            vec![0, 0, 0, 0, 0, 0, 0],
+            vec![0, 0, 0, 0, 0, 0, 0],
+            vec![0, 0, 0, 0, 0, 0, 0],
+            vec![0, 0, 0, 0, 0, 0, 0],
+        ]);
+        assert_eq!(
+            get_shape(&board, Player::One, 0, 2, 1, 0),
+            vec![0, 1, 1, 1, 1, 0]
+        );
+        assert!(evaluate(&board, Player::One) > SCORE_LV_2);
+    }
+
+    #[test]
+    fn test_find_1() {
         let board = make_board(vec![
             vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            vec![0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-            vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            vec![0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+            vec![0, 0, 0, 0, 0, 1, 2, 0, 0, 0],
+            vec![0, 0, 0, 0, 1, 2, 0, 0, 0, 0],
+            vec![0, 0, 0, 0, 2, 0, 0, 0, 0, 0],
             vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         ]);
+        assert_eq!(find(&board, Player::One, Player::Two), (7, 2));
+        assert_eq!(find(&board, Player::Two, Player::One), (3, 7));
     }
 }

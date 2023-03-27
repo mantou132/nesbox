@@ -50,10 +50,6 @@ const style = createCSSSheet(css`
   .preview {
     box-shadow: 0 0 0 0.5px ${theme.borderColor};
   }
-  .preview {
-    filter: ${theme.imageFilter};
-    view-transition-name: ${viewTransitionName.PREVIEW};
-  }
   .info {
     flex-grow: 1;
     display: flex;
@@ -91,6 +87,9 @@ const style = createCSSSheet(css`
     aspect-ratio: 503/348;
     object-fit: cover;
     border-radius: ${theme.normalRound};
+    image-rendering: pixelated;
+    filter: ${theme.imageFilter};
+    view-transition-name: ${viewTransitionName.PREVIEW};
   }
   .stats {
     position: absolute;

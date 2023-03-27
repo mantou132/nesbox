@@ -220,14 +220,14 @@ export class PEmulatorElement extends GemElement<State> {
       () => [configure.windowHasFocus],
     );
 
-    addEventListener('pointermove', this.#onPointerMove);
+    this.addEventListener('pointermove', this.#onPointerMove);
     addEventListener('keydown', this.#onKeyDown);
     this.addEventListener('pointerdown', this.#onPointerDown);
     addEventListener('keyup', this.#onKeyOrPointerUp);
     this.addEventListener('pointerup', this.#onKeyOrPointerUp);
     return () => {
       this.#audioContext?.close();
-      removeEventListener('pointermove', this.#onPointerMove);
+      this.removeEventListener('pointermove', this.#onPointerMove);
       removeEventListener('keydown', this.#onKeyDown);
       this.removeEventListener('pointerdown', this.#onPointerDown);
       removeEventListener('keyup', this.#onKeyOrPointerUp);
