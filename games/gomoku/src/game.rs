@@ -5,8 +5,8 @@ use strum_macros::{Display, EnumIter, EnumString};
 
 use crate::algo::find;
 
-pub const WIDTH: u32 = 256;
-pub const HEIGHT: u32 = 240;
+const WIDTH: u32 = 256;
+const HEIGHT: u32 = 240;
 
 const BOARD_ROWS: usize = 15;
 
@@ -27,9 +27,10 @@ const CURSOR_2_COLOR: Color = Color(0, 0xff, 0, 0xff);
 const CURSOR_SIZE: f32 = 7.;
 
 const ROUND_TIME: u64 = 30;
+const CPU_DELAY: f32 = 1.;
 
 #[derive(Resource, PartialEq, Debug, Default)]
-pub enum GameMode {
+enum GameMode {
     #[default]
     OneBlack,
     OneWhite,
@@ -522,7 +523,7 @@ fn handle_submit(
         let mut transform = query2.single_mut();
 
         if mode.is_1p() {
-            if round_timer.0.elapsed_secs() < 1. {
+            if round_timer.0.elapsed_secs() < CPU_DELAY {
                 return;
             }
             let (x, y) = checkerboard.suggestion();
@@ -564,7 +565,7 @@ fn handle_submit(
 }
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
-pub enum AppState {
+enum AppState {
     #[default]
     Menu,
     InGame,
@@ -791,6 +792,13 @@ fn despawn_screen(to_despawn: Query<Entity>, mut commands: Commands) {
     }
 }
 
+fn global_handle(input: Res<Input<Button>>, mut next: ResMut<NextState<AppState>>) {
+    if input.just_pressed(Button::Reset) {
+        next.set(AppState::Menu);
+    }
+}
+
+#[nesbox_bevy]
 pub fn create_app() -> App {
     let mut app = create_bevy_app(WIDTH, HEIGHT, Color::default());
 
@@ -822,6 +830,7 @@ pub fn create_app() -> App {
 
     // no `run()`: https://github.com/just-talks/game-dev/discussions/2
     app.add_state::<AppState>()
+        .add_system(global_handle)
         .add_systems(
             (despawn_screen, setup_menu.after(despawn_screen)).in_schedule(OnEnter(AppState::Menu)),
         )

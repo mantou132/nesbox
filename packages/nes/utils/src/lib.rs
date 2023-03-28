@@ -7,7 +7,10 @@ pub mod prelude {
     pub use crate::log;
     pub use crate::pixels::*;
     pub use crate::render::*;
+    pub use bevy::core::*;
+    pub use bevy::ecs::system::*;
     pub use bevy::prelude::*;
+    pub use nesbox_utils_macro::nesbox_bevy;
     pub use rand::prelude::random;
     pub use wasm_bindgen;
     pub use wasm_bindgen::prelude::*;

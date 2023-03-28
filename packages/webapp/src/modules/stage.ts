@@ -185,6 +185,8 @@ export class MStageElement extends GemElement<State> {
   };
 
   #pauseAudio = () => {
+    this.#game?.set_sound(false);
+
     if (this.#isHost) {
       this.#setVolume(0);
     } else {
@@ -304,7 +306,7 @@ export class MStageElement extends GemElement<State> {
         }
       }
 
-      // {
+      // if (process.env.NODE_ENV === 'development') {
       //   // test wasm
       //   await initNes(
       //     new Response(await (await fetch('http://localhost:8000/index_bg.wasm')).arrayBuffer(), {

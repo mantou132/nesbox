@@ -1,6 +1,6 @@
 [package]
 name = "nes"
-version = "1.0.9"
+version = "1.0.10"
 authors = ["mantou132"]
 edition = "2021"
 
@@ -9,4 +9,4 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 tetanes = { path = "../../deps/tetanes", default_features = false }
-nesbox-utils = { path = "utils" }
+nesbox_utils = { path = "utils" }
