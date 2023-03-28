@@ -124,6 +124,9 @@ export class MChatElement extends GemElement {
       async () => {
         if (friendStore.friendChatState) {
           await getMessages(friendStore.friendChatState);
+        }
+        // 保证用户看到信息后才清除未读
+        if (friendStore.friendChatState) {
           readMessage(friendStore.friendChatState);
         }
       },
