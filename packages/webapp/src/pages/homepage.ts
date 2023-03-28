@@ -309,7 +309,7 @@ export class PHomepageElement extends GemElement {
           ([img, title, desc]) => html`
             <section>
               <div class="content">
-                <img draggable="false" src=${img} loading="lazy" alt="feature image" width="729" height="628" />
+                <img draggable="false" src=${img} alt="feature image" width="729" height="628" />
                 <div class="feature">
                   <dy-heading lv="2">${title}</dy-heading>
                   <dy-paragraph>${desc}</dy-paragraph>
@@ -323,7 +323,6 @@ export class PHomepageElement extends GemElement {
             <img
               alt="NESBox Screenshot"
               draggable="false"
-              loading="lazy"
               width="800"
               height="530"
               srcset=${`${getCDNSrc(

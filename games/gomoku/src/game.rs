@@ -799,7 +799,7 @@ fn global_handle(input: Res<Input<Button>>, mut next: ResMut<NextState<AppState>
 }
 
 #[nesbox_bevy]
-pub fn create_app() -> App {
+fn create_app() -> App {
     let mut app = create_bevy_app(WIDTH, HEIGHT, Color::default());
 
     let mut assets_resource = app.world.get_resource_mut::<AssetsResource>().unwrap();

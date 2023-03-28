@@ -1,29 +1,41 @@
 # NESBox
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+
+[![Discord](https://img.shields.io/discord/982679663677698079?label=discord&style=flat-square)](https://discord.gg/pBkC7azY)
+[![Twitter](https://img.shields.io/twitter/follow/nesbox_online?style=flat-square)](https://twitter.com/nesbox_online)<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
+
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-> For learning purposes, if there is copyright infringement, please contact to delete
+**NESBox's vision is to become the preferred platform for people playing online multiplayer retro games, providing an excellent user experience for all its users.**
+
+> if there is copyright infringement, please contact to delete
 
 ![](screenshots/homepage.png)
 
 ## Feature
 
-- Support playing many popular NES games
 - Support multiplayer online
-- Support game cheat
-- Support voice
 - Support gamepad
-- Support touch screen
+- Support pointer device(partial game)
 - Support game state restore
+- Support game cheat(only NES)
+- Support voice
 - Friend system, chat, invite
-- Game review
 - Internationalization
-- As a local emulator
+- Run local game
+
+## Download
+
+- [Desktop](https://nesbox.xianqiao.wang)
+- [TV/Mobile(Testing)](https://github.com/mantou132/nesbox/issues/154#issuecomment-1430810077)
+
+## Add game to NESBox
+
+See the guide([Chinese](./PUBLISH_GAME.md))
 
 ## Contributing
 
-See the contributing guide([中文](./CONTRIBUTING.md))
+See the contributing guide([Chinese](./CONTRIBUTING.md))
 
 ## Contributors ✨
 

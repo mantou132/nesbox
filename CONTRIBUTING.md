@@ -4,7 +4,9 @@
 
 ## 不编写代码
 
-对于不编写代码的人，可以优化 NESBox 的[翻译](https://github.com/mantou132/nesbox/tree/master/packages/webapp/src/locales)，或者进行更好的 UI/UX 设计（[原型 1](https://www.figma.com/file/N6DxApZl41524ey9fVL6LF/NESBox?node-id=0%3A1), [原型 2](https://www.figma.com/file/XSQ8Pc5s1SBpbyqDUFzdZe/NESBox-Flutter?node-id=0%3A1)）。
+- 优化 NESBox 的[翻译](https://github.com/mantou132/nesbox/tree/master/packages/webapp/src/locales)
+- 进行更好的 UI/UX 设计（[原型 1](https://www.figma.com/file/N6DxApZl41524ey9fVL6LF/NESBox?node-id=0%3A1)、[原型 2](https://www.figma.com/file/XSQ8Pc5s1SBpbyqDUFzdZe/NESBox-Flutter?node-id=0%3A1)）
+- 完善游戏的截图、介绍等信息（点击游戏详情页面中的编辑按钮）
 
 ## 贡献代码
 
@@ -23,8 +25,8 @@
 ```
 packages
 ├── config            共享配置
-├── flutter_app       NESBox for Android/iOS
-├── mt-app            Flutter-Web bridge
+├── flutter_app       NESBox 的 Android/iOS App
+├── mt-app            用于 NESBox 和 flutter_app 后端交互
 ├── nes               游戏模拟器的 WASM 接口，实现这个接口的任何模拟器都能在 NESBox 上运行
 ├── nes-pkg           从 `nes` 构建自动生成的 ES 模块
 ├── server            NESBox GraphQL API
@@ -34,7 +36,7 @@ packages
 │       ├── db          DB 连接和 Model 定义
 │       ├── error.rs    自定义错误
 │       ├── github.rs   通过 Github Issue 管理 NESBox 游戏
-│       ├── handles.rs  Actix-web route handles
+│       ├── handles.rs  Actix-web 路由处理
 │       ├── main.rs
 │       ├── schemas     数据库 CURD
 │       └── voice       游戏语音服务

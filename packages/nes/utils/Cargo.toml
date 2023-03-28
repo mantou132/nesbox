@@ -3,6 +3,8 @@ name = "nesbox_utils"
 version = "0.0.1"
 authors = ["mantou132"]
 edition = "2021"
+license = "MIT"
+description = "Quickly develop NESBox games"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -13,4 +15,4 @@ bevy = { version = "0.10", default-features = false }
 bincode = "1.3.3"
 rand = "0.8"
 wasm-bindgen = "0.2.63"
-nesbox_utils_macro = { path = "../utils_macro" }
+nesbox_utils_macro = { path = "../utils_macro", version = "0.0.1" }

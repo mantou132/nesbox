@@ -181,6 +181,7 @@ export class PGamesElement extends GemElement<State> {
         class="top"
         style=${styleMap({ backgroundColor: this.state.background, backgroundImage: this.state.backgroundImage })}
         .data=${topData}
+        .interval=${7000}
         @change=${({ detail }: CustomEvent<number>) => this.#onTopChange(detail, topData?.length)}
       ></dy-carousel>
       <m-game-list class="list" .recent=${true}></m-game-list>

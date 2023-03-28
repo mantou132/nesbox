@@ -3,6 +3,8 @@ name = "nesbox_utils_macro"
 version = "0.0.1"
 authors = ["mantou132"]
 edition = "2021"
+license = "MIT"
+description = "macro provided for nesbox_utils"
 
 [lib]
 proc-macro = true

@@ -154,7 +154,6 @@ export class Nes implements ONes {
     this.state = () => {
       const fn = getState();
       const len = fn();
-      if (len > 200 * 1024) throw new Error(`Too much memory`);
       return Uint8Array.from({ length: len }, () => fn());
     };
     this.load_state = (state: Uint8Array) => {
@@ -177,7 +176,7 @@ export class Nes implements ONes {
 
     const width = this.width();
     const height = this.height();
-    if (width > 256 || height > 240 || (height * width) % 2) throw new Error('width or height mistake');
+    if (width > 0xff + 1 || height > 0xff || (height * width) % 2) throw new Error('width or height mistake');
 
     this.#frameLen = width * height * 4;
     this.#frameSpace = [0, this.#frameLen - 1];
