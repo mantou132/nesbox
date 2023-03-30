@@ -1,5 +1,12 @@
 import { clamp } from 'duoyun-ui/lib/number';
 
+export const getCorSrc = (src?: string) => {
+  const url = new URL(src || '');
+  const corsOrigin = 'https://files.xianqiao.wang';
+  if (url.origin === corsOrigin) return url.href;
+  return `${corsOrigin}/${url}`;
+};
+
 export const normalizeFilename = (filename: string) =>
   filename
     .split(/\.|,|-/)[0]

@@ -1,6 +1,6 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css } from '@mantou/gem';
 import { theme } from 'duoyun-ui/lib/theme';
-import { getInputItemType, getInputItemValue, normalizeFilename, saveFile } from 'src/utils';
+import { getCorSrc, getInputItemType, getInputItemValue, normalizeFilename, saveFile } from 'src/utils';
 import QOI from 'qoijs';
 import { Font, encodeFont } from '@mantou/ecs';
 
@@ -90,24 +90,20 @@ export class PFontElement extends GemElement<State> {
   };
 
   #onPaste = async (evt: ClipboardEvent) => {
-    try {
-      const target = evt.target as DuoyunFormItemElement;
-      const url = new URL(evt.clipboardData?.getData('text') || '');
-      const name = url.pathname
-        .split('.')
-        .shift()!
-        .split('/')
-        .reverse()
-        .find((e) => !!e)!
-        .replace(/-|_/g, ' ')
-        .trim();
-      const font = await new FontFace(name, `url(${url})`).load();
-      document.fonts.add(font);
-      this.setState({ webFonts: [...new Set([...this.state.webFonts, name])] });
-      target.shadowRoot?.querySelector<DuoyunSelectElement>('dy-select')?.setState?.({ search: name });
-    } catch {
-      //
-    }
+    const target = evt.target as DuoyunFormItemElement;
+    const url = getCorSrc(evt.clipboardData?.getData('text'));
+    const name = url
+      .split('/')
+      .reverse()
+      .find((e) => !!e)!
+      .split('.')
+      .shift()!
+      .replace(/-|_/g, ' ')
+      .trim();
+    const font = await new FontFace(name, `url(${url})`).load();
+    document.fonts.add(font);
+    this.setState({ webFonts: [...new Set([...this.state.webFonts, name])] });
+    target.shadowRoot?.querySelector<DuoyunSelectElement>('dy-select')?.setState?.({ search: name });
   };
 
   #onArgChange = (evt: CustomEvent<{ name: keyof State['args']; value: string }>) => {
