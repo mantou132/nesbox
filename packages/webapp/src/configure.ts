@@ -4,7 +4,8 @@ import { Modify } from 'duoyun-ui/lib/types';
 import { createCacheStore } from 'duoyun-ui/lib/utils';
 
 import {
-  events,
+  dispatchGlobalEvent,
+  globalEvents,
   localStorageKeys,
   RTCTransportType,
   VideoFilter,
@@ -201,7 +202,7 @@ export const toggleFriendListState = () => {
 
 export const toggleSettingsState = () => {
   updateStore(configure, { settingsState: !configure.settingsState });
-  if (!configure.settingsState) dispatchEvent(new CustomEvent(events.CLOSE_SETTINGS));
+  if (!configure.settingsState) dispatchGlobalEvent(globalEvents.CLOSE_SETTINGS, null);
 };
 
 export const toggleSearchState = () => {

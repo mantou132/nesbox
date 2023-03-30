@@ -1,6 +1,6 @@
 {
   "name": "@mantou/nes-sandbox",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "",
   "module": "src/index.ts",
   "types": "src/index.ts",
@@ -8,7 +8,7 @@
     "qoijs": "^1.0.0"
   },
   "peerDependencies": {
-    "@mantou/nes": "^1.0.9"
+    "@mantou/nes": "^1.0.11"
   },
   "devDependencies": {
     "@nesbox/config": "^0.0.1"

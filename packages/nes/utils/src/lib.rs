@@ -19,7 +19,7 @@ pub mod prelude {
 use assets::AssetsPlugin;
 use audio::AudioPlugin;
 use bevy::{prelude::*, time::TimePlugin};
-use input::{Button, Input, MouseEvent};
+use input::{ButtonInput, MouseEvent};
 use pixels::Color;
 use render::RenderPlugin;
 
@@ -70,7 +70,7 @@ pub fn create_bevy_app(width: u32, height: u32, clear_color: Color) -> App {
     .add_plugin(TransformPlugin::default())
     .add_plugin(HierarchyPlugin::default())
     .add_event::<MouseEvent>()
-    .init_resource::<Input<Button>>();
+    .init_resource::<ButtonInput>();
 
     app
 }

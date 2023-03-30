@@ -126,7 +126,7 @@ pub fn nesbox_bevy(_: TokenStream, item: TokenStream) -> TokenStream {
                 self.app.update();
                 self.app
                     .world
-                    .get_resource_mut::<Input<Button>>()
+                    .get_resource_mut::<ButtonInput>()
                     .unwrap()
                     .clear();
                 self.app.world.get_resource::<FrameCount>().unwrap().0
@@ -136,8 +136,9 @@ pub fn nesbox_bevy(_: TokenStream, item: TokenStream) -> TokenStream {
                 //
             }
 
-            pub fn handle_button_event(&mut self, button: Button, pressed: bool) {
-                let mut input = self.app.world.get_resource_mut::<Input<Button>>().unwrap();
+            pub fn handle_button_event(&mut self, player: Player, button: Button, pressed: bool) {
+                let mut input = self.app.world.get_resource_mut::<ButtonInput>().unwrap();
+                let mut input = input.get_input_mut(player);
                 if pressed {
                     input.press(button);
                 } else {

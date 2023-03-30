@@ -7,8 +7,8 @@ A utils functional for developing games for the NESBox
 ```rust
 use nesbox_utils::prelude::*;
 
-fn global_handle(input: Res<Input<Button>>, mut next: ResMut<NextState<AppState>>) {
-    if input.just_pressed(Button::Reset) {
+fn global_handle(input: Res<ButtonInput>, mut next: ResMut<NextState<AppState>>) {
+    if input.get_input(Player::One).just_pressed(Button::Reset) {
       log!("pressed reset button!");
     }
 }

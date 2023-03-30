@@ -1,9 +1,9 @@
 import { isNotNullish } from 'duoyun-ui/lib/types';
-import { Button } from '@mantou/nes';
+import { Button, Player } from '@mantou/nes';
 import { Toast } from 'duoyun-ui/elements/toast';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 
-import { events } from 'src/constants';
+import { dispatchGlobalEvent, globalEvents } from 'src/constants';
 
 // https://w3c.github.io/gamepad/#remapping
 export enum GamepadBtnIndex {
@@ -24,32 +24,36 @@ export enum GamepadBtnIndex {
   FrontRightBottom = 7,
 }
 
-const buttonMap: Partial<Record<GamepadBtnIndex, Button[]>> = {
-  [GamepadBtnIndex.Up]: [Button.Joypad1Up, Button.Joypad2Up, Button.Joypad3Up, Button.Joypad4Up],
-  [GamepadBtnIndex.Left]: [Button.Joypad1Left, Button.Joypad2Left, Button.Joypad3Left, Button.Joypad4Left],
-  [GamepadBtnIndex.Down]: [Button.Joypad1Down, Button.Joypad2Down, Button.Joypad3Down, Button.Joypad4Down],
-  [GamepadBtnIndex.Right]: [Button.Joypad1Right, Button.Joypad2Right, Button.Joypad3Right, Button.Joypad4Right],
-  [GamepadBtnIndex.A]: [Button.Joypad1A, Button.Joypad2A, Button.Joypad3A, Button.Joypad4A],
-  [GamepadBtnIndex.TurboA]: [Button.Joypad1TurboA, Button.Joypad2TurboA, Button.Joypad3TurboA, Button.Joypad4TurboA],
-  [GamepadBtnIndex.B]: [Button.Joypad1B, Button.Joypad2B, Button.Joypad3B, Button.Joypad4B],
-  [GamepadBtnIndex.TurboB]: [Button.Joypad1TurboB, Button.Joypad2TurboB, Button.Joypad3TurboB, Button.Joypad4TurboB],
-  [GamepadBtnIndex.Select]: [Button.Select],
-  [GamepadBtnIndex.Start]: [Button.Start],
-  [GamepadBtnIndex.Reset]: [Button.Reset],
+const buttonMap: Partial<Record<GamepadBtnIndex, Button>> = {
+  [GamepadBtnIndex.Up]: Button.JoypadUp,
+  [GamepadBtnIndex.Left]: Button.JoypadLeft,
+  [GamepadBtnIndex.Down]: Button.JoypadDown,
+  [GamepadBtnIndex.Right]: Button.JoypadRight,
+  [GamepadBtnIndex.A]: Button.JoypadA,
+  [GamepadBtnIndex.TurboA]: Button.JoypadTurboA,
+  [GamepadBtnIndex.B]: Button.JoypadB,
+  [GamepadBtnIndex.TurboB]: Button.JoypadTurboB,
+  [GamepadBtnIndex.Select]: Button.Select,
+  [GamepadBtnIndex.Start]: Button.Start,
+  [GamepadBtnIndex.Reset]: Button.Reset,
 };
+
+const playerMap = [Player.One, Player.Two, Player.Three, Player.Four];
 
 const pressedButton = new Set<GamepadBtnIndex>();
 
 function dispatchReleaseEvent(index: GamepadBtnIndex, padIndex = 0) {
-  const btn = buttonMap[index]?.[padIndex];
-  dispatchEvent(new CustomEvent(events.RELEASE_BUTTON_INDEX, { detail: index }));
-  if (btn) dispatchEvent(new CustomEvent(events.RELEASE_BUTTON, { detail: btn }));
+  const player = playerMap[padIndex];
+  const btn = buttonMap[index];
+  if (player === Player.One) dispatchGlobalEvent(globalEvents.RELEASE_HOST_BUTTON_INDEX, index);
+  if (btn && player) dispatchGlobalEvent(globalEvents.RELEASE_BUTTON, { detail: { player, btn } });
 }
 
 function dispatchPressEvent(index: GamepadBtnIndex, padIndex = 0) {
-  const btn = buttonMap[index]?.[padIndex];
-  dispatchEvent(new CustomEvent(events.PRESS_BUTTON_INDEX, { detail: index }));
-  if (btn) dispatchEvent(new CustomEvent(events.PRESS_BUTTON, { detail: btn }));
+  const player = playerMap[padIndex];
+  const btn = buttonMap[index];
+  if (player === Player.One) dispatchGlobalEvent(globalEvents.PRESS_HOST_BUTTON_INDEX, index);
+  if (btn && player) dispatchGlobalEvent(globalEvents.PRESS_BUTTON, { player, btn });
 }
 
 function readGamepad() {

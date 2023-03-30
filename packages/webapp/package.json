@@ -13,8 +13,8 @@
   },
   "dependencies": {
     "@mantou/gem": "^1.6.0",
-    "@mantou/nes": "^1.0.9",
-    "@mantou/nes-sandbox": "^0.0.8",
+    "@mantou/nes": "^1.0.11",
+    "@mantou/nes-sandbox": "^0.0.9",
     "duoyun-ui": "^0.0.63",
     "graphql": "^16.2.0",
     "jszip": "^3.10.0",

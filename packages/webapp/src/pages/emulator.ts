@@ -87,29 +87,37 @@ export class PEmulatorElement extends GemElement<State> {
     this.#game?.set_sound(false);
   };
 
-  #getButton = (event: KeyboardEvent | PointerEvent) => {
+  #getGamepadButton = (event: KeyboardEvent | PointerEvent) => {
     const map: Record<string, Button> = {
-      [defaultKeybinding.Up]: Button.Joypad1Up,
-      [defaultKeybinding.Left]: Button.Joypad1Left,
-      [defaultKeybinding.Down]: Button.Joypad1Down,
-      [defaultKeybinding.Right]: Button.Joypad1Right,
-      [defaultKeybinding.A]: Button.Joypad1A,
-      [defaultKeybinding.B]: Button.Joypad1B,
+      [defaultKeybinding.Up]: Button.JoypadUp,
+      [defaultKeybinding.Left]: Button.JoypadLeft,
+      [defaultKeybinding.Down]: Button.JoypadDown,
+      [defaultKeybinding.Right]: Button.JoypadRight,
+      [defaultKeybinding.A]: Button.JoypadA,
+      [defaultKeybinding.B]: Button.JoypadB,
       [defaultKeybinding.Select]: Button.Select,
       [defaultKeybinding.Start]: Button.Start,
       [defaultKeybinding.Reset]: Button.Reset,
-
-      [defaultKeybinding.Up_2]: Button.Joypad2Up,
-      [defaultKeybinding.Left_2]: Button.Joypad2Left,
-      [defaultKeybinding.Down_2]: Button.Joypad2Down,
-      [defaultKeybinding.Right_2]: Button.Joypad2Right,
-      [defaultKeybinding.A_2]: Button.Joypad2A,
-      [defaultKeybinding.B_2]: Button.Joypad2B,
+    };
+    const map2: Record<string, Button> = {
+      [defaultKeybinding.Up_2]: Button.JoypadUp,
+      [defaultKeybinding.Left_2]: Button.JoypadLeft,
+      [defaultKeybinding.Down_2]: Button.JoypadDown,
+      [defaultKeybinding.Right_2]: Button.JoypadRight,
+      [defaultKeybinding.A_2]: Button.JoypadA,
+      [defaultKeybinding.B_2]: Button.JoypadB,
     };
     if (event instanceof PointerEvent) {
-      return MStageElement.mapPointerButton(event);
+      const btn = MStageElement.mapPointerButton(event);
+      return btn && { player: Player.One, btn };
     }
-    return map[event.key.toLowerCase()];
+    const key = event.key.toLowerCase();
+    if (key in map2) {
+      return { player: Player.Two, btn: map2[key] };
+    }
+    if (key in map) {
+      return { player: Player.One, btn: map[key] };
+    }
   };
 
   #onPointerMove = (event: PointerEvent) => {
@@ -124,34 +132,34 @@ export class PEmulatorElement extends GemElement<State> {
   };
 
   #onKeyDown = (event: KeyboardEvent) => {
-    const button = this.#getButton(event);
+    const button = this.#getGamepadButton(event);
     if (!button) {
       hotkeys({ esc: this.#quit })(event);
       return;
     }
     if (event.repeat) return;
-    if (button === Button.Reset) {
+    if (button.btn === Button.Reset) {
       this.#game?.reset();
     } else {
       this.#enableAudio();
     }
-    this.#game?.handle_button_event(button, true);
+    this.#game?.handle_button_event(button.player, button.btn, true);
   };
 
   #onPointerDown = (event: PointerEvent) => {
-    const button = this.#getButton(event);
+    const button = this.#getGamepadButton(event);
     if (!button) return;
     this.#enableAudio();
     const [x, y, dx, dy] = positionMapping(event, this.canvasRef.element!);
     this.#game?.handle_motion_event(Player.One, x, y, dx, dy);
-    this.#game?.handle_button_event(button, true);
+    this.#game?.handle_button_event(Player.One, button.btn, true);
   };
 
   #onKeyOrPointerUp = (event: KeyboardEvent | PointerEvent) => {
-    const button = this.#getButton(event);
+    const button = this.#getGamepadButton(event);
     if (!button) return;
     if (event instanceof KeyboardEvent && event.repeat) return;
-    this.#game?.handle_button_event(button, false);
+    this.#game?.handle_button_event(button.player, button.btn, false);
   };
 
   #sampleRate = 44100;

@@ -1,7 +1,7 @@
 import { createCSSSheet, customElement, css, adoptedStyle } from '@mantou/gem';
 import { DuoyunScrollBaseElement } from 'duoyun-ui/elements/base/scroll';
 
-import { events } from 'src/constants';
+import { globalEvents } from 'src/constants';
 import { GamepadBtnIndex } from 'src/gamepad';
 
 const style = createCSSSheet(css`
@@ -27,9 +27,9 @@ export class NesboxScrollElement extends DuoyunScrollBaseElement {
     }
   };
   mounted = () => {
-    addEventListener(events.PRESS_BUTTON_INDEX, this.#pressButton);
+    addEventListener(globalEvents.PRESS_HOST_BUTTON_INDEX, this.#pressButton);
     return () => {
-      removeEventListener(events.PRESS_BUTTON_INDEX, this.#pressButton);
+      removeEventListener(globalEvents.PRESS_HOST_BUTTON_INDEX, this.#pressButton);
     };
   };
 }

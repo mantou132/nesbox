@@ -1,6 +1,10 @@
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { isMtApp } from 'mt-app';
 
+import type { Button, Player } from '@mantou/nes';
+import type { ValueOf } from 'duoyun-ui/lib/types';
+import type { GamepadBtnIndex } from 'src/gamepad';
+
 export const RELEASE = Number(process.env.RELEASE);
 // https://vitejs.dev/guide/api-javascript.html#resolveconfig
 export const COMMAND = process.env.COMMAND as 'serve' | 'build';
@@ -29,14 +33,44 @@ export const gameStateType = {
   NORMAL: 'normal',
 };
 
-export const events = {
+export const globalEvents = {
   SIGNAL: 'signal',
   VOICE_SIGNAL: 'voice-signal',
   PRESS_BUTTON: 'pressbutton',
   RELEASE_BUTTON: 'releasebutton',
-  PRESS_BUTTON_INDEX: 'pressbutton-index',
-  RELEASE_BUTTON_INDEX: 'releasebutton-index',
+  PRESS_HOST_BUTTON_INDEX: 'pressbutton-index',
+  RELEASE_HOST_BUTTON_INDEX: 'releasebutton-index',
   CLOSE_SETTINGS: 'close-settings',
+} as const;
+
+interface CustomEventDetailMap {
+  [globalEvents.SIGNAL]: SignalDetail;
+  [globalEvents.VOICE_SIGNAL]: VoiceSignalDetail;
+  [globalEvents.PRESS_BUTTON]: CustomGamepadButton;
+  [globalEvents.RELEASE_BUTTON]: CustomGamepadButton;
+  [globalEvents.PRESS_HOST_BUTTON_INDEX]: GamepadBtnIndex;
+  [globalEvents.RELEASE_HOST_BUTTON_INDEX]: GamepadBtnIndex;
+  [globalEvents.CLOSE_SETTINGS]: null;
+}
+
+export function dispatchGlobalEvent<K extends ValueOf<typeof globalEvents>, T = CustomEventDetailMap[K]>(
+  type: K,
+  detail: T,
+) {
+  dispatchEvent(new CustomEvent<T>(type, { detail }));
+}
+
+declare global {
+  function addEventListener<K extends ValueOf<typeof globalEvents>>(
+    type: K,
+    listener: (this: Window, ev: CustomEvent<CustomEventDetailMap[K]>) => any,
+    options?: boolean | AddEventListenerOptions,
+  ): void;
+}
+
+export type CustomGamepadButton = {
+  player: Player;
+  btn: Button;
 };
 
 export enum SignalType {
@@ -50,12 +84,12 @@ export type Signal = {
   data: any;
 };
 
-export type SignalEvent = {
+export type SignalDetail = {
   userId: number;
   signal: Signal;
 };
 
-export type VoiceSignalEvent = {
+export type VoiceSignalDetail = {
   roomId: number;
   signal: (RTCSessionDescriptionInit & { senderTrackIds: string[] }) | RTCIceCandidateInit;
 };

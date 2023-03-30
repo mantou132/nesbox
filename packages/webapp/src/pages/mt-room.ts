@@ -15,7 +15,7 @@ import { waitLoading } from 'duoyun-ui/elements/wait';
 import { playHintSound } from 'src/utils';
 import { routes } from 'src/routes';
 
-import { events, queryKeys } from 'src/constants';
+import { globalEvents, queryKeys } from 'src/constants';
 import { GamepadBtnIndex } from 'src/gamepad';
 import { store } from 'src/store';
 import { leaveRoom, updateRoomScreenshot } from 'src/services/api';
@@ -105,9 +105,9 @@ export class PMtRoomElement extends GemElement {
       () => [this.#playing],
     );
 
-    addEventListener(events.PRESS_BUTTON_INDEX, this.#onPressButtonIndex);
+    addEventListener(globalEvents.PRESS_HOST_BUTTON_INDEX, this.#onPressButtonIndex);
     return () => {
-      removeEventListener(events.PRESS_BUTTON_INDEX, this.#onPressButtonIndex);
+      removeEventListener(globalEvents.PRESS_HOST_BUTTON_INDEX, this.#onPressButtonIndex);
     };
   };
 

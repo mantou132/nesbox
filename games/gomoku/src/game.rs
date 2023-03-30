@@ -409,7 +409,7 @@ fn mouse_motion(
 }
 
 fn handle_dir(
-    input: Res<Input<Button>>,
+    input: Res<ButtonInput>,
     mut set: ParamSet<(
         Query<&mut Transform, With<Cursor1>>,
         Query<&mut Transform, With<Cursor2>>,
@@ -418,58 +418,45 @@ fn handle_dir(
     mut audio_resource: ResMut<AudioResource>,
     mode: Res<GameMode>,
 ) {
-    let mut change =
-        |mut transform: Mut<Transform>, left: Button, right: Button, up: Button, down: Button| {
-            if input.just_pressed(left) {
-                transform.translation.x = get_canvas_position(
-                    get_board_position(transform.translation.x).saturating_sub(1),
-                );
-                audio_resource.play("move_cursor");
-            }
-
-            if input.just_pressed(right) {
-                transform.translation.x = get_canvas_position(
-                    (get_board_position(transform.translation.x) + 1).min(BOARD_ROWS - 1),
-                );
-                audio_resource.play("move_cursor");
-            }
-
-            if input.just_pressed(up) {
-                transform.translation.y = get_canvas_position(
-                    get_board_position(transform.translation.y).saturating_sub(1),
-                );
-                audio_resource.play("move_cursor");
-            }
-
-            if input.just_pressed(down) {
-                transform.translation.y = get_canvas_position(
-                    (get_board_position(transform.translation.y) + 1).min(BOARD_ROWS - 1),
-                );
-                audio_resource.play("move_cursor");
-            }
-        };
-
     let checkerboard = board_query.single();
+    let input = input.get_input(checkerboard.current);
+
+    let mut change = |mut transform: Mut<Transform>| {
+        if input.just_pressed(Button::JoypadLeft) {
+            transform.translation.x =
+                get_canvas_position(get_board_position(transform.translation.x).saturating_sub(1));
+            audio_resource.play("move_cursor");
+        }
+
+        if input.just_pressed(Button::JoypadRight) {
+            transform.translation.x = get_canvas_position(
+                (get_board_position(transform.translation.x) + 1).min(BOARD_ROWS - 1),
+            );
+            audio_resource.play("move_cursor");
+        }
+
+        if input.just_pressed(Button::JoypadUp) {
+            transform.translation.y =
+                get_canvas_position(get_board_position(transform.translation.y).saturating_sub(1));
+            audio_resource.play("move_cursor");
+        }
+
+        if input.just_pressed(Button::JoypadDown) {
+            transform.translation.y = get_canvas_position(
+                (get_board_position(transform.translation.y) + 1).min(BOARD_ROWS - 1),
+            );
+            audio_resource.play("move_cursor");
+        }
+    };
+
     if checkerboard.current == mode.get_1p() {
         set.p0().single_mut().translation.z = 2.;
         set.p1().single_mut().translation.z = 1.;
-        change(
-            set.p0().single_mut(),
-            Button::Joypad1Left,
-            Button::Joypad1Right,
-            Button::Joypad1Up,
-            Button::Joypad1Down,
-        );
+        change(set.p0().single_mut());
     } else {
         set.p0().single_mut().translation.z = 1.;
         set.p1().single_mut().translation.z = 2.;
-        change(
-            set.p1().single_mut(),
-            Button::Joypad2Left,
-            Button::Joypad2Right,
-            Button::Joypad2Up,
-            Button::Joypad2Down,
-        );
+        change(set.p1().single_mut());
     }
 }
 
@@ -499,7 +486,7 @@ fn spawn_piece(commands: &mut Commands, x: usize, y: usize, color: Color) -> Ent
 
 fn handle_submit(
     mut commands: Commands,
-    input: Res<Input<Button>>,
+    input: Res<ButtonInput>,
     mut set: ParamSet<(
         Query<&mut Transform, With<Cursor1>>,
         Query<&mut Transform, With<Cursor2>>,
@@ -512,11 +499,13 @@ fn handle_submit(
 ) {
     let (board_entity, mut checkerboard) = board_query.single_mut();
     let mut round_timer = timer.single_mut();
+    let input = input.get_input(checkerboard.current);
+    let buttons = [Button::JoypadA, Button::JoypadB, Button::PointerPrimary];
 
     let (x, y) = if checkerboard.current == mode.get_1p() {
         let mut query = set.p0();
         let transform = query.single_mut();
-        if !input.any_just_pressed([Button::Joypad1A, Button::Joypad1B, Button::Pointer1Left]) {
+        if !input.any_just_pressed(buttons) {
             return;
         }
         (transform.translation.x, transform.translation.y)
@@ -542,7 +531,7 @@ fn handle_submit(
             }
             return;
         };
-        if !input.any_just_pressed([Button::Joypad2A, Button::Joypad2B, Button::Pointer2Left]) {
+        if !input.any_just_pressed(buttons) {
             return;
         }
         (transform.translation.x, transform.translation.y)
@@ -620,12 +609,13 @@ fn setup_menu(mut commands: Commands) {
 
 fn select(
     mut commands: Commands,
-    input: Res<Input<Button>>,
+    input: Res<ButtonInput>,
     mut audio_resource: ResMut<AudioResource>,
     mut next: ResMut<NextState<AppState>>,
     mut query: Query<&mut UISelect>,
     mut mouse_evt: EventReader<MouseEvent>,
 ) {
+    let input = input.get_input(Player::One);
     let mut select = query.single_mut();
     let sound = Audio {
         name: "select".into(),
@@ -637,17 +627,17 @@ fn select(
 
     if enter {
         audio_resource.play_audio(sound);
-    } else if input.just_pressed(Button::Joypad1Up) {
+    } else if input.just_pressed(Button::JoypadUp) {
         select.change(-1);
         audio_resource.play_audio(sound);
-    } else if input.any_just_pressed([Button::Joypad1Down, Button::Select]) {
+    } else if input.any_just_pressed([Button::JoypadDown, Button::Select]) {
         select.change(1);
         audio_resource.play_audio(sound);
     }
 
     let select_mode = MenuOption::from_str(select.value()).unwrap();
-    if (hover && input.just_pressed(Button::Pointer1Left))
-        || input.any_just_pressed([Button::Start, Button::Joypad1A, Button::Joypad1B])
+    if (hover && input.just_pressed(Button::PointerPrimary))
+        || input.any_just_pressed([Button::Start, Button::JoypadA, Button::JoypadB])
     {
         if select_mode == MenuOption::OneBlack {
             commands.insert_resource(GameMode::OneBlack);
@@ -753,11 +743,15 @@ fn setup_game_over(mut commands: Commands, board_query: Query<&Checkerboard>, mo
 
 fn handle_game_over(
     mut commands: Commands,
-    input: Res<Input<Button>>,
+    input: Res<ButtonInput>,
     mut next: ResMut<NextState<AppState>>,
     query: Query<Entity, With<GameOverModal>>,
 ) {
-    if input.any_just_pressed([Button::Joypad1A, Button::Joypad1B, Button::Pointer1Left]) {
+    if input.get_input(Player::One).any_just_pressed([
+        Button::JoypadA,
+        Button::JoypadB,
+        Button::PointerPrimary,
+    ]) {
         if let Ok(entity) = query.get_single() {
             commands.get_entity(entity).unwrap().despawn_recursive();
         } else {
@@ -782,8 +776,12 @@ fn setup_about(mut commands: Commands) {
     ));
 }
 
-fn handle_about(input: Res<Input<Button>>, mut next: ResMut<NextState<AppState>>) {
-    if input.any_just_pressed([Button::Joypad1A, Button::Joypad1B, Button::Pointer1Left]) {
+fn handle_about(input: Res<ButtonInput>, mut next: ResMut<NextState<AppState>>) {
+    if input.get_input(Player::One).any_just_pressed([
+        Button::JoypadA,
+        Button::JoypadB,
+        Button::PointerPrimary,
+    ]) {
         next.set(AppState::Menu);
     }
 }
@@ -794,8 +792,8 @@ fn despawn_screen(to_despawn: Query<Entity>, mut commands: Commands) {
     }
 }
 
-fn global_handle(input: Res<Input<Button>>, mut next: ResMut<NextState<AppState>>) {
-    if input.just_pressed(Button::Reset) {
+fn global_handle(input: Res<ButtonInput>, mut next: ResMut<NextState<AppState>>) {
+    if input.get_input(Player::One).just_pressed(Button::Reset) {
         next.set(AppState::Menu);
     }
 }

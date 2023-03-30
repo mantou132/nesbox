@@ -20,7 +20,7 @@ import { clamp } from 'duoyun-ui/lib/number';
 import { isMtApp } from 'mt-app';
 import { getCDNSrc, isValidGameFile, playHintSound, positionMapping, requestFrame } from 'src/utils';
 
-import { events, gameStateType, RTCTransportType } from 'src/constants';
+import { CustomGamepadButton, globalEvents, gameStateType, RTCTransportType } from 'src/constants';
 import { logger } from 'src/logger';
 import { Cheat, configure } from 'src/configure';
 import {
@@ -111,9 +111,9 @@ export class MStageElement extends GemElement<State> {
   static mapPointerButton(event: PointerEvent) {
     switch (event.button) {
       case 0:
-        return Button.Pointer1Left;
+        return Button.PointerPrimary;
       case 2:
-        return Button.Pointer1Right;
+        return Button.PointerSecondary;
       default:
         return;
     }
@@ -361,11 +361,11 @@ export class MStageElement extends GemElement<State> {
         break;
       // host
       case ChannelMessageType.KEYDOWN:
-        this.#game?.handle_button_event((detail as KeyDownMsg).button, true);
+        this.#game?.handle_button_event((detail as KeyDownMsg).player, (detail as KeyDownMsg).button, true);
         break;
       // host
       case ChannelMessageType.KEYUP:
-        this.#game?.handle_button_event((detail as KeyUpMsg).button, false);
+        this.#game?.handle_button_event((detail as KeyDownMsg).player, (detail as KeyUpMsg).button, false);
         break;
       // host
       case ChannelMessageType.POINTER_MOVE:
@@ -386,37 +386,43 @@ export class MStageElement extends GemElement<State> {
     });
   };
 
-  #getButton = (event: KeyboardEvent | PointerEvent) => {
+  #getGamepadButton = (event: KeyboardEvent | PointerEvent) => {
     const { keybinding } = this.#settings!;
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     const map: Record<string, Button> = {
-      [keybinding.Up_2]: Button.Joypad2Up,
-      [keybinding.Left_2]: Button.Joypad2Left,
-      [keybinding.Down_2]: Button.Joypad2Down,
-      [keybinding.Right_2]: Button.Joypad2Right,
-      [keybinding.A_2]: Button.Joypad2A,
-      [keybinding.B_2]: Button.Joypad2B,
-      [keybinding.TurboA_2]: Button.Joypad2TurboA,
-      [keybinding.TurboB_2]: Button.Joypad2TurboB,
-
-      // 重复时覆盖 joypad1
-      [keybinding.Up]: Button.Joypad1Up,
-      [keybinding.Left]: Button.Joypad1Left,
-      [keybinding.Down]: Button.Joypad1Down,
-      [keybinding.Right]: Button.Joypad1Right,
-      [keybinding.A]: Button.Joypad1A,
-      [keybinding.B]: Button.Joypad1B,
-      [keybinding.TurboA]: Button.Joypad1TurboA,
-      [keybinding.TurboB]: Button.Joypad1TurboB,
+      [keybinding.Up]: Button.JoypadUp,
+      [keybinding.Left]: Button.JoypadLeft,
+      [keybinding.Down]: Button.JoypadDown,
+      [keybinding.Right]: Button.JoypadRight,
+      [keybinding.A]: Button.JoypadA,
+      [keybinding.B]: Button.JoypadB,
+      [keybinding.TurboA]: Button.JoypadTurboA,
+      [keybinding.TurboB]: Button.JoypadTurboB,
       [keybinding.Select]: Button.Select,
       [keybinding.Start]: Button.Start,
       [keybinding.Reset]: Button.Reset,
     };
-
+    const map2: Record<string, Button> = {
+      [keybinding.Up_2]: Button.JoypadUp,
+      [keybinding.Left_2]: Button.JoypadLeft,
+      [keybinding.Down_2]: Button.JoypadDown,
+      [keybinding.Right_2]: Button.JoypadRight,
+      [keybinding.A_2]: Button.JoypadA,
+      [keybinding.B_2]: Button.JoypadB,
+      [keybinding.TurboA_2]: Button.JoypadTurboA,
+      [keybinding.TurboB_2]: Button.JoypadTurboB,
+    };
     if (event instanceof PointerEvent) {
-      return MStageElement.mapPointerButton(event);
+      const btn = MStageElement.mapPointerButton(event);
+      return btn && { player: Player.One, btn };
     }
-    return map[event.key.toLowerCase()];
+    const key = event.key.toLowerCase();
+    if (key in map2) {
+      return { player: Player.Two, btn: map2[key] };
+    }
+    if (key in map) {
+      return { player: Player.One, btn: map[key] };
+    }
   };
 
   #onPointerMove = (event: PointerEvent) => {
@@ -429,29 +435,29 @@ export class MStageElement extends GemElement<State> {
     }
   };
 
-  #pressButton = (button: Button) => {
+  #pressButton = (player: Player, button: Button) => {
     if (button === Button.Reset) {
       this.#game?.reset();
     } else {
       this.#enableAudio();
     }
     if (this.#isHost) {
-      this.#game?.handle_button_event(button, true);
+      this.#game?.handle_button_event(player, button, true);
     } else {
       this.#rtc?.send(new KeyDownMsg(button));
     }
   };
 
-  #onPressButton = (event: CustomEvent<Button>) => {
-    this.#pressButton(event.detail);
+  #onPressButton = (event: CustomEvent<CustomGamepadButton>) => {
+    this.#pressButton(event.detail.player, event.detail.btn);
   };
 
   #onKeyDown = (event: KeyboardEvent) => {
     if (event.repeat) return;
     if (event.isComposing) return;
-    const button = this.#getButton(event);
+    const button = this.#getGamepadButton(event);
     if (button) {
-      this.#pressButton(button);
+      this.#pressButton(button.player, button.btn);
       event.stopPropagation();
     } else {
       hotkeys({
@@ -465,36 +471,36 @@ export class MStageElement extends GemElement<State> {
   };
 
   #onPointerDown = (event: PointerEvent) => {
-    const button = this.#getButton(event);
+    const button = this.#getGamepadButton(event);
     if (!button) return;
     this.#onPointerMove(event);
-    this.#pressButton(button);
+    this.#pressButton(button.player, button.btn);
   };
 
-  #releaseButton = (button: Button) => {
+  #releaseButton = (player: Player, button: Button) => {
     if (this.#isHost) {
-      this.#game?.handle_button_event(button, false);
+      this.#game?.handle_button_event(player, button, false);
     } else {
       this.#rtc?.send(new KeyUpMsg(button));
     }
   };
 
-  #onReleaseButton = (event: CustomEvent<Button>) => {
-    this.#releaseButton(event.detail);
+  #onReleaseButton = (event: CustomEvent<CustomGamepadButton>) => {
+    this.#releaseButton(event.detail.player, event.detail.btn);
   };
 
   #onKeyUp = (event: KeyboardEvent) => {
     if (event.repeat) return;
     if (event.isComposing) return;
-    const button = this.#getButton(event);
+    const button = this.#getGamepadButton(event);
     if (!button) return;
-    this.#releaseButton(button);
+    this.#releaseButton(button.player, button.btn);
   };
 
   #onPointerUp = (event: PointerEvent) => {
-    const button = this.#getButton(event);
+    const button = this.#getGamepadButton(event);
     if (!button) return;
-    this.#releaseButton(button);
+    this.#releaseButton(button.player, button.btn);
   };
 
   #setVideoFilter = () => {
@@ -567,8 +573,8 @@ export class MStageElement extends GemElement<State> {
     this.addEventListener('pointerdown', this.#onPointerDown);
     addEventListener('keyup', this.#onKeyUp);
     this.addEventListener('pointerup', this.#onPointerUp);
-    addEventListener(events.PRESS_BUTTON, this.#onPressButton);
-    addEventListener(events.RELEASE_BUTTON, this.#onReleaseButton);
+    addEventListener(globalEvents.PRESS_BUTTON, this.#onPressButton);
+    addEventListener(globalEvents.RELEASE_BUTTON, this.#onReleaseButton);
     return () => {
       this.#audioContext?.close();
       this.#rtc?.destroy();
@@ -577,8 +583,8 @@ export class MStageElement extends GemElement<State> {
       this.removeEventListener('pointerdown', this.#onPointerDown);
       removeEventListener('keyup', this.#onKeyUp);
       this.removeEventListener('pointerup', this.#onPointerUp);
-      removeEventListener(events.PRESS_BUTTON, this.#onPressButton);
-      removeEventListener(events.RELEASE_BUTTON, this.#onReleaseButton);
+      removeEventListener(globalEvents.PRESS_BUTTON, this.#onPressButton);
+      removeEventListener(globalEvents.RELEASE_BUTTON, this.#onReleaseButton);
     };
   };
 

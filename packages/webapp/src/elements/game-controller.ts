@@ -1,7 +1,7 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, refobject, RefObject } from '@mantou/gem';
-import { Button } from '@mantou/nes';
+import { Button, Player } from '@mantou/nes';
 
-import { events } from 'src/constants';
+import { dispatchGlobalEvent, globalEvents } from 'src/constants';
 import gamepadImg from 'src/images/gamepad.svg?raw';
 
 import 'duoyun-ui/elements/use';
@@ -68,21 +68,21 @@ export class NesboxGameControllerElement extends GemElement {
   #toBtn = (part?: string) => {
     switch (part) {
       case 'left':
-        return Button.Joypad1Left;
+        return Button.JoypadLeft;
       case 'right':
-        return Button.Joypad1Right;
+        return Button.JoypadRight;
       case 'down':
-        return Button.Joypad1Down;
+        return Button.JoypadDown;
       case 'up':
-        return Button.Joypad1Up;
+        return Button.JoypadUp;
       case 'a':
-        return Button.Joypad1A;
+        return Button.JoypadA;
       case 'b':
-        return Button.Joypad1B;
+        return Button.JoypadB;
       case 'turbo-a':
-        return Button.Joypad1TurboA;
+        return Button.JoypadTurboA;
       case 'turbo-b':
-        return Button.Joypad1TurboB;
+        return Button.JoypadTurboB;
       case 'reset':
         return Button.Reset;
       case 'select':
@@ -106,12 +106,13 @@ export class NesboxGameControllerElement extends GemElement {
       const element = evt.composedPath()[0] as Element | undefined;
       const button = this.#toBtn(element?.part[0]);
       if (!button) return;
+      const detail = { btn: button, player: Player.One };
       navigator.vibrate?.(10);
-      window.dispatchEvent(new CustomEvent(events.PRESS_BUTTON, { detail: button }));
+      dispatchGlobalEvent(globalEvents.PRESS_BUTTON, detail);
       element?.part.add('active');
       const cancel = () => {
         element?.part.remove('active');
-        window.dispatchEvent(new CustomEvent(events.RELEASE_BUTTON, { detail: button }));
+        dispatchGlobalEvent(globalEvents.RELEASE_BUTTON, detail);
         this.removeEventListener('touchend', cancel);
         this.removeEventListener('touchcancel', cancel);
       };

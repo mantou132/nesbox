@@ -1,61 +1,13 @@
 import { createStore, updateStore } from '@mantou/gem';
 import { Button, Player } from '@mantou/nes';
 
-import { events, RTCTransportType, SignalEvent, SignalType } from 'src/constants';
+import { globalEvents, RTCTransportType, SignalDetail, SignalType } from 'src/constants';
 import { configure } from 'src/configure';
 import { LocaleKey } from 'src/i18n';
 import { logger } from 'src/logger';
 import { sendSignal } from 'src/services/api';
 
 export const pingStore = createStore<{ ping?: number }>({});
-
-const buttonMap: Partial<Record<Button, Record<string, Button | undefined>>> = {
-  [Button.Joypad1Up]: {
-    [Player.Two]: Button.Joypad2Up,
-    [Player.Three]: Button.Joypad3Up,
-    [Player.Four]: Button.Joypad4Up,
-  },
-  [Button.Joypad1Left]: {
-    [Player.Two]: Button.Joypad2Left,
-    [Player.Three]: Button.Joypad3Left,
-    [Player.Four]: Button.Joypad4Left,
-  },
-  [Button.Joypad1Down]: {
-    [Player.Two]: Button.Joypad2Down,
-    [Player.Three]: Button.Joypad3Down,
-    [Player.Four]: Button.Joypad4Down,
-  },
-  [Button.Joypad1Right]: {
-    [Player.Two]: Button.Joypad2Right,
-    [Player.Three]: Button.Joypad3Right,
-    [Player.Four]: Button.Joypad4Right,
-  },
-  [Button.Joypad1A]: { [Player.Two]: Button.Joypad2A, [Player.Three]: Button.Joypad3A, [Player.Four]: Button.Joypad4A },
-  [Button.Joypad1B]: { [Player.Two]: Button.Joypad2B, [Player.Three]: Button.Joypad3B, [Player.Four]: Button.Joypad4B },
-  [Button.Joypad1TurboA]: {
-    [Player.Two]: Button.Joypad2TurboA,
-    [Player.Three]: Button.Joypad3TurboA,
-    [Player.Four]: Button.Joypad4TurboA,
-  },
-  [Button.Joypad1TurboB]: {
-    [Player.Two]: Button.Joypad2TurboB,
-    [Player.Three]: Button.Joypad3TurboB,
-    [Player.Four]: Button.Joypad4TurboB,
-  },
-  [Button.Pointer1Left]: {
-    [Player.Two]: Button.Pointer2Left,
-    [Player.Three]: Button.Pointer3Left,
-    [Player.Four]: Button.Pointer4Left,
-  },
-  [Button.Pointer1Right]: {
-    [Player.Two]: Button.Pointer2Right,
-    [Player.Three]: Button.Pointer3Right,
-    [Player.Four]: Button.Pointer4Right,
-  },
-  [Button.Select]: {},
-  [Button.Start]: {},
-  [Button.Reset]: {},
-};
 
 export enum ChannelMessageType {
   CHAT_TEXT,
@@ -133,6 +85,7 @@ export class PointerMoveMsg extends ChannelMessageBase {
 export class KeyDownMsg extends ChannelMessageBase {
   type = ChannelMessageType.KEYDOWN;
 
+  player = Player.One;
   button: Button;
   constructor(button: Button) {
     super();
@@ -239,11 +192,6 @@ export class RTC extends EventTarget {
     return player !== undefined ? (Number(player) as Player) : player;
   };
 
-  #getButton = (userId: number, button: Button) => {
-    if (userId === configure.user!.id) return button;
-    return buttonMap[button]?.[this.#getPlayer(userId)!];
-  };
-
   #setRoles = (userId: number, msg: RoleOffer) => {
     const role: Role = { userId, username: msg.username, nickname: msg.nickname };
     const player = this.#getPlayer(userId);
@@ -300,17 +248,13 @@ export class RTC extends EventTarget {
           break;
         case ChannelMessageType.KEYDOWN:
         case ChannelMessageType.KEYUP:
-          const button = this.#getButton(userId, (msg as KeyDownMsg).button);
-          if (button) {
-            this.#emitMessage({ ...msg, button } as KeyDownMsg);
-          }
-          break;
-        case ChannelMessageType.POINTER_MOVE:
+        case ChannelMessageType.POINTER_MOVE: {
           const player = this.#getPlayer(userId);
           if (player !== undefined) {
-            this.#emitMessage({ ...msg, player } as PointerMoveMsg);
+            this.#emitMessage({ ...msg, player } as KeyDownMsg | PointerMoveMsg);
           }
           break;
+        }
         case ChannelMessageType.ROLE_OFFER:
           this.#setRoles(userId, msg as RoleOffer);
           this.#emitAnswer();
@@ -323,7 +267,7 @@ export class RTC extends EventTarget {
     };
   };
 
-  #onOffer = async ({ userId, signal }: SignalEvent) => {
+  #onOffer = async ({ userId, signal }: SignalDetail) => {
     const conn = this.#createRTCPeerConnection(userId);
     conn.addEventListener('datachannel', ({ channel }) => this.#onDataChannel(userId, conn, channel));
     conn.addEventListener('icecandidate', (event) => {
@@ -341,7 +285,7 @@ export class RTC extends EventTarget {
     });
   };
 
-  #onSignal = async (event: CustomEvent<SignalEvent>) => {
+  #onSignal = async (event: CustomEvent<SignalDetail>) => {
     const { userId, signal } = event.detail;
     try {
       switch (signal.type) {
@@ -469,12 +413,12 @@ export class RTC extends EventTarget {
       this.#startClient();
     }
 
-    addEventListener(events.SIGNAL, this.#onSignal);
+    addEventListener(globalEvents.SIGNAL, this.#onSignal);
   };
 
   destroy = () => {
     this.#connMap.forEach((_, id) => this.#deleteUser(id));
-    removeEventListener(events.SIGNAL, this.#onSignal);
+    removeEventListener(globalEvents.SIGNAL, this.#onSignal);
     clearTimeout(this.#restartTimer);
 
     clearInterval(this.#pingTimer);

@@ -28,9 +28,9 @@ function renderScore(world: World<WorldData>) {
 
 export function commonSystem(world: World<WorldData>) {
   if (
-    nesbox.isTap(nesbox.buttons.Reset) ||
-    (world.data.gameOver && nesbox.isTap(nesbox.buttons.Start)) ||
-    (world.scene === SCENE.About && nesbox.isTap())
+    nesbox.isTap(nesbox.players.One, nesbox.buttons.Reset) ||
+    (world.data.gameOver && nesbox.isTap(nesbox.players.One, nesbox.buttons.Start)) ||
+    (world.scene === SCENE.About && nesbox.isTap(nesbox.players.One))
   ) {
     world.switchScene(...getSceneAndData(SCENE.Start));
   }
@@ -40,7 +40,7 @@ export function pauseSystem(world: World<WorldData>) {
   switch (world.scene) {
     case SCENE.OnePlayer:
     case SCENE.TwoPlayer: {
-      if (nesbox.isTap(nesbox.buttons.Start)) {
+      if (nesbox.isTap(nesbox.players.One, nesbox.buttons.Start)) {
         world.data.paused = !world.data.paused;
       }
     }
@@ -52,15 +52,15 @@ export function modeSelectSystem(world: World<WorldData>) {
   if (!entity) return;
 
   const select = entity.getComponent(SelectComponent)!;
-  if (nesbox.isTap(nesbox.buttons.Joypad1Up)) {
+  if (nesbox.isTap(nesbox.players.One, nesbox.buttons.JoypadUp)) {
     select.change(-1);
     world.addAudio(new AudioComponent(SOUND.Select));
   }
-  if (nesbox.isTap(nesbox.buttons.Joypad1Down)) {
+  if (nesbox.isTap(nesbox.players.One, [nesbox.buttons.JoypadDown, nesbox.buttons.Select])) {
     select.change(1);
     world.addAudio(new AudioComponent(SOUND.Select));
   }
-  if (nesbox.isTap(nesbox.buttons.Start)) {
+  if (nesbox.isTap(nesbox.players.One, nesbox.buttons.Start)) {
     switch (select.getCurrent()) {
       case MODE.OneMode:
         world.switchScene(...getSceneAndData(SCENE.OnePlayer));
@@ -142,7 +142,7 @@ const updateXOffsetFrame = {
 
 function handleCurrentPieceEntity(world: World<WorldData>, entity: PieceEntity) {
   const is1P = entity.id === ENTITY.CurrentPiece1;
-  const buttons = is1P ? nesbox.buttons1 : nesbox.buttons2;
+  const player = is1P ? nesbox.players.One : nesbox.players.Two;
   const piece = entity.getComponent(PieceComponent)!;
   const position = entity.getComponent(PositionComponent)!;
   const otherEntity = is1P ? world.getEntity(ENTITY.CurrentPiece2) : world.getEntity(ENTITY.CurrentPiece1);
@@ -153,12 +153,12 @@ function handleCurrentPieceEntity(world: World<WorldData>, entity: PieceEntity) 
     return;
   }
 
-  if (nesbox.isTap(buttons.JoypadA) || nesbox.isTap(buttons.JoypadB)) {
+  if (nesbox.isTap(player, [nesbox.buttons.JoypadA, nesbox.buttons.JoypadB])) {
     world.addAudio(new AudioComponent(SOUND.PieceTransform));
     entity.transform(world.data);
   }
 
-  if (nesbox.isPressed(buttons.JoypadDown)) {
+  if (nesbox.isPressed(player, nesbox.buttons.JoypadDown)) {
     world.data.updateFrame = MIN_UPDATE_FRAME;
   } else {
     world.data.updateFrame = Math.max(
@@ -180,15 +180,15 @@ function handleCurrentPieceEntity(world: World<WorldData>, entity: PieceEntity) 
   // wait for a period of time and then accelerate to adjust the position
   const shouldUpdateXFrame =
     world.frameNum > updateXOffsetFrame[entity.id] && !((world.frameNum - updateXOffsetFrame[entity.id]) % 2);
-  if (nesbox.isTap(buttons.JoypadLeft)) {
+  if (nesbox.isTap(player, nesbox.buttons.JoypadLeft)) {
     shouldMoveX = -world.data.brickSize;
     updateXOffsetFrame[entity.id] = world.frameNum + UPDATE_X_DELAY;
-  } else if (nesbox.isTap(buttons.JoypadRight)) {
+  } else if (nesbox.isTap(player, nesbox.buttons.JoypadRight)) {
     shouldMoveX = world.data.brickSize;
     updateXOffsetFrame[entity.id] = world.frameNum + UPDATE_X_DELAY;
-  } else if (shouldUpdateXFrame && nesbox.isPressed(buttons.JoypadLeft)) {
+  } else if (shouldUpdateXFrame && nesbox.isPressed(player, nesbox.buttons.JoypadLeft)) {
     shouldMoveX = -world.data.brickSize;
-  } else if (shouldUpdateXFrame && nesbox.isPressed(buttons.JoypadRight)) {
+  } else if (shouldUpdateXFrame && nesbox.isPressed(player, nesbox.buttons.JoypadRight)) {
     shouldMoveX = world.data.brickSize;
   } else {
     shouldMoveX = 0;

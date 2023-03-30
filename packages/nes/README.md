@@ -21,6 +21,4 @@ wasm-pack build --out-dir ../nes-pkg --target web --scope mantou
 
 ## publish to npm
 
-```bash
-npm publish --access=public
-```
+use `yarn publish:nes` at root directory

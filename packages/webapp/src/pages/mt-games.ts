@@ -15,7 +15,7 @@ import { formatDuration, Time } from 'duoyun-ui/lib/time';
 import { getCDNSrc, playHintSound } from 'src/utils';
 import { locationStore } from 'src/routes';
 
-import { events, queryKeys } from 'src/constants';
+import { globalEvents, queryKeys } from 'src/constants';
 import { store } from 'src/store';
 import { theme } from 'src/theme';
 import { createRoom, getComments } from 'src/services/api';
@@ -150,9 +150,9 @@ export class PMtGamesElement extends GemElement {
 
     this.addEventListener('dblclick', () => updateStore(mtGamesStore, { focusId: 0 }));
 
-    addEventListener(events.PRESS_BUTTON_INDEX, this.#pressButton);
+    addEventListener(globalEvents.PRESS_HOST_BUTTON_INDEX, this.#pressButton);
     return () => {
-      removeEventListener(events.PRESS_BUTTON_INDEX, this.#pressButton);
+      removeEventListener(globalEvents.PRESS_HOST_BUTTON_INDEX, this.#pressButton);
       updateMtApp({ inertNav: false });
       updateStore(mtGamesStore, { focusId: 0 });
     };

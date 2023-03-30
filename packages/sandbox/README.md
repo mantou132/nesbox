@@ -26,7 +26,7 @@ nesbox.init({
 Read user input:
 
 ```js
-nesbox.isTap(nesbox.buttons1.Start);
-nesbox.isPressed(nesbox.buttons1.Start);
-nesbox.cursorPosition(Player.One)；
+nesbox.isTap(nesbox.players.One, nesbox.buttons.Start);
+nesbox.isPressed(nesbox.players.One, nesbox.buttons.Start);
+nesbox.cursorPosition(nesbox.players.One)；
 ```

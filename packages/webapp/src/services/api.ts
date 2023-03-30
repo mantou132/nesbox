@@ -4,7 +4,7 @@ import { debounce } from 'duoyun-ui/lib/utils';
 import { isNotNullish } from 'duoyun-ui/lib/types';
 import { documentVisible, playHintSound, playSound } from 'src/utils';
 
-import { events, VoiceSignalEvent, Signal, SignalEvent, COMMAND } from 'src/constants';
+import { globalEvents, Signal, COMMAND, dispatchGlobalEvent } from 'src/constants';
 import {
   AcceptFriend,
   AcceptFriendMutation,
@@ -496,22 +496,17 @@ export const subscribeEvent = () => {
       }
 
       if (sendSignal) {
-        window.dispatchEvent(
-          new CustomEvent<SignalEvent>(events.SIGNAL, {
-            detail: { userId: sendSignal.userId, signal: JSON.parse(sendSignal.json) },
-          }),
-        );
+        dispatchGlobalEvent(globalEvents.SIGNAL, {
+          userId: sendSignal.userId,
+          signal: JSON.parse(sendSignal.json),
+        });
       }
 
       if (voiceSignal) {
-        window.dispatchEvent(
-          new CustomEvent<VoiceSignalEvent>(events.VOICE_SIGNAL, {
-            detail: {
-              roomId: voiceSignal.roomId,
-              signal: JSON.parse(voiceSignal.json),
-            },
-          }),
-        );
+        dispatchGlobalEvent(globalEvents.VOICE_SIGNAL, {
+          roomId: voiceSignal.roomId,
+          signal: JSON.parse(voiceSignal.json),
+        });
       }
 
       if (login) {

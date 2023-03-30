@@ -18,7 +18,7 @@ import {
 } from '@mantou/gem';
 import { playHintSound } from 'src/utils';
 
-import { events } from 'src/constants';
+import { globalEvents } from 'src/constants';
 import { GamepadBtnIndex } from 'src/gamepad';
 import { theme } from 'src/theme';
 import { updateMtApp } from 'src/mt-app';
@@ -154,9 +154,9 @@ export class NesboxRotorElement extends GemElement {
       }
     });
 
-    addEventListener(events.PRESS_BUTTON_INDEX, this.#pressButton);
+    addEventListener(globalEvents.PRESS_HOST_BUTTON_INDEX, this.#pressButton);
     return () => {
-      removeEventListener(events.PRESS_BUTTON_INDEX, this.#pressButton);
+      removeEventListener(globalEvents.PRESS_HOST_BUTTON_INDEX, this.#pressButton);
     };
   };
 

@@ -10,7 +10,7 @@ import {
   updateStore,
 } from '@mantou/gem';
 
-import { events, VoiceSignalEvent } from 'src/constants';
+import { globalEvents, VoiceSignalDetail } from 'src/constants';
 import { configure } from 'src/configure';
 import { icons } from 'src/icons';
 import { theme } from 'src/theme';
@@ -124,7 +124,7 @@ export class MVoiceRoomElement extends GemElement<State> {
             logger.error(event);
           });
 
-          const handleVoiceMsg = async ({ detail }: CustomEvent<VoiceSignalEvent>) => {
+          const handleVoiceMsg = async ({ detail }: CustomEvent<VoiceSignalDetail>) => {
             if (roomId !== detail.roomId) return;
             if ('candidate' in detail.signal) {
               peerConnection.addIceCandidate(new RTCIceCandidate(detail.signal)).catch(logger.error);
@@ -144,7 +144,7 @@ export class MVoiceRoomElement extends GemElement<State> {
             }
           };
 
-          window.addEventListener(events.VOICE_SIGNAL, handleVoiceMsg);
+          addEventListener(globalEvents.VOICE_SIGNAL, handleVoiceMsg);
 
           const intervalTimer = setInterval(async () => {
             if (peerConnection.iceConnectionState !== 'connected') return;
@@ -176,7 +176,7 @@ export class MVoiceRoomElement extends GemElement<State> {
             clearInterval(intervalTimer);
             this.#audioEle.pause();
             userMediaStream?.getTracks().forEach((track) => track.stop());
-            window.removeEventListener(events.VOICE_SIGNAL, handleVoiceMsg);
+            removeEventListener(globalEvents.VOICE_SIGNAL, handleVoiceMsg);
             peerConnection.close();
           };
         }

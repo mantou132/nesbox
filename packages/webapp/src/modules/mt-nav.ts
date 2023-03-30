@@ -13,7 +13,7 @@ import { createPath } from 'duoyun-ui/elements/route';
 import { getAvatar, playHintSound } from 'src/utils';
 import { routes } from 'src/routes';
 
-import { events, queryKeys } from 'src/constants';
+import { globalEvents, queryKeys } from 'src/constants';
 import { configure } from 'src/configure';
 import { theme } from 'src/theme';
 import { i18n } from 'src/i18n';
@@ -114,9 +114,9 @@ export class MMtNavElement extends GemElement {
   };
 
   mounted = () => {
-    addEventListener(events.PRESS_BUTTON_INDEX, this.#onPressButtonIndex);
+    addEventListener(globalEvents.PRESS_HOST_BUTTON_INDEX, this.#onPressButtonIndex);
     return () => {
-      removeEventListener(events.PRESS_BUTTON_INDEX, this.#onPressButtonIndex);
+      removeEventListener(globalEvents.PRESS_HOST_BUTTON_INDEX, this.#onPressButtonIndex);
     };
   };
 

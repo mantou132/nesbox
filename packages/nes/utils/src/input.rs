@@ -1,5 +1,3 @@
-pub use bevy::input::*;
-
 use bevy::prelude::*;
 use wasm_bindgen::prelude::*;
 
@@ -28,47 +26,45 @@ pub enum Button {
     Select,
     Start,
 
-    Joypad1A,
-    Joypad1B,
-    Joypad1TurboA,
-    Joypad1TurboB,
-    Joypad1Up,
-    Joypad1Down,
-    Joypad1Left,
-    Joypad1Right,
-    Pointer1Left,
-    Pointer1Right,
+    JoypadA,
+    JoypadB,
+    JoypadTurboA,
+    JoypadTurboB,
+    JoypadUp,
+    JoypadDown,
+    JoypadLeft,
+    JoypadRight,
+    PointerPrimary,
+    PointerSecondary,
+}
 
-    Joypad2A,
-    Joypad2B,
-    Joypad2TurboA,
-    Joypad2TurboB,
-    Joypad2Up,
-    Joypad2Down,
-    Joypad2Left,
-    Joypad2Right,
-    Pointer2Left,
-    Pointer2Right,
+#[derive(Debug, Clone, Resource, Default)]
+pub struct ButtonInput {
+    inputs: [Input<Button>; 4],
+}
 
-    Joypad3A,
-    Joypad3B,
-    Joypad3TurboA,
-    Joypad3TurboB,
-    Joypad3Up,
-    Joypad3Down,
-    Joypad3Left,
-    Joypad3Right,
-    Pointer3Left,
-    Pointer3Right,
+impl ButtonInput {
+    pub fn get_input(&self, player: Player) -> &Input<Button> {
+        match player {
+            Player::One => &self.inputs[0],
+            Player::Two => &self.inputs[1],
+            Player::Three => &self.inputs[2],
+            Player::Four => &self.inputs[3],
+        }
+    }
 
-    Joypad4A,
-    Joypad4B,
-    Joypad4TurboA,
-    Joypad4TurboB,
-    Joypad4Up,
-    Joypad4Down,
-    Joypad4Left,
-    Joypad4Right,
-    Pointer4Left,
-    Pointer4Right,
+    pub fn get_input_mut(&mut self, player: Player) -> &mut Input<Button> {
+        match player {
+            Player::One => &mut self.inputs[0],
+            Player::Two => &mut self.inputs[1],
+            Player::Three => &mut self.inputs[2],
+            Player::Four => &mut self.inputs[3],
+        }
+    }
+
+    pub fn clear(&mut self) {
+        for input in self.inputs.iter_mut() {
+            input.clear();
+        }
+    }
 }

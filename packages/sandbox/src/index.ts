@@ -145,8 +145,8 @@ export class Nes implements ONes {
       //   out[i] = fn() || 0;
       // }
     };
-    this.handle_button_event = (button, pressed) => {
-      setControl(button, pressed);
+    this.handle_button_event = (player, button, pressed) => {
+      setControl(player, button, pressed);
     };
     this.handle_motion_event = (player, x, y) => {
       setCursorPosition(player, x, y);
@@ -229,7 +229,7 @@ export class Nes implements ONes {
   audio_callback(_out: Float32Array) {
     //
   }
-  handle_button_event(_button: Button, _pressed: boolean) {
+  handle_button_event(_player: Player, _button: Button, _pressed: boolean) {
     //
   }
   handle_motion_event(_player: Player, _x: number, _y: number) {
