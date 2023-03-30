@@ -25,16 +25,16 @@ impl Default for Audio {
 pub struct AudioResource {
     out_buf: Vec<f32>,
     current_audios: HashSet<Audio>,
-    disabled: bool,
+    enabled: bool,
 }
 
 impl AudioResource {
     pub fn sound(&self) -> bool {
-        !self.disabled
+        self.enabled
     }
 
     pub fn set_sound(&mut self, enabled: bool) {
-        self.disabled = !enabled;
+        self.enabled = enabled;
     }
 
     pub fn frame(&self) -> &[f32] {
@@ -79,12 +79,12 @@ impl Default for AudioPlugin {
 impl AudioPlugin {
     fn out(mut audio_resource: ResMut<AudioResource>, assets_resource: Res<AssetsResource>) {
         let len = audio_resource.out_buf.len();
-        let disabled = audio_resource.disabled;
+        let enabled = audio_resource.enabled;
         let mut out_buf = vec![0.; len];
         let mut new_set = HashSet::new();
 
         let mut append = |b: &[f32], volume: u32| {
-            if !disabled {
+            if enabled {
                 let v = (volume.min(100) as f32) / 100.;
                 for (i, b_val) in b.iter().enumerate() {
                     out_buf[i] += b_val * v;

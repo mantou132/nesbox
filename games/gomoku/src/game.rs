@@ -421,27 +421,29 @@ fn handle_dir(
     let mut change =
         |mut transform: Mut<Transform>, left: Button, right: Button, up: Button, down: Button| {
             if input.just_pressed(left) {
-                transform.translation.x =
-                    get_canvas_position(get_board_position(transform.translation.x).max(1) - 1);
+                transform.translation.x = get_canvas_position(
+                    get_board_position(transform.translation.x).saturating_sub(1),
+                );
                 audio_resource.play("move_cursor");
             }
 
             if input.just_pressed(right) {
                 transform.translation.x = get_canvas_position(
-                    get_board_position(transform.translation.x).min(BOARD_ROWS - 2) + 1,
+                    (get_board_position(transform.translation.x) + 1).min(BOARD_ROWS - 1),
                 );
                 audio_resource.play("move_cursor");
             }
 
             if input.just_pressed(up) {
-                transform.translation.y =
-                    get_canvas_position(get_board_position(transform.translation.y).max(1) - 1);
+                transform.translation.y = get_canvas_position(
+                    get_board_position(transform.translation.y).saturating_sub(1),
+                );
                 audio_resource.play("move_cursor");
             }
 
             if input.just_pressed(down) {
                 transform.translation.y = get_canvas_position(
-                    get_board_position(transform.translation.y).min(BOARD_ROWS - 2) + 1,
+                    (get_board_position(transform.translation.y) + 1).min(BOARD_ROWS - 1),
                 );
                 audio_resource.play("move_cursor");
             }

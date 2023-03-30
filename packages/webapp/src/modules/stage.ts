@@ -168,7 +168,8 @@ export class MStageElement extends GemElement<State> {
   #rtc?: RTC;
 
   #enableAudio = () => {
-    // enable audio state, work on host and client
+    // 在主机和客户机中都作为一个“允许播放”的状态开关
+    // 用在重新聚焦后作为判断依据
     this.#game?.set_sound(true);
 
     if (this.#isHost) {
@@ -185,8 +186,6 @@ export class MStageElement extends GemElement<State> {
   };
 
   #pauseAudio = () => {
-    this.#game?.set_sound(false);
-
     if (this.#isHost) {
       this.#setVolume(0);
     } else {
