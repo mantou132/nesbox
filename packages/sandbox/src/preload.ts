@@ -20,12 +20,10 @@ export function preload() {
         return target[player];
       },
     }),
+    _cursor: new Map(),
 
     buttons: {} as Record<keyof typeof Button, Button>,
     players: {} as Record<keyof typeof Player, Player>,
-    soundEnabled: true,
-    videoFilter: 'default',
-    cursorPosition: new Map(),
 
     init({ getAudioFrame, getState, getVideoFrame, setState, width, height }) {
       this._getVideoFrame = getVideoFrame;
@@ -48,6 +46,10 @@ export function preload() {
           ? button.some((e) => pressed.has(e))
           : pressed.has(button)
         : !!pressed.size;
+    },
+
+    getCursor(player: Player) {
+      return this._cursor.get(player);
     },
   };
 
@@ -79,8 +81,8 @@ export function getLogs(): string | undefined {
   return (globalThis.console as any)._logs?.shift()?.join(',');
 }
 
-export function setCursorPosition(player: Player, x: number, y: number) {
-  nesbox.cursorPosition.set(player, { x, y });
+export function setCursorMotion(player: Player, x: number, y: number, dx: number, dy: number) {
+  nesbox._cursor.set(player, { x, y, dx, dy });
 }
 
 export function definedEnums(json: string, playerJson: string) {
@@ -99,14 +101,6 @@ export function setControl(player: Player, button: Button, pressed: boolean) {
     control.pressed.delete(button);
     control.tap.delete(button);
   }
-}
-
-export function setSound(enabled: boolean) {
-  nesbox.soundEnabled = enabled;
-}
-
-export function setVideoFilter(filter: 'default' | 'NTSC') {
-  nesbox.videoFilter = filter;
 }
 
 export function getVideoFrame() {

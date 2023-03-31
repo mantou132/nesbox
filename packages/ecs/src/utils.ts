@@ -76,3 +76,7 @@ export function getLines(text: string, maxWidth: number, font: Font) {
   }
   return cache.get(text)!;
 }
+
+export function hitRect(px: number, py: number, x: number, y: number, w: number, h: number) {
+  return px > x && py > y && px < x + w && py < y + h;
+}

@@ -1,4 +1,5 @@
 import { audios, Color, COLOR_BLACK, FontType } from './assets';
+import { hitRect } from './utils';
 import { World } from './world';
 
 export abstract class Component {
@@ -156,6 +157,27 @@ export class SelectComponent extends Component {
 
   getCurrent() {
     return this.options[this.selected];
+  }
+
+  #optionRects: number[][] = [];
+  setOptionRect(index: number, xywh: [number, number, number, number]) {
+    this.#optionRects[index] = xywh;
+    this.#optionRects.length = this.options.length;
+  }
+
+  isEnterHover(position?: { x: number; y: number }) {
+    if (position) {
+      const index = this.#optionRects.findIndex(([x, y, w, h]) => hitRect(position.x, position.y, x, y, w, h));
+      if (index > -1) {
+        if (this.selected != index) {
+          this.selected = index;
+          return { enter: true, hover: true };
+        } else {
+          return { enter: false, hover: true };
+        }
+      }
+    }
+    return { enter: false, hover: false };
   }
 }
 

@@ -5,6 +5,7 @@ import {
   PositionComponent,
   TextAreaComponent,
   RenderOnceComponent,
+  hitRect,
 } from '@mantou/ecs';
 import { AnimateWrapEntity, FailedEntity, PieceEntity } from 'src/entities';
 import { NewPieceComponent, PieceComponent } from 'src/components';
@@ -18,19 +19,41 @@ import {
   ADD_SPEED_SCORE,
   SOUND,
   UPDATE_X_DELAY,
+  HEIGHT,
+  WIDTH,
+  SIDE_WIDTH,
 } from 'src/constants';
 
 import { getSceneAndData } from 'src/scenes';
 
-function renderScore(world: World<WorldData>) {
+const Player = nesbox.players;
+const Button = nesbox.buttons;
+
+const hitDir = (player: (typeof Player)['One'], dir: (typeof Button)['Start']) => {
+  const cursor = nesbox.getCursor(player);
+  if (nesbox.isTap(player, Button.PointerPrimary) && cursor) {
+    const w = (WIDTH - SIDE_WIDTH) / 2;
+    switch (dir) {
+      case Button.JoypadLeft: {
+        return hitRect(cursor.x, cursor.y, 0, 0, w, HEIGHT);
+      }
+      case Button.JoypadRight: {
+        return hitRect(cursor.x, cursor.y, w, 0, w, HEIGHT);
+      }
+    }
+  }
+  return false;
+};
+
+const renderScore = (world: World<WorldData>) => {
   return `${world.data.score}`.padStart(6, '0');
-}
+};
 
 export function commonSystem(world: World<WorldData>) {
   if (
-    nesbox.isTap(nesbox.players.One, nesbox.buttons.Reset) ||
-    (world.data.gameOver && nesbox.isTap(nesbox.players.One, nesbox.buttons.Start)) ||
-    (world.scene === SCENE.About && nesbox.isTap(nesbox.players.One))
+    nesbox.isTap(Player.One, Button.Reset) ||
+    (world.data.gameOver && nesbox.isTap(Player.One, [Button.Start, Button.PointerPrimary])) ||
+    (world.scene === SCENE.About && nesbox.isTap(Player.One))
   ) {
     world.switchScene(...getSceneAndData(SCENE.Start));
   }
@@ -40,7 +63,7 @@ export function pauseSystem(world: World<WorldData>) {
   switch (world.scene) {
     case SCENE.OnePlayer:
     case SCENE.TwoPlayer: {
-      if (nesbox.isTap(nesbox.players.One, nesbox.buttons.Start)) {
+      if (nesbox.isTap(Player.One, Button.Start)) {
         world.data.paused = !world.data.paused;
       }
     }
@@ -52,15 +75,19 @@ export function modeSelectSystem(world: World<WorldData>) {
   if (!entity) return;
 
   const select = entity.getComponent(SelectComponent)!;
-  if (nesbox.isTap(nesbox.players.One, nesbox.buttons.JoypadUp)) {
+  const { enter, hover } = select.isEnterHover(nesbox.getCursor(Player.One));
+
+  if (enter) {
+    world.addAudio(new AudioComponent(SOUND.Select));
+  } else if (nesbox.isTap(Player.One, Button.JoypadUp)) {
     select.change(-1);
     world.addAudio(new AudioComponent(SOUND.Select));
   }
-  if (nesbox.isTap(nesbox.players.One, [nesbox.buttons.JoypadDown, nesbox.buttons.Select])) {
+  if (nesbox.isTap(Player.One, [Button.JoypadDown, Button.Select])) {
     select.change(1);
     world.addAudio(new AudioComponent(SOUND.Select));
   }
-  if (nesbox.isTap(nesbox.players.One, nesbox.buttons.Start)) {
+  if ((hover && nesbox.isTap(Player.One, Button.PointerPrimary)) || nesbox.isTap(Player.One, Button.Start)) {
     switch (select.getCurrent()) {
       case MODE.OneMode:
         world.switchScene(...getSceneAndData(SCENE.OnePlayer));
@@ -142,7 +169,7 @@ const updateXOffsetFrame = {
 
 function handleCurrentPieceEntity(world: World<WorldData>, entity: PieceEntity) {
   const is1P = entity.id === ENTITY.CurrentPiece1;
-  const player = is1P ? nesbox.players.One : nesbox.players.Two;
+  const player = is1P ? Player.One : Player.Two;
   const piece = entity.getComponent(PieceComponent)!;
   const position = entity.getComponent(PositionComponent)!;
   const otherEntity = is1P ? world.getEntity(ENTITY.CurrentPiece2) : world.getEntity(ENTITY.CurrentPiece1);
@@ -153,12 +180,12 @@ function handleCurrentPieceEntity(world: World<WorldData>, entity: PieceEntity) 
     return;
   }
 
-  if (nesbox.isTap(player, [nesbox.buttons.JoypadA, nesbox.buttons.JoypadB])) {
+  if (nesbox.isTap(player, [Button.PointerSecondary, Button.JoypadA, Button.JoypadB])) {
     world.addAudio(new AudioComponent(SOUND.PieceTransform));
     entity.transform(world.data);
   }
 
-  if (nesbox.isPressed(player, nesbox.buttons.JoypadDown)) {
+  if (nesbox.isPressed(player, Button.JoypadDown) || hitDir(player, Button.JoypadDown)) {
     world.data.updateFrame = MIN_UPDATE_FRAME;
   } else {
     world.data.updateFrame = Math.max(
@@ -180,15 +207,15 @@ function handleCurrentPieceEntity(world: World<WorldData>, entity: PieceEntity) 
   // wait for a period of time and then accelerate to adjust the position
   const shouldUpdateXFrame =
     world.frameNum > updateXOffsetFrame[entity.id] && !((world.frameNum - updateXOffsetFrame[entity.id]) % 2);
-  if (nesbox.isTap(player, nesbox.buttons.JoypadLeft)) {
+  if (nesbox.isTap(player, Button.JoypadLeft) || hitDir(player, Button.JoypadLeft)) {
     shouldMoveX = -world.data.brickSize;
     updateXOffsetFrame[entity.id] = world.frameNum + UPDATE_X_DELAY;
-  } else if (nesbox.isTap(player, nesbox.buttons.JoypadRight)) {
+  } else if (nesbox.isTap(player, Button.JoypadRight) || hitDir(player, Button.JoypadRight)) {
     shouldMoveX = world.data.brickSize;
     updateXOffsetFrame[entity.id] = world.frameNum + UPDATE_X_DELAY;
-  } else if (shouldUpdateXFrame && nesbox.isPressed(player, nesbox.buttons.JoypadLeft)) {
+  } else if (shouldUpdateXFrame && nesbox.isPressed(player, Button.JoypadLeft)) {
     shouldMoveX = -world.data.brickSize;
-  } else if (shouldUpdateXFrame && nesbox.isPressed(player, nesbox.buttons.JoypadRight)) {
+  } else if (shouldUpdateXFrame && nesbox.isPressed(player, Button.JoypadRight)) {
     shouldMoveX = world.data.brickSize;
   } else {
     shouldMoveX = 0;

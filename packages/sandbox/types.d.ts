@@ -1,5 +1,7 @@
 import { Button, Player } from '@mantou/nes';
 
+type Cursor = { x: number; y: number; dx: number; dy: number };
+
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace globalThis {
@@ -12,15 +14,14 @@ declare global {
       _width: number;
       _height: number;
       _control: Record<Player, { tap: Set<Button>; pressed: Set<Button> }>;
+      _cursor: Map<Player, Cursor>;
 
       buttons: Record<keyof typeof Button, Button>;
       players: Record<keyof typeof Player, Player>;
-      soundEnabled: boolean;
-      videoFilter: 'default' | 'NTSC';
-      cursorPosition: Map<Player, { x: number; y: number }>;
 
       isTap: (player: Player, button?: Button | Button[]) => boolean;
       isPressed: (player: Player, button?: Button | Button[]) => boolean;
+      getCursor: (player: Player) => Cursor | undefined;
 
       init: (options: {
         width: number;

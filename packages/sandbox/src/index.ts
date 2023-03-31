@@ -16,11 +16,9 @@ import {
   reset,
   getWidth,
   getHeight,
-  setSound,
-  setVideoFilter,
   definedEnums,
   getLogs,
-  setCursorPosition,
+  setCursorMotion,
 } from './preload';
 
 const importList = [
@@ -33,10 +31,8 @@ const importList = [
   reset,
   getWidth,
   getHeight,
-  setSound,
-  setVideoFilter,
   getLogs,
-  setCursorPosition,
+  setCursorMotion,
 ] as const;
 
 export { Button };
@@ -115,10 +111,8 @@ export class Nes implements ONes {
     reset,
     getWidth,
     getHeight,
-    setSound,
-    setVideoFilter,
     getLogs,
-    setCursorPosition,
+    setCursorMotion,
   ]: typeof importList) {
     this.clock_frame = () => {
       while (true) {
@@ -137,7 +131,7 @@ export class Nes implements ONes {
       // }
       return ++this.#frameNum;
     };
-    this.audio_callback = (out: Float32Array) => {
+    this.audio_callback = (out) => {
       const frame = getAudioFrame();
       out.set(frame);
       // const fn = getAudioFrame();
@@ -148,31 +142,21 @@ export class Nes implements ONes {
     this.handle_button_event = (player, button, pressed) => {
       setControl(player, button, pressed);
     };
-    this.handle_motion_event = (player, x, y) => {
-      setCursorPosition(player, x, y);
+    this.handle_motion_event = (player, x, y, dx, dy) => {
+      setCursorMotion(player, x, y, dx, dy);
     };
     this.state = () => {
       const fn = getState();
       const len = fn();
       return Uint8Array.from({ length: len }, () => fn());
     };
-    this.load_state = (state: Uint8Array) => {
+    this.load_state = (state) => {
       const fn = setState(state.length);
       state.forEach((val) => fn(val));
     };
     this.reset = () => reset();
     this.width = () => getWidth();
     this.height = () => getHeight();
-    this.set_filter = (filter: string) => {
-      switch (filter) {
-        case 'NTSC':
-          setVideoFilter(filter);
-          break;
-        default:
-          setVideoFilter('default');
-      }
-    };
-    this.set_sound = (enabled) => setSound(enabled);
 
     const width = this.width();
     const height = this.height();
@@ -232,7 +216,7 @@ export class Nes implements ONes {
   handle_button_event(_player: Player, _button: Button, _pressed: boolean) {
     //
   }
-  handle_motion_event(_player: Player, _x: number, _y: number) {
+  handle_motion_event(_player: Player, _x: number, _y: number, _dx: number, _dy: number) {
     //
   }
   state(): Uint8Array {

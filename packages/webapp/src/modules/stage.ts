@@ -473,6 +473,7 @@ export class MStageElement extends GemElement<State> {
   #onPointerDown = (event: PointerEvent) => {
     const button = this.#getGamepadButton(event);
     if (!button) return;
+    this.setPointerCapture(event.pointerId);
     this.#onPointerMove(event);
     this.#pressButton(button.player, button.btn);
   };

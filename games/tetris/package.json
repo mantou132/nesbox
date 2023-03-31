@@ -9,7 +9,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@mantou/ecs": "^0.0.1",
+    "@mantou/ecs": "^0.0.2",
     "qoijs": "^1.0.0"
   },
   "devDependencies": {

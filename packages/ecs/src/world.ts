@@ -288,7 +288,7 @@ export class World<CustomData = any> {
   }
 
   #renderText(text: string, x: number, y: number, fontType: FontType, color?: Color) {
-    [...text].reduce((x, char) => {
+    return [...text].reduce((x, char) => {
       const sprite = fonts[fontType].fontSet[char];
       this.#renderSprite(sprite, x, y, color);
       return x + sprite.width;
@@ -309,10 +309,12 @@ export class World<CustomData = any> {
 
   #renderSelect(select: SelectComponent, x: number, y: number, color: Color) {
     const marginLeft = x + fonts[select.fontType].fontSize * 1.5;
+    const lineHeight = fonts[select.fontType].fontSize * 1.2;
     select.options.forEach((option, index) => {
-      const yy = y + index * fonts[select.fontType].fontSize * 1.2;
+      const yy = y + index * lineHeight;
       if (select.selected === index) this.#renderText('>', x, yy, select.fontType, color);
-      this.#renderText(option, marginLeft, yy, select.fontType, color);
+      const endX = this.#renderText(option, marginLeft, yy, select.fontType, color);
+      select.setOptionRect(index, [x, yy, endX - x, lineHeight]);
     });
   }
 
