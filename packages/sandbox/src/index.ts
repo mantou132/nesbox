@@ -228,9 +228,6 @@ export class Nes implements ONes {
   reset() {
     //
   }
-  set_filter(_filter: string) {
-    //
-  }
   set_sound(_enabled: boolean) {
     //
   }

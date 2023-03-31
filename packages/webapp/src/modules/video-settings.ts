@@ -54,17 +54,13 @@ export class MVideoSettingsElement extends GemElement {
           ]}
           @change=${(evt: CustomEvent<VideoRenderMethod>) => this.#updateVideoSetting('render', evt.detail)}
         ></dy-select>
-        <div>
-          ${i18n.get('videoFilter')}
-          <dy-tooltip .content=${i18n.get('tipHostSetting')}>
-            <dy-use class="help" .element=${icons.help}></dy-use>
-          </dy-tooltip>
-        </div>
+        <div>${i18n.get('videoFilter')}</div>
         <dy-select
           .value=${configure.user.settings.video.filter}
           .options=${[
             { label: i18n.get('videoFilterDefault'), value: VideoFilter.DEFAULT },
             { label: 'NTSC', value: VideoFilter.NTSC },
+            { label: 'CRT', value: VideoFilter.CRT },
           ]}
           @change=${(evt: CustomEvent<VideoFilter>) => this.#updateVideoSetting('filter', evt.detail)}
         ></dy-select>

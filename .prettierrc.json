@@ -1,8 +1,8 @@
 {
+  "overrides": [{ "files": ["*.frag"], "options": { "parser": "glsl-parser" } }],
   "semi": true,
   "trailingComma": "all",
   "singleQuote": true,
   "printWidth": 120,
   "endOfLine": "lf"
 }
-

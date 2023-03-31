@@ -49,10 +49,6 @@ pub fn nesbox_bevy(_: TokenStream, item: TokenStream) -> TokenStream {
                     .height
             }
 
-            pub fn set_filter(&mut self, _filter: &str) {
-                //
-            }
-
             pub fn sound(&mut self) -> bool {
                 self.app
                     .world

@@ -191,7 +191,7 @@ export class PRoomElement extends GemElement {
       if (!this.stageRef.element!.hostRomBuffer) return;
       const state = this.stageRef.element!.getState();
       if (!state) return;
-      const thumbnail = this.stageRef.element!.getThumbnail();
+      const thumbnail = await this.stageRef.element!.getThumbnail();
       const cache = await caches.open(this.#getCachesName(auto));
       const key = await hash(this.stageRef.element!.hostRomBuffer);
       await cache.put(
@@ -216,7 +216,9 @@ export class PRoomElement extends GemElement {
     if (!auto) Toast.open('success', i18n.get('tipGameStateSave', new Time().format()));
   };
 
-  #autoSave = () => this.#save(true);
+  #autoSave = () => {
+    this.#save(true);
+  };
 
   #load = async () => {
     if (!this.stageRef.element!.hostRomBuffer) return;
@@ -269,11 +271,11 @@ export class PRoomElement extends GemElement {
     }
   };
 
-  #uploadScreenshot = () => {
+  #uploadScreenshot = async () => {
     if (!this.stageRef.element!.hostRomBuffer) return;
     updateRoomScreenshot({
       id: this.#playing!.id,
-      screenshot: this.stageRef.element!.getThumbnail(),
+      screenshot: await this.stageRef.element!.getThumbnail(),
     });
   };
 

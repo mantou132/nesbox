@@ -20,7 +20,14 @@ import { clamp } from 'duoyun-ui/lib/number';
 import { isMtApp } from 'mt-app';
 import { getCDNSrc, isValidGameFile, playHintSound, positionMapping, requestFrame } from 'src/utils';
 
-import { CustomGamepadButton, globalEvents, gameStateType, RTCTransportType } from 'src/constants';
+import {
+  CustomGamepadButton,
+  globalEvents,
+  gameStateType,
+  RTCTransportType,
+  VideoFilter,
+  VideoRenderMethod,
+} from 'src/constants';
 import { logger } from 'src/logger';
 import { Cheat, configure } from 'src/configure';
 import {
@@ -315,7 +322,6 @@ export class MStageElement extends GemElement<State> {
       //   game = Nes.new(this.#sampleRate);
       // }
 
-      this.#setVideoFilter();
       this.setState({ canvasWidth: game.width(), canvasHeight: game.height() });
       this.#game = game;
       if (this.#isHost) {
@@ -504,10 +510,6 @@ export class MStageElement extends GemElement<State> {
     this.#releaseButton(button.player, button.btn);
   };
 
-  #setVideoFilter = () => {
-    this.#settings && this.#game?.set_filter(this.#settings.video.filter);
-  };
-
   mounted = () => {
     this.effect(
       () => {
@@ -562,8 +564,6 @@ export class MStageElement extends GemElement<State> {
       () => [this.#rom],
     );
 
-    this.effect(this.#setVideoFilter, () => [this.#game, this.#settings?.video]);
-
     this.effect(
       (muteArgs) => (muteArgs!.every((e) => !e) ? this.#resumeAudio() : this.#pauseAudio()),
       () => [!configure.windowHasFocus, configure.searchState, configure.settingsState, configure.friendListState],
@@ -598,9 +598,10 @@ export class MStageElement extends GemElement<State> {
         ref=${this.canvasRef.ref}
         .width=${canvasWidth}
         .height=${canvasHeight}
+        .filter=${this.#settings?.video.filter || VideoFilter.DEFAULT}
         style=${styleMap({
           padding: isMtApp ? '2em 5em 5em' : '5em',
-          imageRendering: configure.user ? configure.user.settings.video.render : 'pixelated',
+          imageRendering: this.#settings?.video.render || VideoRenderMethod.PIXELATED,
         })}
       ></nesbox-canvas>
       <audio ref=${this.audioRef.ref} hidden></audio>
@@ -664,7 +665,6 @@ export class MStageElement extends GemElement<State> {
     } else {
       this.#game.load_state(stateArray);
     }
-    this.#setVideoFilter();
   };
 
   getRam = () => {

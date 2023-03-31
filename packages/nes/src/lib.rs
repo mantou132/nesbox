@@ -54,13 +54,6 @@ impl Nes {
         Ppu::HEIGHT
     }
 
-    pub fn set_filter(&mut self, filter: &str) {
-        self.control_deck.set_filter(match filter {
-            "NTSC" => VideoFilter::Ntsc,
-            _ => VideoFilter::Pixellate,
-        });
-    }
-
     pub fn sound(&mut self) -> bool {
         self.sound
     }

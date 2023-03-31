@@ -132,6 +132,7 @@ export const enum VideoRenderMethod {
 export const enum VideoFilter {
   DEFAULT = 'default',
   NTSC = 'NTSC',
+  CRT = 'CRT',
 }
 
 export const enum VideoRefreshRate {

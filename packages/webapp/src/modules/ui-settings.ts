@@ -51,15 +51,6 @@ export class MUiSettingsElement extends GemElement {
           }))}
           @change=${({ detail }: CustomEvent<ThemeName>) => changeTheme(detail)}
         ></dy-select>
-        ${'startViewTransition' in document
-          ? html`
-              <div>Transition</div>
-              <dy-switch
-                .checked=${!!configure.user?.settings.ui.viewTransition}
-                @change=${({ detail }: CustomEvent<boolean>) => this.#updateVideoSetting('viewTransition', detail)}
-              ></dy-switch>
-            `
-          : ''}
         ${window.__TAURI__ && location.hostname !== 'localhost'
           ? html`
               <div>${i18n.get('branch')}</div>
@@ -71,6 +62,15 @@ export class MUiSettingsElement extends GemElement {
                     //
                   })}
               ></dy-select>
+            `
+          : ''}
+        ${'startViewTransition' in document
+          ? html`
+              <div>Transition</div>
+              <dy-switch
+                .checked=${!!configure.user?.settings.ui.viewTransition}
+                @change=${({ detail }: CustomEvent<boolean>) => this.#updateVideoSetting('viewTransition', detail)}
+              ></dy-switch>
             `
           : ''}
       </div>

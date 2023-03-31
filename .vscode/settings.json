@@ -13,7 +13,7 @@
     "editor.defaultFormatter": null
   },
   "[typescript]": {
-    "editor.formatOnSave": false,
+    "editor.formatOnSave": false
   },
   "editor.codeActionsOnSave": {
     "source.fixAll": true

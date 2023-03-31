@@ -19,6 +19,6 @@
   "devDependencies": {
     "@types/offscreencanvas": "^2019.7.0",
     "@nesbox/config": "^0.0.1",
-    "vite": "^4.1.4"
+    "vite": "^4.2.1"
   }
 }
