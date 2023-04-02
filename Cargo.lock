@@ -4289,7 +4289,7 @@ dependencies = [
 
 [[package]]
 name = "nes"
-version = "1.0.11"
+version = "1.0.12"
 dependencies = [
  "nesbox_utils",
  "tetanes",
@@ -5435,9 +5435,9 @@ dependencies = [
 
 [[package]]
 name = "ringbuf"
-version = "0.3.2"
+version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "93ca10b9c9e53ac855a2d6953bce34cef6edbac32c4b13047a4d59d67299420a"
+checksum = "79abed428d1fd2a128201cec72c5f6938e2da607c6f3745f769fabea399d950a"
 dependencies = [
  "crossbeam-utils",
 ]
