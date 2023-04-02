@@ -362,6 +362,18 @@ fn update_state(
     }
 }
 
+fn get_player(mode: &GameMode, checkerboard: &Checkerboard) -> Player {
+    if mode.is_1p_white() {
+        if checkerboard.current == Player::Two {
+            return Player::One;
+        } else {
+            return Player::Two;
+        }
+    } else {
+        return checkerboard.current;
+    }
+}
+
 fn mouse_motion(
     mut mouse_evt: EventReader<MouseEvent>,
     mut set: ParamSet<(
@@ -374,16 +386,7 @@ fn mouse_motion(
 ) {
     if let Some(event) = mouse_evt.iter().last() {
         let checkerboard = board_query.single();
-        let current_player = if mode.is_1p_white() {
-            if checkerboard.current == Player::Two {
-                Player::One
-            } else {
-                Player::Two
-            }
-        } else {
-            checkerboard.current
-        };
-        if event.player != current_player {
+        if event.player != get_player(&mode, &checkerboard) {
             return;
         }
 
@@ -419,7 +422,7 @@ fn handle_dir(
     mode: Res<GameMode>,
 ) {
     let checkerboard = board_query.single();
-    let input = input.get_input(checkerboard.current);
+    let input = input.get_input(get_player(&mode, &checkerboard));
 
     let mut change = |mut transform: Mut<Transform>| {
         if input.just_pressed(Button::JoypadLeft) {
@@ -499,7 +502,7 @@ fn handle_submit(
 ) {
     let (board_entity, mut checkerboard) = board_query.single_mut();
     let mut round_timer = timer.single_mut();
-    let input = input.get_input(checkerboard.current);
+    let input = input.get_input(get_player(&mode, &checkerboard));
     let buttons = [Button::JoypadA, Button::JoypadB, Button::PointerPrimary];
 
     let (x, y) = if checkerboard.current == mode.get_1p() {
