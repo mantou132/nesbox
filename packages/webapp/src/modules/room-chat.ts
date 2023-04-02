@@ -44,6 +44,12 @@ const style = createCSSSheet(css`
     min-height: 0;
     overflow: auto;
     font-size: 0.875em;
+    /* 点击事件需要传递给 stage, 所以这里不应该接受 pointer 事件 */
+    user-select: none;
+    scrollbar-width: none;
+  }
+  .message::-webkit-scrollbar {
+    width: 0;
   }
   .message.silent {
     opacity: 0.5;
@@ -196,7 +202,7 @@ export class MRoomChatElement extends GemElement<State> {
 
   render = () => {
     return html`
-      <div class=${classMap({ message: true, silent: this.state.silent })} ref=${this.messageRef.ref}>
+      <div ref=${this.messageRef.ref} class=${classMap({ message: true, silent: this.state.silent })}>
         ${repeat(
           this.messages,
           ({ timestamp }) => timestamp,

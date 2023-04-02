@@ -125,8 +125,8 @@ export const localStorageKeys = {
 
 // https://developer.mozilla.org/en-US/docs/Web/CSS/image-rendering
 export const enum VideoRenderMethod {
+  SMOOTH = 'auto',
   PIXELATED = 'pixelated',
-  SMOOTH = 'smooth',
 }
 
 export const enum VideoFilter {

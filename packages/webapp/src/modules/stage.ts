@@ -476,6 +476,13 @@ export class MStageElement extends GemElement<State> {
     }
   };
 
+  // fixed `setPointerCapture` stage
+  #stopPropagation = (event: PointerEvent, onlyInputElement = false) => {
+    if (!onlyInputElement || event.composedPath()[0] instanceof HTMLInputElement) {
+      event.stopPropagation();
+    }
+  };
+
   #onPointerDown = (event: PointerEvent) => {
     const button = this.#getGamepadButton(event);
     if (!button) return;
@@ -609,12 +616,14 @@ export class MStageElement extends GemElement<State> {
         class="chat"
         ref=${this.chatRef.ref}
         .messages=${messages}
+        @pointerdown=${(evt: PointerEvent) => this.#stopPropagation(evt, true)}
         @submit=${({ detail }: CustomEvent<TextMsg>) => this.#rtc?.send(detail)}
       ></m-room-chat>
       <m-room-player-list
         class="player-list"
         .isHost=${this.#isHost}
         .roles=${roles}
+        @pointerdown=${this.#stopPropagation}
         @rolechange=${({ detail }: CustomEvent<RoleOffer>) => this.#rtc?.send(detail)}
         @kickout=${({ detail }: CustomEvent<number>) => this.#rtc?.kickOutRole(detail)}
       ></m-room-player-list>
