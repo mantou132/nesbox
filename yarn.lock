@@ -2778,7 +2778,7 @@ check-more-types@^2.24.0:
   resolved "https://registry.yarnpkg.com/check-more-types/-/check-more-types-2.24.0.tgz#1420ffb10fd444dcfc79b43891bbfffd32a84600"
   integrity sha512-Pj779qHxV2tuapviy1bSZNEL1maXr13bPYpsvSDB68HlYcYuhlDrmGd63i0JHMCLKzc7rUSNIrpdJlhVlNwrxA==
 
-chevrotain@^10.4.2:
+chevrotain@^10.5.0:
   version "10.5.0"
   resolved "https://registry.yarnpkg.com/chevrotain/-/chevrotain-10.5.0.tgz#9c1dc62ef0753bb562dbe521b5f72d041bad624e"
   integrity sha512-Pkv5rBY3+CsHOYfV5g/Vs5JY9WTHHDEKOlohI2XeygaZhUeqhAlldZ8Hz9cRmxu709bvS08YzxHdTPHhffc13A==
@@ -7860,13 +7860,13 @@ prettier-linter-helpers@^1.0.0:
   dependencies:
     fast-diff "^1.1.2"
 
-prettier-plugin-glsl@^0.0.9:
-  version "0.0.9"
-  resolved "https://registry.yarnpkg.com/prettier-plugin-glsl/-/prettier-plugin-glsl-0.0.9.tgz#e5c95e968b04d08dd9ed0a91dce1572c89795b69"
-  integrity sha512-FRLWJba33EBTwVK4ZOV3AVzBXUf2+4DfSU5sAyzK/fZxw6KMt8SAQ3oU6vDZ2UXKm26lZRA3mSdleH9ArlsiBA==
+prettier-plugin-glsl@^0.0.10:
+  version "0.0.10"
+  resolved "https://registry.yarnpkg.com/prettier-plugin-glsl/-/prettier-plugin-glsl-0.0.10.tgz#8b6d7a5c88bd7ac7f9bd0308bb9ba57c6008901d"
+  integrity sha512-9eE2GnZ+//5jwWNKtG3JBlovTez20HiTLv/caeKUP2a6WN9nWGtmMFEuZRxgwbhZCdT9JoHot22LPnnkuSyW1w==
   dependencies:
     "@netflix/nerror" "^1.1.3"
-    chevrotain "^10.4.2"
+    chevrotain "^10.5.0"
     lodash "^4.17.21"
 
 prettier@^2.8.4:

@@ -26,6 +26,15 @@ const style = createCSSSheet(css`
     box-sizing: border-box;
     padding: 1em;
     border-radius: ${theme.normalRound};
+    background-color: ${theme.hoverBackgroundColor};
+  }
+  .header {
+    display: flex;
+    align-content: center;
+    gap: 2px;
+  }
+  .icon {
+    width: 1em;
   }
   .body {
     white-space: pre-wrap;
@@ -54,13 +63,15 @@ export class MCommentElement extends GemElement {
       <style>
         :host {
           order: ${this.#isSelf ? 0 : 1};
-          background-color: ${this.#isSelf ? theme.hoverBackgroundColor : theme.lightBackgroundColor};
-          border: 1px solid ${this.comment.like ? theme.positiveColor : theme.negativeColor};
+          background-image: ${!this.comment.like
+            ? `linear-gradient(to left bottom, ${theme.negativeColor} -300%, transparent)`
+            : 'none'};
         }
       </style>
-      <dy-help-text>
+      <dy-help-text class="header">
         [${new Time().relativeTimeFormat(this.comment.updatedAt)}]
         ${this.#isSelf ? i18n.get('selfComment') : this.comment.user.nickname}:
+        <span style="flex-grow: 1"></span>
       </dy-help-text>
       ${this.comment.body
         ? html`<div class="body">${this.comment.body}</div>`
