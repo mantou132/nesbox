@@ -157,17 +157,7 @@ export class NesboxCanvasElement extends GemElement {
     const texture = webgl.createTexture();
     webgl.activeTexture(webgl.TEXTURE0 + samplerUint);
     webgl.bindTexture(webgl.TEXTURE_2D, texture);
-    webgl.texImage2D(
-      webgl.TEXTURE_2D,
-      0,
-      webgl.RGBA,
-      max_size,
-      max_size,
-      0,
-      webgl.RGBA,
-      webgl.UNSIGNED_BYTE,
-      new Uint8Array(max_size * max_size * 4),
-    );
+    webgl.texImage2D(webgl.TEXTURE_2D, 0, webgl.RGBA, max_size, max_size, 0, webgl.RGBA, webgl.UNSIGNED_BYTE, null);
     webgl.texParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_MAG_FILTER, webgl.NEAREST);
     webgl.texParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_MIN_FILTER, webgl.NEAREST);
 

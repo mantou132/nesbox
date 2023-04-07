@@ -11,7 +11,7 @@ import {
   history,
 } from '@mantou/gem';
 import { locale } from 'duoyun-ui/lib/locale';
-import { default as initNes, Button, Nes, Player } from '@mantou/nes';
+import { Button, Nes, Player } from '@mantou/nes';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { clamp } from 'duoyun-ui/lib/number';
 import { Modal } from 'duoyun-ui/elements/modal';
@@ -21,7 +21,6 @@ import { routes } from 'src/routes';
 
 import { configure, defaultKeybinding, setNesFile } from 'src/configure';
 import { MStageElement } from 'src/modules/stage';
-import { logger } from 'src/logger';
 
 import type { NesboxCanvasElement } from 'src/elements/canvas';
 
@@ -190,29 +189,11 @@ export class PEmulatorElement extends GemElement<State> {
   #loadRom = async () => {
     if (!configure.openNesFile) return;
 
-    const romBuffer = await configure.openNesFile.arrayBuffer();
-
-    switch (configure.openNesFile.name.toLowerCase().split('.').pop()) {
-      case 'wasm': {
-        await initNes(new Response(romBuffer, { headers: { 'content-type': 'application/wasm' } }));
-        this.#game = Nes.new(this.#sampleRate);
-        logger.info(`WASM memory ${this.#game.mem().buffer.byteLength / 1024}KB`);
-        break;
-      }
-      case 'js': {
-        const { default: initNes, Nes } = await import('@mantou/nes-sandbox');
-        await initNes();
-        const jsGame = Nes.new(this.#sampleRate);
-        await jsGame.load_rom(new Uint8Array(romBuffer));
-        this.#game = jsGame;
-        break;
-      }
-      default: {
-        await initNes();
-        this.#game = Nes.new(this.#sampleRate);
-        this.#game.load_rom(new Uint8Array(romBuffer));
-      }
-    }
+    this.#game = await MStageElement.createGame(
+      configure.openNesFile.name,
+      await configure.openNesFile.arrayBuffer(),
+      this.#sampleRate,
+    );
 
     this.setState({ canvasWidth: this.#game.width(), canvasHeight: this.#game.height() });
 
@@ -266,12 +247,17 @@ if (process.env.NODE_ENV === 'development') {
   (async function () {
     try {
       const gameOrigin = 'http://localhost:8000';
-      let filename = 'index_bg.wasm';
-      if (!(await fetch(`${gameOrigin}/${filename}`)).ok) {
-        filename = 'index.js';
+      const filenames = ['index_bg.wasm', 'index.js', 'index.wasm4.wasm'];
+      const filename =
+        filenames[
+          (await Promise.all(filenames.map((filename) => fetch(`${gameOrigin}/${filename}`)))).findIndex(
+            (res) => res.ok,
+          )
+        ];
+      if (filename) {
+        setNesFile(new File([await (await fetch(`${gameOrigin}/${filename}`)).blob()], filename));
+        new EventSource(`${gameOrigin}/esbuild`).addEventListener('change', () => location.reload());
       }
-      setNesFile(new File([await (await fetch(`${gameOrigin}/${filename}`)).blob()], filename));
-      new EventSource(`${gameOrigin}/esbuild`).addEventListener('change', () => location.reload());
     } catch {
       //
     }

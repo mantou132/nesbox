@@ -115,6 +115,52 @@ export class MStageElement extends GemElement<State> {
     canvasHeight: 0,
   };
 
+  static createGame = async (filename: string, romBuffer: ArrayBuffer, sampleRate: number) => {
+    // if (process.env.NODE_ENV === 'development') {
+    //   // test wasm4
+    //   const { Nes } = await import('@mantou/nes-wasm4');
+    //   const game = Nes.new(sampleRate);
+    //   await game.load_rom(new Uint8Array(await (await fetch('http://localhost:8000/index.wasm4.wasm')).arrayBuffer()));
+    //   return game;
+    //   // test wasm
+    //   // await initNes(
+    //   //   new Response(await (await fetch('http://localhost:8000/index_bg.wasm')).arrayBuffer(), {
+    //   //     headers: { 'content-type': 'application/wasm' },
+    //   //   }),
+    //   // );
+    //   // return Nes.new(sampleRate);
+    // }
+    const fragments = filename.toLowerCase().split('.');
+
+    switch (fragments.pop()) {
+      case 'wasm': {
+        if (fragments.pop() === 'wasm4') {
+          const { Nes } = await import('@mantou/nes-wasm4');
+          const game = Nes.new(sampleRate);
+          await game.load_rom(new Uint8Array(romBuffer));
+          return game;
+        } else {
+          await initNes(new Response(romBuffer, { headers: { 'content-type': 'application/wasm' } }));
+          const game = Nes.new(sampleRate);
+          logger.info(`WASM memory ${game.mem().buffer.byteLength / 1024}KB`);
+          return game;
+        }
+      }
+      case 'js': {
+        const { Nes } = await import('@mantou/nes-sandbox');
+        const game = Nes.new(sampleRate);
+        await game.load_rom(new Uint8Array(romBuffer));
+        return game;
+      }
+      default: {
+        await initNes();
+        const game = Nes.new(sampleRate);
+        game.load_rom(new Uint8Array(romBuffer));
+        return game;
+      }
+    }
+  };
+
   static mapPointerButton(event: PointerEvent) {
     switch (event.button) {
       case 0:
@@ -289,38 +335,7 @@ export class MStageElement extends GemElement<State> {
       const file = Object.values(folder.files).find((e) => isValidGameFile(e.name))!;
       const romBuffer = await file.async('arraybuffer');
 
-      let game: Nes;
-
-      switch (file.name.toLowerCase().split('.').pop()) {
-        case 'wasm': {
-          await initNes(new Response(romBuffer, { headers: { 'content-type': 'application/wasm' } }));
-          game = Nes.new(this.#sampleRate);
-          break;
-        }
-        case 'js': {
-          const { default: initNes, Nes } = await import('@mantou/nes-sandbox');
-          await initNes();
-          const jsGame = Nes.new(this.#sampleRate);
-          await jsGame.load_rom(new Uint8Array(romBuffer));
-          game = jsGame;
-          break;
-        }
-        default: {
-          await initNes();
-          game = Nes.new(this.#sampleRate);
-          game.load_rom(new Uint8Array(romBuffer));
-        }
-      }
-
-      // if (process.env.NODE_ENV === 'development') {
-      //   // test wasm
-      //   await initNes(
-      //     new Response(await (await fetch('http://localhost:8000/index_bg.wasm')).arrayBuffer(), {
-      //       headers: { 'content-type': 'application/wasm' },
-      //     }),
-      //   );
-      //   game = Nes.new(this.#sampleRate);
-      // }
+      const game: Nes = await MStageElement.createGame(file.name, romBuffer, this.#sampleRate);
 
       this.setState({ canvasWidth: game.width(), canvasHeight: game.height() });
       this.#game = game;

@@ -2,10 +2,9 @@
 /// <reference types="../env" />
 
 import { Nes as ONes, Button, Player } from '@mantou/nes';
-import QOI from 'qoijs';
 
 import { VM } from './vm';
-import { utf8ToBase64, encodeQoiFrame } from './utils';
+import { utf8ToBase64, encodeQoiFrame, decodeQoiFrame } from './utils';
 import {
   preload,
   getAudioFrame,
@@ -37,10 +36,6 @@ const importList = [
 
 export { Button };
 
-export default async function () {
-  // no body
-}
-
 export class Nes implements ONes {
   static new(_outputSampleRate: number) {
     return new Nes();
@@ -55,7 +50,6 @@ export class Nes implements ONes {
   #deQoiLen = 0;
   #deQoiSpace: number[] = [];
   #prevFrame = new Uint8ClampedArray();
-  #currentFrame = new Uint8ClampedArray();
 
   mem(): Uint8Array {
     return this.#mem;
@@ -74,7 +68,7 @@ export class Nes implements ONes {
         this.#currentQoiFrameLen = qoiFrame.length + partArr.length;
         new Uint8Array(this.#mem.buffer, this.#qoiSpace[0], this.#qoiLen).set(qoiFrame);
         new Uint8Array(this.#mem.buffer, this.#qoiSpace[0] + qoiFrame.byteLength, partArr.length).set(partArr);
-        this.#prevFrame = this.#currentFrame.slice(0);
+        this.#prevFrame = currentFrame.slice(0);
       }
     } else {
       this.#prevFrame = new Uint8ClampedArray();
@@ -93,7 +87,7 @@ export class Nes implements ONes {
   }
   #currentDeQoiLen = 0;
   decode_qoi(bytes: Uint8Array): number {
-    const frame = new Uint8Array(QOI.decode(bytes.buffer).data.buffer);
+    const frame = decodeQoiFrame(bytes.buffer).data;
     this.#currentDeQoiLen = frame.length;
     new Uint8Array(this.#mem.buffer, this.#deQoiSpace[0], this.#deQoiLen).set(frame);
     return this.#deQoiSpace[0];
@@ -122,7 +116,6 @@ export class Nes implements ONes {
         (console as any)[type]?.(args.join(','));
       }
       const frame = getVideoFrame();
-      this.#currentFrame = frame;
       new Uint8ClampedArray(this.#mem.buffer).set(frame, this.#frameSpace[0]);
       // const fn = getVideoFrame();
       // const frame = new DataView(this.#mem.buffer, this.#frameSpace[0], this.#frameLen);
@@ -263,3 +256,5 @@ export class Nes implements ONes {
     // no body
   }
 }
+
+export * from './utils';

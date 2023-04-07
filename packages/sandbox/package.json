@@ -1,6 +1,6 @@
 {
   "name": "@mantou/nes-sandbox",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "",
   "module": "src/index.ts",
   "types": "src/index.ts",

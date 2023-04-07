@@ -74,3 +74,7 @@ export function encodeQoiFrame(
     ];
   }
 }
+
+export function decodeQoiFrame(buffer: ArrayBuffer, byteOffset?: number, byteLength?: number): { data: Uint8Array } {
+  return QOI.decode(buffer, byteOffset, byteLength);
+}

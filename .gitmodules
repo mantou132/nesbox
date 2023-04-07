@@ -4,3 +4,6 @@
 [submodule "deps/tauri-plugin-window-state"]
 	path = deps/tauri-plugin-window-state
 	url = https://github.com/mantou132/tauri-plugin-window-state.git
+[submodule "deps/wasm4"]
+	path = deps/wasm4
+	url = https://github.com/mantou132/wasm4.git
