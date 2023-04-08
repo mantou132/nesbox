@@ -22,13 +22,13 @@ import { hash } from 'duoyun-ui/lib/encode';
 import { Time } from 'duoyun-ui/lib/time';
 import { getStringFromTemplate, once } from 'duoyun-ui/lib/utils';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
-import { preventDefault } from 'src/utils';
 import { routes } from 'src/routes';
 
+import { preventDefault } from 'src/utils/common';
 import { BcMsgEvent, BcMsgType, queryKeys } from 'src/constants';
 import { configure, getShortcut } from 'src/configure';
 import { friendStore, store } from 'src/store';
-import { i18n } from 'src/i18n';
+import { i18n } from 'src/i18n/basic';
 import { createInvite, updateRoomScreenshot } from 'src/services/api';
 import { closeListenerSet } from 'src/elements/titlebar';
 import { logger } from 'src/logger';

@@ -5,7 +5,7 @@ import { ContextMenu } from 'duoyun-ui/elements/menu';
 import { waitLoading } from 'duoyun-ui/elements/wait';
 import { focusStyle } from 'duoyun-ui/lib/styles';
 
-import { i18n, langNames } from 'src/i18n';
+import { i18n, langNames } from 'src/i18n/basic';
 import { ThemeName, themeNames, changeTheme, theme } from 'src/theme';
 import { configure, toggleScreencastMode } from 'src/configure';
 

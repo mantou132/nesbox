@@ -1,4 +1,4 @@
-import { i18n } from 'src/i18n';
+import { i18n } from 'src/i18n/basic';
 import zhCN from 'src/locales/templates/tour-message.json';
 import enURI from 'src/locales/en/tour-message.json?url';
 import jaURI from 'src/locales/ja/tour-message.json?url';

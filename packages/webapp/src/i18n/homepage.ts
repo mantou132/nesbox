@@ -1,4 +1,4 @@
-import { i18n } from 'src/i18n';
+import { i18n } from 'src/i18n/basic';
 import zhCN from 'src/locales/templates/homepage-message.json';
 import enURI from 'src/locales/en/homepage-message.json?url';
 import twURI from 'src/locales/zh-TW/homepage-message.json?url';

@@ -4,7 +4,7 @@ import { ValueOf } from 'duoyun-ui/lib/types';
 import { isMtApp } from 'mt-app';
 
 import { paramKeys } from 'src/constants';
-import { i18n } from 'src/i18n';
+import { i18n } from 'src/i18n/basic';
 
 // url data
 export const locationStore = GemRouteElement.createLocationStore();

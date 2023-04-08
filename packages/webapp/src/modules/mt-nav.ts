@@ -10,13 +10,13 @@ import {
   QueryString,
 } from '@mantou/gem';
 import { createPath } from 'duoyun-ui/elements/route';
-import { getAvatar, playHintSound } from 'src/utils';
 import { routes } from 'src/routes';
 
+import { getAvatar, playHintSound } from 'src/utils/common';
 import { globalEvents, queryKeys } from 'src/constants';
 import { configure } from 'src/configure';
 import { theme } from 'src/theme';
-import { i18n } from 'src/i18n';
+import { i18n } from 'src/i18n/basic';
 import { GamepadBtnIndex } from 'src/gamepad';
 
 import type { DuoyunActiveLinkElement } from 'duoyun-ui/elements/link';

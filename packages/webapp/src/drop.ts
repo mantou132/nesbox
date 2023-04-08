@@ -1,8 +1,8 @@
 import { history } from '@mantou/gem';
 import { createPath } from 'duoyun-ui/elements/route';
-import { isValidGameFile, matchRoute } from 'src/utils';
 import { routes } from 'src/routes';
 
+import { isValidGameFile, matchRoute } from 'src/utils/common';
 import { setNesFile } from 'src/configure';
 
 window.launchQueue?.setConsumer(async (launchParams: any) => {

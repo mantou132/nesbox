@@ -3,7 +3,7 @@ import { isMac } from 'duoyun-ui/lib/hotkeys';
 
 import { configure, Settings } from 'src/configure';
 import { updateAccount } from 'src/services/api';
-import { i18n } from 'src/i18n';
+import { i18n } from 'src/i18n/basic';
 
 import 'duoyun-ui/elements/shortcut-record';
 import 'duoyun-ui/elements/heading';

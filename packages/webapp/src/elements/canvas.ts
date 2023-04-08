@@ -12,8 +12,8 @@ import {
 } from '@mantou/gem';
 import { BaseDirectory } from '@tauri-apps/api/fs';
 import { Time } from 'duoyun-ui/lib/time';
-import { saveFile } from 'src/utils';
 
+import { saveFile } from 'src/utils/common';
 import { VideoFilter } from 'src/constants';
 import { logger } from 'src/logger';
 import normalVert from 'src/shaders/normal.vert?raw';

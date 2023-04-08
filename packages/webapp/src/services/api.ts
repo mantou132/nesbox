@@ -2,8 +2,8 @@ import { updateStore } from '@mantou/gem';
 import { Toast } from 'duoyun-ui/elements/toast';
 import { debounce } from 'duoyun-ui/lib/utils';
 import { isNotNullish } from 'duoyun-ui/lib/types';
-import { documentVisible, playHintSound, playSound } from 'src/utils';
 
+import { documentVisible, playHintSound, playSound } from 'src/utils/common';
 import { globalEvents, Signal, COMMAND, dispatchGlobalEvent } from 'src/constants';
 import {
   AcceptFriend,
@@ -98,7 +98,7 @@ import {
 import { store, friendStore } from 'src/store';
 import { request, subscribe } from 'src/services';
 import { configure, parseAccount, Settings } from 'src/configure';
-import { i18n, isCurrentLang } from 'src/i18n';
+import { i18n, isCurrentLang } from 'src/i18n/basic';
 import { logout } from 'src/auth';
 
 export const enterLobby = async () => {

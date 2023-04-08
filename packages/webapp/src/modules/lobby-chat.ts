@@ -12,7 +12,7 @@ import {
 import { polling } from 'duoyun-ui/lib/utils';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 
-import { i18n } from 'src/i18n';
+import { i18n } from 'src/i18n/basic';
 import { enterLobby, leaveLobby, sendLobbyMsg } from 'src/services/api';
 import { store } from 'src/store';
 import { icons } from 'src/icons';

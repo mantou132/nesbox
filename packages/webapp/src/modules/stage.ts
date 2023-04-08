@@ -13,23 +13,12 @@ import {
 import JSZip from 'jszip';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { waitLoading } from 'duoyun-ui/elements/wait';
-import { default as initNes, Nes, Button, Player } from '@mantou/nes';
+import { Nes, Button, Player } from '@mantou/nes';
 import { Toast } from 'duoyun-ui/elements/toast';
 import { isNotNullish } from 'duoyun-ui/lib/types';
 import { clamp } from 'duoyun-ui/lib/number';
 import { isMtApp } from 'mt-app';
-import { getCDNSrc, isValidGameFile, playHintSound, positionMapping, requestFrame } from 'src/utils';
 
-import {
-  CustomGamepadButton,
-  globalEvents,
-  gameStateType,
-  RTCTransportType,
-  VideoFilter,
-  VideoRenderMethod,
-} from 'src/constants';
-import { logger } from 'src/logger';
-import { Cheat, configure } from 'src/configure';
 import {
   ChannelMessage,
   ChannelMessageType,
@@ -39,11 +28,24 @@ import {
   Role,
   RoleAnswer,
   RoleOffer,
-  RTC,
   TextMsg,
-} from 'src/rtc';
+} from 'src/netplay/common';
+import { RTCHost } from 'src/netplay/host';
+import { RTCClient } from 'src/netplay/client';
+import { getCDNSrc, isValidGameFile, playHintSound } from 'src/utils/common';
+import {
+  CustomGamepadButton,
+  globalEvents,
+  gameStateType,
+  RTCTransportType,
+  VideoFilter,
+  VideoRenderMethod,
+} from 'src/constants';
+import { logger } from 'src/logger';
+import { configure } from 'src/configure';
 import { store } from 'src/store';
-import { i18n } from 'src/i18n';
+import { i18n } from 'src/i18n/basic';
+import { createGame, mapPointerButton, parseCheatCode, positionMapping, requestFrame } from 'src/utils/game';
 
 import type { MRoomChatElement } from 'src/modules/room-chat';
 import type { NesboxCanvasElement } from 'src/elements/canvas';
@@ -87,7 +89,7 @@ const style = createCSSSheet(css`
 type State = {
   messages: TextMsg[];
   roles: Partial<Record<Player, Role>>;
-  cheats: Exclude<ReturnType<typeof MStageElement.parseCheatCode>, undefined>[];
+  cheats: Exclude<ReturnType<typeof parseCheatCode>, undefined>[];
   cheatKeyHandles: Record<string, (evt: KeyboardEvent) => void>;
   canvasWidth: number;
   canvasHeight: number;
@@ -113,81 +115,6 @@ export class MStageElement extends GemElement<State> {
     cheatKeyHandles: {},
     canvasWidth: 0,
     canvasHeight: 0,
-  };
-
-  static createGame = async (filename: string, romBuffer: ArrayBuffer, sampleRate: number) => {
-    // if (process.env.NODE_ENV === 'development') {
-    //   // test wasm4
-    //   const { Nes } = await import('@mantou/nes-wasm4');
-    //   const game = Nes.new(sampleRate);
-    //   await game.load_rom(new Uint8Array(await (await fetch('http://localhost:8000/index.wasm4.wasm')).arrayBuffer()));
-    //   return game;
-    //   // test wasm
-    //   // await initNes(
-    //   //   new Response(await (await fetch('http://localhost:8000/index_bg.wasm')).arrayBuffer(), {
-    //   //     headers: { 'content-type': 'application/wasm' },
-    //   //   }),
-    //   // );
-    //   // return Nes.new(sampleRate);
-    // }
-    const fragments = filename.toLowerCase().split('.');
-
-    switch (fragments.pop()) {
-      case 'wasm': {
-        if (fragments.pop() === 'wasm4') {
-          const { Nes } = await import('@mantou/nes-wasm4');
-          const game = Nes.new(sampleRate);
-          await game.load_rom(new Uint8Array(romBuffer));
-          return game;
-        } else {
-          await initNes(new Response(romBuffer, { headers: { 'content-type': 'application/wasm' } }));
-          const game = Nes.new(sampleRate);
-          logger.info(`WASM memory ${game.mem().buffer.byteLength / 1024}KB`);
-          return game;
-        }
-      }
-      case 'js': {
-        const { Nes } = await import('@mantou/nes-sandbox');
-        const game = Nes.new(sampleRate);
-        await game.load_rom(new Uint8Array(romBuffer));
-        return game;
-      }
-      default: {
-        await initNes();
-        const game = Nes.new(sampleRate);
-        game.load_rom(new Uint8Array(romBuffer));
-        return game;
-      }
-    }
-  };
-
-  static mapPointerButton(event: PointerEvent) {
-    switch (event.button) {
-      case 0:
-        return Button.PointerPrimary;
-      case 2:
-        return Button.PointerSecondary;
-      default:
-        return;
-    }
-  }
-
-  static parseCheatCode = (cheat: Cheat) => {
-    const result = cheat.code.match(/^(?<addr>[0-9A-F]{4})-(?<type>[0-3])(?<len>[1-4])-(?<val>([0-9A-F]{2})+)$/);
-    if (!result) return;
-    const { addr, type, len, val } = result.groups!;
-    if (val.length !== 2 * Number(len)) return;
-    return {
-      cheat,
-      enabled: cheat.enabled,
-      addr: parseInt(addr, 16),
-      type: Number(type) as 0 | 1 | 2 | 3,
-      len: Number(len),
-      val: val
-        .split(/(\w{2}\b)/)
-        .filter((e) => !!e)
-        .map((e) => parseInt(e, 16)),
-    };
   };
 
   get #settings() {
@@ -218,7 +145,7 @@ export class MStageElement extends GemElement<State> {
   #audioContext?: AudioContext;
   #audioStreamDestination?: MediaStreamAudioDestinationNode;
   #gainNode?: GainNode;
-  #rtc?: RTC;
+  #rtc?: RTCHost | RTCClient;
 
   #enableAudio = () => {
     // 在主机和客户机中都作为一个“允许播放”的状态开关
@@ -335,7 +262,7 @@ export class MStageElement extends GemElement<State> {
       const file = Object.values(folder.files).find((e) => isValidGameFile(e.name))!;
       const romBuffer = await file.async('arraybuffer');
 
-      const game: Nes = await MStageElement.createGame(file.name, romBuffer, this.#sampleRate);
+      const game: Nes = await createGame(file.name, romBuffer, this.#sampleRate);
 
       this.setState({ canvasWidth: game.width(), canvasHeight: game.height() });
       this.#game = game;
@@ -397,7 +324,7 @@ export class MStageElement extends GemElement<State> {
   };
 
   #initRtc = () => {
-    this.#rtc = new RTC();
+    this.#rtc = this.#isHost ? new RTCHost() : new RTCClient();
     this.#rtc.addEventListener('message', this.#onMessage);
 
     this.#rtc.start({
@@ -434,7 +361,7 @@ export class MStageElement extends GemElement<State> {
       [keybinding.TurboB_2]: Button.JoypadTurboB,
     };
     if (event instanceof PointerEvent) {
-      const btn = MStageElement.mapPointerButton(event);
+      const btn = mapPointerButton(event);
       return btn && { player: Player.One, btn };
     }
     const key = event.key.toLowerCase();
@@ -558,9 +485,7 @@ export class MStageElement extends GemElement<State> {
         const gameId = this.#playing?.gameId;
         const cheatSettings = this.#settings?.cheat;
         if (gameId && cheatSettings) {
-          const cheats = (cheatSettings[gameId] || [])
-            .map((cheat) => MStageElement.parseCheatCode(cheat))
-            .filter(isNotNullish);
+          const cheats = (cheatSettings[gameId] || []).map((cheat) => parseCheatCode(cheat)).filter(isNotNullish);
 
           this.setState({
             cheats,

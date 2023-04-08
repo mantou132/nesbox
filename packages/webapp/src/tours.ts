@@ -1,8 +1,8 @@
 import { setTours, Tour } from 'duoyun-ui/elements/coach-mark';
-import { getCDNSrc } from 'src/utils';
 
+import { getCDNSrc } from 'src/utils/common';
 import { globalEvents } from 'src/constants';
-import { tourI18n } from 'src/tour-i18n';
+import { tourI18n } from 'src/i18n/tour';
 import { configure, toggleSettingsState } from 'src/configure';
 import { updateAccount } from 'src/services/api';
 

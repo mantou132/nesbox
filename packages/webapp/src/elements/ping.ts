@@ -1,7 +1,7 @@
 import { GemElement, html, adoptedStyle, customElement, connectStore } from '@mantou/gem';
 
 import { fpsStyle } from 'src/elements/fps';
-import { pingStore } from 'src/rtc';
+import { pingStore } from 'src/netplay/client';
 
 /**
  * @customElement nesbox-ping

@@ -3,14 +3,10 @@ import { matchPath, RouteItem } from 'duoyun-ui/elements/route';
 import { Time } from 'duoyun-ui/lib/time';
 import { ValueOf } from 'duoyun-ui/lib/types';
 import { isMtApp, mtApp } from 'mt-app';
-import { debounce } from 'duoyun-ui/lib/utils';
-import { clamp } from 'duoyun-ui/lib/number';
 
-import { githubIssue, queryKeys, VideoRefreshRate } from 'src/constants';
+import { githubIssue, queryKeys } from 'src/constants';
 import { configure } from 'src/configure';
 import { logger } from 'src/logger';
-
-import type { NesboxCanvasElement } from 'src/elements/canvas';
 
 export const setViewTransitionName = (ele: HTMLElement | null, name: string) => {
   if (ele instanceof HTMLElement) {
@@ -131,48 +127,6 @@ export const preventDefault = (fn: () => void) => {
   };
 };
 
-export function requestFrame(render: () => void, generator = VideoRefreshRate.AUTO) {
-  const duration = 1000 / 60;
-  const firstFramesTime: number[] = [];
-  const statsLength = 30;
-  let frameGenerator = generator === VideoRefreshRate.FIXED ? (window as Window).setTimeout : requestAnimationFrame;
-  let timer = 0;
-  let nextFrameIdealTime = performance.now();
-  const nextFrame = () => {
-    const now = performance.now();
-
-    if (firstFramesTime.length >= statsLength) {
-      if (generator === VideoRefreshRate.AUTO) {
-        const avgTime = (firstFramesTime[statsLength - 1] - firstFramesTime[statsLength - 10]) / 10;
-        const refreshDeviation = 2;
-        if (avgTime < duration - refreshDeviation) {
-          generator = VideoRefreshRate.FIXED;
-          frameGenerator = (window as Window).setTimeout;
-        } else {
-          generator = VideoRefreshRate.SYNC;
-        }
-      }
-    } else {
-      firstFramesTime.push(now);
-    }
-
-    nextFrameIdealTime += duration;
-    // avoid negative delay
-    if (nextFrameIdealTime < now) nextFrameIdealTime = now;
-    const nextFrameDelay = nextFrameIdealTime - now;
-    render();
-    timer = frameGenerator(nextFrame, nextFrameDelay);
-  };
-  nextFrame();
-  return () => {
-    if (frameGenerator === requestAnimationFrame) {
-      cancelAnimationFrame(timer);
-    } else {
-      clearTimeout(timer);
-    }
-  };
-}
-
 export const fontLoading = (font: FontFace) => {
   if (document.fonts.has(font)) return;
   font
@@ -181,31 +135,4 @@ export const fontLoading = (font: FontFace) => {
     .catch(() => {
       //
     });
-};
-
-const getRectCache = new WeakMap<HTMLElement, () => DOMRect>();
-export const positionMapping = (event: PointerEvent, canvas: NesboxCanvasElement) => {
-  if (!getRectCache.has(canvas)) {
-    const fn = debounce(() => canvas.canvasRef.element!.getBoundingClientRect());
-    getRectCache.set(canvas, fn);
-  }
-  const stage = getRectCache.get(canvas)!();
-  const aspectRadio = canvas.width / canvas.height;
-  const width = aspectRadio > stage.width / stage.height ? stage.width : aspectRadio * stage.height;
-  const halfWidth = width / 2;
-  const height = width / aspectRadio;
-  const halfHeight = height / 2;
-
-  const centerX = stage.x + stage.width / 2;
-  const centerY = stage.y + stage.height / 2;
-
-  const result = [
-    clamp(0, event.x - centerX + halfWidth, width),
-    clamp(0, event.y - centerY + halfHeight, height),
-    event.movementX,
-    event.movementY,
-  ];
-
-  const scale = width / canvas.width;
-  return result.map((e) => e / scale);
 };

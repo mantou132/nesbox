@@ -20,7 +20,7 @@ import { locationStore, routes } from 'src/routes';
 
 import { paramKeys, queryKeys } from 'src/constants';
 import { getAccount, getFriends, getGames, subscribeEvent } from 'src/services/api';
-import { i18n } from 'src/i18n';
+import { i18n } from 'src/i18n/basic';
 import { configure } from 'src/configure';
 
 import 'src/modules/mt-nav';

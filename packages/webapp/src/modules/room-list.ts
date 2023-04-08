@@ -4,7 +4,7 @@ import { Toast } from 'duoyun-ui/elements/toast';
 import { store } from 'src/store';
 import { enterPubRoom } from 'src/services/api';
 import { theme } from 'src/theme';
-import { i18n } from 'src/i18n';
+import { i18n } from 'src/i18n/basic';
 
 import 'src/modules/room-item';
 

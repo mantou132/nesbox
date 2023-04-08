@@ -13,7 +13,7 @@ import { Time } from 'duoyun-ui/lib/time';
 import { Comment } from 'src/store';
 import { theme } from 'src/theme';
 import { configure } from 'src/configure';
-import { i18n } from 'src/i18n';
+import { i18n } from 'src/i18n/basic';
 
 import 'duoyun-ui/elements/help-text';
 

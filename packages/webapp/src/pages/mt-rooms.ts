@@ -10,12 +10,12 @@ import {
   updateStore,
 } from '@mantou/gem';
 import { polling } from 'duoyun-ui/lib/utils';
-import { getCDNSrc } from 'src/utils';
 
+import { getCDNSrc } from 'src/utils/common';
 import { store } from 'src/store';
 import { theme } from 'src/theme';
 import { enterPubRoom, getRooms } from 'src/services/api';
-import { i18n } from 'src/i18n';
+import { i18n } from 'src/i18n/basic';
 
 import 'duoyun-ui/elements/empty';
 import 'duoyun-ui/elements/heading';

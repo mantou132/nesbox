@@ -12,9 +12,9 @@ import {
 } from '@mantou/gem';
 import { createPath, matchPath } from 'duoyun-ui/elements/route';
 import { waitLoading } from 'duoyun-ui/elements/wait';
-import { playHintSound } from 'src/utils';
 import { routes } from 'src/routes';
 
+import { playHintSound } from 'src/utils/common';
 import { globalEvents, queryKeys } from 'src/constants';
 import { GamepadBtnIndex } from 'src/gamepad';
 import { store } from 'src/store';

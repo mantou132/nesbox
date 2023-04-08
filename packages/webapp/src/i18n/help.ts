@@ -1,4 +1,4 @@
-import { i18n } from 'src/i18n';
+import { i18n } from 'src/i18n/basic';
 import zhCN from 'src/locales/templates/help-message.json';
 import enURI from 'src/locales/en/help-message.json?url';
 import jaURI from 'src/locales/ja/help-message.json?url';

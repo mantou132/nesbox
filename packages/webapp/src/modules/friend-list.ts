@@ -3,7 +3,7 @@ import { Modal } from 'duoyun-ui/elements/modal';
 
 import { icons } from 'src/icons';
 import { friendStore } from 'src/store';
-import { i18n } from 'src/i18n';
+import { i18n } from 'src/i18n/basic';
 import { applyFriend } from 'src/services/api';
 import { theme } from 'src/theme';
 

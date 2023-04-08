@@ -1,15 +1,15 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, property } from '@mantou/gem';
 import { ContextMenu } from 'duoyun-ui/elements/menu';
 import { commonHandle } from 'duoyun-ui/lib/hotkeys';
-import { getAvatar } from 'src/utils';
 
+import { getAvatar } from 'src/utils/common';
 import { Friend, store, toggleFriendChatState } from 'src/store';
 import { theme } from 'src/theme';
 import { ScUserStatus, ScFriendStatus } from 'src/generated/graphql';
 import { icons } from 'src/icons';
 import { acceptFriend, createInvite, deleteFriend } from 'src/services/api';
 import { configure, toggleFriendListState } from 'src/configure';
-import { i18n } from 'src/i18n';
+import { i18n } from 'src/i18n/basic';
 
 import 'duoyun-ui/elements/avatar';
 import 'duoyun-ui/elements/help-text';

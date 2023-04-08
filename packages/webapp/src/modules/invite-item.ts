@@ -5,7 +5,7 @@ import { theme } from 'src/theme';
 import { icons } from 'src/icons';
 import { acceptInvite } from 'src/services/api';
 import { toggleFriendListState } from 'src/configure';
-import { i18n } from 'src/i18n';
+import { i18n } from 'src/i18n/basic';
 import { ScUserStatus } from 'src/generated/graphql';
 
 const style = createCSSSheet(css`

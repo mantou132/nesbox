@@ -4,14 +4,14 @@ import { waitLoading } from 'duoyun-ui/elements/wait';
 import { commonHandle } from 'duoyun-ui/lib/hotkeys';
 import { Modal } from 'duoyun-ui/elements/modal';
 import { locale } from 'duoyun-ui/lib/locale';
-import { getAvatar } from 'src/utils';
 import { routes } from 'src/routes';
 
+import { getAvatar } from 'src/utils/common';
 import { githubIssue } from 'src/constants';
 import { configure, getShortcut, toggleScreencastMode, toggleSettingsState } from 'src/configure';
 import { logout } from 'src/auth';
 import { changeTheme, theme, ThemeName, themeNames } from 'src/theme';
-import { i18n, langNames } from 'src/i18n';
+import { i18n, langNames } from 'src/i18n/basic';
 import { icons } from 'src/icons';
 
 import type { MNewGameElement } from 'src/modules/new-game';

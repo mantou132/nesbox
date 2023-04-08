@@ -19,8 +19,8 @@ import { sleep } from 'duoyun-ui/lib/utils';
 import { Time } from 'duoyun-ui/lib/time';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
-import { SysMsg, TextMsg } from 'src/rtc';
-import { i18n } from 'src/i18n';
+import { SysMsg, TextMsg } from 'src/netplay/common';
+import { i18n } from 'src/i18n/basic';
 import { theme } from 'src/theme';
 import { configure, getShortcut } from 'src/configure';
 import { icons } from 'src/icons';

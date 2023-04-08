@@ -16,11 +16,10 @@ import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { clamp } from 'duoyun-ui/lib/number';
 import { Modal } from 'duoyun-ui/elements/modal';
 import { createPath, RouteItem } from 'duoyun-ui/elements/route';
-import { positionMapping, requestFrame } from 'src/utils';
 import { routes } from 'src/routes';
 
 import { configure, defaultKeybinding, setNesFile } from 'src/configure';
-import { MStageElement } from 'src/modules/stage';
+import { createGame, mapPointerButton, positionMapping, requestFrame } from 'src/utils/game';
 
 import type { NesboxCanvasElement } from 'src/elements/canvas';
 
@@ -107,7 +106,7 @@ export class PEmulatorElement extends GemElement<State> {
       [defaultKeybinding.B_2]: Button.JoypadB,
     };
     if (event instanceof PointerEvent) {
-      const btn = MStageElement.mapPointerButton(event);
+      const btn = mapPointerButton(event);
       return btn && { player: Player.One, btn };
     }
     const key = event.key.toLowerCase();
@@ -189,7 +188,7 @@ export class PEmulatorElement extends GemElement<State> {
   #loadRom = async () => {
     if (!configure.openNesFile) return;
 
-    this.#game = await MStageElement.createGame(
+    this.#game = await createGame(
       configure.openNesFile.name,
       await configure.openNesFile.arrayBuffer(),
       this.#sampleRate,

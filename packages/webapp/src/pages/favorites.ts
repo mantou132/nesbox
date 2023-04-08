@@ -2,7 +2,7 @@ import { html, adoptedStyle, customElement, createCSSSheet, css, connectStore, G
 
 import { store } from 'src/store';
 import { icons } from 'src/icons';
-import { i18n } from 'src/i18n';
+import { i18n } from 'src/i18n/basic';
 import { theme } from 'src/theme';
 
 import 'duoyun-ui/elements/carousel';

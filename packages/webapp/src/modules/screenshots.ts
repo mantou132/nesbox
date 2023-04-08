@@ -10,8 +10,8 @@ import {
   refobject,
   RefObject,
 } from '@mantou/gem';
-import { getCDNSrc } from 'src/utils';
 
+import { getCDNSrc } from 'src/utils/common';
 import { theme } from 'src/theme';
 
 import type { DuoyunCarouselElement } from 'duoyun-ui/elements/carousel';

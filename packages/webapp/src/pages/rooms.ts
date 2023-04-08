@@ -4,7 +4,7 @@ import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
 import { getRooms } from 'src/services/api';
 import { store } from 'src/store';
-import { i18n } from 'src/i18n';
+import { i18n } from 'src/i18n/basic';
 import { icons } from 'src/icons';
 import { theme } from 'src/theme';
 

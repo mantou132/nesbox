@@ -1,6 +1,6 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, property } from '@mantou/gem';
-import { getCDNSrc } from 'src/utils';
 
+import { getCDNSrc } from 'src/utils/common';
 import { Room, store } from 'src/store';
 import { theme } from 'src/theme';
 import { icons } from 'src/icons';

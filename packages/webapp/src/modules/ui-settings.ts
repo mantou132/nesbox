@@ -1,7 +1,7 @@
 import { GemElement, html, adoptedStyle, customElement, connectStore } from '@mantou/gem';
 import { waitLoading } from 'duoyun-ui/elements/wait';
 
-import { i18n, langNames } from 'src/i18n';
+import { i18n, langNames } from 'src/i18n/basic';
 import { gridStyle } from 'src/modules/shortcut-settings';
 import { changeTheme, ThemeName, themeNames } from 'src/theme';
 import { configure, Settings } from 'src/configure';

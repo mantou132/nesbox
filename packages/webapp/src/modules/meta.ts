@@ -1,7 +1,7 @@
 import { GemElement, html, adoptedStyle, createCSSSheet, css, customElement, connectStore } from '@mantou/gem';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
-import { i18n } from 'src/i18n';
+import { i18n } from 'src/i18n/basic';
 import { themeStore } from 'src/theme';
 
 import 'duoyun-ui/elements/title';

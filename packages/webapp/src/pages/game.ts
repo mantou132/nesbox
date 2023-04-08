@@ -13,15 +13,15 @@ import { Modal } from 'duoyun-ui/elements/modal';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { waitLoading } from 'duoyun-ui/elements/wait';
 import { formatDuration, Time } from 'duoyun-ui/lib/time';
-import { getCDNSrc, getGithubGames } from 'src/utils';
 
+import { getCDNSrc, getGithubGames } from 'src/utils/common';
 import { githubIssue, viewTransitionName } from 'src/constants';
 import { createComment, createRoom, getComments } from 'src/services/api';
 import { store } from 'src/store';
 import { icons } from 'src/icons';
 import { configure } from 'src/configure';
 import { theme } from 'src/theme';
-import { i18n } from 'src/i18n';
+import { i18n } from 'src/i18n/basic';
 
 import 'duoyun-ui/elements/button';
 import 'duoyun-ui/elements/input';

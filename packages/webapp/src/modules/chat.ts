@@ -16,7 +16,7 @@ import { createMessage, getMessages, readMessage } from 'src/services/api';
 import { icons } from 'src/icons';
 import { theme } from 'src/theme';
 import { ScUserStatus } from 'src/generated/graphql';
-import { i18n } from 'src/i18n';
+import { i18n } from 'src/i18n/basic';
 
 import 'duoyun-ui/elements/use';
 import 'duoyun-ui/elements/result';

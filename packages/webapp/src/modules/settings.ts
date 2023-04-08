@@ -1,7 +1,7 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, connectStore } from '@mantou/gem';
 
 import { theme } from 'src/theme';
-import { i18n } from 'src/i18n';
+import { i18n } from 'src/i18n/basic';
 
 import 'duoyun-ui/elements/tabs';
 import 'src/elements/license';

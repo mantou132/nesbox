@@ -1,6 +1,6 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, property } from '@mantou/gem';
-import { formatTime } from 'src/utils';
 
+import { formatTime } from 'src/utils/common';
 import { LobbyMessage } from 'src/store';
 import { theme } from 'src/theme';
 

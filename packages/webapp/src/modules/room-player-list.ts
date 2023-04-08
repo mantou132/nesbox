@@ -16,14 +16,14 @@ import { commonHandle } from 'duoyun-ui/lib/hotkeys';
 import { focusStyle } from 'duoyun-ui/lib/styles';
 import { ContextMenu } from 'duoyun-ui/elements/menu';
 import { isNotBoolean } from 'duoyun-ui/lib/types';
-import { getAvatar, getCDNSrc } from 'src/utils';
 import { Player } from '@mantou/nes';
 
+import { Role, RoleOffer } from 'src/netplay/common';
+import { getAvatar, getCDNSrc } from 'src/utils/common';
 import { theme } from 'src/theme';
 import { configure } from 'src/configure';
-import { Role, RoleOffer } from 'src/rtc';
 import { icons } from 'src/icons';
-import { i18n } from 'src/i18n';
+import { i18n } from 'src/i18n/basic';
 import { voiceStore } from 'src/modules/room-voice';
 import { applyFriend } from 'src/services/api';
 import { friendStore } from 'src/store';

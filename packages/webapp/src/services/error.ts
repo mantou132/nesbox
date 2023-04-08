@@ -1,4 +1,4 @@
-import { LocaleKey } from 'src/i18n';
+import { LocaleKey } from 'src/i18n/basic';
 
 export const errorCodeMap: Record<string, LocaleKey | undefined> = {
   0: 'code0',

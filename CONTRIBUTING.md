@@ -6,7 +6,8 @@
 
 - 优化 NESBox 的[翻译](https://github.com/mantou132/nesbox/tree/master/packages/webapp/src/locales)
 - 进行更好的 UI/UX 设计（[原型 1](https://www.figma.com/file/N6DxApZl41524ey9fVL6LF/NESBox?node-id=0%3A1)、[原型 2](https://www.figma.com/file/XSQ8Pc5s1SBpbyqDUFzdZe/NESBox-Flutter?node-id=0%3A1)）
-- 完善游戏的截图、介绍等信息（点击游戏详情页面中的编辑按钮）
+- 修正游戏的截图、介绍等信息（点击游戏详情页面中的编辑按钮）
+- 为 NESBox [添加游戏](./PUBLISH_GAME.md)
 
 ## 贡献代码
 
@@ -24,62 +25,63 @@
 
 ```
 packages
-├── config            共享配置
-├── flutter_app       NESBox 的 Android/iOS App
-├── mt-app            用于 NESBox 和 flutter_app 后端交互
-├── nes               游戏模拟器的 WASM 接口，实现这个接口的任何模拟器都能在 NESBox 上运行
-├── nes-pkg           从 `nes` 构建自动生成的 ES 模块
-├── server            NESBox GraphQL API
-│   ├── migrations    数据库 SQL
+├── config                    共享配置
+├── e2e                       端到端自动化测试
+├── ecs                       简单 JS ECS 框架
+├── flutter_app               Android/iOS App
+├── mt-app                    Android/iOS App 和 flutter_app 交互层
+├── nes                       游戏模拟器的 WASM 接口，实现这个接口的任何模拟器都能在 NESBox 上运行
+├── nes-pkg                   从 `nes` 构建自动生成的 ES 模块
+├── server                    NESBox GraphQL API
+│   ├── migrations            数据库 SQL
 │   └── src
-│       ├── auth.rs     用户认证
-│       ├── db          DB 连接和 Model 定义
-│       ├── error.rs    自定义错误
-│       ├── github.rs   通过 Github Issue 管理 NESBox 游戏
-│       ├── handles.rs  Actix-web 路由处理
+│       ├── auth.rs           用户认证
+│       ├── db                DB 连接和 Model 定义
+│       ├── error.rs          自定义错误
+│       ├── github.rs         通过 Github Issue 管理 NESBox 游戏
+│       ├── handles.rs        Actix-web 路由处理
 │       ├── main.rs
-│       ├── schemas     数据库 CURD
-│       └── voice       游戏语音服务
-├── tauriapp            NESBox 桌面端
+│       ├── schemas           数据库 CURD
+│       └── voice             游戏语音服务
+├── tauriapp                  NESBox 桌面端
 │   ├── src
-│   │   ├── handler.rs    用于 Web 端调用的接口，比如设置徽标
+│   │   ├── handler.rs        用于 Web 端调用的接口，比如设置徽标
 │   │   ├── main.rs
-│   │   ├── preload.rs    注入 js
-│   │   └── window_ext.rs 窗口自定义
+│   │   ├── preload.rs        注入 js
+│   │   └── window_ext.rs     窗口自定义
 │   └─ ...
-├── webapp                    Web 端、桌面端、Android/iOS 端都使用此包
+├── webapp                    Web, Desktop, Android/iOS 端都使用此包
 │   ├── src
+│   │   ├── elements          业务无关的自定义元素
+│   │   ├── generated         GraphQL 自动生成的代码
+│   │   ├── i18n              各模块的 i18n 定义
+│   │   ├── images            项目中用到的 SVG 图片
+│   │   ├── locales           各模块语言包
+│   │   ├── modules           业务相关的自定义元素
+│   │   ├── netplay           游戏连接 WebRTC 连接
+│   │   ├── pages             页面元素
+│   │   ├── services          GraphQL APIs
+│   │   ├── shaders           游戏画面滤镜
+│   │   ├── utils             共用的一些函数
 │   │   ├── app.ts            NESBox Web 端根元素
 │   │   ├── auth.ts
 │   │   ├── configure.ts
 │   │   ├── constants.ts
 │   │   ├── drop.ts           接收用户拖放的 `.nes` 文件
-│   │   ├── elements          和 NESBox 业务无关的自定义元素
+│   │   ├── enums.ts
 │   │   ├── gamepad.ts        手柄监听和模拟
-│   │   ├── generated         GraphQL 自动生成的代码
-│   │   ├── help-i18n.ts
-│   │   ├── homepage-i18n.ts
-│   │   ├── i18n.ts
-│   │   ├── icons.ts          NESBox Web 端使用的图标集，使用 Material Icons
-│   │   ├── images
+│   │   ├── icons.ts          使用的图标集，使用 Material Symbol
 │   │   ├── index.html
 │   │   ├── index.ts
-│   │   ├── locales           各模块语言包
 │   │   ├── logger.ts
-│   │   ├── modules           和 NESBox 数据相关的自定义元素
 │   │   ├── mt-app.ts         NESBox Android/iOS 端根元素
-│   │   ├── pages
 │   │   ├── routes.ts
-│   │   ├── rtc.ts            游戏连接 WebRTC 连接
-│   │   ├── services          GraphQL APIs
 │   │   ├── store.ts          用户的 NESBox 数据，会储存在 LocalStorage
 │   │   ├── theme.ts
-│   │   ├── tour-i18n.ts
-│   │   ├── tours.ts          新手游戏指引
-│   │   ├── types
-│   │   └── utils.ts
+│   │   └── tours.ts          新手游戏指引
 │   └─ ...
-└── zombie 网上爬取数据和下载图片用到的脚本
+├── toolbox                   自制 JS/Rust 游戏静态资源工具箱
+└── zombie                    网上爬取数据和下载图片用到的脚本
 ```
 
 ### 本地开发

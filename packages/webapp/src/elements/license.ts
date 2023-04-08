@@ -9,7 +9,8 @@ import {
   connectStore,
   updateStore,
 } from '@mantou/gem';
-import { getCorSrc } from 'src/utils';
+
+import { getCorSrc } from 'src/utils/common';
 
 import 'duoyun-ui/elements/loading';
 

@@ -9,8 +9,8 @@ import {
   state,
   boolattribute,
 } from '@mantou/gem';
-import { formatTime } from 'src/utils';
 
+import { formatTime } from 'src/utils/common';
 import { configure } from 'src/configure';
 import { Message } from 'src/store';
 import { theme } from 'src/theme';

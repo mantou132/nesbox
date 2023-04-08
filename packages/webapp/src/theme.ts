@@ -4,7 +4,7 @@ import { createTheme, getThemeStore, updateTheme } from '@mantou/gem/helper/them
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { isMtApp } from 'mt-app';
 
-import { i18n } from 'src/i18n';
+import { i18n } from 'src/i18n/basic';
 import { configure } from 'src/configure';
 
 export const themeNames = {

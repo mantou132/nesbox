@@ -4,7 +4,7 @@ import { RTCTransportType, VideoFilter, VideoRefreshRate, VideoRenderMethod } fr
 import { configure, Settings } from 'src/configure';
 import { gridStyle } from 'src/modules/shortcut-settings';
 import { updateAccount } from 'src/services/api';
-import { i18n } from 'src/i18n';
+import { i18n } from 'src/i18n/basic';
 import { icons } from 'src/icons';
 
 import 'duoyun-ui/elements/select';

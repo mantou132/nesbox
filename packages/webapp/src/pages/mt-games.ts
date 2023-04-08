@@ -12,16 +12,16 @@ import {
   repeat,
 } from '@mantou/gem';
 import { formatDuration, Time } from 'duoyun-ui/lib/time';
-import { getCDNSrc, playHintSound } from 'src/utils';
 import { locationStore } from 'src/routes';
 
+import { getCDNSrc, playHintSound } from 'src/utils/common';
 import { globalEvents, queryKeys } from 'src/constants';
 import { store } from 'src/store';
 import { theme } from 'src/theme';
 import { createRoom, getComments } from 'src/services/api';
 import { GamepadBtnIndex } from 'src/gamepad';
 import { updateMtApp } from 'src/mt-app';
-import { i18n } from 'src/i18n';
+import { i18n } from 'src/i18n/basic';
 import { icons } from 'src/icons';
 
 import 'duoyun-ui/elements/divider';

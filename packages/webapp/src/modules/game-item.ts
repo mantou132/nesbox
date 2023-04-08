@@ -11,14 +11,14 @@ import {
   connectStore,
 } from '@mantou/gem';
 import { createPath } from 'duoyun-ui/elements/route';
-import { getCDNSrc, setViewTransitionName } from 'src/utils';
 import { routes } from 'src/routes';
 
+import { getCDNSrc, setViewTransitionName } from 'src/utils/common';
 import { paramKeys, viewTransitionName } from 'src/constants';
 import { icons } from 'src/icons';
 import { Game } from 'src/store';
 import { createRoom, favoriteGame } from 'src/services/api';
-import { i18n } from 'src/i18n';
+import { i18n } from 'src/i18n/basic';
 import { theme } from 'src/theme';
 
 import 'duoyun-ui/elements/use';

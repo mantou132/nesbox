@@ -15,12 +15,12 @@ import { locale } from 'duoyun-ui/lib/locale';
 import { isIncludesString } from 'duoyun-ui/lib/utils';
 import { isNotNullish } from 'duoyun-ui/lib/types';
 import { getDisplayKey, hotkeys, isMac } from 'duoyun-ui/lib/hotkeys';
-import { getCDNSrc, getTempText, matchRoute } from 'src/utils';
 import { routes } from 'src/routes';
 
+import { getCDNSrc, getTempText, matchRoute } from 'src/utils/common';
 import { friendStore, store, toggleFriendChatState } from 'src/store';
 import { theme } from 'src/theme';
-import { i18n } from 'src/i18n';
+import { i18n } from 'src/i18n/basic';
 import { icons } from 'src/icons';
 import { configure, getShortcut, SearchCommand, setSearchCommand, toggleSearchState } from 'src/configure';
 import { createInvite, createRoom, enterPubRoom, updateRoom } from 'src/services/api';
@@ -301,7 +301,7 @@ export class MSearchElement extends GemElement<State> {
   };
 
   mounted = () => {
-    import('src/help-i18n').then(({ helpI18n }) => {
+    import('src/i18n/help').then(({ helpI18n }) => {
       const resources = helpI18n.resources[helpI18n.currentLanguage] || {};
       this.#helpMessages = Object.entries(resources).map(([, v]) => (v.message || v) as string);
     });

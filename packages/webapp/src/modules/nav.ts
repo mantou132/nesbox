@@ -6,7 +6,7 @@ import { focusStyle } from 'duoyun-ui/lib/styles';
 import { locationStore, routes } from 'src/routes';
 
 import { viewTransitionName } from 'src/constants';
-import { i18n } from 'src/i18n';
+import { i18n } from 'src/i18n/basic';
 import { configure, SearchCommand, setSearchCommand, toggleFriendListState, toggleSearchState } from 'src/configure';
 import { theme } from 'src/theme';
 import { favoriteGame, leaveRoom } from 'src/services/api';

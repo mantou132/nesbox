@@ -15,7 +15,7 @@ import { Toast } from 'duoyun-ui/elements/toast';
 
 import { configure } from 'src/configure';
 import { updateAccount, updatePassword } from 'src/services/api';
-import { i18n } from 'src/i18n';
+import { i18n } from 'src/i18n/basic';
 
 import type { DuoyunFormElement } from 'duoyun-ui/elements/form';
 

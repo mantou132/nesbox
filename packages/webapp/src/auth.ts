@@ -1,8 +1,8 @@
 import { history, QueryString } from '@mantou/gem';
 import { createPath } from 'duoyun-ui/elements/route';
-import { matchRoute } from 'src/utils';
 import { routes } from 'src/routes';
 
+import { matchRoute } from 'src/utils/common';
 import { queryKeys } from 'src/constants';
 import { deleteUser, Profile } from 'src/configure';
 

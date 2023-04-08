@@ -4,7 +4,7 @@ import { SubscriptionClient } from 'subscriptions-transport-ws';
 import { errorCodeMap, grapCommonErrorMap, graphqlErrorMap } from 'src/services/error';
 import { configure } from 'src/configure';
 import { logout, isExpiredProfile } from 'src/auth';
-import { i18n } from 'src/i18n';
+import { i18n } from 'src/i18n/basic';
 import { logger } from 'src/logger';
 
 const API_BASE = process.env.API_BASE || '/api';
