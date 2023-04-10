@@ -1,4 +1,4 @@
-import { debounce } from 'duoyun-ui/lib/utils';
+import { debounce, once } from 'duoyun-ui/lib/utils';
 import { clamp } from 'duoyun-ui/lib/number';
 import { default as initNes, Nes, Button } from '@mantou/nes';
 
@@ -88,24 +88,58 @@ export function mapPointerButton(event: PointerEvent) {
   }
 }
 
+const getDevRomFile = once(async function getDevRomFile() {
+  if (process.env.NODE_ENV === 'development') {
+    try {
+      const origin = 'http://localhost:8000';
+      const filenames = ['index_bg.wasm', 'index.js', 'index.wasm4.wasm', 'ffightub.arcade.zip', 'alienar.arcade.zip'];
+      const filename =
+        filenames[
+          (await Promise.all(filenames.map((filename) => fetch(`${origin}/${filename}`)))).findIndex((res) => res.ok)
+        ];
+      if (filename) {
+        return {
+          origin: origin,
+          filename,
+          romBuffer: await (await fetch(`${origin}/${filename}`)).arrayBuffer(),
+        };
+      }
+    } catch {
+      //
+    }
+  }
+});
+
+export async function watchDevRom(
+  callback?: (devRom: Exclude<Awaited<ReturnType<typeof getDevRomFile>>, undefined>) => void,
+) {
+  const devRom = await getDevRomFile();
+  if (devRom) {
+    callback?.(devRom);
+    new EventSource(`${devRom.origin}/esbuild`).addEventListener('change', () => location.reload());
+  }
+}
+
 export async function createGame(filename: string, romBuffer: ArrayBuffer, sampleRate: number) {
-  // if (process.env.NODE_ENV === 'development') {
-  //   // test wasm4
-  //   const { Nes } = await import('@mantou/nes-wasm4');
-  //   const game = Nes.new(sampleRate);
-  //   await game.load_rom(new Uint8Array(await (await fetch('http://localhost:8000/index.wasm4.wasm')).arrayBuffer()));
-  //   return game;
-  //   // test wasm
-  //   // await initNes(
-  //   //   new Response(await (await fetch('http://localhost:8000/index_bg.wasm')).arrayBuffer(), {
-  //   //     headers: { 'content-type': 'application/wasm' },
-  //   //   }),
-  //   // );
-  //   // return Nes.new(sampleRate);
-  // }
+  const devRom = await getDevRomFile();
+  if (devRom) {
+    filename = devRom.filename;
+    romBuffer = devRom.romBuffer;
+  }
+
   const fragments = filename.toLowerCase().split('.');
 
   switch (fragments.pop()) {
+    case 'zip': {
+      if (fragments.pop() === 'arcade') {
+        const { Nes } = await import('@mantou/arcade');
+        const game = Nes.new(sampleRate);
+        await game.load_rom(new Uint8Array(romBuffer), fragments.join('.'));
+        return game;
+      } else {
+        throw new Error('not support');
+      }
+    }
     case 'wasm': {
       if (fragments.pop() === 'wasm4') {
         const { Nes } = await import('@mantou/nes-wasm4');

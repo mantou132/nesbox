@@ -19,7 +19,7 @@ import { createPath, RouteItem } from 'duoyun-ui/elements/route';
 import { routes } from 'src/routes';
 
 import { configure, defaultKeybinding, setNesFile } from 'src/configure';
-import { createGame, mapPointerButton, positionMapping, requestFrame } from 'src/utils/game';
+import { createGame, mapPointerButton, positionMapping, requestFrame, watchDevRom } from 'src/utils/game';
 
 import type { NesboxCanvasElement } from 'src/elements/canvas';
 
@@ -242,23 +242,4 @@ export class PEmulatorElement extends GemElement<State> {
   };
 }
 
-if (process.env.NODE_ENV === 'development') {
-  (async function () {
-    try {
-      const gameOrigin = 'http://localhost:8000';
-      const filenames = ['index_bg.wasm', 'index.js', 'index.wasm4.wasm'];
-      const filename =
-        filenames[
-          (await Promise.all(filenames.map((filename) => fetch(`${gameOrigin}/${filename}`)))).findIndex(
-            (res) => res.ok,
-          )
-        ];
-      if (filename) {
-        setNesFile(new File([await (await fetch(`${gameOrigin}/${filename}`)).blob()], filename));
-        new EventSource(`${gameOrigin}/esbuild`).addEventListener('change', () => location.reload());
-      }
-    } catch {
-      //
-    }
-  })();
-}
+watchDevRom((rom) => setNesFile(new File([rom.romBuffer], rom.filename)));

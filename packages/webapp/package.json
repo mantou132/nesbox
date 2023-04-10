@@ -12,6 +12,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
+    "@mantou/arcade": "^0.0.1",
     "@mantou/gem": "^1.6.0",
     "@mantou/nes": "^1.0.12",
     "@mantou/nes-sandbox": "^0.0.11",

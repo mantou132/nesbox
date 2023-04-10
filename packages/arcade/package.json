@@ -1,0 +1,18 @@
+{
+  "name": "@mantou/arcade",
+  "version": "0.0.1",
+  "description": "",
+  "module": "src/index.ts",
+  "types": "src/index.ts",
+  "dependencies": {
+    "@mantou/fbneo": "^0.0.2"
+  },
+  "peerDependencies": {
+    "@mantou/nes": "^1.0.11",
+    "@mantou/nes-sandbox": "^0.0.11"
+  },
+  "devDependencies": {
+    "@nesbox/config": "^0.0.1",
+    "@types/emscripten": "^1.39.6"
+  }
+}

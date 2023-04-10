@@ -50,6 +50,8 @@ export class Nes implements ONes {
   #deQoiLen = 0;
   #deQoiSpace: number[] = [];
   #prevFrame = new Uint8ClampedArray();
+  #currentQoiFrameLen = 0;
+  #currentDeQoiLen = 0;
 
   mem(): Uint8Array {
     return this.#mem;
@@ -78,14 +80,12 @@ export class Nes implements ONes {
   frame_len(): number {
     return this.#frameLen;
   }
-  #currentQoiFrameLen = 0;
   qoi_frame(): number {
     return this.#qoiSpace[0];
   }
   qoi_frame_len(): number {
     return this.#currentQoiFrameLen;
   }
-  #currentDeQoiLen = 0;
   decode_qoi(bytes: Uint8Array): number {
     const frame = decodeQoiFrame(bytes.buffer).data;
     this.#currentDeQoiLen = frame.length;

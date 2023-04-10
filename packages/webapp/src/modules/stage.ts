@@ -45,7 +45,14 @@ import { logger } from 'src/logger';
 import { configure } from 'src/configure';
 import { store } from 'src/store';
 import { i18n } from 'src/i18n/basic';
-import { createGame, mapPointerButton, parseCheatCode, positionMapping, requestFrame } from 'src/utils/game';
+import {
+  createGame,
+  mapPointerButton,
+  parseCheatCode,
+  positionMapping,
+  requestFrame,
+  watchDevRom,
+} from 'src/utils/game';
 
 import type { MRoomChatElement } from 'src/modules/room-chat';
 import type { NesboxCanvasElement } from 'src/elements/canvas';
@@ -626,3 +633,5 @@ export type GameState = {
   buffer: ArrayBuffer;
   ptr?: string;
 };
+
+watchDevRom();
