@@ -6,7 +6,8 @@
     "lint": "lerna exec --ignore @nesbox/config --ignore @mantou/nes-wasm4 --ignore @mantou/nes -- tsc --noEmit && eslint . --ext .ts,.js",
     "release": "lerna version",
     "build:nes": "wasm-pack build --out-dir ../nes-pkg --target web --scope mantou packages/nes",
-    "publish:nes": "node scripts/nes-pkg.mjs",
+    "publish:nes": "./scripts/nes-pkg.mjs",
+    "publish:nes:test": "./scripts/nes-pkg.mjs --test",
     "prepare": "husky install"
   },
   "devDependencies": {

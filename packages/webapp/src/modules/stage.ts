@@ -53,6 +53,7 @@ import {
   requestFrame,
   watchDevRom,
 } from 'src/utils/game';
+import { ScGamePlatform } from 'src/generated/graphql';
 
 import type { MRoomChatElement } from 'src/modules/room-chat';
 import type { NesboxCanvasElement } from 'src/elements/canvas';
@@ -140,15 +141,19 @@ export class MStageElement extends GemElement<State> {
     return this.#userId === this.#playing?.host;
   }
 
+  get #game() {
+    return store.games[this.#playing?.gameId || 0];
+  }
+
   get #rom() {
-    return store.games[this.#playing?.gameId || 0]?.rom;
+    return this.#game?.rom;
   }
 
   get #isVisible() {
     return document.visibilityState === 'visible';
   }
 
-  #game?: Nes;
+  #gameInstance?: Nes;
   #audioContext?: AudioContext;
   #audioStreamDestination?: MediaStreamAudioDestinationNode;
   #gainNode?: GainNode;
@@ -157,7 +162,7 @@ export class MStageElement extends GemElement<State> {
   #enableAudio = () => {
     // 在主机和客户机中都作为一个“允许播放”的状态开关
     // 用在重新聚焦后作为判断依据
-    this.#game?.set_sound(true);
+    this.#gameInstance?.set_sound(true);
 
     if (this.#isHost) {
       this.#setVolume();
@@ -167,7 +172,7 @@ export class MStageElement extends GemElement<State> {
   };
 
   #resumeAudio = () => {
-    if (this.#game?.sound()) {
+    if (this.#gameInstance?.sound()) {
       this.#enableAudio();
     }
   };
@@ -199,27 +204,33 @@ export class MStageElement extends GemElement<State> {
   };
 
   #execCheat = () => {
-    if (!this.#game) return;
+    if (!this.#gameInstance) return;
+    const readVal = (addr: number, len: number) => {
+      return new Uint32Array(
+        new Uint8Array(
+          Array.from({ length: len === 3 ? 4 : len }, (v, i) => {
+            return this.#gameInstance!.read_ram(addr + i);
+          }),
+        ).buffer,
+      )[0];
+    };
     this.state.cheats.forEach((cheat) => {
-      const { enabled, addr, type, val } = cheat;
+      const { enabled, addr, type, bytes, val, len } = cheat;
       if (!enabled) return;
+      const write = () => bytes.forEach((byte, i) => this.#gameInstance!.write_ram(addr + i, byte));
       switch (type) {
         case 0:
-          val.forEach((v, i) => this.#game!.write_ram(addr + i, v));
+          write();
           break;
         case 1:
-          val.forEach((v, i) => this.#game!.write_ram(addr + i, v));
+          write();
           cheat.enabled = false;
           break;
         case 2:
-          if (this.#game!.read_ram(addr) > val[0]) {
-            this.#game!.write_ram(addr, val[0]);
-          }
+          if (readVal(addr, len) > val) write();
           break;
         case 3:
-          if (this.#game!.read_ram(addr) < val[0]) {
-            this.#game!.write_ram(addr, val[0]);
-          }
+          if (readVal(addr, len) < val) write();
           break;
       }
     });
@@ -229,26 +240,26 @@ export class MStageElement extends GemElement<State> {
   #bufferSize = this.#sampleRate / 60;
   #nextStartTime = 0;
   #loop = () => {
-    if (!this.#game || !this.#isVisible) return;
+    if (!this.#gameInstance || !this.#isVisible) return;
     this.#execCheat();
-    const frameNum = this.#game.clock_frame();
+    const frameNum = this.#gameInstance.clock_frame();
 
-    const memory = this.#game.mem();
+    const memory = this.#gameInstance.mem();
 
-    const framePtr = this.#game.frame(
+    const framePtr = this.#gameInstance.frame(
       !!this.#rtc?.needSendFrame(),
       this.#settings?.video.rtcImprove !== RTCTransportType.CLIP || frameNum % 180 === 0,
     );
-    const frameLen = this.#game.frame_len();
+    const frameLen = this.#gameInstance.frame_len();
     this.canvasRef.element!.paint(new Uint8Array(memory.buffer, framePtr, frameLen));
 
-    const qoiFramePtr = this.#game.qoi_frame();
-    const qoiFrameLen = this.#game.qoi_frame_len();
+    const qoiFramePtr = this.#gameInstance.qoi_frame();
+    const qoiFrameLen = this.#gameInstance.qoi_frame_len();
     this.#rtc?.sendFrame(new Uint8Array(memory.buffer, qoiFramePtr, qoiFrameLen), frameNum);
 
-    if (!this.#game.sound() || !this.#audioContext || !this.#audioStreamDestination || !this.#gainNode) return;
+    if (!this.#gameInstance.sound() || !this.#audioContext || !this.#audioStreamDestination || !this.#gainNode) return;
     const audioBuffer = this.#audioContext.createBuffer(1, this.#bufferSize, this.#sampleRate);
-    this.#game.audio_callback(audioBuffer.getChannelData(0));
+    this.#gameInstance.audio_callback(audioBuffer.getChannelData(0));
     const node = this.#audioContext.createBufferSource();
     node.connect(this.#gainNode);
     node.connect(this.#audioStreamDestination);
@@ -260,19 +271,26 @@ export class MStageElement extends GemElement<State> {
 
   hostRomBuffer?: ArrayBuffer;
   #loadRom = async () => {
-    this.#game = undefined;
+    this.#gameInstance = undefined;
     this.hostRomBuffer = undefined;
 
     try {
-      const zip = await (await fetch(getCDNSrc(this.#rom!))).arrayBuffer();
-      const folder = await JSZip.loadAsync(zip);
-      const file = Object.values(folder.files).find((e) => isValidGameFile(e.name))!;
-      const romBuffer = await file.async('arraybuffer');
+      const url = new URL(this.#rom!);
+      let romBuffer = await (await fetch(getCDNSrc(this.#rom!))).arrayBuffer();
+      let filename = url.pathname.split('/').pop()!;
 
-      const game: Nes = await createGame(file.name, romBuffer, this.#sampleRate);
+      // 街机模拟器依赖 zip 档文件名，所以不能修改文件名
+      if (!url.searchParams.has('arcade') && this.#game!.platform !== ScGamePlatform.Arcade) {
+        const folder = await JSZip.loadAsync(romBuffer);
+        const file = Object.values(folder.files).find((e) => isValidGameFile(e.name))!;
+        romBuffer = await file.async('arraybuffer');
+        filename = file.name;
+      }
+
+      const game: Nes = await createGame(filename, romBuffer, this.#sampleRate);
 
       this.setState({ canvasWidth: game.width(), canvasHeight: game.height() });
-      this.#game = game;
+      this.#gameInstance = game;
       if (this.#isHost) {
         this.hostRomBuffer = romBuffer;
       }
@@ -285,13 +303,13 @@ export class MStageElement extends GemElement<State> {
 
   #onMessage = ({ detail }: CustomEvent<ChannelMessage | ArrayBuffer>) => {
     if (detail instanceof ArrayBuffer) {
-      if (this.#game) {
-        const memory = this.#game.mem();
+      if (this.#gameInstance) {
+        const memory = this.#gameInstance.mem();
         const qoiBuffer = new Uint8Array(detail);
         if (qoiBuffer.length <= 4) return;
         const part = new Uint8Array(detail, qoiBuffer.length - 4, 4);
-        const framePtr = this.#game.decode_qoi(qoiBuffer);
-        const frameLen = this.#game.decode_qoi_len();
+        const framePtr = this.#gameInstance.decode_qoi(qoiBuffer);
+        const frameLen = this.#gameInstance.decode_qoi_len();
         const frame = new Uint8Array(memory.buffer, framePtr, frameLen);
         this.canvasRef.element!.paint(frame, [...part]);
       }
@@ -316,16 +334,16 @@ export class MStageElement extends GemElement<State> {
         break;
       // host
       case ChannelMessageType.KEYDOWN:
-        this.#game?.handle_button_event((detail as KeyDownMsg).player, (detail as KeyDownMsg).button, true);
+        this.#gameInstance?.handle_button_event((detail as KeyDownMsg).player, (detail as KeyDownMsg).button, true);
         break;
       // host
       case ChannelMessageType.KEYUP:
-        this.#game?.handle_button_event((detail as KeyDownMsg).player, (detail as KeyUpMsg).button, false);
+        this.#gameInstance?.handle_button_event((detail as KeyDownMsg).player, (detail as KeyUpMsg).button, false);
         break;
       // host
       case ChannelMessageType.POINTER_MOVE:
         const { player, x, y, dx, dy } = detail as PointerMoveMsg;
-        this.#game?.handle_motion_event(player, x, y, dx, dy);
+        this.#gameInstance?.handle_motion_event(player, x, y, dx, dy);
         break;
     }
   };
@@ -381,10 +399,10 @@ export class MStageElement extends GemElement<State> {
   };
 
   #onPointerMove = (event: PointerEvent) => {
-    if (!this.#game) return;
+    if (!this.#gameInstance) return;
     const [x, y, dx, dy] = positionMapping(event, this.canvasRef.element!);
     if (this.#isHost) {
-      this.#game.handle_motion_event(Player.One, x, y, dx, dy);
+      this.#gameInstance.handle_motion_event(Player.One, x, y, dx, dy);
     } else {
       this.#rtc?.send(new PointerMoveMsg(x, y, dx, dy));
     }
@@ -392,12 +410,12 @@ export class MStageElement extends GemElement<State> {
 
   #pressButton = (player: Player, button: Button) => {
     if (button === Button.Reset) {
-      this.#game?.reset();
+      this.#gameInstance?.reset();
     } else {
       this.#enableAudio();
     }
     if (this.#isHost) {
-      this.#game?.handle_button_event(player, button, true);
+      this.#gameInstance?.handle_button_event(player, button, true);
     } else {
       this.#rtc?.send(new KeyDownMsg(button));
     }
@@ -442,7 +460,7 @@ export class MStageElement extends GemElement<State> {
 
   #releaseButton = (player: Player, button: Button) => {
     if (this.#isHost) {
-      this.#game?.handle_button_event(player, button, false);
+      this.#gameInstance?.handle_button_event(player, button, false);
     } else {
       this.#rtc?.send(new KeyUpMsg(button));
     }
@@ -586,16 +604,16 @@ export class MStageElement extends GemElement<State> {
   };
 
   getState = (): GameState | undefined => {
-    if (!this.#game) return;
-    const state = this.#game.state();
+    if (!this.#gameInstance) return;
+    const state = this.#gameInstance.state();
     if (state.length === 0) {
-      const buffer = this.#game.mem().buffer;
+      const buffer = this.#gameInstance.mem().buffer;
       logger.warn(`Saved wasm memory: ${buffer.byteLength / 1024}KB`);
       return {
         type: gameStateType.WASM,
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        ptr: String(this.#game.ptr),
+        ptr: String(this.#gameInstance.ptr),
         buffer,
       };
     } else {
@@ -607,24 +625,33 @@ export class MStageElement extends GemElement<State> {
   };
 
   loadState = ({ buffer, type, ptr }: GameState) => {
-    if (!this.#game) return;
+    if (!this.#gameInstance) return;
     const stateArray = new Uint8Array(buffer);
     if (type === gameStateType.WASM) {
-      const mem: WebAssembly.Memory = this.#game.mem();
+      const mem: WebAssembly.Memory = this.#gameInstance.mem();
       if (stateArray.length > mem.buffer.byteLength) {
         mem.grow((stateArray.length - mem.buffer.byteLength) / (64 * 1024));
       }
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      this.#game.ptr = Number(ptr);
+      this.#gameInstance.ptr = Number(ptr);
       new Uint8Array(mem.buffer).set(stateArray);
     } else {
-      this.#game.load_state(stateArray);
+      this.#gameInstance.load_state(stateArray);
     }
   };
 
   getRam = () => {
-    return this.#game?.ram();
+    if (!this.#gameInstance) return;
+    // 兼容没有 ram_map 方法的 wasm 游戏
+    try {
+      return {
+        bytes: this.#gameInstance.ram(),
+        map: this.#gameInstance.ram_map(),
+      };
+    } catch {
+      logger.warn('Read ram error');
+    }
   };
 }
 

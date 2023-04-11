@@ -1,6 +1,6 @@
 [package]
 name = "nesbox_utils"
-version = "0.0.2"
+version = "0.0.3"
 authors = ["mantou132"]
 edition = "2021"
 license = "MIT"
@@ -15,4 +15,4 @@ bevy = { version = "0.10", default-features = false }
 bincode = "1.3.3"
 rand = "0.8"
 wasm-bindgen = "0.2.63"
-nesbox_utils_macro = { path = "../utils_macro", version = "0.0.2" }
+nesbox_utils_macro = { path = "../utils_macro", version = "0.0.3" }

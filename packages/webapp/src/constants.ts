@@ -99,10 +99,15 @@ export enum BcMsgType {
   RAM_RES = 'ram-res',
 }
 
+export type Ram = {
+  map: Uint32Array;
+  bytes: Uint8Array;
+};
+
 export type BcMsgEvent = {
   id: string;
   type: BcMsgType;
-  data?: Uint8Array;
+  data?: Ram;
 };
 
 export const queryKeys = {

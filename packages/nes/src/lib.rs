@@ -158,8 +158,13 @@ impl Nes {
         }
     }
 
-    pub fn ram(&mut self) -> Vec<u8> {
+    // format: [fragment1_start, =fragment1_end, fragment2_start, =fragment2_end, ...]
+    pub fn ram_map(&mut self) -> Vec<u32> {
         // 2k(0u16..=0x07FF) ram + 8K(0x6000u16..=0x7FFF) sram
+        vec![0, 0x07FF, 0x6000, 0x7FFF]
+    }
+
+    pub fn ram(&mut self) -> Vec<u8> {
         let wram = self.control_deck.wram();
         let sram = self.control_deck.sram();
         log!("wram: {}, sram: {}", wram.len(), sram.len());

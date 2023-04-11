@@ -162,6 +162,10 @@ pub fn nesbox_bevy(_: TokenStream, item: TokenStream) -> TokenStream {
                 //
             }
 
+            pub fn ram_map(&mut self) -> Vec<u32> {
+                Vec::new()
+            }
+
             pub fn ram(&mut self) -> Vec<u8> {
                 Vec::new()
             }

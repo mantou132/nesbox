@@ -8,8 +8,8 @@
     "@mantou/fbneo": "^0.0.2"
   },
   "peerDependencies": {
-    "@mantou/nes": "^1.0.11",
-    "@mantou/nes-sandbox": "^0.0.11"
+    "@mantou/nes": "^1.0.13",
+    "@mantou/nes-sandbox": "^0.0.12"
   },
   "devDependencies": {
     "@nesbox/config": "^0.0.1",

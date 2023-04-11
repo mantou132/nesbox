@@ -13,19 +13,6 @@ export const INP_B4 = 1 << 9;
 export const INP_B5 = 1 << 10;
 export const INP_B6 = 1 << 11;
 
-export const K_INP_LEFT = 0x8000 | INP_LEFT;
-export const K_INP_RIGHT = 0x8000 | INP_RIGHT;
-export const K_INP_UP = 0x8000 | INP_UP;
-export const K_INP_DOWN = 0x8000 | INP_DOWN;
-export const K_INP_SELECT = 0x8000 | INP_SELECT;
-export const K_INP_START = 0x8000 | INP_START;
-export const K_INP_B1 = 0x8000 | INP_B1;
-export const K_INP_B2 = 0x8000 | INP_B2;
-export const K_INP_B3 = 0x8000 | INP_B3;
-export const K_INP_B4 = 0x8000 | INP_B4;
-export const K_INP_B5 = 0x8000 | INP_B5;
-export const K_INP_B6 = 0x8000 | INP_B6;
-
 function getButtonBitFlag(button: Button) {
   switch (button) {
     case Button.JoypadA:
@@ -67,20 +54,25 @@ function getPlayerIdx(player: Player) {
 }
 
 export class Controller {
-  index = 0;
-  state = 0;
-  alx = 0;
-  aly = 0;
-  arx = 0;
-  ary = 0;
+  #index = 0;
+  #state = 0;
+  #alx = 0;
+  #aly = 0;
+  #arx = 0;
+  #ary = 0;
 
   constructor(index: number) {
-    this.index = index;
+    this.#index = index;
   }
 
   handleEvent(button: Button, pressed: boolean) {
     const btn = getButtonBitFlag(button);
-    this.state = pressed ? this.state | btn : this.state & ~btn;
+    this.#state = pressed ? this.#state | btn : this.#state & ~btn;
+  }
+
+  getArgs() {
+    // https://github.com/mantou132/FBNeo/blob/nesbox/src/intf/input/sdl/inp_sdl2.cpp#L49
+    return [this.#index, this.#state, this.#alx, this.#aly, this.#arx, this.#ary] as const;
   }
 }
 

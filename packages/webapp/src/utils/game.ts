@@ -92,7 +92,7 @@ const getDevRomFile = once(async function getDevRomFile() {
   if (process.env.NODE_ENV === 'development') {
     try {
       const origin = 'http://localhost:8000';
-      const filenames = ['index_bg.wasm', 'index.js', 'index.wasm4.wasm', 'ffightub.arcade.zip', 'alienar.arcade.zip'];
+      const filenames = ['index_bg.wasm', 'index.js', 'index.wasm4.wasm', 'ffightub.zip', 'alienar.zip'];
       const filename =
         filenames[
           (await Promise.all(filenames.map((filename) => fetch(`${origin}/${filename}`)))).findIndex((res) => res.ok)
@@ -131,19 +131,15 @@ export async function createGame(filename: string, romBuffer: ArrayBuffer, sampl
 
   switch (fragments.pop()) {
     case 'zip': {
-      if (fragments.pop() === 'arcade') {
-        const { Nes } = await import('@mantou/arcade');
-        const game = Nes.new(sampleRate);
-        await game.load_rom(new Uint8Array(romBuffer), fragments.join('.'));
-        return game;
-      } else {
-        throw new Error('not support');
-      }
+      const { Arcade } = await import('@mantou/arcade');
+      const game = Arcade.new(sampleRate);
+      await game.load_rom(new Uint8Array(romBuffer), fragments.join('.'));
+      return game;
     }
     case 'wasm': {
       if (fragments.pop() === 'wasm4') {
-        const { Nes } = await import('@mantou/nes-wasm4');
-        const game = Nes.new(sampleRate);
+        const { Wasm4 } = await import('@mantou/nes-wasm4');
+        const game = Wasm4.new(sampleRate);
         await game.load_rom(new Uint8Array(romBuffer));
         return game;
       } else {
@@ -154,8 +150,8 @@ export async function createGame(filename: string, romBuffer: ArrayBuffer, sampl
       }
     }
     case 'js': {
-      const { Nes } = await import('@mantou/nes-sandbox');
-      const game = Nes.new(sampleRate);
+      const { JsGame } = await import('@mantou/nes-sandbox');
+      const game = JsGame.new(sampleRate);
       await game.load_rom(new Uint8Array(romBuffer));
       return game;
     }
@@ -169,19 +165,37 @@ export async function createGame(filename: string, romBuffer: ArrayBuffer, sampl
 }
 
 export function parseCheatCode(cheat: Cheat) {
+  // 第一段数字表示地址
+  // 第二段数字
+  //    第一位数字表示类型:
+  //      0：始終。效果是一直保持成設定值
+  //      1：一次。效果是只修改一次成設定值
+  //      2：動態。效果是當內存的數值大於設定值時，自動改成設定值，相當於減小的功能
+  //      3：從不。效果是當內存的數值小於設定值時，自動改成設定值，相當於加大的功能
+  //    第二位数字表示字节长度
+  // 第三段数字表示值（内存布局，小端字节序），例如 612 为 `01100100 00000010` => [100, 2] => 6402
+  // 例子：
+  // XXXX-X1-XX
+  // XXXX-X2-XXXX
+  // XXXX-X3-XXXXXX
+  // XXXX-X4-XXXXXXXX
   const result = cheat.code.match(/^(?<addr>[0-9A-F]{4})-(?<type>[0-3])(?<len>[1-4])-(?<val>([0-9A-F]{2})+)$/);
   if (!result) return;
   const { addr, type, len, val } = result.groups!;
-  if (val.length !== 2 * Number(len)) return;
+  const length = Number(len);
+  if (val.length !== 2 * length) return;
+  const bytes = val
+    .split(/(\w{2}\b)/)
+    .filter((e) => !!e)
+    .map((e) => parseInt(e, 16));
+
   return {
     cheat,
     enabled: cheat.enabled,
     addr: parseInt(addr, 16),
     type: Number(type) as 0 | 1 | 2 | 3,
-    len: Number(len),
-    val: val
-      .split(/(\w{2}\b)/)
-      .filter((e) => !!e)
-      .map((e) => parseInt(e, 16)),
+    len: length,
+    bytes,
+    val: new Uint32Array(new Uint8Array([...bytes, ...Array(4 - bytes.length)]).buffer)[0],
   };
 }

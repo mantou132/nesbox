@@ -36,9 +36,9 @@ const importList = [
 
 export { Button };
 
-export class Nes implements ONes {
+export class JsGame implements ONes {
   static new(_outputSampleRate: number) {
-    return new Nes();
+    return new JsGame();
   }
 
   #frameNum = 0;
@@ -52,6 +52,7 @@ export class Nes implements ONes {
   #prevFrame = new Uint8ClampedArray();
   #currentQoiFrameLen = 0;
   #currentDeQoiLen = 0;
+  #sound = false;
 
   mem(): Uint8Array {
     return this.#mem;
@@ -125,6 +126,7 @@ export class Nes implements ONes {
       return ++this.#frameNum;
     };
     this.audio_callback = (out) => {
+      if (!this.#sound) return;
       const frame = getAudioFrame();
       out.set(frame);
       // const fn = getAudioFrame();
@@ -221,15 +223,18 @@ export class Nes implements ONes {
   reset() {
     //
   }
-  set_sound(_enabled: boolean) {
-    //
+  set_sound(enabled: boolean) {
+    this.#sound = enabled;
+  }
+  sound(): boolean {
+    return this.#sound;
   }
 
   /**
    * @ignore
    */
-  sound(): boolean {
-    return true;
+  ram_map(): Uint32Array {
+    return new Uint32Array();
   }
   /**
    * @ignore
@@ -257,4 +262,5 @@ export class Nes implements ONes {
   }
 }
 
+// used for other js runtime
 export * from './utils';

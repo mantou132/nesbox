@@ -1,6 +1,6 @@
 [package]
 name = "nes"
-version = "1.0.12"
+version = "1.0.13"
 authors = ["mantou132"]
 edition = "2021"
 
