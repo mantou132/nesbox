@@ -25,13 +25,18 @@
 
 ```
 packages
+├── arcade                    实现 NESBox 接口的街机模拟器
 ├── config                    共享配置
 ├── e2e                       端到端自动化测试
 ├── ecs                       简单 JS ECS 框架
 ├── flutter_app               Android/iOS App
 ├── mt-app                    Android/iOS App 和 flutter_app 交互层
-├── nes                       游戏模拟器的 WASM 接口，实现这个接口的任何模拟器都能在 NESBox 上运行
+├── nes
+│   ├── src                   定义 NESBox 接口，实现 NESBox 接口的 NES 模拟器
+│   ├── utils                 用于开发实现 NESBox 接口的 WASM 游戏
+│   └── utils_macro           utils 中用到的宏
 ├── nes-pkg                   从 `nes` 构建自动生成的 ES 模块
+├── sandbox                   运行 JavaScript 游戏的沙箱，实现了 NESBox 接口
 ├── server                    NESBox GraphQL API
 │   ├── migrations            数据库 SQL
 │   └── src
@@ -50,6 +55,7 @@ packages
 │   │   ├── preload.rs        注入 js
 │   │   └── window_ext.rs     窗口自定义
 │   └─ ...
+├── wasm4                     实现 NESBox 接口的 WASM4 运行时
 ├── webapp                    Web, Desktop, Android/iOS 端都使用此包
 │   ├── src
 │   │   ├── elements          业务无关的自定义元素

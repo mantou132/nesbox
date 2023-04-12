@@ -1255,6 +1255,11 @@
     qoijs "^1.0.0"
     shadowrealm-api "^0.8.2"
 
+"@mantou/nes-wasm4@^0.0.6":
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/@mantou/nes-wasm4/-/nes-wasm4-0.0.6.tgz#4cae22789935867aaae66b58abea99b682c7506c"
+  integrity sha512-+Dfefwa3s8Tzrih7VwqaXXvW/sbMW+HIB0H4HMlZzgaURAm9l0cMepEB+dSy03dytSj5hcBzfqMocs4vnq/0Hg==
+
 "@n1ru4l/graphql-live-query@^0.9.0":
   version "0.9.0"
   resolved "https://registry.yarnpkg.com/@n1ru4l/graphql-live-query/-/graphql-live-query-0.9.0.tgz#defaebdd31f625bee49e6745934f36312532b2bc"

@@ -296,7 +296,7 @@ export class MStageElement extends GemElement<State> {
       }
     } catch (err) {
       logger.error(err);
-      Toast.open('error', 'ROM 加载错误');
+      Toast.open('error', typeof err === 'string' ? err : 'ROM load fail');
     }
     this.#nextStartTime = 0;
   };

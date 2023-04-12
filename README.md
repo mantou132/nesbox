@@ -6,7 +6,7 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-**NESBox's vision is to become the preferred platform for people playing online multiplayer retro games, providing an excellent user experience for all its users.**
+**NESBox's vision is to become the preferred platform for people playing online multiplayer games, providing an excellent user experience for all its users.**
 
 > if there is copyright infringement, please contact to delete
 
@@ -18,11 +18,19 @@
 - Support gamepad
 - Support pointer device(partial game)
 - Support game state restore
-- Support game cheat(only NES)
+- Support game cheat(partial game)
 - Support voice
 - Friend system, chat, invite
 - Internationalization
 - Run local game
+
+## Support games
+
+- [NES(FC)](https://en.wikipedia.org/wiki/Nintendo_Entertainment_System)
+- [Arcade](https://en.wikipedia.org/wiki/Arcade_video_game)
+- [Wasm4](https://wasm4.org/)
+- Universal Wasm (implementing [NESBox API](https://github.com/mantou132/nesbox/blob/dev/packages/nes/utils_macro/src/lib.rs))
+- Universal JavaScript (implementing [NESBox Sandbox API](https://github.com/mantou132/nesbox/blob/dev/packages/sandbox/types.d.ts))
 
 ## Download
 

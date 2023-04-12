@@ -138,7 +138,7 @@ export async function createGame(filename: string, romBuffer: ArrayBuffer, sampl
     }
     case 'wasm': {
       if (fragments.pop() === 'wasm4') {
-        const { Wasm4 } = await import('@mantou/nes-wasm4');
+        const { Wasm4 } = await import('@mantou/wasm4');
         const game = Wasm4.new(sampleRate);
         await game.load_rom(new Uint8Array(romBuffer));
         return game;
@@ -155,11 +155,14 @@ export async function createGame(filename: string, romBuffer: ArrayBuffer, sampl
       await game.load_rom(new Uint8Array(romBuffer));
       return game;
     }
-    default: {
+    case 'nes': {
       await initNes();
       const game = Nes.new(sampleRate);
       game.load_rom(new Uint8Array(romBuffer));
       return game;
+    }
+    default: {
+      throw new Error('No support format');
     }
   }
 }
