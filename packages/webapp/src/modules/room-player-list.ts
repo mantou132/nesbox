@@ -137,6 +137,7 @@ export class MRoomPlayerItemElement extends GemElement {
 
   @globalemitter rolechange: Emitter<RoleOffer>;
   @globalemitter kickout: Emitter<number>;
+  @globalemitter disableplayer: Emitter<Player>;
 
   constructor() {
     super();
@@ -145,7 +146,7 @@ export class MRoomPlayerItemElement extends GemElement {
   }
 
   get #isSelf() {
-    return !!this.playerRole && this.playerRole.userId === configure.user?.id;
+    return this.playerRole?.userId === configure.user?.id;
   }
 
   get #isHostRole() {
@@ -161,7 +162,15 @@ export class MRoomPlayerItemElement extends GemElement {
   }
 
   get #isOther() {
-    return !!this.playerRole && !this.#isSelf;
+    return !!this.playerRole?.userId && !this.#isSelf;
+  }
+
+  get #isAllowDisable() {
+    return this.host && !this.playerRole;
+  }
+
+  get #isDisabledSlot() {
+    return this.playerRole && !this.playerRole.userId;
   }
 
   get #isAllowLeave() {
@@ -169,10 +178,13 @@ export class MRoomPlayerItemElement extends GemElement {
   }
 
   get #audioLevel() {
-    return voiceStore.audioLevel[this.playerRole!.userId];
+    return this.playerRole?.userId ? voiceStore.audioLevel[this.playerRole.userId] : 0;
   }
 
   #onClick = () => {
+    if (this.#isAllowDisable || this.#isDisabledSlot) {
+      this.disableplayer(this.roleType);
+    }
     if (this.#isJoinable) {
       this.rolechange(new RoleOffer(this.roleType));
     }
@@ -197,28 +209,29 @@ export class MRoomPlayerItemElement extends GemElement {
     }
   };
 
-  render = () => {
-    if (!this.playerRole) {
-      return html`
-        <style>
-          :host {
-            border: 1px solid ${theme.borderColor};
-          }
-        </style>
-        <dy-avatar
-          class="avatar"
-          square
-          src=${getCDNSrc(`https://ui-avatars.com/api/?name=P${Number(this.roleType) + 1}`)}
-        ></dy-avatar>
-        <div class="username">
-          ${this.#isHostRole
-            ? html`<dy-use class="icon" .element=${icons.loading}></dy-use>`
-            : this.#isJoinable
-            ? html`<dy-use class="icon" tabindex="0" .element=${icons.received}></dy-use>`
-            : i18n.get('roomEmptyRole')}
-        </div>
-      `;
+  #getRenderData = () => {
+    if (!this.playerRole?.userId) {
+      return {
+        avatar: getCDNSrc(`https://ui-avatars.com/api/?name=P${Number(this.roleType) + 1}`),
+        username: this.#isDisabledSlot
+          ? html`<dy-use class="icon" .element=${icons.notAllowed}></dy-use>`
+          : this.#isHostRole
+          ? html`<dy-use class="icon" .element=${icons.loading}></dy-use>`
+          : this.#isJoinable
+          ? html`<dy-use class="icon" tabindex="0" .element=${icons.received}></dy-use>`
+          : i18n.get('roomEmptyRole'),
+      };
+    } else {
+      return {
+        avatar: getAvatar(this.playerRole.username),
+        username: this.playerRole.nickname,
+      };
     }
+  };
+
+  render = () => {
+    const { avatar, username } = this.#getRenderData();
+
     return html`
       <style>
         :host {
@@ -233,9 +246,9 @@ export class MRoomPlayerItemElement extends GemElement {
         })}
         .element=${icons.volume}
       ></dy-use>
-      <dy-avatar class="avatar" square src=${getAvatar(this.playerRole?.username)}></dy-avatar>
+      <dy-avatar class="avatar" square src=${avatar}></dy-avatar>
       <div class="username">
-        <span>${this.playerRole.nickname}</span>
+        <span>${username}</span>
       </div>
     `;
   };

@@ -591,6 +591,7 @@ export class MStageElement extends GemElement<State> {
         @pointerdown=${this.#stopPropagation}
         @rolechange=${({ detail }: CustomEvent<RoleOffer>) => this.#rtc?.send(detail)}
         @kickout=${({ detail }: CustomEvent<number>) => this.#rtc?.kickOutRole(detail)}
+        @disableplayer=${({ detail }: CustomEvent<Player>) => this.#rtc?.disablePlayer(detail)}
       ></m-room-player-list>
     `;
   };

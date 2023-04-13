@@ -177,4 +177,13 @@ export class RTCHost extends RTCBasic {
     this.#setRoles(userId, new RoleOffer(null));
     this.send(new RoleAnswer(this.roles));
   };
+
+  disablePlayer = (player: Player) => {
+    if (this.roles[player]) {
+      delete this.roles[player];
+    } else {
+      this.roles[player] = { userId: 0, nickname: '', username: '' };
+    }
+    this.send(new RoleAnswer(this.roles));
+  };
 }

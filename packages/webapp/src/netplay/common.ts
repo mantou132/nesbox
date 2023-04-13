@@ -202,6 +202,10 @@ export class RTCBasic extends EventTarget {
   kickOutRole = (_userId: number) => {
     //
   };
+
+  disablePlayer = (_player: Player) => {
+    //
+  };
 }
 
 const dataChannelSend = RTCDataChannel.prototype.send;
