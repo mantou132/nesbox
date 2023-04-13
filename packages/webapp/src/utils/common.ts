@@ -1,8 +1,10 @@
 import { history, QueryString, render, TemplateResult } from '@mantou/gem';
 import { matchPath, RouteItem } from 'duoyun-ui/elements/route';
 import { Time } from 'duoyun-ui/lib/time';
+import { formatTraffic } from 'duoyun-ui/lib/number';
 import { ValueOf } from 'duoyun-ui/lib/types';
 import { isMtApp, mtApp } from 'mt-app';
+import { changeLoading } from 'duoyun-ui/elements/wait';
 
 import { githubIssue, queryKeys } from 'src/constants';
 import { configure } from 'src/configure';
@@ -135,4 +137,39 @@ export const fontLoading = (font: FontFace) => {
     .catch(() => {
       //
     });
+};
+
+const formatTrafficString = (v: number) => {
+  const { number, unit } = formatTraffic(v);
+  return `${number}${unit}`;
+};
+
+export const progressFetch = async (url: string, init?: RequestInit) => {
+  const response = await fetch(url, init);
+
+  const reader = response.body!.getReader();
+  const contentLength = Number(response.headers.get('Content-Length'));
+
+  let receivedLength = 0;
+  const chunks = [];
+  while (true) {
+    const { done, value } = await reader.read();
+
+    if (done) {
+      break;
+    }
+
+    chunks.push(value);
+    receivedLength += value.length;
+
+    changeLoading({ text: `${formatTrafficString(receivedLength)}/${formatTrafficString(contentLength)}` });
+  }
+
+  const chunksAll = new Uint8Array(receivedLength);
+  let position = 0;
+  for (const chunk of chunks) {
+    chunksAll.set(chunk, position);
+    position += chunk.length;
+  }
+  return chunksAll;
 };

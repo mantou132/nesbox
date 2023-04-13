@@ -137,7 +137,10 @@ addEventListener('beforeunload', () => {
   unloading = true;
   setTimeout(() => (unloading = false), 1000);
 });
-function printError(err: Error | ErrorEvent) {
+function printError(err: Error | ErrorEvent | DOMException) {
+  if (err instanceof DOMException && err.name === 'AbortError') {
+    return;
+  }
   const ignoreError = [
     // chrome
     'ResizeObserver',

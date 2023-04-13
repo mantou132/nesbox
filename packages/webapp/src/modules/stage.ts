@@ -14,7 +14,6 @@ import JSZip from 'jszip';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { waitLoading } from 'duoyun-ui/elements/wait';
 import { Nes, Button, Player } from '@mantou/nes';
-import { Toast } from 'duoyun-ui/elements/toast';
 import { isNotNullish } from 'duoyun-ui/lib/types';
 import { clamp } from 'duoyun-ui/lib/number';
 import { isMtApp } from 'mt-app';
@@ -32,7 +31,7 @@ import {
 } from 'src/netplay/common';
 import { RTCHost } from 'src/netplay/host';
 import { RTCClient } from 'src/netplay/client';
-import { getCDNSrc, isValidGameFile, playHintSound } from 'src/utils/common';
+import { getCDNSrc, isValidGameFile, playHintSound, progressFetch } from 'src/utils/common';
 import {
   CustomGamepadButton,
   globalEvents,
@@ -153,6 +152,7 @@ export class MStageElement extends GemElement<State> {
     return document.visibilityState === 'visible';
   }
 
+  #abortController?: AbortController;
   #gameInstance?: Nes;
   #audioContext?: AudioContext;
   #audioStreamDestination?: MediaStreamAudioDestinationNode;
@@ -273,10 +273,11 @@ export class MStageElement extends GemElement<State> {
   #loadRom = async () => {
     this.#gameInstance = undefined;
     this.hostRomBuffer = undefined;
+    this.#abortController = new AbortController();
 
     try {
       const url = new URL(this.#rom!);
-      let romBuffer = await (await fetch(getCDNSrc(this.#rom!))).arrayBuffer();
+      let romBuffer = (await progressFetch(getCDNSrc(this.#rom!), { signal: this.#abortController.signal })).buffer;
       let filename = url.pathname.split('/').pop()!;
 
       // 街机模拟器依赖 zip 档文件名，所以不能修改文件名
@@ -295,8 +296,9 @@ export class MStageElement extends GemElement<State> {
         this.hostRomBuffer = romBuffer;
       }
     } catch (err) {
+      if (err?.name === 'AbortError') throw err;
       logger.error(err);
-      Toast.open('error', typeof err === 'string' ? err : 'ROM load fail');
+      throw new Error(typeof err === 'string' ? err : 'ROM load fail');
     }
     this.#nextStartTime = 0;
   };
@@ -532,7 +534,7 @@ export class MStageElement extends GemElement<State> {
     );
 
     this.effect(
-      () => this.#rom && waitLoading(this.#loadRom()),
+      () => this.#rom && waitLoading(this.#loadRom(), { transparent: true, position: 'center' }),
       () => [this.#rom],
     );
 
@@ -549,6 +551,7 @@ export class MStageElement extends GemElement<State> {
     addEventListener(globalEvents.PRESS_BUTTON, this.#onPressButton);
     addEventListener(globalEvents.RELEASE_BUTTON, this.#onReleaseButton);
     return () => {
+      this.#abortController?.abort();
       this.#audioContext?.close();
       this.#rtc?.destroy();
       this.removeEventListener('pointermove', this.#onPointerMove);
