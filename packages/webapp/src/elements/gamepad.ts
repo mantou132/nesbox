@@ -11,7 +11,7 @@ import {
   classMap,
 } from '@mantou/gem';
 
-import gamepadImg from 'src/images/gamepad.svg?raw';
+import gamepadImg from 'src/images/gamepad2.svg?raw';
 import { theme } from 'src/theme';
 
 import 'duoyun-ui/elements/shortcut-record';
@@ -40,53 +40,65 @@ const style = createCSSSheet(css`
   .key:focus {
     background-color: ${theme.informativeColor};
   }
+  .key:not(:focus) {
+    text-shadow: 0 0.5px #0003;
+    filter: drop-shadow(0.1em 0.3em 0.4em black);
+  }
   .key::part(kbd) {
     background-color: transparent;
     border-color: transparent;
     font-weight: bold;
   }
   .up {
-    top: 31.5%;
-    left: 25.4%;
+    top: 45.5%;
+    left: 29.4%;
   }
   .left {
-    top: 37.3%;
-    left: 20.9%;
+    top: 51.3%;
+    left: 23.9%;
   }
   .down {
-    top: 43%;
-    left: 25.4%;
+    top: 58%;
+    left: 29.4%;
   }
   .right {
-    top: 37.3%;
-    left: 30.1%;
-  }
-  .a {
-    top: 45.5%;
-    left: 75%;
+    top: 51.3%;
+    left: 34.1%;
   }
   .b {
-    top: 37.1%;
-    left: 68.1%;
+    top: 59.6%;
+    left: 66.6%;
   }
-  .turboa {
-    top: 37.1%;
-    left: 81.9%;
+  .a {
+    top: 54.5%;
+    left: 73.4%;
+  }
+  .c {
+    top: 49.9%;
+    left: 80%;
   }
   .turbob {
-    top: 28.7%;
-    left: 74.9%;
+    top: 51.9%;
+    left: 62.1%;
+  }
+  .turboa {
+    top: 47.3%;
+    left: 68.1%;
+  }
+  .turboc {
+    top: 43.1%;
+    left: 73.9%;
   }
   .select {
-    top: 45.8%;
-    left: 44.7%;
+    top: 58.6%;
+    left: 45.7%;
   }
   .start {
-    top: 45.8%;
-    left: 55%;
+    top: 58.6%;
+    left: 53%;
   }
   .reset {
-    top: 35.5%;
+    top: 47.5%;
     left: 50%;
   }
 `);
@@ -98,8 +110,10 @@ export type GamePadValue = {
   Right: string;
   A: string;
   B: string;
+  C: string;
   TurboA: string;
   TurboB: string;
+  TurboC: string;
   Select: string;
   Start: string;
   Reset: string;

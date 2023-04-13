@@ -93,6 +93,10 @@ export class PEmulatorElement extends GemElement<State> {
       [defaultKeybinding.Right]: Button.JoypadRight,
       [defaultKeybinding.A]: Button.JoypadA,
       [defaultKeybinding.B]: Button.JoypadB,
+      [defaultKeybinding.C]: Button.JoypadC,
+      [defaultKeybinding.TurboA]: Button.JoypadTurboA,
+      [defaultKeybinding.TurboB]: Button.JoypadTurboB,
+      [defaultKeybinding.TurboC]: Button.JoypadTurboC,
       [defaultKeybinding.Select]: Button.Select,
       [defaultKeybinding.Start]: Button.Start,
       [defaultKeybinding.Reset]: Button.Reset,
@@ -104,6 +108,10 @@ export class PEmulatorElement extends GemElement<State> {
       [defaultKeybinding.Right_2]: Button.JoypadRight,
       [defaultKeybinding.A_2]: Button.JoypadA,
       [defaultKeybinding.B_2]: Button.JoypadB,
+      [defaultKeybinding.C_2]: Button.JoypadC,
+      [defaultKeybinding.TurboA_2]: Button.JoypadTurboA,
+      [defaultKeybinding.TurboB_2]: Button.JoypadTurboB,
+      [defaultKeybinding.TurboC_2]: Button.JoypadTurboC,
     };
     if (event instanceof PointerEvent) {
       const btn = mapPointerButton(event);

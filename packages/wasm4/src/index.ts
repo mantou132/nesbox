@@ -34,8 +34,12 @@ function getPlayerIdx(player: Player) {
 
 function getButtonBitFlag(button: Button) {
   switch (button) {
+    case Button.JoypadTurboA:
+      return BUTTON_X;
     case Button.JoypadA:
       return BUTTON_X;
+    case Button.JoypadTurboB:
+      return BUTTON_Z;
     case Button.JoypadB:
       return BUTTON_Z;
     case Button.JoypadLeft:

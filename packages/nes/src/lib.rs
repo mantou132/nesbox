@@ -120,20 +120,31 @@ impl Nes {
     }
 
     pub fn handle_button_event(&mut self, player: Player, button: Button, pressed: bool) {
-        let gamepad1 = &mut self.control_deck.joypad_mut(match player {
+        let joypad = &mut self.control_deck.joypad_mut(match player {
             Player::One => Slot::One,
             Player::Two => Slot::Two,
             Player::Three => Slot::Three,
             Player::Four => Slot::Four,
         });
-        gamepad1.set_button(
+        match button {
+            Button::JoypadC => {
+                joypad.set_button(JoypadBtnState::A, pressed);
+                joypad.set_button(JoypadBtnState::B, pressed);
+            }
+            Button::JoypadTurboC => {
+                joypad.set_button(JoypadBtnState::TURBO_A, pressed);
+                joypad.set_button(JoypadBtnState::TURBO_B, pressed);
+            }
+            _ => {}
+        }
+        joypad.set_button(
             match button {
                 Button::Start => JoypadBtnState::START,
                 Button::Select => JoypadBtnState::SELECT,
-                Button::JoypadA => JoypadBtnState::A,
                 Button::JoypadB => JoypadBtnState::B,
-                Button::JoypadTurboA => JoypadBtnState::TURBO_A,
+                Button::JoypadA => JoypadBtnState::A,
                 Button::JoypadTurboB => JoypadBtnState::TURBO_B,
+                Button::JoypadTurboA => JoypadBtnState::TURBO_A,
                 Button::JoypadUp => JoypadBtnState::UP,
                 Button::JoypadDown => JoypadBtnState::DOWN,
                 Button::JoypadLeft => JoypadBtnState::LEFT,

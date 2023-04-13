@@ -36,6 +36,9 @@ pub enum Button {
     JoypadRight,
     PointerPrimary,
     PointerSecondary,
+
+    JoypadC,
+    JoypadTurboC,
 }
 
 #[derive(Debug, Clone, Resource, Default)]

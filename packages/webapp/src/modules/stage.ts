@@ -12,7 +12,7 @@ import {
 } from '@mantou/gem';
 import JSZip from 'jszip';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
-import { waitLoading } from 'duoyun-ui/elements/wait';
+import { changeLoading, waitLoading } from 'duoyun-ui/elements/wait';
 import { Nes, Button, Player } from '@mantou/nes';
 import { isNotNullish } from 'duoyun-ui/lib/types';
 import { clamp } from 'duoyun-ui/lib/number';
@@ -371,8 +371,10 @@ export class MStageElement extends GemElement<State> {
       [keybinding.Right]: Button.JoypadRight,
       [keybinding.A]: Button.JoypadA,
       [keybinding.B]: Button.JoypadB,
+      [keybinding.C]: Button.JoypadC,
       [keybinding.TurboA]: Button.JoypadTurboA,
       [keybinding.TurboB]: Button.JoypadTurboB,
+      [keybinding.TurboC]: Button.JoypadTurboC,
       [keybinding.Select]: Button.Select,
       [keybinding.Start]: Button.Start,
       [keybinding.Reset]: Button.Reset,
@@ -384,8 +386,10 @@ export class MStageElement extends GemElement<State> {
       [keybinding.Right_2]: Button.JoypadRight,
       [keybinding.A_2]: Button.JoypadA,
       [keybinding.B_2]: Button.JoypadB,
+      [keybinding.C_2]: Button.JoypadC,
       [keybinding.TurboA_2]: Button.JoypadTurboA,
       [keybinding.TurboB_2]: Button.JoypadTurboB,
+      [keybinding.TurboC_2]: Button.JoypadTurboC,
     };
     if (event instanceof PointerEvent) {
       const btn = mapPointerButton(event);
@@ -486,6 +490,15 @@ export class MStageElement extends GemElement<State> {
     this.#releaseButton(button.player, button.btn);
   };
 
+  #getMaskFactor = () => [
+    !configure.windowHasFocus,
+    configure.searchState,
+    configure.settingsState,
+    configure.friendListState,
+  ];
+
+  #hasMask = () => this.#getMaskFactor().every((e) => !e);
+
   mounted = () => {
     this.effect(
       () => {
@@ -534,14 +547,26 @@ export class MStageElement extends GemElement<State> {
     );
 
     this.effect(
-      () => this.#rom && waitLoading(this.#loadRom(), { transparent: true, position: 'center' }),
+      () => {
+        if (this.#rom) {
+          waitLoading(this.#loadRom(), {
+            transparent: true,
+            position: this.#hasMask() ? 'center' : 'start',
+          });
+        }
+      },
       () => [this.#rom],
     );
 
-    this.effect(
-      (muteArgs) => (muteArgs!.every((e) => !e) ? this.#resumeAudio() : this.#pauseAudio()),
-      () => [!configure.windowHasFocus, configure.searchState, configure.settingsState, configure.friendListState],
-    );
+    this.effect(() => {
+      if (this.#hasMask()) {
+        this.#resumeAudio();
+        changeLoading({ position: 'center' });
+      } else {
+        this.#pauseAudio();
+        changeLoading({ position: 'start' });
+      }
+    }, this.#getMaskFactor);
 
     this.addEventListener('pointermove', this.#onPointerMove);
     addEventListener('keydown', this.#onKeyDown);

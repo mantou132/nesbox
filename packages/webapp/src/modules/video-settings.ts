@@ -9,6 +9,7 @@ import { icons } from 'src/icons';
 
 import 'duoyun-ui/elements/select';
 import 'duoyun-ui/elements/use';
+import 'duoyun-ui/elements/tooltip';
 
 /**
  * @customElement m-video-settings

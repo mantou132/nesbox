@@ -125,8 +125,8 @@
   "shortcutGlobal": {
     "message": "全局"
   },
-  "shortcutHost": {
-    "message": "主機"
+  "shortcutInGame": {
+    "message": "遊戲內"
   },
   "shortcutReadMsg": {
     "message": "閱讀消息"

@@ -125,8 +125,8 @@
   "shortcutGlobal": {
     "message": "グローバル"
   },
-  "shortcutHost": {
-    "message": "ホスト"
+  "shortcutInGame": {
+    "message": "ゲームで"
   },
   "shortcutReadMsg": {
     "message": "読む情報"

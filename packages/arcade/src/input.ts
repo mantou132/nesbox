@@ -15,14 +15,18 @@ export const INP_B6 = 1 << 11;
 
 function getButtonBitFlag(button: Button) {
   switch (button) {
-    case Button.JoypadA:
-      return INP_B1;
     case Button.JoypadB:
+      return INP_B1;
+    case Button.JoypadA:
       return INP_B2;
-    case Button.JoypadTurboA:
-      return INP_B4;
+    case Button.JoypadC:
+      return INP_B3;
     case Button.JoypadTurboB:
+      return INP_B4;
+    case Button.JoypadTurboA:
       return INP_B5;
+    case Button.JoypadTurboC:
+      return INP_B6;
     case Button.JoypadLeft:
       return INP_LEFT;
     case Button.JoypadRight:

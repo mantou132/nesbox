@@ -4,8 +4,6 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { exec } from 'node:child_process';
 
-import pkg from '../packages/nes-pkg/package.json' assert { type: 'json' };
-
 const old = ['__wbg_log_ffb63dcc9cf67297'];
 
 function executeShellCommand(command, cwd = process.cwd()) {
@@ -33,7 +31,11 @@ function executeShellCommand(command, cwd = process.cwd()) {
 // 用 debug 模式生成包含 nesbox_bevy app 相关的代码，这让 js 胶水代码同时兼容 nes 模拟器和 nesbox_bevy app.
 await executeShellCommand('yarn build:nes --debug');
 
-const pathname = path.resolve(process.cwd(), 'packages/nes-pkg', pkg.module);
+const pathname = path.resolve(
+  process.cwd(),
+  'packages/nes-pkg',
+  (await import('../packages/nes-pkg/package.json', { assert: { type: 'json' } })).default.module,
+);
 
 const content = (
   await fs.readFile(pathname, {

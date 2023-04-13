@@ -18,26 +18,34 @@ import { GetAccountQuery } from 'src/generated/graphql';
 import type { ThemeName } from 'src/theme';
 
 export const defaultKeybinding = {
+  Reset: 'r',
+  Select: 'f',
+  Start: 'h',
+
   Up: 'w',
   Left: 'a',
   Down: 's',
   Right: 'd',
-  A: 'j',
-  B: 'k',
-  TurboA: 'n',
-  TurboB: 'm',
-  Select: 'u',
-  Start: 'i',
-  Reset: 'r',
+  B: 'j',
+  A: 'k',
+  C: 'l',
+  TurboB: 'u',
+  TurboA: 'i',
+  TurboC: 'o',
 
   Up_2: 'arrowup',
   Left_2: 'arrowleft',
   Down_2: 'arrowdown',
   Right_2: 'arrowright',
-  A_2: '5',
-  B_2: '6',
-  TurboA_2: '8',
-  TurboB_2: '9',
+  B_2: '1',
+  A_2: '2',
+  C_2: '3',
+  TurboB_2: '4',
+  TurboA_2: '5',
+  TurboC_2: '6',
+  Reset_2: '7',
+  Select_2: '8',
+  Start_2: '9',
 };
 
 const defaultVolume = {
