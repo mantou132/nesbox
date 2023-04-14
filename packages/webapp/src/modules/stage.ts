@@ -43,7 +43,6 @@ import {
 import { logger } from 'src/logger';
 import { configure } from 'src/configure';
 import { store } from 'src/store';
-import { i18n } from 'src/i18n/basic';
 import {
   createGame,
   mapPointerButton,
@@ -109,7 +108,6 @@ type State = {
 @connectStore(store)
 @connectStore(configure)
 @adoptedStyle(style)
-@connectStore(i18n.store)
 export class MStageElement extends GemElement<State> {
   @refobject canvasRef: RefObject<NesboxCanvasElement>;
   @refobject audioRef: RefObject<HTMLAudioElement>;

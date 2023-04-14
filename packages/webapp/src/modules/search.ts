@@ -303,7 +303,7 @@ export class MSearchElement extends GemElement<State> {
   mounted = () => {
     import('src/i18n/help').then(({ helpI18n }) => {
       const resources = helpI18n.resources[helpI18n.currentLanguage] || {};
-      this.#helpMessages = Object.entries(resources).map(([, v]) => (v.message || v) as string);
+      this.#helpMessages = Object.values(resources);
     });
 
     this.addEventListener('keydown', this.#onKeydown);
@@ -346,10 +346,10 @@ export class MSearchElement extends GemElement<State> {
                 : configure.searchCommand === SearchCommand.SELECT_GAME
                 ? 'selectGame'
                 : this.#isRooms
-                ? 'placeholderRoomSearch'
+                ? 'placeholder.roomSearch'
                 : configure.user?.playing
-                ? 'placeholderSearchPlaying'
-                : 'placeholderSearch',
+                ? 'placeholder.searchPlaying'
+                : 'placeholder.search',
               configure.searchCommand === SearchCommand.HELP
                 ? getShortcut('OPEN_SEARCH', true)
                 : configure.searchCommand === SearchCommand.SELECT_GAME

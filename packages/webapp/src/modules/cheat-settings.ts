@@ -96,12 +96,12 @@ export class MCheatSettingsElement extends GemElement<State> {
 
   #addData = async (data: Cheat) => {
     if (this.#cheatSettings.find((e) => e.code === data.code)) {
-      Toast.open('error', i18n.get('tipCheatCodeExist'));
+      Toast.open('error', i18n.get('tip.cheat.exist'));
     } else if (parseCheatCode(data)) {
       await this.#onChangeSettings([...this.#cheatSettings, data]);
       this.setState({ newCheat: undefined });
     } else {
-      Toast.open('error', i18n.get('tipCheatCodeFormatErr'));
+      Toast.open('error', i18n.get('tip.cheat.formatErr'));
     }
   };
 
@@ -138,7 +138,7 @@ export class MCheatSettingsElement extends GemElement<State> {
     const data = this.#data;
     const columns: Columns<Cheat> = [
       {
-        title: i18n.get('cheatCode'),
+        title: i18n.get('settings.cheat.code'),
         dataIndex: 'code',
         render: (data) =>
           data === this.state.newCheat
@@ -152,7 +152,7 @@ export class MCheatSettingsElement extends GemElement<State> {
             : data.code,
       },
       {
-        title: i18n.get('cheatComment'),
+        title: i18n.get('settings.cheat.comment'),
         dataIndex: 'comment',
         render: (data) =>
           data === this.state.newCheat
@@ -166,7 +166,7 @@ export class MCheatSettingsElement extends GemElement<State> {
             : data.comment,
       },
       {
-        title: i18n.get('cheatToggleKey'),
+        title: i18n.get('settings.cheat.key'),
         dataIndex: 'toggleKey',
         width: '25%',
         render: (data) =>
@@ -179,7 +179,7 @@ export class MCheatSettingsElement extends GemElement<State> {
           `,
       },
       {
-        title: i18n.get('cheatEnable'),
+        title: i18n.get('settings.cheat.enable'),
         dataIndex: 'enabled',
         width: '100px',
         render: (data) =>
@@ -219,7 +219,7 @@ export class MCheatSettingsElement extends GemElement<State> {
         .noData=${' '}
       ></dy-table>
       <dy-button ?disabled=${!!this.state.newCheat} type="reverse" .icon=${icons.add} @click=${this.#addNewCheat}>
-        ${i18n.get('cheatAdd')}
+        ${i18n.get('settings.cheat.add')}
       </dy-button>
     `;
   };

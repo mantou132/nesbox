@@ -188,7 +188,7 @@ export class AppRootElement extends GemElement {
       </dy-drawer>
 
       <dy-modal
-        .header=${i18n.get('setting')}
+        .header=${i18n.get('settings.title')}
         .disableDefaultOKBtn=${true}
         .cancelText=${i18n.get('close')}
         .open=${!!configure.settingsState}

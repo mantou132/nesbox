@@ -33,7 +33,7 @@ export class MKeybindingElement extends GemElement {
   #updateKeybinding = (keybinding: Settings['keybinding']) => {
     const values = Object.values(keybinding);
     if (values.length !== new Set(values).size) {
-      Toast.open('warning', i18n.get('tipKeybindingExist'));
+      Toast.open('warning', i18n.get('tip.settings.keybindingExist'));
     }
     updateAccount({
       settings: {
@@ -70,7 +70,7 @@ export class MKeybindingElement extends GemElement {
               Reset: defaultKeybinding.Reset,
             });
           }}
-          >Reset</dy-button
+          >${i18n.get('reset')}</dy-button
         >
       </div>
       <nesbox-gamepad
@@ -97,7 +97,7 @@ export class MKeybindingElement extends GemElement {
       ></nesbox-gamepad>
 
       <div class="header">
-        <dy-heading class="heading" lv="4"> ${i18n.get('keySettingJoypad2')} </dy-heading>
+        <dy-heading class="heading" lv="4">${i18n.get('keySettingJoypad2')}</dy-heading>
         <dy-button
           small
           @click=${() => {
@@ -115,7 +115,7 @@ export class MKeybindingElement extends GemElement {
               TurboC_2: defaultKeybinding.TurboC_2,
             });
           }}
-          >Reset</dy-button
+          >${i18n.get('reset')}</dy-button
         >
       </div>
       <nesbox-gamepad

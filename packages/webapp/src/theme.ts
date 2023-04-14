@@ -9,13 +9,13 @@ import { configure } from 'src/configure';
 
 export const themeNames = {
   get default() {
-    return i18n.get('defaultTheme');
+    return i18n.get('enum.theme.default');
   },
   get punk() {
-    return i18n.get('punkTheme');
+    return i18n.get('enum.theme.punk');
   },
   get retro() {
-    return i18n.get('retroTheme');
+    return i18n.get('enum.theme.retro');
   },
 };
 

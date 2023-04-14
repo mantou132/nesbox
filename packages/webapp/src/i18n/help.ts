@@ -1,8 +1,8 @@
 import { i18n } from 'src/i18n/basic';
-import zhCN from 'src/locales/templates/help-message.json';
-import enURI from 'src/locales/en/help-message.json?url';
-import jaURI from 'src/locales/ja/help-message.json?url';
-import twURI from 'src/locales/zh-TW/help-message.json?url';
+import zhCN from 'src/locales/zh-CN/help.json';
+import enURI from 'src/locales/en/help.json?url';
+import jaURI from 'src/locales/ja/help.json?url';
+import twURI from 'src/locales/zh-TW/help.json?url';
 
 export type Locale = typeof zhCN;
 export type LocaleKey = keyof Locale;

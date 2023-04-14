@@ -255,7 +255,7 @@ export const getFriends = async () => {
 
 export const applyFriend = async (username: string) => {
   await request<ApplyFriendMutation, ApplyFriendMutationVariables>(ApplyFriend, { input: { username } });
-  Toast.open('default', i18n.get('tipApplyFriendSuccess', username));
+  Toast.open('default', i18n.get('tip.friend.applySuccess', username));
 };
 
 export const acceptFriend = async (targetId: number, accept: boolean) => {
@@ -280,7 +280,7 @@ export const deleteFriend = async (targetId: number) => {
 
 export const createInvite = async (input: ScNewInvite) => {
   await request<CreateInviteMutation, CreateInviteMutationVariables>(CreateInvite, { input });
-  Toast.open('success', i18n.get('tipInviteSuccess'));
+  Toast.open('success', i18n.get('tip.friend.invited'));
 };
 
 export const acceptInvite = async (inviteId: number, accept: boolean) => {
@@ -442,7 +442,7 @@ export const subscribeEvent = () => {
         updateStore(store, { roomIds: store.roomIds?.filter((id) => id !== deleteRoom) });
         if (configure.user && configure.user.playing?.id === deleteRoom) {
           if (configure.user.playing.host !== configure.user.id) {
-            Toast.open('warning', i18n.get('tipRoomDeleted'));
+            Toast.open('warning', i18n.get('tip.room.deleted'));
           }
           delete configure.user.playing;
           updateStore(configure);

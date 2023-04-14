@@ -66,14 +66,14 @@ export class MAccountSettingsElement extends GemElement<State> {
       password: this.state.password,
     });
     this.setState({ oldpassword: '', password: '', renewpassword: '' });
-    Toast.open('success', i18n.get('tipChangePassword'));
+    Toast.open('success', i18n.get('tip.settings.passwordChanged'));
   };
 
   render = () => {
     return html`
       <dy-form class="form">
         <dy-form-item
-          label=${i18n.get('nickname')}
+          label=${i18n.get('settings.account.nickname')}
           name="nickname"
           .value=${configure.user?.nickname}
           @itemchange=${this.#onNicknameChange}
@@ -84,7 +84,7 @@ export class MAccountSettingsElement extends GemElement<State> {
         ref=${this.formRef.ref}
         @change=${({ detail }: CustomEvent<State>) => this.setState(detail)}
       >
-        <dy-heading class="heading" lv="4">${i18n.get('changePassword')}</dy-heading>
+        <dy-heading class="heading" lv="4">${i18n.get('settings.account.password')}</dy-heading>
         <dy-form-item
           label=${i18n.get('oldpassword')}
           type="password"
@@ -105,7 +105,7 @@ export class MAccountSettingsElement extends GemElement<State> {
             {
               validator: () => {
                 if (this.state.password !== this.state.renewpassword) {
-                  throw new Error(i18n.get('renewpasswordNotMatch'));
+                  throw new Error(i18n.get('tip.settings.renewPasswordNotMatch'));
                 }
               },
             },

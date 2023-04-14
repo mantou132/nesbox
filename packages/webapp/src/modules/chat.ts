@@ -184,7 +184,7 @@ export class MChatElement extends GemElement {
       <dy-input
         autofocus
         class="input"
-        placeholder=${i18n.get('placeholderMessage')}
+        placeholder=${i18n.get('placeholder.message')}
         @change=${({ detail }: CustomEvent<string>) => changeFriendChatDraft(friendStore.friendChatState!, detail)}
         @keydown=${this.#onKeyDown}
         .value=${friendStore.draft[friendStore.friendChatState] || ''}

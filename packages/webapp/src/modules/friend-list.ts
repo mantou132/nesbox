@@ -56,7 +56,7 @@ export class MFriendListElement extends GemElement {
           <dy-input
             autofocus
             style="width: 100%"
-            placeholder=${i18n.get('placeholderUsername')}
+            placeholder=${i18n.get('placeholder.username')}
             @change=${(e: any) => (e.target.value = e.detail)}
           ></dy-input>
         `,

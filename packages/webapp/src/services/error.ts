@@ -1,15 +1,15 @@
 import { LocaleKey } from 'src/i18n/basic';
 
 export const errorCodeMap: Record<string, LocaleKey | undefined> = {
-  0: 'code0',
-  400: 'code400',
-  401: 'code401',
-  403: 'code403',
-  404: 'code404',
-  409: 'code409',
-  500: 'code500',
-  501: 'code501',
-  504: 'code504',
+  0: 'code.0',
+  400: 'code.400',
+  401: 'code.401',
+  403: 'code.403',
+  404: 'code.404',
+  409: 'code.409',
+  500: 'code.500',
+  501: 'code.501',
+  504: 'code.504',
 };
 
 // https://github.com/grpc/grpc/blob/master/doc/statuscodes.md
@@ -36,6 +36,6 @@ export const graphqlErrorMap: Record<string, LocaleKey | undefined> = {
   403000: errorCodeMap[403],
   500000: errorCodeMap[500],
 
-  404001: 'code404001',
-  404002: 'code404002',
+  404001: 'code.404001',
+  404002: 'code.404002',
 };

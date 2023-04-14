@@ -108,7 +108,7 @@ export class MNewGameElement extends GemElement<State> {
           .placeholder=${i18n.get('gameMaxPlayer')}
           .options=${['', '1', '2', '4'].map((value) => ({
             value: value && `game.max_player.${value}`,
-            label: value ? i18n.get('gamePlayer', value) : i18n.get('gameNoLimit'),
+            label: value ? i18n.get('gamePlayer', value) : i18n.get('noLimit'),
           }))}
           @change=${({ detail }: CustomEvent<string>) => this.setState({ maxPlayer: detail })}
         ></dy-pick>

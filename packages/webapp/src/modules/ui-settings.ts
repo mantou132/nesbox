@@ -33,7 +33,7 @@ export class MUiSettingsElement extends GemElement {
   render = () => {
     return html`
       <div class="grid">
-        <div>${i18n.get('changeLanguage')}</div>
+        <div>${i18n.get('settings.ui.language')}</div>
         <dy-select
           .value=${i18n.currentLanguage}
           .options=${Object.keys(i18n.resources).map((code) => ({
@@ -42,7 +42,7 @@ export class MUiSettingsElement extends GemElement {
           }))}
           @change=${({ detail }: CustomEvent<string>) => waitLoading(i18n.setLanguage(detail))}
         ></dy-select>
-        <div>${i18n.get('changeTheme')}</div>
+        <div>${i18n.get('settings.ui.theme')}</div>
         <dy-select
           .value=${configure.theme}
           .options=${Object.entries(themeNames).map(([theme, name]: [ThemeName, string]) => ({
@@ -53,7 +53,7 @@ export class MUiSettingsElement extends GemElement {
         ></dy-select>
         ${window.__TAURI__ && location.hostname !== 'localhost'
           ? html`
-              <div>${i18n.get('branch')}</div>
+              <div>${i18n.get('settings.ui.branch')}</div>
               <dy-select
                 .value=${location.origin.includes('dev') ? 'dev' : 'master'}
                 .options=${['master', 'dev'].map((branch) => ({ label: branch.toUpperCase(), value: branch }))}
@@ -66,7 +66,7 @@ export class MUiSettingsElement extends GemElement {
           : ''}
         ${'startViewTransition' in document
           ? html`
-              <div>Transition</div>
+              <div>${i18n.get('settings.ui.transition')}</div>
               <dy-switch
                 .checked=${!!configure.user?.settings.ui.viewTransition}
                 @change=${({ detail }: CustomEvent<boolean>) => this.#updateVideoSetting('viewTransition', detail)}

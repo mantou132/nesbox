@@ -7,37 +7,37 @@ import { ScGameKind, ScGameSeries } from 'src/generated/graphql';
 export const gameKindList: { value: ScGameKind | ''; label: LocaleKey }[] = [
   {
     value: '',
-    label: 'gameNoLimit',
+    label: 'noLimit',
   },
   {
     value: ScGameKind.Act,
-    label: 'gameKindAct',
+    label: 'enum.gameKind.act',
   },
   {
     value: ScGameKind.Ftg,
-    label: 'gameKindFtg',
+    label: 'enum.gameKind.ftg',
   },
   {
     value: ScGameKind.Stg,
-    label: 'gameKindStg',
+    label: 'enum.gameKind.stg',
   },
   {
     value: ScGameKind.Spg,
-    label: 'gameKindSpg',
+    label: 'enum.gameKind.spg',
   },
   {
     value: ScGameKind.Rpg,
-    label: 'gameKindRpg',
+    label: 'enum.gameKind.rpg',
   },
   {
     // ScGameKind.Tbs, ScGameKind.Slg, ScGameKind.Tbg
     value: ScGameKind.Rts,
-    label: 'gameKindStrategy',
+    label: 'enum.gameKind.strategy',
   },
   {
     // ScGameKind.Pzg, ScGameKind.Rcg
     value: ScGameKind.Other,
-    label: 'gameKindOther',
+    label: 'enum.gameKind.other',
   },
 ];
 export const gameKindMap = convertToMap<ElementOf<typeof gameKindList>, LocaleKey>(gameKindList, 'value', 'label');
@@ -45,7 +45,7 @@ export const gameKindMap = convertToMap<ElementOf<typeof gameKindList>, LocaleKe
 export const gameSeriesList: { value: ScGameSeries | ''; label: LocaleKey }[] = [
   {
     value: '',
-    label: 'gameNoLimit',
+    label: 'noLimit',
   },
   {
     value: ScGameSeries.Mario,

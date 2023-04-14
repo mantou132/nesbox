@@ -39,13 +39,13 @@ export class MSoundSettingsElement extends GemElement {
     if (!configure.user) return html``;
 
     const volumeLabelMap: Record<keyof Settings['volume'], string> = {
-      hint: i18n.get('hintVolume'),
-      notification: i18n.get('notificationVolume'),
-      game: i18n.get('gameVolume'),
+      hint: i18n.get('settings.sound.hintVolume'),
+      notification: i18n.get('settings.sound.notificationVolume'),
+      game: i18n.get('settings.sound.gameVolume'),
     };
 
     return html`
-      <dy-heading class="heading" lv="4">${i18n.get('volumeSetting')}</dy-heading>
+      <dy-heading class="heading" lv="4">${i18n.get('settings.sound.volumeTitle')}</dy-heading>
       <div class="grid">
         ${Object.entries(configure.user.settings.volume).map(
           ([name, value]) => html`

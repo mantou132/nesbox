@@ -2,10 +2,10 @@ import { I18n } from '@mantou/gem/helper/i18n';
 import { updateLocale } from 'duoyun-ui/lib/locale';
 
 import { ScGame } from 'src/generated/graphql';
-import zhCN from 'src/locales/templates/messages.json';
-import enURI from 'src/locales/en/messages.json?url';
-import twURI from 'src/locales/zh-TW/messages.json?url';
-import jaURI from 'src/locales/ja/messages.json?url';
+import zhCN from 'src/locales/zh-CN/basic.json';
+import enURI from 'src/locales/en/basic.json?url';
+import twURI from 'src/locales/zh-TW/basic.json?url';
+import jaURI from 'src/locales/ja/basic.json?url';
 
 const fallbackLanguage = 'zh-CN';
 

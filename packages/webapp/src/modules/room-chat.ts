@@ -224,7 +224,7 @@ export class MRoomChatElement extends GemElement<State> {
               ref=${this.inputRef.ref}
               class=${classMap({ input: true })}
               .icon=${this.state.speechTimer ? icons.loading : undefined}
-              placeholder=${this.state.speechTimer ? 'Speech Recognition' : i18n.get('placeholderMessage')}
+              placeholder=${this.state.speechTimer ? 'Speech Recognition' : i18n.get('placeholder.message')}
               @keydown=${this.#onKeyDown}
               @keyup=${this.#stopPropagation}
               @change=${this.#onChange}

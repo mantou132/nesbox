@@ -122,7 +122,7 @@ export class PRoomElement extends GemElement {
                 <dy-input
                   autofocus
                   style="width: 100%"
-                  placeholder=${i18n.get('placeholderUsername')}
+                  placeholder=${i18n.get('placeholder.username')}
                   @change=${(e: any) => (e.target.value = e.detail)}
                 ></dy-input>
               `,
@@ -152,27 +152,27 @@ export class PRoomElement extends GemElement {
           text: '---',
         },
         {
-          text: i18n.get('shortcutScreenshot'),
+          text: i18n.get('settings.shortcut.screenshot'),
           handle: this.#saveScreenshot,
           tag: getShortcut('SCREENSHOT', true),
         },
         this.#isHost && {
-          text: i18n.get('shortcutSave') + ' (Local)',
+          text: i18n.get('settings.shortcut.stateSave') + ' (Local)',
           handle: this.#save,
           tag: getShortcut('SAVE_GAME_STATE', true),
         },
         this.#isHost && {
-          text: i18n.get('shortcutLoad') + ' (Local)',
+          text: i18n.get('settings.shortcut.stateLoad') + ' (Local)',
           handle: this.#load,
           tag: getShortcut('LOAD_GAME_STATE', true),
         },
         this.#isHost && {
-          text: i18n.get('shortcutOpenRam'),
+          text: i18n.get('settings.shortcut.openRam'),
           handle: this.#openRamViewer,
           tag: getShortcut('OPEN_RAM_VIEWER', true),
         },
         this.#isHost && {
-          text: i18n.get('shortcutOpenCheat'),
+          text: i18n.get('settings.shortcut.openCheat'),
           handle: this.#openCheatModal,
           tag: getShortcut('OPEN_CHEAT_SETTINGS', true),
         },
@@ -213,7 +213,7 @@ export class PRoomElement extends GemElement {
       logger.error(err);
       if (!auto) throw err;
     }
-    if (!auto) Toast.open('success', i18n.get('tipGameStateSave', new Time().format()));
+    if (!auto) Toast.open('success', i18n.get('tip.game.stateSave', new Time().format()));
   };
 
   #autoSave = () => {
@@ -232,7 +232,7 @@ export class PRoomElement extends GemElement {
       reqList.unshift(autoCacheReq);
     }
     if (reqList.length === 0) {
-      Toast.open('default', i18n.get('tipGameStateMissing'));
+      Toast.open('default', i18n.get('tip.game.stateMissing'));
     } else {
       const getQuery = (url: string, { searchParams } = new URL(url)) => ({
         type: searchParams.get('type') || '',
@@ -242,7 +242,7 @@ export class PRoomElement extends GemElement {
         tag: searchParams.get('auto') ? 'AUTO' : '',
       });
       Modal.open({
-        header: i18n.get('tipGameStateTitle'),
+        header: i18n.get('page.room.stateSelectTitle'),
         body: html`
           <nesbox-list
             .data=${reqList
@@ -256,7 +256,7 @@ export class PRoomElement extends GemElement {
                   const res = await (req === autoCacheReq ? autoCache : cache).match(req);
                   if (!res) return;
                   this.stageRef.element!.loadState({ type, ptr, buffer: await res.arrayBuffer() });
-                  Toast.open('success', i18n.get('tipGameStateLoad', time.format()));
+                  Toast.open('success', i18n.get('tip.game.stateLoad', time.format()));
                   evt.target?.dispatchEvent(new CustomEvent('close', { composed: true }));
                 },
               }))}
@@ -281,7 +281,7 @@ export class PRoomElement extends GemElement {
 
   #saveScreenshot = async () => {
     if (await this.stageRef.element!.screenshot()) {
-      Toast.open('success', i18n.get('tipScreenshotSaved'));
+      Toast.open('success', i18n.get('tip.game.screenshotSaved'));
     }
   };
 
@@ -298,7 +298,7 @@ export class PRoomElement extends GemElement {
   #openCheatModal = () => {
     if (!this.#playing) return;
     Modal.open({
-      header: i18n.get('cheatSettingsTitle', store.games[this.#playing.gameId]?.name || ''),
+      header: i18n.get('settings.cheat.title', store.games[this.#playing.gameId]?.name || ''),
       body: html`
         <m-cheat-settings .gameId=${this.#playing.gameId}></m-cheat-settings>
         <style>

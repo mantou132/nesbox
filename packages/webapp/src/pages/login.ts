@@ -234,14 +234,14 @@ export class PLoginElement extends GemElement<State> {
           <dy-form-item
             name="username"
             required
-            .placeholder=${i18n.get('placeholderUsername')}
+            .placeholder=${i18n.get('placeholder.username')}
             .value=${username}
           ></dy-form-item>
           <dy-form-item
             type="password"
             name="password"
             required
-            .placeholder=${i18n.get('placeholderPassword')}
+            .placeholder=${i18n.get('placeholder.password')}
             .value=${password}
           ></dy-form-item>
         </dy-form>

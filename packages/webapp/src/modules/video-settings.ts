@@ -36,38 +36,38 @@ export class MVideoSettingsElement extends GemElement {
 
     return html`
       <div class="grid">
-        <div>${i18n.get('refreshRate')}</div>
+        <div>${i18n.get('settings.video.refreshRate')}</div>
         <dy-select
           .value=${configure.user.settings.video.refreshRate}
           .options=${[
-            { label: i18n.get('refreshRateAuto'), value: VideoRefreshRate.AUTO },
-            { label: i18n.get('refreshRateFixed'), value: VideoRefreshRate.FIXED },
-            { label: i18n.get('refreshRateSync'), value: VideoRefreshRate.SYNC },
+            { label: i18n.get('enum.videoRefreshRate.auto'), value: VideoRefreshRate.AUTO },
+            { label: i18n.get('enum.videoRefreshRate.fixed'), value: VideoRefreshRate.FIXED },
+            { label: i18n.get('enum.videoRefreshRate.sync'), value: VideoRefreshRate.SYNC },
           ]}
           @change=${(evt: CustomEvent<VideoRenderMethod>) => this.#updateVideoSetting('refreshRate', evt.detail)}
         ></dy-select>
-        <div>${i18n.get('videoRender')}</div>
+        <div>${i18n.get('settings.video.render')}</div>
         <dy-select
           .value=${configure.user.settings.video.render}
           .options=${[
-            { label: i18n.get('videoRenderPixelated'), value: VideoRenderMethod.PIXELATED },
-            { label: i18n.get('videoRenderSmooth'), value: VideoRenderMethod.SMOOTH },
+            { label: i18n.get('enum.videoRender.pixelated'), value: VideoRenderMethod.PIXELATED },
+            { label: i18n.get('enum.videoRender.smooth'), value: VideoRenderMethod.SMOOTH },
           ]}
           @change=${(evt: CustomEvent<VideoRenderMethod>) => this.#updateVideoSetting('render', evt.detail)}
         ></dy-select>
-        <div>${i18n.get('videoFilter')}</div>
+        <div>${i18n.get('settings.video.filter')}</div>
         <dy-select
           .value=${configure.user.settings.video.filter}
           .options=${[
-            { label: i18n.get('videoFilterDefault'), value: VideoFilter.DEFAULT },
+            { label: i18n.get('enum.videoFilter.default'), value: VideoFilter.DEFAULT },
             { label: 'NTSC', value: VideoFilter.NTSC },
             { label: 'CRT', value: VideoFilter.CRT },
           ]}
           @change=${(evt: CustomEvent<VideoFilter>) => this.#updateVideoSetting('filter', evt.detail)}
         ></dy-select>
         <div>
-          Transport
-          <dy-tooltip .content=${i18n.get('tipHostSetting')}>
+          ${i18n.get('settings.video.transport')}
+          <dy-tooltip .content=${i18n.get('tip.settings.onlyHost')}>
             <dy-use class="help" .element=${icons.help}></dy-use>
           </dy-tooltip>
         </div>

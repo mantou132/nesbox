@@ -106,7 +106,7 @@ export class MLobbyChatElement extends GemElement<State> {
               autofocus
               class="input"
               .value=${this.state.input}
-              .placeholder=${i18n.get('placeholderMessage')}
+              .placeholder=${i18n.get('placeholder.message')}
               @blur=${() => this.setState({ start: false })}
               @change=${this.#onChange}
               @keydown=${this.#onKeydown}

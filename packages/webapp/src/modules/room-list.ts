@@ -26,7 +26,7 @@ const style = createCSSSheet(css`
 export class MRoomListElement extends GemElement {
   #onClick = (id: number) => {
     if (store.rooms[id] && store.rooms[id]!.users.length > 4) {
-      Toast.open('error', i18n.get('tipRoomCrowded'));
+      Toast.open('error', i18n.get('tip.room.crowded'));
     } else {
       enterPubRoom(id);
     }

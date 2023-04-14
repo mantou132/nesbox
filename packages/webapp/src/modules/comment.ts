@@ -70,7 +70,10 @@ export class MCommentElement extends GemElement {
       </style>
       <dy-help-text class="header">
         [${new Time().relativeTimeFormat(this.comment.updatedAt)}]
-        ${this.#isSelf ? i18n.get('selfComment') : this.comment.user.nickname}:
+        ${i18n.get(
+          this.comment.like ? 'likeGameComment' : 'unLikeGameComment',
+          this.#isSelf ? i18n.get('selfComment') : this.comment.user.nickname,
+        )}
         <span style="flex-grow: 1"></span>
       </dy-help-text>
       ${this.comment.body

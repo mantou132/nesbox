@@ -204,7 +204,7 @@ export class MGameListElement extends GemElement {
                 .value=${this.#gamePlayer}
                 .options=${['', '1', '2', '4'].map((value) => ({
                   value,
-                  label: value ? i18n.get('gamePlayer', value) : i18n.get('gameNoLimit'),
+                  label: value ? i18n.get('gamePlayer', value) : i18n.get('noLimit'),
                 }))}
                 @change=${({ detail }: CustomEvent<string>) => changeQuery(queryKeys.GAME_PLAYER, detail)}
               ></dy-select>

@@ -26,5 +26,12 @@
   "[dart]": {
     "editor.rulers": [120]
   },
-  "files.eol": "\n"
+  "files.eol": "\n",
+  "i18n-ally.enabledFrameworks": ["custom"],
+  "i18n-ally.localesPaths": ["packages/webapp/src/locales"],
+  "i18n-ally.sourceLanguage": "zh-CN",
+  "i18n-ally.dirStructure": "dir",
+  "i18n-ally.keystyle": "flat",
+  "i18n-ally.sortKeys": true,
+  "i18n-ally.translate.engines": ["google"]
 }

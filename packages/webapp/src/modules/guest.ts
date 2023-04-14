@@ -41,7 +41,7 @@ export class ModuleGuestElement extends GemElement {
     ContextMenu.open(
       [
         {
-          text: i18n.get('changeLanguage'),
+          text: i18n.get('settings.ui.language'),
           menu: Object.keys(i18n.resources).map((code) => ({
             selected: i18n.currentLanguage === code,
             text: langNames[code],
@@ -49,7 +49,7 @@ export class ModuleGuestElement extends GemElement {
           })),
         },
         {
-          text: i18n.get('changeTheme'),
+          text: i18n.get('settings.ui.theme'),
           menu: Object.entries(themeNames).map(([theme, name]: [ThemeName, string]) => ({
             selected: configure.theme === theme,
             text: name,
@@ -57,7 +57,7 @@ export class ModuleGuestElement extends GemElement {
           })),
         },
         {
-          text: i18n.get('screencastMode'),
+          text: i18n.get('settings.ui.screencastMode'),
           selected: configure.screencastMode,
           handle: toggleScreencastMode,
         },

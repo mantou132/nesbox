@@ -1,8 +1,8 @@
 import { i18n } from 'src/i18n/basic';
-import zhCN from 'src/locales/templates/tour-message.json';
-import enURI from 'src/locales/en/tour-message.json?url';
-import jaURI from 'src/locales/ja/tour-message.json?url';
-import twURI from 'src/locales/zh-TW/tour-message.json?url';
+import zhCN from 'src/locales/zh-CN/tour.json';
+import enURI from 'src/locales/en/tour.json?url';
+import jaURI from 'src/locales/ja/tour.json?url';
+import twURI from 'src/locales/zh-TW/tour.json?url';
 
 export type Locale = typeof zhCN;
 export type LocaleKey = keyof Locale;

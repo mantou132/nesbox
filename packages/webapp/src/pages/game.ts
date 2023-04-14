@@ -170,6 +170,13 @@ export class PGameElement extends GemElement {
     return this.#comment && !this.#comment.like;
   }
 
+  #getPercentage() {
+    if (!this.#commentIds?.length) return ['0%', '0%'];
+    const total = this.#commentIds.length || Infinity;
+    const liked = this.#commentIds.filter((id) => !!this.#comments?.[id]?.like).length / total;
+    return [liked, 1 - liked].map((e) => `${Math.round(e * 100)}%`);
+  }
+
   #changeComment = async (like: boolean) => {
     const input = await Modal.open<HTMLInputElement>({
       header: i18n.get('addComment'),
@@ -206,20 +213,7 @@ export class PGameElement extends GemElement {
   render = () => {
     const game = this.#game;
     const record = store.record[this.gameId];
-
-    let likedCount = 0;
-
-    const commentList = html`
-      ${this.#commentIds?.map((id) => {
-        if (this.#comments?.[id]?.like) likedCount++;
-        return this.#comments?.[id] && html`<m-comment .comment=${this.#comments[id]!}></m-comment>`;
-      })}
-    `;
-
-    const formatPercentage = (like: boolean) =>
-      !!this.#commentIds?.length
-        ? `${Math.round(((like ? likedCount : this.#commentIds.length - likedCount) * 100) / this.#commentIds.length)}%`
-        : '0%';
+    const [liked, unLiked] = this.#getPercentage();
 
     return html`
       <dy-divider></dy-divider>
@@ -262,7 +256,7 @@ export class PGameElement extends GemElement {
                 .icon=${this.#isSelfLike ? icons.likeSolid : icons.like}
                 type=${this.#isSelfLike ? 'solid' : 'reverse'}
               >
-                ${formatPercentage(true)}
+                ${liked}
               </dy-button>
               <dy-button
                 color=${theme.textColor}
@@ -270,11 +264,13 @@ export class PGameElement extends GemElement {
                 .icon=${this.#isSelfUnLike ? icons.unlikeSolid : icons.unlike}
                 type=${this.#isSelfUnLike ? 'solid' : 'reverse'}
               >
-                ${formatPercentage(false)}
+                ${unLiked}
               </dy-button>
             </dy-input-group>
           </div>
-          ${commentList}
+          ${this.#commentIds?.map((id) =>
+            this.#comments?.[id] ? html`<m-comment .comment=${this.#comments[id]!}></m-comment>` : '',
+          )}
         </div>
       </div>
     `;

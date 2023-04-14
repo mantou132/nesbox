@@ -70,7 +70,7 @@ export class MSettingsElement extends GemElement<State> {
         .value=${this.state.tab}
         .data=${[
           {
-            tab: i18n.get('keySetting'),
+            tab: i18n.get('settings.keybinding.title'),
             getContent() {
               return html`
                 <dy-tab-panel>
@@ -80,7 +80,7 @@ export class MSettingsElement extends GemElement<State> {
             },
           },
           {
-            tab: i18n.get('shortcut'),
+            tab: i18n.get('settings.shortcut.title'),
             getContent() {
               return html`
                 <dy-tab-panel>
@@ -90,7 +90,7 @@ export class MSettingsElement extends GemElement<State> {
             },
           },
           {
-            tab: i18n.get('soundSetting'),
+            tab: i18n.get('settings.sound.title'),
             getContent() {
               return html`
                 <dy-tab-panel>
@@ -100,7 +100,7 @@ export class MSettingsElement extends GemElement<State> {
             },
           },
           {
-            tab: i18n.get('videoSetting'),
+            tab: i18n.get('settings.video.title'),
             getContent() {
               return html`
                 <dy-tab-panel>
@@ -110,7 +110,7 @@ export class MSettingsElement extends GemElement<State> {
             },
           },
           {
-            tab: i18n.get('uiSetting'),
+            tab: i18n.get('settings.ui.title'),
             getContent() {
               return html`
                 <dy-tab-panel>
@@ -120,7 +120,7 @@ export class MSettingsElement extends GemElement<State> {
             },
           },
           {
-            tab: i18n.get('accountSetting'),
+            tab: i18n.get('settings.account.title'),
             getContent() {
               return html`
                 <dy-tab-panel>
