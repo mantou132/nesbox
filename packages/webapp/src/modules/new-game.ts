@@ -93,10 +93,7 @@ export class MNewGameElement extends GemElement<State> {
 
   render = () => {
     const { kind, maxPlayer, series, title, metadata } = this.state;
-    const tip = i18n.get(
-      'addGameDetail',
-      (e) => html`<dy-link @click=${() => open(`${githubRelease}/tag/0.0.1`)}>${e}</dy-link>`,
-    );
+    const tip = i18n.get('addGameDetail');
 
     return html`
       <dy-paragraph>

@@ -17,6 +17,7 @@ import { Loadbar } from 'duoyun-ui/elements/page-loadbar';
 import { createPath } from '@mantou/gem/elements/route';
 import { forever } from 'duoyun-ui/lib/utils';
 import { routes, locationStore } from 'src/routes';
+import { DuoyunRouteElement } from 'duoyun-ui/elements/route';
 
 import { preventDefault } from 'src/utils/common';
 import { paramKeys, queryKeys, viewTransitionName } from 'src/constants';
@@ -33,16 +34,15 @@ import { enterPubRoom, getAccount, getFriends, getGames, subscribeEvent } from '
 import { i18n } from 'src/i18n/basic';
 import { clearLobbyMessage, friendStore, toggleFriendChatState } from 'src/store';
 import { ScFriendStatus } from 'src/generated/graphql';
+import { navRoutes } from 'src/modules/nav';
 
 import 'duoyun-ui/elements/input-capture';
 import 'duoyun-ui/elements/drawer';
-import 'duoyun-ui/elements/route';
 import 'duoyun-ui/elements/modal';
 import 'src/modules/settings';
 import 'src/modules/search';
 import 'src/modules/friend-list';
 import 'src/modules/chat';
-import 'src/modules/nav';
 
 const style = createCSSSheet(css`
   :host {
@@ -76,18 +76,30 @@ const style = createCSSSheet(css`
 @connectStore(history.store)
 export class AppRootElement extends GemElement {
   @refobject contentRef: RefObject<HTMLDivElement>;
+  @refobject routeRef: RefObject<DuoyunRouteElement>;
 
   get #joinRoom() {
     return Number(history.getParams().query.get(queryKeys.JOIN_ROOM));
   }
 
+  #scrollPosition = new Map<string, number>();
+
   #onLoading = () => {
     Loadbar.start();
+    const { currentRoute, currentParams } = this.routeRef.element!;
+    if (currentRoute) {
+      this.#scrollPosition.set(
+        createPath(currentRoute, { params: currentParams }),
+        this.contentRef.element?.scrollTop || 0,
+      );
+    }
   };
 
   #onChange = async () => {
     Loadbar.end();
-    this.contentRef.element?.scrollTo(0, 0);
+    // await render
+    await Promise.resolve();
+    this.contentRef.element?.scrollTo(0, this.#scrollPosition.get(locationStore.path) || 0);
   };
 
   #openUnReadMessage = () => {
@@ -161,10 +173,11 @@ export class AppRootElement extends GemElement {
 
   render = () => {
     return html`
-      <m-nav></m-nav>
+      <dy-route .locationStore=${locationStore} .routes=${navRoutes}></dy-route>
       <div tabindex="-1" class="content" ref=${this.contentRef.ref}>
         <main style="display: contents">
           <dy-route
+            ref=${this.routeRef.ref}
             @loading=${this.#onLoading}
             @routechange=${this.#onChange}
             .routes=${routes}

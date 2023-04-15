@@ -55,6 +55,9 @@ const style = createCSSSheet(css`
     grid-gap: 2rem;
   }
   @media ${mediaQuery.PHONE} {
+    .list {
+      grid-template-columns: repeat(auto-fill, minmax(8em, 1fr));
+    }
     .heading {
       flex-direction: column;
       align-items: start;

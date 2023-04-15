@@ -38,9 +38,12 @@ const style = createCSSSheet(css`
   }
   .body {
     white-space: pre-wrap;
+    margin-block: 0.2em;
+    font-size: 0.875em;
+    line-height: 1.5;
   }
   .none {
-    white-space: normal;
+    opacity: 0.5;
     font-style: italic;
   }
 `);
@@ -71,14 +74,14 @@ export class MCommentElement extends GemElement {
       <dy-help-text class="header">
         [${new Time().relativeTimeFormat(this.comment.updatedAt)}]
         ${i18n.get(
-          this.comment.like ? 'likeGameComment' : 'unLikeGameComment',
-          this.#isSelf ? i18n.get('selfComment') : this.comment.user.nickname,
+          this.comment.like ? 'page.game.likeGame' : 'page.game.dislikeGame',
+          this.#isSelf ? i18n.get('page.game.selfComment') : this.comment.user.nickname,
         )}
         <span style="flex-grow: 1"></span>
       </dy-help-text>
       ${this.comment.body
         ? html`<div class="body">${this.comment.body}</div>`
-        : html`<dy-help-text class="none">${i18n.get('noneComment')}</dy-help-text>`}
+        : html`<div class="body none">${i18n.get('page.game.emptyComment')}</div>`}
     `;
   };
 }

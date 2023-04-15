@@ -76,6 +76,10 @@ export const gameSeriesList: { value: ScGameSeries | ''; label: LocaleKey }[] = 
     label: 'gameSeriesStreetFighter',
   },
   {
+    value: ScGameSeries.Kof,
+    label: 'gameSeriesKof',
+  },
+  {
     value: ScGameSeries.Tank,
     label: 'gameSeriesTank',
   },
@@ -86,18 +90,6 @@ export const gameSeriesList: { value: ScGameSeries | ''; label: LocaleKey }[] = 
   {
     value: ScGameSeries.AdventureIsland,
     label: 'gameSeriesAdventureIsland',
-  },
-  {
-    value: ScGameSeries.ChipDale,
-    label: 'gameSeriesChipDale',
-  },
-  {
-    value: ScGameSeries.DragonBall,
-    label: 'gameSeriesDragonBall',
-  },
-  {
-    value: ScGameSeries.LodeRunner,
-    label: 'gameSeriesLodeRunner',
   },
   {
     value: ScGameSeries.SanGokuShi,

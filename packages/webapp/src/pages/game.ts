@@ -6,100 +6,48 @@ import {
   css,
   connectStore,
   numattribute,
-  styleMap,
   GemElement,
 } from '@mantou/gem';
-import { Modal } from 'duoyun-ui/elements/modal';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
-import { waitLoading } from 'duoyun-ui/elements/wait';
 import { formatDuration, Time } from 'duoyun-ui/lib/time';
+import { waitLoading } from 'duoyun-ui/elements/wait';
 
-import { getCDNSrc, getGithubGames } from 'src/utils/common';
-import { githubIssue, viewTransitionName } from 'src/constants';
-import { createComment, createRoom, getComments } from 'src/services/api';
+import { getComments } from 'src/services/api';
 import { store } from 'src/store';
 import { icons } from 'src/icons';
-import { configure } from 'src/configure';
 import { theme } from 'src/theme';
 import { i18n } from 'src/i18n/basic';
+import { getGithubGames } from 'src/utils/common';
+import { githubIssue } from 'src/constants';
 
-import 'duoyun-ui/elements/button';
-import 'duoyun-ui/elements/input';
-import 'duoyun-ui/elements/heading';
+import 'duoyun-ui/elements/action-text';
 import 'duoyun-ui/elements/divider';
 import 'src/modules/screenshots';
-import 'src/modules/comment';
+import 'src/modules/comment-list';
 import 'src/modules/game-detail';
 
 const style = createCSSSheet(css`
   :host {
-    display: block;
+    display: flex;
+    flex-direction: column;
     min-height: 100vh;
     padding-inline: ${theme.gridGutter};
-    align-items: flex-start;
-  }
-  dy-divider {
-    margin-block-end: ${theme.gridGutter};
+    padding-block-start: ${theme.gridGutter};
+    gap: ${theme.gridGutter};
   }
   .content {
     display: flex;
     flex-direction: row;
-    gap: 1.5em;
-  }
-  .screenshots,
-  .preview {
-    box-shadow: 0 0 0 0.5px ${theme.borderColor};
-  }
-  .info {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: ${theme.gridGutter};
+    gap: calc(3 * ${theme.gridGutter});
+    margin-block: calc(${theme.gridGutter});
   }
   .aside {
     display: flex;
     flex-direction: column;
-    gap: ${theme.gridGutter};
-    width: 22em;
+    align-items: flex-start;
     flex-shrink: 0;
-  }
-  .header {
-    width: 100%;
-    display: flex;
-    align-items: center;
-  }
-  .title {
-    flex-grow: 1;
-    margin: 0;
-  }
-  .icon {
-    width: 1.5rem;
-    padding: 0.3rem;
-    border-radius: ${theme.normalRound};
-  }
-  .icon:hover {
-    background-color: ${theme.hoverBackgroundColor};
-  }
-  .preview {
-    display: block;
-    width: 100%;
-    aspect-ratio: 503/348;
-    object-fit: cover;
-    border-radius: ${theme.normalRound};
-    image-rendering: pixelated;
-    filter: ${theme.imageFilter};
-    view-transition-name: ${viewTransitionName.PREVIEW};
-  }
-  .stats {
-    position: absolute;
-    width: 100%;
-    box-sizing: border-box;
-    bottom: 0;
-    display: flex;
-    justify-content: space-between;
-    padding: 0.5em;
-    background: rgba(0, 0, 0, 0.6);
+    width: 12em;
+    line-height: 2;
   }
   .stats-icon {
     gap: 0.2em;
@@ -107,31 +55,9 @@ const style = createCSSSheet(css`
   .stats-icon::part(icon) {
     width: 1.2em;
   }
-  .comment-title {
-    display: flex;
-    align-items: center;
-  }
-  .comment-title > * {
-    margin: 0;
-    flex-grow: 1;
-  }
-  .comment-title dy-button {
-    width: 5.5em;
-  }
   @media ${mediaQuery.PHONE} {
     .content {
       flex-direction: column;
-    }
-    .aside {
-      width: 100%;
-    }
-    .preview {
-      display: none;
-    }
-    .header {
-      flex-direction: column;
-      gap: 1em;
-      align-items: flex-start;
     }
   }
 `);
@@ -149,49 +75,6 @@ export class PGameElement extends GemElement {
   get #game() {
     return store.games[this.gameId];
   }
-
-  get #comments() {
-    return store.comment[this.gameId]?.comments;
-  }
-
-  get #commentIds() {
-    return store.comment[this.gameId]?.userIds;
-  }
-
-  get #comment() {
-    return this.#comments?.[configure.user?.id || 0];
-  }
-
-  get #isSelfLike() {
-    return this.#comment && this.#comment.like;
-  }
-
-  get #isSelfUnLike() {
-    return this.#comment && !this.#comment.like;
-  }
-
-  #getPercentage() {
-    if (!this.#commentIds?.length) return ['0%', '0%'];
-    const total = this.#commentIds.length || Infinity;
-    const liked = this.#commentIds.filter((id) => !!this.#comments?.[id]?.like).length / total;
-    return [liked, 1 - liked].map((e) => `${Math.round(e * 100)}%`);
-  }
-
-  #changeComment = async (like: boolean) => {
-    const input = await Modal.open<HTMLInputElement>({
-      header: i18n.get('addComment'),
-      body: html`
-        <dy-input
-          autofocus
-          type="textarea"
-          style=${styleMap({ width: '30em' })}
-          .value=${this.#comment?.body || ''}
-          @change=${({ target, detail }: CustomEvent<string>) => ((target as HTMLInputElement).value = detail)}
-        ></dy-input>
-      `,
-    });
-    createComment({ gameId: this.gameId, like, body: input.value });
-  };
 
   #edit = async () => {
     if (this.#game) {
@@ -211,68 +94,30 @@ export class PGameElement extends GemElement {
   };
 
   render = () => {
-    const game = this.#game;
     const record = store.record[this.gameId];
-    const [liked, unLiked] = this.#getPercentage();
 
     return html`
-      <dy-divider></dy-divider>
+      <m-screenshots class="screenshots" .game=${this.#game}></m-screenshots>
       <div class="content">
-        <div class="info">
-          <m-screenshots class="screenshots" .links=${game?.screenshots}></m-screenshots>
-          <div class="header">
-            <dy-heading lv="1" class="title">
-              ${game?.name}
-              <dy-use class="icon" @click=${this.#edit} .element=${icons.edit}></dy-use>
-            </dy-heading>
-            <dy-button data-cy="start" @click=${() => game && createRoom({ gameId: game.id, private: false })}>
-              ${i18n.get('startGame')}
-            </dy-button>
-          </div>
-          <m-game-detail .md=${game?.description || ''}></m-game-detail>
-        </div>
+        <m-game-detail .game=${this.#game}></m-game-detail>
         <div class="aside">
-          <div style="position: relative;">
-            <img class="preview" draggable="false" src=${game ? getCDNSrc(game.preview) : ''} />
-            ${record
-              ? html`
-                  <div class="stats">
-                    <dy-use class="stats-icon" .element=${icons.date}>
-                      ${i18n.get('gameLastPlay', new Time().relativeTimeFormat(record.lastPlayStartAt))}
-                    </dy-use>
-                    <dy-use class="stats-icon" .element=${icons.schedule}>
-                      ${i18n.get('gameTotalPlay', formatDuration(record.playTotal))}
-                    </dy-use>
-                  </div>
-                `
-              : ''}
-          </div>
-          <div class="comment-title">
-            <dy-heading lv="3">${i18n.get('gameComment')}</dy-heading>
-            <dy-input-group>
-              <dy-button
-                color=${theme.textColor}
-                @click=${() => this.#changeComment(true)}
-                .icon=${this.#isSelfLike ? icons.likeSolid : icons.like}
-                type=${this.#isSelfLike ? 'solid' : 'reverse'}
-              >
-                ${liked}
-              </dy-button>
-              <dy-button
-                color=${theme.textColor}
-                @click=${() => this.#changeComment(false)}
-                .icon=${this.#isSelfUnLike ? icons.unlikeSolid : icons.unlike}
-                type=${this.#isSelfUnLike ? 'solid' : 'reverse'}
-              >
-                ${unLiked}
-              </dy-button>
-            </dy-input-group>
-          </div>
-          ${this.#commentIds?.map((id) =>
-            this.#comments?.[id] ? html`<m-comment .comment=${this.#comments[id]!}></m-comment>` : '',
-          )}
+          ${record
+            ? html`
+                <dy-use class="stats-icon" .element=${icons.date}>
+                  ${i18n.get('page.game.lastPlay', new Time().relativeTimeFormat(record.lastPlayStartAt))}
+                </dy-use>
+                <dy-use class="stats-icon" .element=${icons.schedule}>
+                  ${i18n.get('page.game.totalPlay', formatDuration(record.playTotal))}
+                </dy-use>
+              `
+            : ''}
+          <dy-use class="stats-icon" @click=${this.#edit} .element=${icons.edit}>
+            <dy-action-text>${i18n.get('page.game.update')}</dy-action-text>
+          </dy-use>
         </div>
       </div>
+      <dy-divider></dy-divider>
+      <m-comment-list .game=${this.#game}></m-comment-list>
     `;
   };
 }

@@ -227,16 +227,17 @@ export enum ScGameKind {
 
 export enum ScGamePlatform {
   Arcade = 'ARCADE',
-  Nes = 'NES'
+  Nes = 'NES',
+  UniversalJs = 'UNIVERSAL_JS',
+  UniversalWasm = 'UNIVERSAL_WASM',
+  Wasm4 = 'WASM4'
 }
 
 export enum ScGameSeries {
   AdventureIsland = 'ADVENTURE_ISLAND',
-  ChipDale = 'CHIP_DALE',
   Contra = 'CONTRA',
   DoubleDragon = 'DOUBLE_DRAGON',
-  DragonBall = 'DRAGON_BALL',
-  LodeRunner = 'LODE_RUNNER',
+  Kof = 'KOF',
   Mario = 'MARIO',
   MegaMan = 'MEGA_MAN',
   Nekketsu = 'NEKKETSU',

@@ -19,9 +19,7 @@ const style = createCSSSheet(css`
     display: block;
     min-height: 100vh;
     padding-inline: ${theme.gridGutter};
-  }
-  dy-divider {
-    margin-block-end: ${theme.gridGutter};
+    padding-block-start: ${theme.gridGutter};
   }
   .chat {
     position: fixed;
@@ -44,7 +42,6 @@ export class PRoomsElement extends GemElement {
 
   render = () => {
     return html`
-      <dy-divider></dy-divider>
       ${!store.roomIds
         ? html`<dy-loading></dy-loading>`
         : store.roomIds.length === 0

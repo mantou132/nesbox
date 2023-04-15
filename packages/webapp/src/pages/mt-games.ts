@@ -191,10 +191,10 @@ export class PMtGamesElement extends GemElement {
           ? html`
               <div class="stats">
                 <dy-use class="stats-icon" .element=${icons.date}>
-                  ${i18n.get('gameLastPlay', new Time().relativeTimeFormat(record.lastPlayStartAt))}
+                  ${i18n.get('page.game.lastPlay', new Time().relativeTimeFormat(record.lastPlayStartAt))}
                 </dy-use>
                 <dy-use class="stats-icon" .element=${icons.schedule}>
-                  ${i18n.get('gameTotalPlay', formatDuration(record.playTotal))}
+                  ${i18n.get('page.game.totalPlay', formatDuration(record.playTotal))}
                 </dy-use>
               </div>
             `

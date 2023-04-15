@@ -129,14 +129,9 @@ export const preventDefault = (fn: () => void) => {
   };
 };
 
-export const fontLoading = (font: FontFace) => {
+export const fontLoading = async (font: FontFace) => {
   if (document.fonts.has(font)) return;
-  font
-    .load()
-    .then((font) => document.fonts.add(font))
-    .catch(() => {
-      //
-    });
+  document.fonts.add(await font.load());
 };
 
 const formatTrafficString = (v: number) => {

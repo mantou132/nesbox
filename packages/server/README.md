@@ -42,7 +42,7 @@ restart local server. now, if you create an issue, will notify your local server
 
 - operator is repo owner
 - one or more picture
-- a `.zip` file containing `.nes` file
+- a `.zip` file
 
 reference: https://github.com/mantou132/nesbox/issues/1
 

@@ -279,11 +279,17 @@ export class MStageElement extends GemElement<State> {
       let filename = url.pathname.split('/').pop()!;
 
       // 街机模拟器依赖 zip 档文件名，所以不能修改文件名
+      // 不是街机需要解压 zip 档
       if (!url.searchParams.has('arcade') && this.#game!.platform !== ScGamePlatform.Arcade) {
         const folder = await JSZip.loadAsync(romBuffer);
         const file = Object.values(folder.files).find((e) => isValidGameFile(e.name))!;
         romBuffer = await file.async('arraybuffer');
         filename = file.name;
+      }
+
+      // 区分通用 wasm 游戏
+      if (this.#game!.platform === ScGamePlatform.Wasm4) {
+        filename = `${filename}.wasm4.wasm`;
       }
 
       const game: Nes = await createGame(filename, romBuffer, this.#sampleRate);

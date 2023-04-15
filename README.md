@@ -24,6 +24,11 @@
 - Internationalization
 - Run local game
 
+## Download
+
+- [Desktop](https://nesbox.xianqiao.wang)
+- [TV/Mobile(Testing)](https://github.com/mantou132/nesbox/issues/154#issuecomment-1430810077)
+
 ## Support games
 
 - [NES(FC)](https://en.wikipedia.org/wiki/Nintendo_Entertainment_System)
@@ -32,12 +37,7 @@
 - Universal Wasm (implementing [NESBox API](https://github.com/mantou132/nesbox/blob/dev/packages/nes/utils_macro/src/lib.rs))
 - Universal JavaScript (implementing [NESBox Sandbox API](https://github.com/mantou132/nesbox/blob/dev/packages/sandbox/types.d.ts))
 
-## Download
-
-- [Desktop](https://nesbox.xianqiao.wang)
-- [TV/Mobile(Testing)](https://github.com/mantou132/nesbox/issues/154#issuecomment-1430810077)
-
-## Add game to NESBox
+## Publish game to NESBox
 
 See the guide([Chinese](./PUBLISH_GAME.md))
 

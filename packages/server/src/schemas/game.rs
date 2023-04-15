@@ -14,6 +14,9 @@ use crate::db::schema::games;
 pub enum ScGamePlatform {
     Arcade,
     Nes,
+    Wasm4,
+    UniversalWasm,
+    UniversalJs,
 }
 
 // https://zh.wikipedia.org/wiki/%E7%94%B5%E5%AD%90%E6%B8%B8%E6%88%8F%E7%B1%BB%E5%9E%8B#%E9%A1%9E%E5%9E%8B%E7%B8%AE%E5%AF%AB
@@ -56,16 +59,11 @@ pub enum ScGameSeries {
     Mario,
     DoubleDragon,
     AdventureIsland,
-    // 松鼠大作战
-    ChipDale,
     StreetFighter,
     MegaMan,
-    // 忍者龙剑传
     NinjaGaiden,
-    // 淘金者
-    LodeRunner,
-    DragonBall,
     SanGokuShi,
+    Kof,
 }
 
 #[derive(GraphQLObject, Debug, Clone)]
