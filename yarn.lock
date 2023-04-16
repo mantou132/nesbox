@@ -1240,10 +1240,10 @@
   resolved "https://registry.yarnpkg.com/@mantou/fbneo/-/fbneo-0.0.2.tgz#63d657d0df661e776880caae1584f581ee8a2e3c"
   integrity sha512-tFsDKZ8NqN0NhWyCopEk/ck89ioDxU36bOby5gg65kukCIQDmknDIUMEO9iUb7gsqdF2VYKEvmGHm7rvLUXCWg==
 
-"@mantou/gem@^1.6.0":
-  version "1.6.17"
-  resolved "https://registry.yarnpkg.com/@mantou/gem/-/gem-1.6.17.tgz#6867ca888b08eba751390077561c6d3a92481198"
-  integrity sha512-CxgojVXDNWVbeG7kfJl1KekOVFRQcPqEtHnT3bB4SRJhAdKoDGpr5RhheWzeJYbzxnsTV3iH4tomh8eBjN0vhg==
+"@mantou/gem@^1.6.18":
+  version "1.6.18"
+  resolved "https://registry.yarnpkg.com/@mantou/gem/-/gem-1.6.18.tgz#2503f5f4576cb30a754be630978f3f01febf8ee0"
+  integrity sha512-i0ZXQnPi2D6BsUsRWwAC8JfqOHUxWSvjZss2jaVFMwPcaDQCAxC5suaeRFnRhU36JGRGsPDGQgpoyfWpoXtTaw==
   dependencies:
     lit-html "^1.4.1"
 
@@ -4624,6 +4624,13 @@ from2@^2.1.1:
     inherits "^2.0.1"
     readable-stream "^2.0.0"
 
+front-matter@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/front-matter/-/front-matter-4.0.2.tgz#b14e54dc745cfd7293484f3210d15ea4edd7f4d5"
+  integrity sha512-I8ZuJ/qG92NWX8i5x1Y8qyj3vizhXS31OxjKDu3LKP+7/qBgfIKValiZIEwoVoJKUHlhWtYrktkxV1XsX+pPlg==
+  dependencies:
+    js-yaml "^3.13.1"
+
 fs-constants@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/fs-constants/-/fs-constants-1.0.0.tgz#6be0de9be998ce16af8afc24497b9ee9b7ccd9ad"
@@ -5933,7 +5940,7 @@ js-yaml@4.1.0, js-yaml@^4.0.0, js-yaml@^4.1.0:
   dependencies:
     argparse "^2.0.1"
 
-js-yaml@^3.10.0:
+js-yaml@^3.10.0, js-yaml@^3.13.1:
   version "3.14.1"
   resolved "https://registry.npmmirror.com/js-yaml/-/js-yaml-3.14.1.tgz#dae812fdb3825fa306609a8717383c50c36a0537"
   integrity sha512-okMH7OXXJ7YrN9Ok3/SXrnu4iX9yOk+25nqX4imS2npuvTYDmo/QEZoqwZkYaIDk3jVvBOTOIEgEhaLOynBS9g==

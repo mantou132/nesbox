@@ -3,7 +3,6 @@ import { ContextMenu } from 'duoyun-ui/elements/menu';
 import { waitLoading } from 'duoyun-ui/elements/wait';
 import { commonHandle } from 'duoyun-ui/lib/hotkeys';
 import { Modal } from 'duoyun-ui/elements/modal';
-import { locale } from 'duoyun-ui/lib/locale';
 import { routes } from 'src/routes';
 
 import { getAvatar } from 'src/utils/common';
@@ -58,14 +57,26 @@ export class MAvatarElement extends GemElement {
   #addGame = async () => {
     const newGameElement = await Modal.open<MNewGameElement>({
       header: i18n.get('addGame'),
-      body: html`<m-new-game></m-new-game>`,
-      okText: locale.nextTour,
+      body: html`
+        <m-new-game>
+          <style>
+            div[part='footer'] {
+              display: none;
+            }
+          </style>
+        </m-new-game>
+      `,
     });
+
+    const attrs = Object.entries(newGameElement.state.attrs).reduce((p, [k, v]) => {
+      if (!v) return p;
+      return `${p}${k}: ${v}\n`;
+    }, '');
 
     open(
       `${githubIssue}/new?${new URLSearchParams({
         title: newGameElement.state.title,
-        body: newGameElement.state.description,
+        body: `${attrs ? `---\n${attrs}---\n\n` : ''}${newGameElement.state.description}`,
         labels: [
           'game',
           newGameElement.state.kind,

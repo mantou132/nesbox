@@ -9,6 +9,7 @@ import {
   refobject,
   RefObject,
   styleMap,
+  attribute,
 } from '@mantou/gem';
 import JSZip from 'jszip';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
@@ -16,7 +17,6 @@ import { changeLoading, waitLoading } from 'duoyun-ui/elements/wait';
 import { Nes, Button, Player } from '@mantou/nes';
 import { isNotNullish } from 'duoyun-ui/lib/types';
 import { clamp } from 'duoyun-ui/lib/number';
-import { isMtApp } from 'mt-app';
 
 import {
   ChannelMessage,
@@ -112,6 +112,7 @@ export class MStageElement extends GemElement<State> {
   @refobject canvasRef: RefObject<NesboxCanvasElement>;
   @refobject audioRef: RefObject<HTMLAudioElement>;
   @refobject chatRef: RefObject<MRoomChatElement>;
+  @attribute padding: string;
 
   state: State = {
     messages: [],
@@ -604,7 +605,7 @@ export class MStageElement extends GemElement<State> {
         .height=${canvasHeight}
         .filter=${this.#settings?.video.filter || VideoFilter.DEFAULT}
         style=${styleMap({
-          padding: isMtApp ? '2em 5em 5em' : '5em',
+          padding: this.padding,
           imageRendering: this.#settings?.video.render || VideoRenderMethod.PIXELATED,
         })}
       ></nesbox-canvas>

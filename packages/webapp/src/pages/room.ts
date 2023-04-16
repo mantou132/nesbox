@@ -33,6 +33,7 @@ import { createInvite, updateRoomScreenshot } from 'src/services/api';
 import { closeListenerSet } from 'src/elements/titlebar';
 import { logger } from 'src/logger';
 import { ScUserStatus } from 'src/generated/graphql';
+import { theme } from 'src/theme';
 
 import type { MStageElement } from 'src/modules/stage';
 
@@ -40,11 +41,14 @@ import 'duoyun-ui/elements/coach-mark';
 import 'duoyun-ui/elements/space';
 import 'duoyun-ui/elements/status-light';
 import 'src/modules/stage';
+import 'src/modules/ads';
 import 'src/modules/cheat-settings';
 import 'src/elements/list';
 import 'src/elements/game-controller';
 import 'src/elements/fps';
 import 'src/elements/ping';
+
+const PADDING = '5em';
 
 const style = createCSSSheet(css`
   .stage,
@@ -63,6 +67,11 @@ const style = createCSSSheet(css`
     .controller {
       display: none;
     }
+  }
+  .ads {
+    position: absolute;
+    right: ${theme.gridGutter};
+    top: ${PADDING};
   }
   .info {
     position: absolute;
@@ -91,6 +100,10 @@ export class PRoomElement extends GemElement {
 
   get #playing() {
     return configure.user?.playing;
+  }
+
+  get #game() {
+    return store.games[this.#playing?.gameId || 0];
   }
 
   get #isHost() {
@@ -378,12 +391,13 @@ export class PRoomElement extends GemElement {
 
   render = () => {
     return html`
-      <m-stage class="stage" ref=${this.stageRef.ref} @contextmenu=${this.#onContextMenu}></m-stage>
+      <m-stage class="stage" ref=${this.stageRef.ref} @contextmenu=${this.#onContextMenu} .padding=${PADDING}></m-stage>
       <nesbox-game-controller class="controller"></nesbox-game-controller>
       <dy-space class="info">
         ${this.#isHost ? html`<nesbox-fps></nesbox-fps>` : html`<nesbox-ping></nesbox-ping>`}
         <m-room-voice></m-room-voice>
       </dy-space>
+      <m-ads class="ads" .attrs=${this.#game?.attributes}></m-ads>
       <div class="coach-mark-container">
         <dy-coach-mark index="1"></dy-coach-mark>
       </div>

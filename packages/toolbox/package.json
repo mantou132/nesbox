@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@mantou/ecs": "^0.0.1",
-    "@mantou/gem": "^1.6.0",
+    "@mantou/gem": "^1.6.18",
     "duoyun-ui": "^0.0.65",
     "jszip": "^3.10.0",
     "qoijs": "^1.0.0"

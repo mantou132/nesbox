@@ -1,11 +1,13 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, connectStore } from '@mantou/gem';
+import { locale } from 'duoyun-ui/lib/locale';
+import { Modal } from 'duoyun-ui/elements/modal';
 
 import { getCDNSrc } from 'src/utils/common';
 import { githubRelease } from 'src/constants';
 import { i18n } from 'src/i18n/basic';
 import { theme } from 'src/theme';
 import { gameKindList, gameSeriesList } from 'src/enums';
-import { store } from 'src/store';
+import { GameAttributes, store } from 'src/store';
 
 import 'duoyun-ui/elements/alert';
 import 'duoyun-ui/elements/link';
@@ -25,6 +27,12 @@ const style = createCSSSheet(css`
     text-align: justify;
     border: 1px solid ${theme.borderColor};
   }
+  .footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1em;
+    margin-top: 1.5em;
+  }
 `);
 
 type State = {
@@ -32,11 +40,13 @@ type State = {
   // 重名时游戏名称添加了`（中文/日本語）`后缀
   title: string;
   description: string;
-  kind: string;
-  series: string;
-  maxPlayer: string;
-  platform: string;
+  kind?: string;
+  series?: string;
+  maxPlayer?: string;
+  platform?: string;
   metadata?: { title: string; description: string }[];
+  step: number;
+  attrs: GameAttributes;
 };
 
 /**
@@ -49,10 +59,8 @@ export class MNewGameElement extends GemElement<State> {
   state: State = {
     title: '',
     description: '',
-    kind: '',
-    series: '',
-    maxPlayer: '',
-    platform: 'game.platform.nes',
+    step: 1,
+    attrs: {},
   };
 
   #updateDesc = () => {
@@ -87,56 +95,98 @@ export class MNewGameElement extends GemElement<State> {
     this.#updateDesc();
   };
 
+  #getContent = () => {
+    const { kind, maxPlayer, series, title, metadata, step, attrs } = this.state;
+    const { ad_link = '', ad_text = '' } = attrs;
+    switch (step) {
+      case 1:
+        return html`
+          <dy-paragraph>
+            <dy-alert class="tip" .header=${i18n.get('tip.game.adsTitle')} .status=${'default'}>
+              ${i18n.get('tip.game.ads')}
+            </dy-alert>
+          </dy-paragraph>
+          <dy-input-group>
+            <dy-input
+              .placeholder=${i18n.get('placeholder.adText')}
+              .value=${ad_text}
+              @change=${({ detail }: CustomEvent<string>) => this.setState({ attrs: { ...attrs, ad_text: detail } })}
+            ></dy-input>
+          </dy-input-group>
+          <dy-input-group>
+            <dy-input
+              .placeholder=${i18n.get('placeholder.adLink')}
+              .value=${ad_link}
+              @change=${({ detail }: CustomEvent<string>) => this.setState({ attrs: { ...attrs, ad_link: detail } })}
+            ></dy-input>
+          </dy-input-group>
+        `;
+      default:
+        return html`
+          <dy-paragraph>
+            <dy-alert class="tip" .header=${'Tip'} .status=${'default'}>${i18n.get('tip.game.add')}</dy-alert>
+          </dy-paragraph>
+          <dy-input-group>
+            <dy-input
+              .autofocus=${true}
+              .placeholder=${i18n.get('gameName')}
+              .value=${title}
+              .dataList=${metadata?.map((e) => ({ label: e.title }))}
+              @change=${this.#onChange}
+            ></dy-input>
+          </dy-input-group>
+          <dy-input-group>
+            <dy-pick
+              .value=${maxPlayer ?? undefined}
+              .placeholder=${i18n.get('gameMaxPlayer')}
+              .options=${['', '1', '2', '4'].map((value) => ({
+                value: value && `game.max_player.${value}`,
+                label: value ? i18n.get('gamePlayer', value) : i18n.get('noLimit'),
+              }))}
+              @change=${({ detail }: CustomEvent<string>) => this.setState({ maxPlayer: detail })}
+            ></dy-pick>
+            <dy-pick
+              .value=${kind ?? undefined}
+              .placeholder=${i18n.get('gameKind')}
+              .options=${gameKindList.map((e) => ({
+                value: e.value && `game.kind.${e.value.toLowerCase()}`,
+                label: i18n.get(e.label),
+              }))}
+              @change=${({ detail }: CustomEvent<string>) => this.setState({ kind: detail })}
+            ></dy-pick>
+            <dy-pick
+              .value=${series ?? undefined}
+              .placeholder=${i18n.get('gameSeries')}
+              .options=${gameSeriesList.map((e) => ({
+                value: e.value && `game.series.${e.value.toLowerCase()}`,
+                label: i18n.get(e.label),
+              }))}
+              @change=${({ detail }: CustomEvent<string>) => this.setState({ series: detail })}
+            ></dy-pick>
+          </dy-input-group>
+        `;
+    }
+  };
+
+  #next = () => {
+    if (this.state.step === 1) {
+      this.setState({ step: ++this.state.step });
+    } else {
+      this.closestElement(Modal)?.ok(null);
+    }
+  };
+
   mounted = () => {
     this.#fetchMetadata();
   };
 
   render = () => {
-    const { kind, maxPlayer, series, title, metadata } = this.state;
-    const tip = i18n.get('addGameDetail');
-
     return html`
-      <dy-paragraph>
-        <dy-alert class="tip" .header=${'Tip'} .status=${'default'}>${tip}</dy-alert>
-      </dy-paragraph>
-      <dy-input-group>
-        <dy-pick
-          .value=${maxPlayer || undefined}
-          .placeholder=${i18n.get('gameMaxPlayer')}
-          .options=${['', '1', '2', '4'].map((value) => ({
-            value: value && `game.max_player.${value}`,
-            label: value ? i18n.get('gamePlayer', value) : i18n.get('noLimit'),
-          }))}
-          @change=${({ detail }: CustomEvent<string>) => this.setState({ maxPlayer: detail })}
-        ></dy-pick>
-        <dy-pick
-          .value=${kind || undefined}
-          .placeholder=${i18n.get('gameKind')}
-          .options=${gameKindList.map((e) => ({
-            value: e.value && `game.kind.${e.value.toLowerCase()}`,
-            label: i18n.get(e.label),
-          }))}
-          @change=${({ detail }: CustomEvent<string>) => this.setState({ kind: detail })}
-        ></dy-pick>
-        <dy-pick
-          .value=${series || undefined}
-          .placeholder=${i18n.get('gameSeries')}
-          .options=${gameSeriesList.map((e) => ({
-            value: e.value && `game.series.${e.value.toLowerCase()}`,
-            label: i18n.get(e.label),
-          }))}
-          @change=${({ detail }: CustomEvent<string>) => this.setState({ series: detail })}
-        ></dy-pick>
-      </dy-input-group>
-      <dy-input-group>
-        <dy-input
-          .autofocus=${true}
-          .placeholder=${i18n.get('gameName')}
-          .value=${title}
-          .dataList=${metadata?.map((e) => ({ label: e.title }))}
-          @change=${this.#onChange}
-        ></dy-input>
-      </dy-input-group>
+      ${this.#getContent()}
+      <div class="footer">
+        <dy-button color="cancel" @click=${() => this.closestElement(Modal)?.close(null)}>${locale.cancel}</dy-button>
+        <dy-button color="normal" @click=${this.#next}>${locale.nextTour}</dy-button>
+      </div>
     `;
   };
 }

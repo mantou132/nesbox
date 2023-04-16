@@ -156,6 +156,8 @@ export class AppRootElement extends GemElement {
     this.effect(this.#enterRoom, () => [configure.user?.playing?.id]);
     this.effect(
       () => {
+        this.#scrollPosition.clear();
+        this.contentRef.element?.scrollTo(0, 0);
         clearLobbyMessage();
         return forever(getGames);
       },

@@ -113,7 +113,7 @@ export class PMtRoomElement extends GemElement {
 
   render = () => {
     return html`
-      <m-stage class="stage" ref=${this.stageRef.ref}></m-stage>
+      <m-stage class="stage" ref=${this.stageRef.ref} .padding=${'2em 5em 5em'}></m-stage>
 
       <dy-space class="info">
         ${this.#playing?.host === configure.user?.id

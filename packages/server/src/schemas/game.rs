@@ -104,6 +104,7 @@ fn convert_to_sc_game(game: &Game) -> ScGame {
         rom: game.rom.clone(),
         created_at: game.created_at.timestamp_millis() as f64,
         updated_at: game.updated_at.timestamp_millis() as f64,
+        max_player: game.max_player,
         screenshots: game
             .screenshots
             .clone()
@@ -111,16 +112,18 @@ fn convert_to_sc_game(game: &Game) -> ScGame {
             .split(",")
             .map(|url| url.into())
             .collect::<Vec<String>>(),
-        kind: game.kind.as_ref().map(|s| ScGameKind::from_str(s).unwrap()),
-        max_player: game.max_player,
+        kind: game
+            .kind
+            .as_ref()
+            .and_then(|s| ScGameKind::from_str(s).ok()),
         platform: game
             .platform
             .as_ref()
-            .map(|s| ScGamePlatform::from_str(s).unwrap()),
+            .and_then(|s| ScGamePlatform::from_str(s).ok()),
         series: game
             .series
             .as_ref()
-            .map(|s| ScGameSeries::from_str(s).unwrap()),
+            .and_then(|s| ScGameSeries::from_str(s).ok()),
     }
 }
 

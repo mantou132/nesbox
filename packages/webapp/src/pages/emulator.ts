@@ -155,7 +155,6 @@ export class PEmulatorElement extends GemElement<State> {
   #onPointerDown = (event: PointerEvent) => {
     const button = this.#getGamepadButton(event);
     if (!button) return;
-    this.setPointerCapture(event.pointerId);
     this.#enableAudio();
     const [x, y, dx, dy] = positionMapping(event, this.canvasRef.element!);
     this.#game?.handle_motion_event(Player.One, x, y, dx, dy);

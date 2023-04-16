@@ -95,7 +95,7 @@ import {
   UpdateRoomScreenshotMutation,
   UpdateRoomScreenshotMutationVariables,
 } from 'src/generated/graphql';
-import { store, friendStore } from 'src/store';
+import { store, friendStore, convertGame } from 'src/store';
 import { request, subscribe } from 'src/services';
 import { configure, parseAccount, Settings } from 'src/configure';
 import { i18n, isCurrentLang } from 'src/i18n/basic';
@@ -141,7 +141,7 @@ export const getGames = debounce(async () => {
   );
   const gameIds = games
     .map((e) => {
-      store.games[e.id] = e;
+      store.games[e.id] = convertGame(e);
       if (isCurrentLang(e)) return e.id;
     })
     .filter(isNotNullish);
@@ -417,7 +417,7 @@ export const subscribeEvent = () => {
       }
 
       if (newGame) {
-        store.games[newGame.id] = newGame;
+        store.games[newGame.id] = convertGame(newGame);
         if (isCurrentLang(newGame)) {
           updateStore(store, {
             gameIds: [...(store.gameIds || []), newGame.id],

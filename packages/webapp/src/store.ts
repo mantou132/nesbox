@@ -1,3 +1,4 @@
+import frontmatter from 'front-matter';
 import { ElementOf } from 'duoyun-ui/lib/types';
 import { createCacheStore } from 'duoyun-ui/lib/utils';
 import { updateStore } from '@mantou/gem';
@@ -14,7 +15,17 @@ import {
 } from 'src/generated/graphql';
 import { configure } from 'src/configure';
 
-export type Game = ElementOf<GetGamesQuery['games']>;
+export type GameAttributes = {
+  ad_text?: string;
+  ad_link?: string;
+};
+
+export function convertGame(game: ElementOf<GetGamesQuery['games']>): Game {
+  const { body, attributes } = frontmatter(game.description);
+  return { ...game, attributes: attributes as GameAttributes, description: body };
+}
+
+export type Game = ElementOf<GetGamesQuery['games']> & { attributes: GameAttributes };
 export type Room = ElementOf<GetRoomsQuery['rooms']>;
 export type Invite = ElementOf<GetFriendsQuery['invites']>;
 export type Friend = ElementOf<GetFriendsQuery['friends']>;
