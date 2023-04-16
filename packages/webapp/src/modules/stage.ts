@@ -334,7 +334,11 @@ export class MStageElement extends GemElement<State> {
       case ChannelMessageType.ROLE_ANSWER:
         const roleIds = new Set(Object.values(this.state.roles).map((role) => role?.userId));
         const newRoles = (detail as RoleAnswer).roles;
-        if (Object.values(newRoles).some((role) => role && !roleIds.has(role.userId) && role.userId !== this.#userId)) {
+        if (
+          Object.values(newRoles).some(
+            (role) => role?.userId && !roleIds.has(role.userId) && role.userId !== this.#userId,
+          )
+        ) {
           playHintSound('joined');
         }
         this.setState({ roles: { ...newRoles } });
