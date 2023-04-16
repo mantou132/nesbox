@@ -65,7 +65,6 @@ export class MCommentElement extends GemElement {
     return html`
       <style>
         :host {
-          order: ${this.#isSelf ? 0 : 1};
           background-image: ${!this.comment.like
             ? `linear-gradient(to left bottom, ${theme.negativeColor} -300%, transparent)`
             : 'none'};

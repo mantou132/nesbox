@@ -1,4 +1,14 @@
-import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, property, styleMap } from '@mantou/gem';
+import {
+  GemElement,
+  html,
+  adoptedStyle,
+  customElement,
+  createCSSSheet,
+  css,
+  property,
+  styleMap,
+  connectStore,
+} from '@mantou/gem';
 import { Modal } from 'duoyun-ui/elements/modal';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
@@ -51,6 +61,7 @@ const style = createCSSSheet(css`
  * @customElement m-comment-list
  */
 @customElement('m-comment-list')
+@connectStore(store)
 @adoptedStyle(style)
 export class MCommentListElement extends GemElement {
   @property game?: Game;
@@ -65,6 +76,10 @@ export class MCommentListElement extends GemElement {
 
   get #commentIds() {
     return store.comment[this.#gameId]?.userIds;
+  }
+
+  get #selfId() {
+    return configure.user?.id || 0;
   }
 
   get #comment() {
@@ -128,9 +143,14 @@ export class MCommentListElement extends GemElement {
         </dy-input-group>
       </div>
       <div class="list">
-        ${this.#commentIds?.map((id) =>
-          this.#comments?.[id] ? html`<m-comment class="comment" .comment=${this.#comments[id]!}></m-comment>` : '',
-        )}
+        ${this.#comments?.[this.#selfId]
+          ? html`<m-comment class="comment" .comment=${this.#comments[this.#selfId]!}></m-comment>`
+          : ''}
+        ${this.#commentIds
+          ?.filter((id) => id !== this.#selfId)
+          ?.map((id) =>
+            this.#comments?.[id] ? html`<m-comment class="comment" .comment=${this.#comments[id]!}></m-comment>` : '',
+          )}
       </div>
     `;
   };
