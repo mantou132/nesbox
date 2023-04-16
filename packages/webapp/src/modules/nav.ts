@@ -23,6 +23,7 @@ import { theme } from 'src/theme';
 import { createRoom, favoriteGame, leaveRoom } from 'src/services/api';
 import { store } from 'src/store';
 import { icons } from 'src/icons';
+import { AppRootElement } from 'src/app';
 
 import 'duoyun-ui/elements/link';
 import 'duoyun-ui/elements/use';
@@ -127,6 +128,15 @@ const style = createCSSSheet(css`
 export class MNavElement extends GemElement {
   @attribute page: 'room' | 'game' | '';
 
+  #goTop = (event: MouseEvent) => {
+    event.preventDefault();
+    this.closestElement(AppRootElement)?.contentRef.element?.scrollTo({
+      left: 0,
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
+
   #renderLinks = () => {
     return [routes.games, routes.favorites, routes.rooms].map(
       (route: RouteItem) => html`
@@ -203,7 +213,7 @@ export class MNavElement extends GemElement {
           : this.page === 'room'
           ? this.#renderRoomTitle()
           : this.#renderLinks()}
-        <span style="flex-grow: 1;"></span>
+        <span style="flex-grow: 1; align-self: stretch;" @dblclick=${this.#goTop}></span>
         <dy-use
           class="icon"
           tabindex="0"

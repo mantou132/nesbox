@@ -88,10 +88,8 @@ export class AppRootElement extends GemElement {
     Loadbar.start();
     const { currentRoute, currentParams } = this.routeRef.element!;
     if (currentRoute) {
-      this.#scrollPosition.set(
-        createPath(currentRoute, { params: currentParams }),
-        this.contentRef.element?.scrollTop || 0,
-      );
+      const scrollTop = this.contentRef.element?.scrollTop || 0;
+      this.#scrollPosition.set(createPath(currentRoute, { params: currentParams }), scrollTop > 360 ? scrollTop : 0);
     }
   };
 
