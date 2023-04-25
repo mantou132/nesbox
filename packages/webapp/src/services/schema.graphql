@@ -1,18 +1,3 @@
-fragment ScGamePart on ScGame {
-  id
-  name
-  description
-  preview
-  createdAt
-  updatedAt
-  rom
-  screenshots
-  platform
-  kind
-  series
-  maxPlayer
-}
-
 fragment ScMessagePart on ScMessage {
   id
   body
@@ -35,15 +20,6 @@ fragment ScLobbyInfoPart on ScLobbyInfo {
   onlineUserCount
 }
 
-fragment ScRoomBasicPart on ScRoomBasic {
-  id
-  gameId
-  private
-  host
-  createdAt
-  updatedAt
-}
-
 fragment ScInvitePart on ScInvite {
   id
   room {
@@ -51,50 +27,6 @@ fragment ScInvitePart on ScInvite {
   }
   targetId
   userId
-  createdAt
-  updatedAt
-}
-
-fragment ScUserBasicPart on ScUserBasic {
-  id
-  username
-  nickname
-  status
-  playing {
-    ...ScRoomBasicPart
-  }
-}
-
-fragment ScAccountPart on ScUser {
-  id
-  username
-  nickname
-  settings
-  playing {
-    ...ScRoomBasicPart
-  }
-}
-
-fragment ScRoomPart on ScRoom {
-  id
-  gameId
-  private
-  host
-  createdAt
-  updatedAt
-  users {
-    ...ScUserBasicPart
-  }
-  screenshot
-}
-
-fragment ScCommentPart on ScComment {
-  user {
-    ...ScUserBasicPart
-  }
-  gameId
-  body
-  like
   createdAt
   updatedAt
 }
@@ -114,25 +46,13 @@ fragment ScFriendPart on ScFriend {
   unreadMessageCount
 }
 
-query getGames {
-  games {
-    ...ScGamePart
-  }
+query getGameIds {
   topGames
   favorites
   recentGames
 }
 
-query getRooms {
-  rooms {
-    ...ScRoomPart
-  }
-}
-
-query getComments($gameId: Int!) {
-  comments(input: { gameId: $gameId }) {
-    ...ScCommentPart
-  }
+query getRecord($gameId: Int!) {
   record(input: { gameId: $gameId }) {
     ...ScRecordPart
   }

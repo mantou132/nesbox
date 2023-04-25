@@ -87,13 +87,13 @@ export class MMtNavElement extends GemElement {
 
   get #links() {
     return [
-      { path: createPath(routes.games), text: i18n.get('favoritesTitle') },
+      { path: createPath(routes.games), text: i18n.get('page.favorites.title') },
       {
         path: createPath(routes.games),
         query: new QueryString({ [queryKeys.RECENT_GAMES]: 1 }).toString(),
-        text: i18n.get('recentGame'),
+        text: i18n.get('page.games.recent'),
       },
-      { path: createPath(routes.rooms), text: i18n.get('roomsTitle') },
+      { path: createPath(routes.rooms), text: i18n.get('page.rooms.title') },
     ];
   }
 

@@ -3,9 +3,9 @@ projects:
     schema:
       - ${API_BASE:http://localhost:8080}/schema:
           method: GET
-    documents: packages/webapp/src/services/schema.graphql
+    documents: packages/webapp/src/services/{schema,common}.graphql
   webappguest:
     schema:
       - ${API_BASE:http://localhost:8080}/guestschema:
           method: GET
-    documents: packages/webapp/src/services/guest.graphql
+    documents: packages/webapp/src/services/{guest,common}.graphql

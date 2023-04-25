@@ -30,7 +30,8 @@ import {
   toggleSettingsState,
   SearchCommand,
 } from 'src/configure';
-import { enterPubRoom, getAccount, getFriends, getGames, subscribeEvent } from 'src/services/api';
+import { enterPubRoom, getAccount, getFriends, getGameIds, subscribeEvent } from 'src/services/api';
+import { getGames } from 'src/services/guest-api';
 import { i18n } from 'src/i18n/basic';
 import { clearLobbyMessage, friendStore, toggleFriendChatState } from 'src/store';
 import { ScFriendStatus } from 'src/generated/graphql';
@@ -157,17 +158,29 @@ export class AppRootElement extends GemElement {
         this.#scrollPosition.clear();
         this.contentRef.element?.scrollTo(0, 0);
         clearLobbyMessage();
-        return forever(getGames);
+        getGames();
+        if (configure.user) {
+          getGameIds();
+        }
       },
       () => [i18n.currentLanguage],
     );
-    forever(getAccount);
-    forever(getFriends);
+    this.effect(
+      () => {
+        if (configure.user) {
+          getAccount();
+          getFriends();
+          const subscription = subscribeEvent();
+          return () => {
+            subscription.return?.();
+          };
+        }
+      },
+      () => [configure.user?.id],
+    );
     addEventListener('keydown', this.#globalShortcut);
-    const subscription = subscribeEvent();
     return () => {
       removeEventListener('keydown', this.#globalShortcut);
-      subscription.return?.();
     };
   };
 

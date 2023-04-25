@@ -12,13 +12,15 @@ import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { formatDuration, Time } from 'duoyun-ui/lib/time';
 import { waitLoading } from 'duoyun-ui/elements/wait';
 
-import { getComments } from 'src/services/api';
+import { getComments } from 'src/services/guest-api';
+import { getRecord } from 'src/services/api';
 import { store } from 'src/store';
 import { icons } from 'src/icons';
 import { theme } from 'src/theme';
 import { i18n } from 'src/i18n/basic';
 import { getGithubGames } from 'src/utils/common';
 import { githubIssue } from 'src/constants';
+import { configure } from 'src/configure';
 
 import 'duoyun-ui/elements/action-text';
 import 'duoyun-ui/elements/divider';
@@ -91,6 +93,9 @@ export class PGameElement extends GemElement {
 
   mounted = () => {
     getComments(this.gameId);
+    if (configure.user) {
+      getRecord(this.gameId);
+    }
   };
 
   render = () => {

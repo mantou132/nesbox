@@ -16,6 +16,13 @@ export const gotoRedirectUri = () => {
   }
 };
 
+export const gotoLogin = () => {
+  history.push({
+    path: createPath(routes.login),
+    query: new QueryString({ [queryKeys.REDIRECT_URI]: window.location.href }),
+  });
+};
+
 export const logout = () => {
   if (matchRoute(routes.login)) return;
   deleteUser();

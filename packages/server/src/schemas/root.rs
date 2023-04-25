@@ -23,6 +23,7 @@ pub struct QueryRoot;
 
 #[juniper::graphql_object(Context = Context)]
 impl QueryRoot {
+    #[deprecated]
     fn games(_context: &Context) -> FieldResult<Vec<ScGame>> {
         let conn = DB_POOL.get().unwrap();
         Ok(get_games(&conn))
@@ -32,6 +33,7 @@ impl QueryRoot {
         Ok(get_recent_ids(&conn, context.user_id))
     }
     fn top_games(_context: &Context) -> FieldResult<Vec<i32>> {
+        // TODO: 个性化推荐
         let conn = DB_POOL.get().unwrap();
         Ok(get_top_ids(&conn))
     }
@@ -39,6 +41,7 @@ impl QueryRoot {
         let conn = DB_POOL.get().unwrap();
         Ok(get_favorites(&conn, context.user_id))
     }
+    #[deprecated]
     fn comments(_context: &Context, input: ScCommentsReq) -> FieldResult<Vec<ScComment>> {
         let conn = DB_POOL.get().unwrap();
         Ok(get_comments(&conn, input.game_id))
@@ -59,6 +62,7 @@ impl QueryRoot {
         let conn = DB_POOL.get().unwrap();
         Ok(get_friends(&conn, context.user_id))
     }
+    #[deprecated]
     fn rooms(_context: &Context) -> FieldResult<Vec<ScRoom>> {
         let conn = DB_POOL.get().unwrap();
         Ok(get_rooms(&conn))
@@ -432,6 +436,26 @@ pub struct GuestQueryRoot;
 impl GuestQueryRoot {
     fn hello() -> FieldResult<String> {
         Ok("guest".to_owned())
+    }
+
+    fn games(_context: &GuestContext) -> FieldResult<Vec<ScGame>> {
+        let conn = DB_POOL.get().unwrap();
+        Ok(get_games(&conn))
+    }
+
+    fn top_games(_context: &GuestContext) -> FieldResult<Vec<i32>> {
+        let conn = DB_POOL.get().unwrap();
+        Ok(get_top_ids(&conn))
+    }
+
+    fn comments(_context: &GuestContext, input: ScCommentsReq) -> FieldResult<Vec<ScComment>> {
+        let conn = DB_POOL.get().unwrap();
+        Ok(get_comments(&conn, input.game_id))
+    }
+
+    fn rooms(_context: &GuestContext) -> FieldResult<Vec<ScRoom>> {
+        let conn = DB_POOL.get().unwrap();
+        Ok(get_rooms(&conn))
     }
 }
 

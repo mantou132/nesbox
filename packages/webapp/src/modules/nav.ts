@@ -24,6 +24,7 @@ import { createRoom, favoriteGame, leaveRoom } from 'src/services/api';
 import { store } from 'src/store';
 import { icons } from 'src/icons';
 import { AppRootElement } from 'src/app';
+import { gotoLogin } from 'src/auth';
 
 import 'duoyun-ui/elements/link';
 import 'duoyun-ui/elements/use';
@@ -90,6 +91,11 @@ const style = createCSSSheet(css`
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
+  }
+  .space {
+    flex-grow: 1;
+    align-self: stretch;
+    height: 3em;
   }
   .icon {
     flex-shrink: 0;
@@ -205,6 +211,28 @@ export class MNavElement extends GemElement {
     `;
   };
 
+  #renderMenu = () => {
+    return html`
+      <dy-use
+        class="icon"
+        tabindex="0"
+        @keydown=${commonHandle}
+        .element=${icons.search}
+        @click=${toggleSearchState}
+      ></dy-use>
+      <dy-use
+        class="icon group"
+        tabindex="0"
+        @keydown=${commonHandle}
+        .element=${icons.group}
+        @click=${toggleFriendListState}
+      >
+        <m-badge></m-badge>
+      </dy-use>
+      <m-avatar class="icon avatar"></m-avatar>
+    `;
+  };
+
   render = () => {
     return html`
       <nav class="nav">
@@ -213,24 +241,10 @@ export class MNavElement extends GemElement {
           : this.page === 'room'
           ? this.#renderRoomTitle()
           : this.#renderLinks()}
-        <span style="flex-grow: 1; align-self: stretch;" @dblclick=${this.#goTop}></span>
-        <dy-use
-          class="icon"
-          tabindex="0"
-          @keydown=${commonHandle}
-          .element=${icons.search}
-          @click=${toggleSearchState}
-        ></dy-use>
-        <dy-use
-          class="icon group"
-          tabindex="0"
-          @keydown=${commonHandle}
-          .element=${icons.group}
-          @click=${toggleFriendListState}
-        >
-          <m-badge></m-badge>
-        </dy-use>
-        <m-avatar class="icon avatar"></m-avatar>
+        <span class="space" @dblclick=${this.#goTop}></span>
+        ${configure.user
+          ? this.#renderMenu()
+          : html`<dy-action-text @click=${gotoLogin} data-cy="login">${i18n.get('login')}</dy-action-text>`}
       </nav>
     `;
   };

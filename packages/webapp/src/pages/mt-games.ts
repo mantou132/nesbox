@@ -18,7 +18,8 @@ import { getCDNSrc, playHintSound } from 'src/utils/common';
 import { globalEvents, queryKeys } from 'src/constants';
 import { store } from 'src/store';
 import { theme } from 'src/theme';
-import { createRoom, getComments } from 'src/services/api';
+import { createRoom, getRecord } from 'src/services/api';
+import { getComments } from 'src/services/guest-api';
 import { GamepadBtnIndex } from 'src/gamepad';
 import { updateMtApp } from 'src/mt-app';
 import { i18n } from 'src/i18n/basic';
@@ -119,6 +120,7 @@ export class PMtGamesElement extends GemElement {
   #onDetail = (gameId: number) => {
     updateStore(mtGamesStore, { focusId: gameId });
     getComments(gameId);
+    getRecord(gameId);
   };
 
   #pressButton = (evt: CustomEvent<GamepadBtnIndex>) => {

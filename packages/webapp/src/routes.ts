@@ -25,7 +25,7 @@ const getInitRoutes = () => {
       },
     },
     games: {
-      title: isMtApp ? undefined : i18n.get('gamesTitle'),
+      title: isMtApp ? undefined : i18n.get('page.games.title'),
       pattern: '/games',
       async getContent(_params: Record<string, string>) {
         if (isMtApp) {
@@ -37,7 +37,7 @@ const getInitRoutes = () => {
       },
     },
     emulator: {
-      title: '模拟器',
+      title: i18n.get('page.emulator.title'),
       pattern: '/emulator',
       async getContent(_params: Record<string, string>) {
         await import('src/pages/emulator');
@@ -45,7 +45,7 @@ const getInitRoutes = () => {
       },
     },
     privacy: {
-      title: 'Privacy Policy',
+      title: i18n.get('page.privacy.title'),
       pattern: '/privacy',
       async getContent(_params: Record<string, string>) {
         await import('src/pages/privacy');
@@ -53,7 +53,7 @@ const getInitRoutes = () => {
       },
     },
     ramviewer: {
-      title: '内存查看器',
+      title: i18n.get('page.ram.title'),
       pattern: '/ramviewer',
       async getContent(_params: Record<string, string>) {
         await import('src/pages/ramviewer');
@@ -61,7 +61,7 @@ const getInitRoutes = () => {
       },
     },
     game: {
-      title: i18n.get('gameTitle'),
+      title: i18n.get('page.game.title'),
       pattern: `/game/:${paramKeys.GAME_ID}`,
       async getContent(params: Record<string, string>) {
         await import('src/pages/game');
@@ -69,7 +69,7 @@ const getInitRoutes = () => {
       },
     },
     favorites: {
-      title: i18n.get('favoritesTitle'),
+      title: i18n.get('page.favorites.title'),
       pattern: '/favorites',
       async getContent(_params: Record<string, string>) {
         await import('src/pages/favorites');
@@ -77,7 +77,7 @@ const getInitRoutes = () => {
       },
     },
     rooms: {
-      title: i18n.get('roomsTitle'),
+      title: i18n.get('page.rooms.title'),
       pattern: '/rooms',
       async getContent(_params: Record<string, string>) {
         if (isMtApp) {
@@ -89,7 +89,7 @@ const getInitRoutes = () => {
       },
     },
     room: {
-      title: i18n.get('roomTitle'),
+      title: i18n.get('page.room.title'),
       pattern: `/room/:${paramKeys.ROOM_ID}`,
       async getContent(params: Record<string, string>) {
         if (isMtApp) {
@@ -101,7 +101,7 @@ const getInitRoutes = () => {
       },
     },
     login: {
-      title: i18n.get('loginTitle'),
+      title: i18n.get('page.login.title'),
       pattern: '/login',
       async getContent(_params: Record<string, string>) {
         await import('src/pages/login');
@@ -109,7 +109,7 @@ const getInitRoutes = () => {
       },
     },
     register: {
-      title: i18n.get('registerTitle'),
+      title: i18n.get('page.register.title'),
       pattern: '/register',
       async getContent(_params: Record<string, string>) {
         await import('src/pages/login');
@@ -117,7 +117,7 @@ const getInitRoutes = () => {
       },
     },
     notfound: {
-      title: i18n.get('notFoundTitle'),
+      title: i18n.get('page.notFound.title'),
       pattern: '*',
       async getContent(_params: Record<string, string>) {
         await import('src/pages/notfound');

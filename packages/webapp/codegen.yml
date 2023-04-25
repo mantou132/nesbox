@@ -4,7 +4,7 @@ generates:
     schema:
       - ${API_BASE:http://localhost:8080}/schema:
           method: GET
-    documents: "src/**/schema.graphql"
+    documents: "src/**/{schema,common}.graphql"
     plugins:
       - typescript
       - typescript-operations
@@ -20,7 +20,7 @@ generates:
     schema:
       - ${API_BASE:http://localhost:8080}/guestschema:
           method: GET
-    documents: "src/**/guest.graphql"
+    documents: "src/**/{guest,common}.graphql"
     plugins:
       - typescript
       - typescript-operations

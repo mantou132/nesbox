@@ -2,11 +2,12 @@ import { html, adoptedStyle, customElement, createCSSSheet, css, connectStore, G
 import { polling } from 'duoyun-ui/lib/utils';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
-import { getRooms } from 'src/services/api';
+import { getRooms } from 'src/services/guest-api';
 import { store } from 'src/store';
 import { i18n } from 'src/i18n/basic';
 import { icons } from 'src/icons';
 import { theme } from 'src/theme';
+import { configure } from 'src/configure';
 
 import 'duoyun-ui/elements/result';
 import 'duoyun-ui/elements/loading';
@@ -49,7 +50,7 @@ export class PRoomsElement extends GemElement {
             <dy-result style="height: 60vh" .illustrator=${icons.empty} .header=${i18n.get('notDataTitle')}></dy-result>
           `
         : html`<m-room-list></m-room-list>`}
-      ${!mediaQuery.isPhone ? html`<m-lobby-chat class="chat"></m-lobby-chat>` : ''}
+      ${!mediaQuery.isPhone && configure.user ? html`<m-lobby-chat class="chat"></m-lobby-chat>` : ''}
     `;
   };
 }

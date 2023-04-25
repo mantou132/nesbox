@@ -1,7 +1,6 @@
 import { updateStore } from '@mantou/gem';
 import { Toast } from 'duoyun-ui/elements/toast';
 import { debounce } from 'duoyun-ui/lib/utils';
-import { isNotNullish } from 'duoyun-ui/lib/types';
 
 import { documentVisible, playHintSound, playSound } from 'src/utils/common';
 import { globalEvents, Signal, COMMAND, dispatchGlobalEvent } from 'src/constants';
@@ -41,21 +40,18 @@ import {
   GetAccount,
   GetAccountQuery,
   GetAccountQueryVariables,
-  GetComments,
-  GetCommentsQuery,
-  GetCommentsQueryVariables,
+  GetRecord,
+  GetRecordQuery,
+  GetRecordQueryVariables,
   GetFriends,
   GetFriendsQuery,
   GetFriendsQueryVariables,
-  GetGames,
-  GetGamesQuery,
-  GetGamesQueryVariables,
+  GetGameIds,
+  GetGameIdsQuery,
+  GetGameIdsQueryVariables,
   GetMessages,
   GetMessagesQuery,
   GetMessagesQueryVariables,
-  GetRooms,
-  GetRoomsQuery,
-  GetRoomsQueryVariables,
   LeaveLobby,
   LeaveLobbyMutation,
   LeaveLobbyMutationVariables,
@@ -99,7 +95,8 @@ import { store, friendStore, convertGame } from 'src/store';
 import { request, subscribe } from 'src/services';
 import { configure, parseAccount, Settings } from 'src/configure';
 import { i18n, isCurrentLang } from 'src/i18n/basic';
-import { logout } from 'src/auth';
+import { gotoLogin, logout } from 'src/auth';
+import { getGames } from 'src/services/guest-api';
 
 export const enterLobby = async () => {
   const { enterLobby } = await request<EnterLobbyMutation, EnterLobbyMutationVariables>(EnterLobby, {
@@ -134,39 +131,21 @@ export const sendVoiceMsg = async (kind: ScVoiceMsgKind, payload: RTCSessionDesc
   });
 };
 
-export const getGames = debounce(async () => {
-  const { games, topGames, favorites, recentGames } = await request<GetGamesQuery, GetGamesQueryVariables>(
-    GetGames,
-    {},
-  );
-  const gameIds = games
-    .map((e) => {
-      store.games[e.id] = convertGame(e);
-      if (isCurrentLang(e)) return e.id;
-    })
-    .filter(isNotNullish);
-  updateStore(store, {
-    gameIds,
-    favoriteIds: favorites.filter((id) => isCurrentLang(store.games[id]!)),
-    topGameIds: [...new Set([...topGames, ...gameIds])].filter((id) => isCurrentLang(store.games[id]!)).splice(0, 5),
-    recentGameIds: recentGames.filter((id) => isCurrentLang(store.games[id]!)),
-  });
-});
-
-export const getRooms = async () => {
-  const { rooms } = await request<GetRoomsQuery, GetRoomsQueryVariables>(GetRooms, {});
+export const getGameIds = async () => {
   if (!store.gameIds?.length) await getGames();
+  const { topGames, favorites, recentGames } = await request<GetGameIdsQuery, GetGameIdsQueryVariables>(GetGameIds, {});
+
   updateStore(store, {
-    roomIds: rooms
-      .filter(({ gameId }) => gameId in store.games && isCurrentLang(store.games[gameId]!))
-      .map((e) => {
-        store.rooms[e.id] = e;
-        return e.id;
-      }),
+    favoriteIds: favorites.filter((id) => isCurrentLang(store.games[id]!)),
+    topGameIds: [...new Set([...topGames, ...store.gameIds!])]
+      .filter((id) => isCurrentLang(store.games[id]!))
+      .splice(0, 5),
+    recentGameIds: recentGames.filter((id) => isCurrentLang(store.games[id]!)),
   });
 };
 
 export const createRoom = async (input: ScNewRoom) => {
+  if (!configure.user) return gotoLogin();
   if (COMMAND === 'serve') input.private = true;
   const { createRoom } = await request<CreateRoomMutation, CreateRoomMutationVariables>(CreateRoom, { input });
   configure.user!.playing = createRoom;
@@ -195,6 +174,7 @@ export const updateRoomScreenshot = async (input: ScUpdateRoomScreenshot) => {
 };
 
 export const enterPubRoom = async (roomId: number) => {
+  if (!configure.user) return gotoLogin();
   const { enterPubRoom } = await request<EnterPubRoomMutation, EnterPubRoomMutationVariables>(EnterPubRoom, {
     input: { roomId },
   });
@@ -294,13 +274,9 @@ export const acceptInvite = async (inviteId: number, accept: boolean) => {
   updateStore(friendStore);
 };
 
-export const getComments = async (gameId: number) => {
-  const { comments, record } = await request<GetCommentsQuery, GetCommentsQueryVariables>(GetComments, { gameId });
+export const getRecord = async (gameId: number) => {
+  const { record } = await request<GetRecordQuery, GetRecordQueryVariables>(GetRecord, { gameId });
   store.record[gameId] = record;
-  store.comment[gameId] = {
-    userIds: comments.map((e) => e.user.id),
-    comments: Object.fromEntries(comments.map((e) => [e.user.id, e])),
-  };
   updateStore(store);
 };
 
@@ -349,6 +325,7 @@ export const createMessage = async (targetId: number, body: string) => {
 };
 
 export const favoriteGame = async (gameId: number, favorite: boolean) => {
+  if (!configure.user) return gotoLogin();
   await request<FavoriteGameMutation, FavoriteGameMutationVariables>(FavoriteGame, {
     input: {
       gameId,

@@ -1,6 +1,5 @@
 {
   "desc": "找到你最喜欢的游戏叫上你的朋友，无论你们相距多远，都可以在 NESBox 上立即享受游戏，保存进度，下次继续",
-  "download": "立即下载",
   "feature1Desc": "NESBox 收集了大量游戏。开始你喜欢的游戏后，NESBox 会创建一个房间，你可以邀请朋友一起玩。",
   "feature1Title": "海量游戏任你选择",
   "feature2Desc": "NESBox 通过可靠的技术让你和你的朋友进行低延迟的视频和音频传输，就像在同一个房间里玩一样。",
@@ -8,7 +7,8 @@
   "feature3Desc": "NESBox 可以同步你的按键、渲染设置和声音设置。 当你切换设备时，你可以快速玩游戏。",
   "feature3Title": "同步你的设置",
   "journey": "准备好开始你的旅程了吗？",
-  "open": "打开 NESBox",
-  "tipNotSupport": "不支持手机",
-  "title": "享受游戏"
+  "page.homepage.downloadBtn": "立即下载",
+  "page.homepage.header": "享受游戏",
+  "page.homepage.openBtn": "打开 NESBox",
+  "tip.homepage.notSupport": "不支持手机"
 }

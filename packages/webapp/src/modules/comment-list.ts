@@ -38,13 +38,19 @@ const style = createCSSSheet(css`
     break-inside: avoid;
   }
   .comment-title {
-    width: min(22em, 100%);
+    gap: 2em;
     display: flex;
     align-items: center;
   }
   .comment-title > * {
     margin: 0;
-    flex-grow: 1;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+  .comment-title dy-input-group {
+    width: 13em;
+    flex-shrink: 0;
   }
   .comment-title dy-button {
     width: 5.5em;

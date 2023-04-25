@@ -67,7 +67,7 @@ export const playSound = async (kind: string, volume = configure.user?.settings.
 };
 
 export const playHintSound = (kind = '') => {
-  playSound(kind, configure.user!.settings.volume.hint);
+  playSound(kind, configure.user ? configure.user.settings.volume.hint : 1);
 };
 
 export const saveFile = async (file: File) => {

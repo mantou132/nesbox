@@ -169,7 +169,7 @@ export class MGameListElement extends GemElement {
       ${this.recent
         ? html`
             <div class="heading">
-              <dy-heading lv="3">${i18n.get('recentGame')}</dy-heading>
+              <dy-heading lv="3">${i18n.get('page.games.recent')}</dy-heading>
             </div>
             <dy-divider></dy-divider>
           `

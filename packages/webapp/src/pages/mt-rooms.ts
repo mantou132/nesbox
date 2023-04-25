@@ -14,7 +14,8 @@ import { polling } from 'duoyun-ui/lib/utils';
 import { getCDNSrc } from 'src/utils/common';
 import { store } from 'src/store';
 import { theme } from 'src/theme';
-import { enterPubRoom, getRooms } from 'src/services/api';
+import { enterPubRoom } from 'src/services/api';
+import { getRooms } from 'src/services/guest-api';
 import { i18n } from 'src/i18n/basic';
 
 import 'duoyun-ui/elements/empty';

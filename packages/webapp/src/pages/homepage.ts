@@ -232,8 +232,8 @@ const style = createCSSSheet(css`
 @adoptedStyle(style)
 @connectStore(homepageI18n.store)
 export class PHomepageElement extends GemElement {
-  #login = () => {
-    history.push({ path: createPath(routes.login) });
+  #openNesbox = () => {
+    history.push({ path: createPath(routes.games) });
   };
 
   #download = async () => {
@@ -242,7 +242,7 @@ export class PHomepageElement extends GemElement {
       return;
     }
     if (mediaQuery.isPhone) {
-      Toast.open('warning', homepageI18n.get('tipNotSupport'));
+      Toast.open('warning', homepageI18n.get('tip.homepage.notSupport'));
       return;
     }
     try {
@@ -292,11 +292,15 @@ export class PHomepageElement extends GemElement {
           </div>
         </nav>
         <div class="content main">
-          <dy-heading lv="1">${homepageI18n.get('title')}</dy-heading>
+          <dy-heading lv="1">${homepageI18n.get('page.homepage.header')}</dy-heading>
           <dy-paragraph>${homepageI18n.get('desc')}</dy-paragraph>
           <dy-space size="large">
-            <dy-button .icon=${downloadSvg} @click=${this.#download}>${homepageI18n.get('download')}</dy-button>
-            <dy-button color=${theme.textColor} @click=${this.#login}>${homepageI18n.get('open')}</dy-button>
+            <dy-button .icon=${downloadSvg} @click=${this.#download}>
+              ${homepageI18n.get('page.homepage.downloadBtn')}
+            </dy-button>
+            <dy-button color=${theme.textColor} @click=${this.#openNesbox}>
+              ${homepageI18n.get('page.homepage.openBtn')}
+            </dy-button>
           </dy-space>
         </div>
       </header>
@@ -357,7 +361,9 @@ export class PHomepageElement extends GemElement {
                 />
               </svg>
             </dy-heading>
-            <dy-button .icon=${downloadSvg} @click=${this.#download}>${homepageI18n.get('download')}</dy-button>
+            <dy-button .icon=${downloadSvg} @click=${this.#download}>
+              ${homepageI18n.get('page.homepage.downloadBtn')}
+            </dy-button>
           </div>
         </section>
       </main>

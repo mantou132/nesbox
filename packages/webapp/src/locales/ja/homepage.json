@@ -1,6 +1,5 @@
 {
   "desc": "お気に入りのゲームを見つけて、友達に電話をかけましょう。遠く離れていても、すぐに NESBox でゲームを楽しみ、進行状況を保存して、次回に続きます。",
-  "download": "ダウンロード",
   "feature1Desc": "NESBox は、多数のゲームを収集しました。 お気に入りのゲームを開始すると、Nesbox が部屋を作成し、友達を招待して一緒にプレイすることができます。",
   "feature1Title": "あなたが選択できる大規模なゲーム",
   "feature2Desc": "NESBox の信頼性の高いテクノロジーにより、同じ部屋で遊んでいるのと同じように、あなたとあなたの友人が低遅延のビデオとオーディオの送信を行うことができます。",
@@ -8,7 +7,8 @@
   "feature3Desc": "NESBox は、キー、レンダリング設定、およびサウンド設定を同期できます。 デバイスを切り替えると、すぐにゲームをプレイできます。",
   "feature3Title": "設定を同期する",
   "journey": "旅を始める準備はできましたか?",
-  "open": "開ける NESBox",
-  "tipNotSupport": "モバイルをサポートしない",
-  "title": "ゲームを楽しむ"
+  "page.homepage.downloadBtn": "ダウンロード",
+  "page.homepage.header": "ゲームを楽しむ",
+  "page.homepage.openBtn": "開ける NESBox",
+  "tip.homepage.notSupport": "モバイルをサポートしない"
 }

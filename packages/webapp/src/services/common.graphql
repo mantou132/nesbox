@@ -1,0 +1,67 @@
+fragment ScRoomBasicPart on ScRoomBasic {
+  id
+  gameId
+  private
+  host
+  createdAt
+  updatedAt
+}
+
+fragment ScAccountPart on ScUser {
+  id
+  username
+  nickname
+  settings
+  playing {
+    ...ScRoomBasicPart
+  }
+}
+
+fragment ScUserBasicPart on ScUserBasic {
+  id
+  username
+  nickname
+  status
+  playing {
+    ...ScRoomBasicPart
+  }
+}
+
+fragment ScRoomPart on ScRoom {
+  id
+  gameId
+  private
+  host
+  createdAt
+  updatedAt
+  users {
+    ...ScUserBasicPart
+  }
+  screenshot
+}
+
+fragment ScGamePart on ScGame {
+  id
+  name
+  description
+  preview
+  createdAt
+  updatedAt
+  rom
+  screenshots
+  platform
+  kind
+  series
+  maxPlayer
+}
+
+fragment ScCommentPart on ScComment {
+  user {
+    ...ScUserBasicPart
+  }
+  gameId
+  body
+  like
+  createdAt
+  updatedAt
+}

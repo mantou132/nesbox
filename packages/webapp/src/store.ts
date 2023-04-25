@@ -5,14 +5,13 @@ import { updateStore } from '@mantou/gem';
 
 import { localStorageKeys } from 'src/constants';
 import {
-  GetCommentsQuery,
   GetFriendsQuery,
-  GetGamesQuery,
-  GetRoomsQuery,
   GetMessagesQuery,
   EventSubscription,
   EnterLobbyMutation,
+  GetRecordQuery,
 } from 'src/generated/graphql';
+import { GetCommentsQuery, GetGamesQuery, GetRoomsQuery } from 'src/generated/guestgraphql';
 import { configure } from 'src/configure';
 
 export type GameAttributes = {
@@ -30,7 +29,7 @@ export type Room = ElementOf<GetRoomsQuery['rooms']>;
 export type Invite = ElementOf<GetFriendsQuery['invites']>;
 export type Friend = ElementOf<GetFriendsQuery['friends']>;
 export type Comment = ElementOf<GetCommentsQuery['comments']>;
-export type GameRecord = GetCommentsQuery['record'];
+export type GameRecord = GetRecordQuery['record'];
 export type Message = ElementOf<GetMessagesQuery['messages']>;
 export type LobbyInfo = EnterLobbyMutation['enterLobby'];
 export type LobbyMessage = Exclude<EventSubscription['event']['lobbyMessage'], undefined>;

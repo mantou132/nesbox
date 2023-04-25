@@ -4,6 +4,7 @@ import { store } from 'src/store';
 import { icons } from 'src/icons';
 import { i18n } from 'src/i18n/basic';
 import { theme } from 'src/theme';
+import { getGameIds } from 'src/services/api';
 
 import 'duoyun-ui/elements/carousel';
 import 'src/modules/game-list';
@@ -25,6 +26,10 @@ const style = createCSSSheet(css`
 @connectStore(i18n.store)
 @connectStore(store)
 export class PFavoritesElement extends GemElement {
+  mounted = () => {
+    getGameIds();
+  };
+
   render = () => {
     return html`
       ${store.favoriteIds?.length === 0

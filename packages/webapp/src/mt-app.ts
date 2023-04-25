@@ -19,9 +19,10 @@ import { isNotNullish } from 'duoyun-ui/lib/types';
 import { locationStore, routes } from 'src/routes';
 
 import { paramKeys, queryKeys } from 'src/constants';
-import { getAccount, getFriends, getGames, subscribeEvent } from 'src/services/api';
-import { i18n } from 'src/i18n/basic';
+import { getAccount, getFriends, getGameIds, subscribeEvent } from 'src/services/api';
+import { getGames } from 'src/services/guest-api';
 import { configure } from 'src/configure';
+import { i18n } from 'src/i18n/basic';
 
 import 'src/modules/mt-nav';
 
@@ -95,7 +96,10 @@ export class MTAppRootElement extends GemElement {
   mounted = () => {
     this.effect(this.#enterRoom, () => [configure.user?.playing?.id]);
     this.effect(
-      () => forever(getGames),
+      () => {
+        getGames();
+        getGameIds();
+      },
       () => [i18n.currentLanguage],
     );
     forever(getAccount);
