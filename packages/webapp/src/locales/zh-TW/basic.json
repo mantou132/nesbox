@@ -135,6 +135,7 @@
   "settings.sound.gameVolume": "遊戲",
   "settings.sound.hintVolume": "提示",
   "settings.sound.notificationVolume": "通知",
+  "settings.sound.title": "聲音",
   "settings.sound.volumeTitle": "音量",
   "settings.title": "設置",
   "settings.ui.branch": "分支",

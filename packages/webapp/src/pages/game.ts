@@ -37,6 +37,9 @@ const style = createCSSSheet(css`
     padding-block-start: ${theme.gridGutter};
     gap: ${theme.gridGutter};
   }
+  .screenshots::-webkit-scrollbar {
+    width: 0;
+  }
   .content {
     display: flex;
     flex-direction: row;
@@ -49,7 +52,10 @@ const style = createCSSSheet(css`
     align-items: flex-start;
     flex-shrink: 0;
     width: 12em;
-    line-height: 2;
+    line-height: 1.7;
+  }
+  .aside:where(:lang(zh), :lang(ja), :lang(kr)) {
+    text-align: justify;
   }
   .stats-icon {
     gap: 0.2em;

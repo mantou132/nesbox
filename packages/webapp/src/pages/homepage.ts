@@ -246,7 +246,11 @@ export class PHomepageElement extends GemElement {
       return;
     }
     try {
-      const latest = await (await fetch(getCorSrc(`${githubRelease}/latest/download/latest-version.json`))).json();
+      const latest = await waitLoading(
+        fetch(getCorSrc(`${githubRelease}/latest/download/latest-version.json?t=${Date.now()}`)).then((res) =>
+          res.json(),
+        ),
+      );
       const platforms = Object.entries(latest.platforms as Record<string, { url: string }>);
       const url = platforms.find(([key]) => key.startsWith(isMac ? 'darwin' : 'windows'))![1].url;
       open(url);

@@ -7,6 +7,7 @@ import 'duoyun-ui/elements/button';
 import 'duoyun-ui/elements/unsafe';
 import 'duoyun-ui/elements/use';
 import 'duoyun-ui/elements/more';
+import 'duoyun-ui/elements/empty';
 
 const style = createCSSSheet(css`
   :host {
@@ -22,10 +23,9 @@ const contentCSS = css`
   p {
     display: block;
     margin-block-end: 0.75em;
-    line-height: 1.5;
+    line-height: 1.7;
   }
   p:where(:lang(zh), :lang(ja), :lang(kr)) {
-    line-height: 1.7;
     text-align: justify;
   }
 `;
@@ -48,6 +48,8 @@ export class MGameDetailElement extends GemElement {
         p.remove();
       }
     });
+
+    if (!doc.body.textContent?.trim()) return html`<dy-empty></dy-empty>`;
 
     return html`
       <dy-more>

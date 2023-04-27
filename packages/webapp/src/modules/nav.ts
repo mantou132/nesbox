@@ -134,6 +134,17 @@ const style = createCSSSheet(css`
 export class MNavElement extends GemElement {
   @attribute page: 'room' | 'game' | '';
 
+  #share = () => {
+    navigator
+      .share?.({
+        url: location.href,
+        text: store.games[Number(this.id)]?.name,
+      })
+      .catch(() => {
+        //
+      });
+  };
+
   #goTop = (event: MouseEvent) => {
     event.preventDefault();
     this.closestElement(AppRootElement)?.contentRef.element?.scrollTo({
@@ -154,7 +165,6 @@ export class MNavElement extends GemElement {
   #renderRoomTitle = () => {
     const playing = configure.user?.playing;
     const gameId = playing?.gameId || 0;
-    const favorited = store.favoriteIds?.includes(gameId || 0);
 
     return html`
       <nesbox-tooltip .position=${'bottom'} .content=${i18n.get('leaveRoom')}>
@@ -168,7 +178,7 @@ export class MNavElement extends GemElement {
         ></dy-use>
       </nesbox-tooltip>
       ${playing?.host !== configure.user?.id
-        ? html`<div class="title">${store.games[gameId || 0]?.name}</div>`
+        ? html`<div class="title">${store.games[gameId]?.name}</div>`
         : html`
             <nesbox-tooltip .position=${'bottom'} .content=${i18n.get('selectGame')}>
               <dy-action-text
@@ -177,10 +187,17 @@ export class MNavElement extends GemElement {
                 @keydown=${commonHandle}
                 @click=${() => setSearchCommand(SearchCommand.SELECT_GAME)}
               >
-                ${store.games[gameId || 0]?.name}
+                ${store.games[gameId]?.name}
               </dy-action-text>
             </nesbox-tooltip>
           `}
+      ${this.#renderFavoriteBtn(gameId)}
+    `;
+  };
+
+  #renderFavoriteBtn = (gameId: number) => {
+    const favorited = store.favoriteIds?.includes(gameId);
+    return html`
       <dy-use
         class="icon heart"
         tabindex="0"
@@ -193,6 +210,7 @@ export class MNavElement extends GemElement {
   };
 
   #renderGameTitle = () => {
+    const gameId = Number(this.id);
     return html`
       <dy-use
         data-cy="back"
@@ -204,10 +222,8 @@ export class MNavElement extends GemElement {
           history.push({ path: createPath(routes.games) });
         }}
       ></dy-use>
-      <div class="title">${store.games[Number(this.id)]?.name}</div>
-      <dy-button data-cy="start" @click=${() => createRoom({ gameId: Number(this.id), private: false })}>
-        ${i18n.get('startGame')}
-      </dy-button>
+      <div class="title">${store.games[gameId]?.name}</div>
+      ${this.#renderFavoriteBtn(gameId)}
     `;
   };
 
@@ -242,9 +258,23 @@ export class MNavElement extends GemElement {
           ? this.#renderRoomTitle()
           : this.#renderLinks()}
         <span class="space" @dblclick=${this.#goTop}></span>
-        ${configure.user
-          ? this.#renderMenu()
-          : html`<dy-action-text @click=${gotoLogin} data-cy="login">${i18n.get('login')}</dy-action-text>`}
+        ${!configure.user
+          ? html`<dy-action-text @click=${gotoLogin} data-cy="login">${i18n.get('login')}</dy-action-text>`
+          : this.page === 'game'
+          ? html`
+              <dy-use
+                class="icon"
+                tabindex="0"
+                ?hidden=${!navigator.share}
+                @keydown=${commonHandle}
+                .element=${icons.share}
+                @click=${this.#share}
+              ></dy-use>
+              <dy-button data-cy="start" @click=${() => createRoom({ gameId: Number(this.id), private: false })}>
+                ${i18n.get('startGame')}
+              </dy-button>
+            `
+          : this.#renderMenu()}
       </nav>
     `;
   };

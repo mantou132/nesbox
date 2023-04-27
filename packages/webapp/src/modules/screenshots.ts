@@ -11,11 +11,14 @@ const style = createCSSSheet(css`
     gap: ${theme.gridGutter};
     overflow: auto;
     filter: drop-shadow(0 0 0.5px ${theme.borderColor});
+    scrollbar-width: none;
+    scroll-snap-type: x mandatory;
   }
   .img:first-of-type {
     view-transition-name: ${viewTransitionName.PREVIEW};
   }
   .img {
+    scroll-snap-align: start;
     flex-shrink: 0;
     width: calc(50% - ${theme.gridGutter} / 2);
     aspect-ratio: 503/348;

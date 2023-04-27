@@ -30,7 +30,7 @@ const defaultTheme = {
   backgroundColor: '#1a1a1a',
   lightBackgroundColor: '#1e1e1e',
   hoverBackgroundColor: '#2f2f2f',
-  borderColor: '#515151',
+  borderColor: '#2d2e33',
   disabledColor: '#333',
   titleBarColor: '#000',
   imageFilter: 'none',

@@ -31,7 +31,7 @@ const style = createCSSSheet(css`
   }
   .list {
     column-count: 3;
-    gap: 1em;
+    gap: ${theme.gridGutter};
   }
   .comment {
     margin-bottom: ${theme.gridGutter};

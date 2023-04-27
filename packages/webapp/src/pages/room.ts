@@ -23,6 +23,7 @@ import { Time } from 'duoyun-ui/lib/time';
 import { getStringFromTemplate, once } from 'duoyun-ui/lib/utils';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { routes } from 'src/routes';
+import { locale } from 'duoyun-ui/lib/locale';
 
 import { preventDefault } from 'src/utils/common';
 import { BcMsgEvent, BcMsgType, queryKeys } from 'src/constants';
@@ -158,7 +159,7 @@ export class PRoomElement extends GemElement {
                   .catch(() => {
                     //
                   })
-              : navigator.clipboard.writeText(url);
+              : navigator.clipboard.writeText(url).then(() => Toast.open('success', locale.copySuccess));
           },
         },
         {
