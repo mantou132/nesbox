@@ -1,5 +1,5 @@
 {
-  "name": "@mantou/wasm4",
+  "name": "@nesbox/wasm4",
   "version": "0.0.1",
   "description": "",
   "module": "src/index.ts",

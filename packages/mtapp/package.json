@@ -1,5 +1,5 @@
 {
-  "name": "mt-app",
+  "name": "@nesbox/mtapp",
   "version": "0.0.1",
   "module": "index.ts",
   "devDependencies": {

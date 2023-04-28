@@ -1,5 +1,5 @@
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
-import { isMtApp } from 'mt-app';
+import { isMtApp } from '@nesbox/mtapp';
 
 import type { Button, Player } from '@mantou/nes';
 import type { ValueOf } from 'duoyun-ui/lib/types';

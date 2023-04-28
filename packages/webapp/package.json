@@ -12,17 +12,18 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@mantou/arcade": "^0.0.1",
     "@mantou/gem": "^1.6.18",
     "@mantou/nes": "^1.0.14",
     "@mantou/nes-sandbox": "^0.0.12",
-    "@mantou/wasm4": "^0.0.1",
+    "@nesbox/arcade": "^0.0.1",
+    "@nesbox/fceux": "^0.0.1",
+    "@nesbox/mtapp": "^0.0.1",
+    "@nesbox/wasm4": "^0.0.1",
     "duoyun-ui": "^0.0.65",
     "front-matter": "^4.0.2",
     "graphql": "^16.2.0",
     "jszip": "^3.10.0",
     "marked": "^4.0.16",
-    "mt-app": "^0.0.1",
     "subscriptions-transport-ws": "^0.11.0"
   },
   "devDependencies": {

@@ -18,6 +18,8 @@ import { VideoFilter } from 'src/constants';
 import { logger } from 'src/logger';
 import normalVert from 'src/shaders/normal.vert?raw';
 
+import 'duoyun-ui/elements/reflect';
+
 const getShader = (filter: VideoFilter) => {
   switch (filter) {
     case VideoFilter.NTSC: {
@@ -277,6 +279,9 @@ export class NesboxCanvasElement extends GemElement {
   render = () => {
     return html`
       <canvas class="canvas" width=${this.#renderWidth} height=${this.#renderHeight} ref=${this.canvasRef.ref}></canvas>
+      <dy-reflect .target=${document.body}>
+        <canvas hidden id="webgl-ctx" width=${this.width} height=${this.height}></canvas>
+      </dy-reflect>
     `;
   };
 }

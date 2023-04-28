@@ -14,7 +14,7 @@ import {
 import { createPath } from 'duoyun-ui/elements/route';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
-import { isMtApp } from 'mt-app';
+import { isMtApp } from '@nesbox/mtapp';
 import { routes } from 'src/routes';
 
 import { getCDNSrc } from 'src/utils/common';

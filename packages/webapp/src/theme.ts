@@ -2,7 +2,7 @@ import { updateTheme as updateDuoyunTheme, darkTheme } from 'duoyun-ui/lib/theme
 import { updateStore } from '@mantou/gem';
 import { createTheme, getThemeStore, updateTheme } from '@mantou/gem/helper/theme';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
-import { isMtApp } from 'mt-app';
+import { isMtApp } from '@nesbox/mtapp';
 
 import { i18n } from 'src/i18n/basic';
 import { configure } from 'src/configure';

@@ -133,7 +133,7 @@ export class Wasm4 implements ONes {
     this.#runtime.composite();
     const { gl } = this.#runtime.compositor;
     const currentFrame = new Uint8ClampedArray(this.#mem.buffer, this.#frameSpace[0], this.#frameLen);
-    gl.readPixels(0, 0, WIDTH, HEIGHT, this.#runtime.compositor.gl.RGBA, gl.UNSIGNED_BYTE, currentFrame);
+    gl.readPixels(0, 0, WIDTH, HEIGHT, gl.RGBA, gl.UNSIGNED_BYTE, currentFrame);
     return this.#frameNum++;
   }
   audio_callback(out: Float32Array) {

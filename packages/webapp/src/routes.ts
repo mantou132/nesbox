@@ -1,7 +1,7 @@
 import { html, createStore, updateStore, connect } from '@mantou/gem';
 import { GemRouteElement } from '@mantou/gem/elements/route';
 import { ValueOf } from 'duoyun-ui/lib/types';
-import { isMtApp } from 'mt-app';
+import { isMtApp } from '@nesbox/mtapp';
 
 import { paramKeys } from 'src/constants';
 import { i18n } from 'src/i18n/basic';

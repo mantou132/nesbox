@@ -1,11 +1,11 @@
 {
-  "name": "@nesbox/arcade",
+  "name": "@nesbox/fceux",
   "version": "0.0.1",
   "description": "",
   "module": "src/index.ts",
   "types": "src/index.ts",
   "dependencies": {
-    "@mantou/fbneo": "^0.0.2"
+    "@mantou/fceux": "^0.0.4"
   },
   "peerDependencies": {
     "@mantou/nes": "^1.0.14",

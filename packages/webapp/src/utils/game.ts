@@ -131,14 +131,14 @@ export async function createGame(filename: string, romBuffer: ArrayBuffer, sampl
 
   switch (fragments.pop()) {
     case 'zip': {
-      const { Arcade } = await import('@mantou/arcade');
+      const { Arcade } = await import('@nesbox/arcade');
       const game = Arcade.new(sampleRate);
       await game.load_rom(new Uint8Array(romBuffer), fragments.join('.'));
       return game;
     }
     case 'wasm': {
       if (fragments.pop() === 'wasm4') {
-        const { Wasm4 } = await import('@mantou/wasm4');
+        const { Wasm4 } = await import('@nesbox/wasm4');
         const game = Wasm4.new(sampleRate);
         await game.load_rom(new Uint8Array(romBuffer));
         return game;
@@ -156,10 +156,17 @@ export async function createGame(filename: string, romBuffer: ArrayBuffer, sampl
       return game;
     }
     case 'nes': {
-      await initNes();
-      const game = Nes.new(sampleRate);
-      game.load_rom(new Uint8Array(romBuffer));
-      return game;
+      if (process.env.NODE_ENV === 'development') {
+        const { Nes } = await import('@nesbox/fceux');
+        const game = Nes.new(sampleRate);
+        await game.load_rom(new Uint8Array(romBuffer));
+        return game;
+      } else {
+        await initNes();
+        const game = Nes.new(sampleRate);
+        game.load_rom(new Uint8Array(romBuffer));
+        return game;
+      }
     }
     default: {
       throw new Error('No support format');

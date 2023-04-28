@@ -3,7 +3,7 @@ import { matchPath, RouteItem } from 'duoyun-ui/elements/route';
 import { Time } from 'duoyun-ui/lib/time';
 import { formatTraffic } from 'duoyun-ui/lib/number';
 import { ValueOf } from 'duoyun-ui/lib/types';
-import { isMtApp, mtApp } from 'mt-app';
+import { isMtApp, mtApp } from '@nesbox/mtapp';
 import { changeLoading } from 'duoyun-ui/elements/wait';
 
 import { githubIssue, queryKeys } from 'src/constants';
