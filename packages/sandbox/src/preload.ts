@@ -7,8 +7,8 @@ export function preload() {
   globalThis.nesbox = {
     _getVideoFrame: () => new Uint8ClampedArray(),
     _getAudioFrame: () => new Float32Array(),
-    _getState: () => new Uint8Array(),
-    _setState: (_state?: Uint8Array) => void 0,
+    _getState: () => ({}),
+    _setState: (_state?: Record<string, any>) => void 0,
     _width: 0,
     _height: 0,
     _control: new Proxy({} as Record<Player, { tap: Set<Button>; pressed: Set<Button> }>, {
@@ -121,27 +121,11 @@ export function getAudioFrame() {
 }
 
 export function getState() {
-  const state = nesbox._getState();
-  let index = 0;
-  let lenReport = false;
-  return () => {
-    if (!lenReport) {
-      lenReport = true;
-      return state.length;
-    }
-    return state[index++];
-  };
+  return JSON.stringify(nesbox._getState());
 }
 
-export function setState(length: number) {
-  const state = new Uint8Array(length);
-  let index = 0;
-  return (value: number) => {
-    state[index++] = value;
-    if (index === length) {
-      nesbox._setState(state);
-    }
-  };
+export function setState(state: string) {
+  nesbox._setState(JSON.parse(state));
 }
 
 export function reset() {

@@ -5,6 +5,7 @@
   "module": "src/index.ts",
   "types": "src/index.ts",
   "dependencies": {
+    "jszip": "^3.10.0",
     "qoijs": "^1.0.0"
   },
   "peerDependencies": {

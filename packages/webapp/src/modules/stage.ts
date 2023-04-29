@@ -641,9 +641,10 @@ export class MStageElement extends GemElement<State> {
     return this.canvasRef.element!.screenshot();
   };
 
-  getState = (): GameState | undefined => {
+  getState = async (): Promise<GameState | undefined> => {
     if (!this.#gameInstance) return;
-    const state = this.#gameInstance.state();
+    // await jszip
+    const state = await this.#gameInstance.state();
     if (state.length === 0) {
       const buffer = this.#gameInstance.mem().buffer;
       logger.warn(`Saved wasm memory: ${buffer.byteLength / 1024}KB`);

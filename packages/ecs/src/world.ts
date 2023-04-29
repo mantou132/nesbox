@@ -164,14 +164,12 @@ export class World<CustomData = any> {
   }
 
   getState() {
-    return new Uint8Array(Uint16Array.from(JSON.stringify(this.toJSON()), (v) => v.charCodeAt(0)).buffer);
+    return this.toJSON();
   }
 
-  setState(state: Uint8Array) {
+  setState(state: Record<string, any>) {
+    const object = state as ReturnType<World['toJSON']>;
     try {
-      const object: ReturnType<World['toJSON']> = JSON.parse(
-        new Uint16Array(state.buffer).reduce((p, c) => p + String.fromCharCode(c), ''),
-      );
       this.data = object.data;
       this.fps = object.fps;
       this.scene = object.scene;

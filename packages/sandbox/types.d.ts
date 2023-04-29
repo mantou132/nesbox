@@ -9,8 +9,8 @@ declare global {
     var nesbox: {
       _getVideoFrame: () => Uint8ClampedArray;
       _getAudioFrame: () => Float32Array;
-      _getState: () => Uint8Array;
-      _setState: (state?: Uint8Array) => void;
+      _getState: () => Record<string, any>;
+      _setState: (state?: Record<string, any>) => void;
       _width: number;
       _height: number;
       _control: Record<Player, { tap: Set<Button>; pressed: Set<Button> }>;
@@ -34,8 +34,8 @@ declare global {
          * Sample Rate: 44100
          */
         getAudioFrame: () => Float32Array;
-        getState: () => Uint8Array;
-        setState: (state?: Uint8Array) => void;
+        getState: () => Record<string, any>;
+        setState: (state?: Record<string, any>) => void;
       }) => void;
     };
   }
