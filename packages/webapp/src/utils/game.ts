@@ -1,6 +1,7 @@
 import { debounce, once } from 'duoyun-ui/lib/utils';
 import { clamp } from 'duoyun-ui/lib/number';
 import { default as initNes, Nes, Button } from '@mantou/nes';
+import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
 import { VideoRefreshRate } from 'src/constants';
 import { logger } from 'src/logger';
@@ -120,7 +121,7 @@ export async function watchDevRom(
   }
 }
 
-export async function createGame(filename: string, romBuffer: ArrayBuffer, sampleRate: number) {
+export async function createGame(filename: string, romBuffer: ArrayBuffer, sampleRate: number, maxPlayer?: number) {
   const devRom = await getDevRomFile();
   if (devRom) {
     filename = devRom.filename;
@@ -156,15 +157,15 @@ export async function createGame(filename: string, romBuffer: ArrayBuffer, sampl
       return game;
     }
     case 'nes': {
-      if (process.env.NODE_ENV === 'development') {
-        const { Nes } = await import('@nesbox/fceux');
-        const game = Nes.new(sampleRate);
-        await game.load_rom(new Uint8Array(romBuffer));
-        return game;
-      } else {
+      if (maxPlayer && maxPlayer > 2 && !mediaQuery.isPhone) {
         await initNes();
         const game = Nes.new(sampleRate);
         game.load_rom(new Uint8Array(romBuffer));
+        return game;
+      } else {
+        const { Nes } = await import('@nesbox/fceux');
+        const game = Nes.new(sampleRate);
+        await game.load_rom(new Uint8Array(romBuffer));
         return game;
       }
     }

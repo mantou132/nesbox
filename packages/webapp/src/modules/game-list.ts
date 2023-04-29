@@ -151,7 +151,7 @@ export class MGameListElement extends GemElement {
           this.#filteredData = this.#data;
         }
       },
-      () => [store.gameIds, locationStore.query.toString()],
+      () => [store.topGameIds, locationStore.query.toString()],
     );
   };
 

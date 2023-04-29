@@ -198,7 +198,7 @@ export class PRoomElement extends GemElement {
     );
   };
 
-  #getCachesName = (auto: boolean) => `${auto ? 'auto_' : ''}state_v6`;
+  #getCachesName = (auto: boolean) => `${auto ? 'auto_v1_' : ''}state_v7`;
 
   #save = async (auto = false) => {
     try {

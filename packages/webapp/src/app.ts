@@ -154,12 +154,12 @@ export class AppRootElement extends GemElement {
 
     this.effect(this.#enterRoom, () => [configure.user?.playing?.id]);
     this.effect(
-      () => {
+      (_, prev) => {
         this.#scrollPosition.clear();
         this.contentRef.element?.scrollTo(0, 0);
         clearLobbyMessage();
         getGames();
-        if (configure.user) {
+        if (prev && configure.user) {
           getGameIds();
         }
       },
@@ -168,6 +168,7 @@ export class AppRootElement extends GemElement {
     this.effect(
       () => {
         if (configure.user) {
+          getGameIds();
           getAccount();
           getFriends();
           const subscription = subscribeEvent();

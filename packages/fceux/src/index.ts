@@ -17,6 +17,7 @@ export class Nes implements ONes {
   #currentDeQoiLen = 0;
   #currentQoiFrameLen = 0;
   #controllers = new Controllers();
+  #sound = false;
 
   #frameNum = 0;
   #framePixelCount = this.#width * this.#height;
@@ -36,8 +37,10 @@ export class Nes implements ONes {
     | (FceuxModule & {
         HEAP8: Uint8Array;
         ctx: WebGLRenderingContext;
-        currentOutputBuffer: Float32Array;
-        _audioBufferCallback: () => void;
+        _audioBufferCallback: () => number;
+        _getMemory: () => number;
+        _readMemory: (addr: number) => number;
+        _writeMemory: (addr: number, value: number) => void;
       }) = undefined;
 
   mem(): Uint8Array {
@@ -100,6 +103,8 @@ export class Nes implements ONes {
     this.#fceux!.loadGame(bytes);
   }
   clock_frame(): number {
+    // NOT support 4 player
+    this.#fceux!.setControllerBits(this.#controllers.getState(this.#frameNum));
     this.#fceux!.update();
     const gl = this.#fceux!.ctx;
     const currentFrame = new Uint8ClampedArray(this.#mem.buffer, this.#frameSpace[0], this.#frameLen);
@@ -107,67 +112,51 @@ export class Nes implements ONes {
     return this.#frameNum++;
   }
   audio_callback(out: Float32Array) {
-    this.#fceux!.currentOutputBuffer = out;
-    this.#fceux!._audioBufferCallback();
+    if (!this.#sound) return;
+    out.set(new Float32Array(this.#fceux!.HEAP8.buffer, this.#fceux!._audioBufferCallback(), out.length));
   }
   handle_button_event(player: Player, button: Button, pressed: boolean) {
-    if (button === Button.JoypadTurboA || button === Button.JoypadTurboB || button === Button.JoypadTurboC) {
-      this.#fceux?.setThrottling(pressed);
-    }
     this.#controllers.handleEvent(player, button, pressed);
-    // NOT support 4 player
-    this.#fceux?.setControllerBits(this.#controllers.getState());
   }
   handle_motion_event(_player: Player, _x: number, _y: number, _dx: number, _dy: number) {
     //
   }
   state(): Uint8Array {
     this.#fceux!.saveState();
-    const [name, buf] = Object.entries(this.#fceux!.exportSaveFiles())[0];
-    const state = new Uint8Array(30 + buf.length);
-    const nameBuf = new TextEncoder().encode(name);
-    state[0] = nameBuf.length;
-    state.set(nameBuf, 1);
-    state.set(buf, 30);
-    return state;
+    const buf = Object.values(this.#fceux!.exportSaveFiles())[0];
+    this.#fceux!.deleteSaveFiles();
+    return buf;
   }
   load_state(state: Uint8Array) {
-    const name = new TextDecoder().decode(new Uint8Array(state.buffer, 1, state[0]));
-    this.#fceux!.importSaveFiles({ [name]: new Uint8Array(state.buffer, 30) });
+    this.#fceux!.saveState();
+    const name = Object.keys(this.#fceux!.exportSaveFiles())[0];
+    this.#fceux!.importSaveFiles({ [name]: state });
     this.#fceux!.loadState();
   }
   reset() {
     this.#fceux?.reset();
   }
   set_sound(enabled: boolean) {
-    this.#fceux?.setMuted(!enabled);
+    this.#sound = enabled;
   }
   sound(): boolean {
-    return !this.#fceux?.muted();
+    return this.#sound;
   }
-  /**
-   * @ignore
-   */
   ram_map(): Uint32Array {
-    return new Uint32Array();
+    return new Uint32Array([0, 0x07ff, 0x6000, 0x7fff]);
   }
-  /**
-   * @ignore
-   */
   ram(): Uint8Array {
-    return new Uint8Array();
+    const ram = new Uint8Array(10 * 1024);
+    const offset = this.#fceux!._getMemory();
+    ram.set(new Uint8Array(this.#fceux!.HEAP8.buffer, offset, 2 * 1024));
+    ram.set(new Uint8Array(this.#fceux!.HEAP8.buffer, offset + 0x6000, 8 * 1024), 2 * 1024);
+    return ram;
   }
-  /**
-   * @ignore
-   */
-  read_ram(_addr: number): number {
-    return 0;
+  read_ram(addr: number): number {
+    return this.#fceux!._readMemory(addr);
   }
-  /**
-   * @ignore
-   */
-  write_ram(_addr: number, _val: number) {
-    //
+  write_ram(addr: number, val: number) {
+    this.#fceux!._writeMemory(addr, val);
   }
   /**
    * @ignore

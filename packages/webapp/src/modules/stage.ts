@@ -293,7 +293,7 @@ export class MStageElement extends GemElement<State> {
         filename = `${filename}.wasm4.wasm`;
       }
 
-      const game: Nes = await createGame(filename, romBuffer, this.#sampleRate);
+      const game: Nes = await createGame(filename, romBuffer, this.#sampleRate, this.#game!.maxPlayer);
 
       this.setState({ canvasWidth: game.width(), canvasHeight: game.height() });
       this.#gameInstance = game;
@@ -687,8 +687,8 @@ export class MStageElement extends GemElement<State> {
         bytes: this.#gameInstance.ram(),
         map: this.#gameInstance.ram_map(),
       };
-    } catch {
-      logger.warn('Read ram error');
+    } catch (err) {
+      logger.warn('Read ram error', err);
     }
   };
 }

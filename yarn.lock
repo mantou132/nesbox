@@ -1240,10 +1240,10 @@
   resolved "https://registry.yarnpkg.com/@mantou/fbneo/-/fbneo-0.0.2.tgz#63d657d0df661e776880caae1584f581ee8a2e3c"
   integrity sha512-tFsDKZ8NqN0NhWyCopEk/ck89ioDxU36bOby5gg65kukCIQDmknDIUMEO9iUb7gsqdF2VYKEvmGHm7rvLUXCWg==
 
-"@mantou/fceux@^0.0.4":
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/@mantou/fceux/-/fceux-0.0.4.tgz#04c64b04226636791de54ab5515be5a23119939c"
-  integrity sha512-WWr/jMpQAu7mvApJaV8A/LgftzyVb0ZvqsKfWL09tKOAp1mRStuNu7TWWvh0BQGVf8ltAbwg7TzzKVjCDkzltQ==
+"@mantou/fceux@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@mantou/fceux/-/fceux-0.0.5.tgz#a974a886273e47bbb49bad047a9ed0f3bccccd63"
+  integrity sha512-DuupPEP5I+eC6ZjtXQXbamyAnCeb+0NvJ+tFH4YQj7kJyz4pEPV7mEpzcWLQnGYsAdnvLiePlSISCZ9cFgBRxQ==
 
 "@mantou/gem@^1.6.18":
   version "1.6.18"
