@@ -11,6 +11,8 @@ export enum ChannelMessageType {
   ROLE_ANSWER,
   PING,
   POINTER_MOVE,
+  STATE_REQ,
+  PLAYER_MSGS,
 }
 
 export type Role =
@@ -122,7 +124,32 @@ export class Ping extends ChannelMessageBase {
   }
 }
 
-export type ChannelMessage = TextMsg | KeyDownMsg | KeyUpMsg | RoleOffer | RoleAnswer | Ping | PointerMoveMsg;
+export class StateReq extends ChannelMessageBase {
+  type = ChannelMessageType.STATE_REQ;
+}
+
+export type PlayerMsgs = (KeyDownMsg | KeyUpMsg | PointerMoveMsg)[];
+
+export class PlayerMsgsMsg extends ChannelMessageBase {
+  type = ChannelMessageType.PLAYER_MSGS;
+
+  events?: PlayerMsgs;
+  constructor(events: PlayerMsgs) {
+    super();
+    this.events = events;
+  }
+}
+
+export type ChannelMessage =
+  | TextMsg
+  | KeyDownMsg
+  | KeyUpMsg
+  | RoleOffer
+  | RoleAnswer
+  | Ping
+  | PointerMoveMsg
+  | StateReq
+  | PlayerMsgsMsg;
 
 export class RTCBasic extends EventTarget {
   connMap = new Map<number, RTCPeerConnection>();
@@ -196,6 +223,13 @@ export class RTCBasic extends EventTarget {
     });
     if (emit) {
       this.emitMessage(data);
+    }
+  };
+
+  sendToUser = (userId: number, data: Uint8Array) => {
+    const conn = this.connMap.get(userId);
+    if (conn) {
+      this.channelMap.get(conn)?.send(data);
     }
   };
 

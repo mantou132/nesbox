@@ -74,6 +74,7 @@ export class MVideoSettingsElement extends GemElement {
         <dy-select
           .value=${configure.user.settings.video.rtcImprove}
           .options=${[
+            { label: 'Event', value: RTCTransportType.EVENT },
             { label: 'Frame Clip', value: RTCTransportType.CLIP },
             { label: '30 FPS', value: RTCTransportType.REDUCE },
           ]}

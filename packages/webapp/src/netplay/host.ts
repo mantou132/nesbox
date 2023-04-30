@@ -93,6 +93,9 @@ export class RTCHost extends RTCBasic {
           channel.send(data);
           channel.clientPrevPing = (msg as Ping).prevPing;
           break;
+        case ChannelMessageType.STATE_REQ:
+          this.emitMessage(msg);
+          break;
       }
     };
   };

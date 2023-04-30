@@ -147,6 +147,7 @@ export const enum VideoRefreshRate {
 }
 
 export const enum RTCTransportType {
+  EVENT = 'event',
   CLIP = 'clip',
   REDUCE = 'reduce',
 }

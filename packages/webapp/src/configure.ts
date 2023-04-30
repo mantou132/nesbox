@@ -101,7 +101,7 @@ const defaultVideoSettings = {
   render: VideoRenderMethod.PIXELATED,
   filter: VideoFilter.DEFAULT,
   refreshRate: VideoRefreshRate.AUTO,
-  rtcImprove: RTCTransportType.CLIP,
+  rtcImprove: RTCTransportType.EVENT,
 };
 
 const defaultUISettings = {

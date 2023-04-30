@@ -1,7 +1,6 @@
 /// <reference types="../types" />
 /// <reference types="../env" />
 
-import JSZip from 'jszip';
 import { Nes as ONes, Button, Player } from '@mantou/nes';
 
 import { VM } from './vm';
@@ -142,11 +141,11 @@ export class JsGame implements ONes {
       setCursorMotion(player, x, y, dx, dy);
     };
     this.state = () => {
-      return new JSZip().file('state', getState()).generateAsync({ type: 'uint8array' }) as any;
+      // Improve: compress
+      return new TextEncoder().encode(getState());
     };
     this.load_state = async (state) => {
-      const { files } = await JSZip.loadAsync(state);
-      setState(await Object.values(files)[0].async('string'));
+      setState(new TextDecoder().decode(state));
     };
     this.reset = () => reset();
     this.width = () => getWidth();

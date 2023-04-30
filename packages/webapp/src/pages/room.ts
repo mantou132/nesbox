@@ -203,7 +203,7 @@ export class PRoomElement extends GemElement {
   #save = async (auto = false) => {
     try {
       if (!this.stageRef.element!.hostRomBuffer) return;
-      const state = await this.stageRef.element!.getState();
+      const state = this.stageRef.element!.getState();
       if (!state) return;
       const thumbnail = await this.stageRef.element!.getThumbnail();
       const cache = await caches.open(this.#getCachesName(auto));

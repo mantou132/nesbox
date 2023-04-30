@@ -5,7 +5,16 @@ import { globalEvents, SignalDetail, SignalType } from 'src/constants';
 import { configure } from 'src/configure';
 import { logger } from 'src/logger';
 import { sendSignal } from 'src/services/api';
-import { ChannelMessage, ChannelMessageType, Ping, RoleAnswer, RoleOffer, RTCBasic, TextMsg } from 'src/netplay/common';
+import {
+  ChannelMessage,
+  ChannelMessageType,
+  Ping,
+  RoleAnswer,
+  RoleOffer,
+  RTCBasic,
+  StateReq,
+  TextMsg,
+} from 'src/netplay/common';
 
 export const pingStore = createStore<{ ping?: number }>({});
 
@@ -36,12 +45,7 @@ export class RTCClient extends RTCBasic {
   #startClient = async () => {
     const conn = this.createRTCPeerConnection(configure.user!.id);
 
-    /**
-     * 不按顺序接收消息的问题
-     * 1. 帧可能乱序，可以在帧数据上添加帧数，但需要复制内存（性能消耗多少？）
-     * 2. ping 值不准确
-     */
-    const channel = conn.createDataChannel('msg', { ordered: false });
+    const channel = conn.createDataChannel('msg', { ordered: true });
     channel.binaryType = 'arraybuffer';
     channel.onopen = () => {
       clearTimeout(this.#restartTimer);
@@ -54,6 +58,8 @@ export class RTCClient extends RTCBasic {
       this.channelMap.set(conn, channel);
       // 也许是重连
       this.send(new RoleOffer(this.getPlayer(configure.user!.id)));
+
+      this.send(new StateReq(), false);
 
       const textMsg = new TextMsg(['enterRoomMsg', configure.user!.nickname]).toSystemRole();
       this.send(textMsg);

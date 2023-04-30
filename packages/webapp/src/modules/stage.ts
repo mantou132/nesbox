@@ -28,6 +28,9 @@ import {
   RoleAnswer,
   RoleOffer,
   TextMsg,
+  PlayerMsgs,
+  PlayerMsgsMsg,
+  StateReq,
 } from 'src/netplay/common';
 import { RTCHost } from 'src/netplay/host';
 import { RTCClient } from 'src/netplay/client';
@@ -235,26 +238,45 @@ export class MStageElement extends GemElement<State> {
     });
   };
 
+  #events: PlayerMsgs = [];
+  #handleButtonEvent = (event: KeyDownMsg | KeyUpMsg) => {
+    this.#isHost && this.#events.push(event);
+    this.#gameInstance?.handle_button_event(event.player, event.button, event.type === ChannelMessageType.KEYDOWN);
+  };
+
+  #handleMotionEvent = (event: PointerMoveMsg) => {
+    this.#isHost && this.#events.push(event);
+    this.#gameInstance?.handle_motion_event(event.player, event.x, event.y, event.dx, event.dy);
+  };
+
   #sampleRate = 44100;
   #bufferSize = this.#sampleRate / 60;
   #nextStartTime = 0;
   #loop = () => {
     if (!this.#gameInstance || !this.#isVisible) return;
-    this.#execCheat();
+    const rtcImprove = this.#settings?.video.rtcImprove;
+    if (rtcImprove !== RTCTransportType.EVENT) {
+      this.#execCheat();
+    }
     const frameNum = this.#gameInstance.clock_frame();
 
     const memory = this.#gameInstance.mem();
 
     const framePtr = this.#gameInstance.frame(
-      !!this.#rtc?.needSendFrame(),
-      this.#settings?.video.rtcImprove !== RTCTransportType.CLIP || frameNum % 180 === 0,
+      rtcImprove !== RTCTransportType.EVENT && !!this.#rtc?.needSendFrame(),
+      rtcImprove !== RTCTransportType.CLIP || frameNum % 180 === 0,
     );
     const frameLen = this.#gameInstance.frame_len();
     this.canvasRef.element!.paint(new Uint8Array(memory.buffer, framePtr, frameLen));
 
-    const qoiFramePtr = this.#gameInstance.qoi_frame();
-    const qoiFrameLen = this.#gameInstance.qoi_frame_len();
-    this.#rtc?.sendFrame(new Uint8Array(memory.buffer, qoiFramePtr, qoiFrameLen), frameNum);
+    if (rtcImprove !== RTCTransportType.EVENT) {
+      const qoiFramePtr = this.#gameInstance.qoi_frame();
+      const qoiFrameLen = this.#gameInstance.qoi_frame_len();
+      this.#rtc?.sendFrame(new Uint8Array(memory.buffer, qoiFramePtr, qoiFrameLen), frameNum);
+    } else {
+      this.#rtc?.send(new PlayerMsgsMsg(this.#events), false);
+    }
+    this.#events.length = 0;
 
     if (!this.#gameInstance.sound() || !this.#audioContext || !this.#audioStreamDestination || !this.#gainNode) return;
     const audioBuffer = this.#audioContext.createBuffer(1, this.#bufferSize, this.#sampleRate);
@@ -311,14 +333,18 @@ export class MStageElement extends GemElement<State> {
   #onMessage = ({ detail }: CustomEvent<ChannelMessage | ArrayBuffer>) => {
     if (detail instanceof ArrayBuffer) {
       if (this.#gameInstance) {
-        const memory = this.#gameInstance.mem();
-        const qoiBuffer = new Uint8Array(detail);
-        if (qoiBuffer.length <= 4) return;
-        const part = new Uint8Array(detail, qoiBuffer.length - 4, 4);
-        const framePtr = this.#gameInstance.decode_qoi(qoiBuffer);
-        const frameLen = this.#gameInstance.decode_qoi_len();
-        const frame = new Uint8Array(memory.buffer, framePtr, frameLen);
-        this.canvasRef.element!.paint(frame, [...part]);
+        const buffer = new Uint8Array(detail);
+        if (buffer[0] === 0x71 && buffer[1] === 0x6f && buffer[2] === 0x69 && buffer[3] === 0x66) {
+          if (buffer.length <= 4) return;
+          const memory = this.#gameInstance.mem();
+          const part = new Uint8Array(detail, buffer.length - 4, 4);
+          const framePtr = this.#gameInstance.decode_qoi(buffer);
+          const frameLen = this.#gameInstance.decode_qoi_len();
+          const frame = new Uint8Array(memory.buffer, framePtr, frameLen);
+          this.canvasRef.element!.paint(frame, [...part]);
+        } else {
+          this.#gameInstance.load_state(buffer);
+        }
       }
       return;
     }
@@ -345,17 +371,40 @@ export class MStageElement extends GemElement<State> {
         break;
       // host
       case ChannelMessageType.KEYDOWN:
-        this.#gameInstance?.handle_button_event((detail as KeyDownMsg).player, (detail as KeyDownMsg).button, true);
+        this.#handleButtonEvent(detail as KeyDownMsg);
         break;
       // host
       case ChannelMessageType.KEYUP:
-        this.#gameInstance?.handle_button_event((detail as KeyDownMsg).player, (detail as KeyUpMsg).button, false);
+        this.#handleButtonEvent(detail as KeyUpMsg);
         break;
       // host
       case ChannelMessageType.POINTER_MOVE:
-        const { player, x, y, dx, dy } = detail as PointerMoveMsg;
-        this.#gameInstance?.handle_motion_event(player, x, y, dx, dy);
+        this.#handleMotionEvent(detail as PointerMoveMsg);
         break;
+      // host
+      case ChannelMessageType.STATE_REQ:
+        if (this.#gameInstance) {
+          const state = this.#gameInstance.state();
+          this.#rtc?.sendToUser(detail.userId, state);
+        }
+        break;
+      // client
+      case ChannelMessageType.PLAYER_MSGS:
+        (detail as PlayerMsgsMsg).events?.forEach((msg) => {
+          if (msg.type === ChannelMessageType.POINTER_MOVE) {
+            this.#handleMotionEvent(msg as PointerMoveMsg);
+          } else {
+            this.#handleButtonEvent(msg as KeyUpMsg);
+          }
+        });
+        if (this.#gameInstance) {
+          this.#gameInstance.clock_frame();
+          const memory = this.#gameInstance.mem();
+          const framePtr = this.#gameInstance.frame(false, false);
+          const frameLen = this.#gameInstance.frame_len();
+          this.canvasRef.element!.paint(new Uint8Array(memory.buffer, framePtr, frameLen));
+          break;
+        }
     }
   };
 
@@ -416,10 +465,11 @@ export class MStageElement extends GemElement<State> {
   #onPointerMove = (event: PointerEvent) => {
     if (!this.#gameInstance) return;
     const [x, y, dx, dy] = positionMapping(event, this.canvasRef.element!);
+    const e = new PointerMoveMsg(x, y, dx, dy);
     if (this.#isHost) {
-      this.#gameInstance.handle_motion_event(Player.One, x, y, dx, dy);
+      this.#handleMotionEvent(e);
     } else {
-      this.#rtc?.send(new PointerMoveMsg(x, y, dx, dy));
+      this.#rtc?.send(e, false);
     }
   };
 
@@ -429,10 +479,12 @@ export class MStageElement extends GemElement<State> {
     } else {
       this.#enableAudio();
     }
+    const e = new KeyDownMsg(button);
     if (this.#isHost) {
-      this.#gameInstance?.handle_button_event(player, button, true);
+      e.player = player;
+      this.#handleButtonEvent(e);
     } else {
-      this.#rtc?.send(new KeyDownMsg(button));
+      this.#rtc?.send(e, false);
     }
   };
 
@@ -474,10 +526,12 @@ export class MStageElement extends GemElement<State> {
   };
 
   #releaseButton = (player: Player, button: Button) => {
+    const e = new KeyUpMsg(button);
     if (this.#isHost) {
-      this.#gameInstance?.handle_button_event(player, button, false);
+      e.player = player;
+      this.#handleButtonEvent(e);
     } else {
-      this.#rtc?.send(new KeyUpMsg(button));
+      this.#rtc?.send(e, false);
     }
   };
 
@@ -562,6 +616,9 @@ export class MStageElement extends GemElement<State> {
             transparent: true,
             position: this.#hasMask() ? 'center' : 'start',
           });
+          if (!this.#isHost) {
+            this.#rtc?.send(new StateReq(), false);
+          }
         }
       },
       () => [this.#rom],
@@ -641,10 +698,9 @@ export class MStageElement extends GemElement<State> {
     return this.canvasRef.element!.screenshot();
   };
 
-  getState = async (): Promise<GameState | undefined> => {
+  getState = (): GameState | undefined => {
     if (!this.#gameInstance) return;
-    // await jszip
-    const state = await this.#gameInstance.state();
+    const state = this.#gameInstance.state();
     if (state.length === 0) {
       const buffer = this.#gameInstance.mem().buffer;
       logger.warn(`Saved wasm memory: ${buffer.byteLength / 1024}KB`);
