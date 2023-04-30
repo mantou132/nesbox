@@ -3,6 +3,7 @@ import { theme } from 'duoyun-ui/lib/theme';
 import { getCorSrc, getInputItemType, getInputItemValue, normalizeFilename, saveFile } from 'src/utils';
 import QOI from 'qoijs';
 import { Font, encodeFont } from '@mantou/ecs';
+import { sleep } from 'duoyun-ui/lib/utils';
 
 import type { DuoyunFormItemElement } from 'duoyun-ui/elements/form';
 import type { DuoyunSelectElement } from 'duoyun-ui/elements/select';
@@ -60,6 +61,8 @@ type State = {
 @customElement('p-font')
 @adoptedStyle(style)
 export class PFontElement extends GemElement<State> {
+  #buildInFonts = ['Sans-Serif', 'Serif'];
+
   state: State = {
     localFonts: [],
     webFonts: [],
@@ -67,7 +70,7 @@ export class PFontElement extends GemElement<State> {
     result: '',
     previews: [],
     args: {
-      currentFont: 'Sans-Serif',
+      currentFont: this.#buildInFonts[0],
       fontSize: 10,
       qoi: true,
     },
@@ -100,6 +103,7 @@ export class PFontElement extends GemElement<State> {
       .shift()!
       .replace(/-|_/g, ' ')
       .trim();
+    await sleep(0);
     const font = await new FontFace(name, `url(${url})`).load();
     document.fonts.add(font);
     this.setState({ webFonts: [...new Set([...this.state.webFonts, name])] });
@@ -110,6 +114,13 @@ export class PFontElement extends GemElement<State> {
     const { args } = this.state;
     const { name, value } = evt.detail;
     this.setState({ args: { ...args, [name]: getInputItemValue(args[name], value) } });
+  };
+
+  #getFont = (str: string) => {
+    if (this.#buildInFonts.includes(str)) {
+      return str;
+    }
+    return `'${str}'`;
   };
 
   #canvas = new OffscreenCanvas(0, 0);
@@ -128,7 +139,7 @@ export class PFontElement extends GemElement<State> {
       if (!map.has(char)) {
         this.#canvas.width = args.fontSize;
         this.#canvas.height = args.fontSize;
-        ctx.font = `${args.fontSize}px ${args.currentFont}`;
+        ctx.font = `${args.fontSize}px ${this.#getFont(args.currentFont)}`;
         const { width, fontBoundingBoxDescent, fontBoundingBoxAscent } = ctx.measureText(char);
         const intWidth = Math.trunc(width);
         ctx.fillText(char, 0, args.fontSize - (args.fontSize - (fontBoundingBoxAscent - fontBoundingBoxDescent)) / 2);
@@ -209,7 +220,7 @@ export class PFontElement extends GemElement<State> {
           @click=${this.#loadLocalFonts}
           @paste=${this.#onPaste}
           .value=${args.currentFont}
-          .dataList=${[...new Set(['Sans-Serif', 'Serif', ...webFonts, ...localFonts])].map((e) => ({
+          .dataList=${[...new Set([...this.#buildInFonts, ...webFonts, ...localFonts])].map((e) => ({
             value: e,
             label: html`<div style="font-family: ${e}">${e}</div>`,
           }))}
