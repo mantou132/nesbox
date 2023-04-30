@@ -11,9 +11,9 @@ function genIcon(d: string, ext = '') {
   `;
 }
 
-function genIconV2(d: string, ext = '') {
+function genIconV2(d: string, ext = '', viewBox = '0 0 960 960') {
   return raw`
-    <svg part="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="0 0 960 960" width="48px" fill="currentColor">
+    <svg part="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" height="48px" viewBox="${viewBox}" width="48px" fill="currentColor">
       <path d="M0 0h960v960H0z" fill="none" stroke="none"></path>
       <path d="${d}"></path>
       ${ext}
@@ -23,6 +23,11 @@ function genIconV2(d: string, ext = '') {
 
 // https://fonts.google.com/icons?icon.style=Rounded&icon.set=Material+Symbols
 export const icons = setIcons({
+  screenRecord: genIconV2(
+    'M159 813q-37-51-58-110.5T80 576q0-67 20.5-127T158 339l43 43q-29 42-45 91t-16 103q0 54 16.5 103.5T202 771l-43 42Zm321 163q-66 0-126.5-20.5T243 898l43-43q42 29 91 45t103 16q54 0 103-16t91-45l43 43q-50 37-110 57.5T480 976Zm322-162-43-43q29-42 45-91.5T820 576q0-54-16-103t-45-91l43-43q37 50 57.5 110T880 576q0 67-20.5 127T802 814ZM285 297l-43-43q51-37 111-57.5T480 176q67 0 127 21t111 58l-43 43q-42-29-91-45.5T480 236q-54 0-103.5 16T285 297Zm195 469q-79 0-134.5-55.5T290 576q0-79 55.5-134.5T480 386q79 0 134.5 55.5T670 576q0 79-55.5 134.5T480 766Z',
+    '',
+    '0 96 960 960',
+  ),
   notAllowed: genIconV2(
     'M310 603h340q12.75 0 21.375-8.675 8.625-8.676 8.625-21.5 0-12.825-8.625-21.325T650 543H310q-12.75 0-21.375 8.675-8.625 8.676-8.625 21.5 0 12.825 8.625 21.325T310 603Zm170.266 373q-82.734 0-155.5-31.5t-127.266-86q-54.5-54.5-86-127.341Q80 658.319 80 575.5q0-82.819 31.5-155.659Q143 347 197.5 293t127.341-85.5Q397.681 176 480.5 176q82.819 0 155.659 31.5Q709 239 763 293t85.5 127Q880 493 880 575.734q0 82.734-31.5 155.5T763 858.316q-54 54.316-127 86Q563 976 480.266 976Zm.234-60Q622 916 721 816.5t99-241Q820 434 721.188 335 622.375 236 480 236q-141 0-240.5 98.812Q140 433.625 140 576q0 141 99.5 240.5t241 99.5Zm-.5-340Z',
   ),

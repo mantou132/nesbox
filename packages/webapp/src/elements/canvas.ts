@@ -265,6 +265,10 @@ export class NesboxCanvasElement extends GemElement {
     });
   };
 
+  captureVideoTrack = () => {
+    return this.canvasRef.element!.captureStream(30).getVideoTracks()[0];
+  };
+
   mounted = () => {
     this.effect(async () => {
       if (this.width) {

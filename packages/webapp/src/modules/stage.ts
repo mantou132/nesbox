@@ -190,7 +190,7 @@ export class MStageElement extends GemElement<State> {
     }
   };
 
-  #createStream = () => {
+  #createAudioStream = () => {
     const stream = new MediaStream();
 
     this.#audioContext = new AudioContext({ sampleRate: this.#sampleRate });
@@ -366,7 +366,7 @@ export class MStageElement extends GemElement<State> {
     this.#rtc.start({
       host: this.#playing!.host,
       audio: this.audioRef.element!,
-      stream: this.#createStream(),
+      stream: this.#createAudioStream(),
     });
   };
 
@@ -639,6 +639,19 @@ export class MStageElement extends GemElement<State> {
 
   screenshot = () => {
     return this.canvasRef.element!.screenshot();
+  };
+
+  getStream = () => {
+    const videoTrack = this.canvasRef.element!.captureVideoTrack();
+    const audioTrack = this.#isHost
+      ? this.#audioStreamDestination!.stream.getAudioTracks()[0]
+      : (this.audioRef.element!.srcObject as MediaStream).getAudioTracks()[0];
+    return {
+      stream: new MediaStream([videoTrack, audioTrack]),
+      stopStream: () => {
+        videoTrack.stop();
+      },
+    };
   };
 
   getState = async (): Promise<GameState | undefined> => {

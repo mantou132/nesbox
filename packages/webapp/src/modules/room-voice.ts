@@ -1,38 +1,13 @@
-import {
-  GemElement,
-  html,
-  adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
-  createStore,
-  connectStore,
-  updateStore,
-} from '@mantou/gem';
+import { GemElement, html, customElement, createStore, connectStore, updateStore } from '@mantou/gem';
 
 import { globalEvents, VoiceSignalDetail } from 'src/constants';
 import { configure } from 'src/configure';
 import { icons } from 'src/icons';
-import { theme } from 'src/theme';
 import { sendVoiceMsg } from 'src/services/api';
 import { logger } from 'src/logger';
 import { ScVoiceMsgKind } from 'src/generated/graphql';
 
 import 'duoyun-ui/elements/use';
-
-const style = createCSSSheet(css`
-  :host {
-    display: contents;
-  }
-  .icon {
-    width: 1.3em;
-    padding: 0.2em;
-    border-radius: ${theme.smallRound};
-  }
-  .icon:hover {
-    background: ${theme.lightBackgroundColor};
-  }
-`);
 
 export const voiceStore = createStore<{ audioLevel: Record<number, number> }>({
   audioLevel: {},
@@ -47,7 +22,6 @@ type State = {
  * @customElement m-room-voice
  */
 @customElement('m-room-voice')
-@adoptedStyle(style)
 @connectStore(configure)
 export class MVoiceRoomElement extends GemElement<State> {
   state: State = {

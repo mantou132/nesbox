@@ -42,6 +42,8 @@ import 'duoyun-ui/elements/coach-mark';
 import 'duoyun-ui/elements/space';
 import 'duoyun-ui/elements/status-light';
 import 'src/modules/stage';
+import 'src/modules/room-recorder';
+import 'src/modules/room-voice';
 import 'src/modules/ads';
 import 'src/modules/cheat-settings';
 import 'src/elements/list';
@@ -78,6 +80,15 @@ const style = createCSSSheet(css`
     position: absolute;
     right: 1rem;
     bottom: 1rem;
+  }
+  .icon {
+    display: inline-flex;
+    width: 1.3em;
+    padding: 0.2em;
+    border-radius: ${theme.smallRound};
+  }
+  .icon:hover {
+    background: ${theme.lightBackgroundColor};
   }
   @media ${mediaQuery.PHONE} {
     .info {
@@ -396,7 +407,8 @@ export class PRoomElement extends GemElement {
       <nesbox-game-controller class="controller"></nesbox-game-controller>
       <dy-space class="info">
         ${this.#isHost ? html`<nesbox-fps></nesbox-fps>` : html`<nesbox-ping></nesbox-ping>`}
-        <m-room-voice></m-room-voice>
+        <m-room-recorder class="icon" .getStream=${() => this.stageRef.element!.getStream()}></m-room-recorder>
+        <m-room-voice class="icon"></m-room-voice>
       </dy-space>
       <m-ads class="ads" .attrs=${this.#game?.attributes}></m-ads>
       <div class="coach-mark-container">
