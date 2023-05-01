@@ -77,6 +77,7 @@ export class MGameListElement extends GemElement {
   @boolattribute favorite: boolean;
   @boolattribute recent: boolean;
   @boolattribute new: boolean;
+  @boolattribute all: boolean;
 
   constructor() {
     super();
@@ -151,7 +152,11 @@ export class MGameListElement extends GemElement {
           this.#filteredData = this.#data;
         }
       },
-      () => [store.topGameIds],
+      () => [
+        store.topGameIds,
+        // filter
+        this.all ? locationStore.query.toString() : '',
+      ],
     );
   };
 

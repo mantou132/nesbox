@@ -186,7 +186,7 @@ export class PGamesElement extends GemElement<State> {
       ></dy-carousel>
       <m-game-list class="list" .recent=${true}></m-game-list>
       <m-game-list class="list" .new=${true}></m-game-list>
-      <m-game-list class="list"></m-game-list>
+      <m-game-list class="list" .all=${true}></m-game-list>
     `;
   };
 }
