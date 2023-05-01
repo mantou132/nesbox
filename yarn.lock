@@ -1252,14 +1252,6 @@
   dependencies:
     lit-html "^1.4.1"
 
-"@mantou/nes-sandbox@^0.0.8":
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/@mantou/nes-sandbox/-/nes-sandbox-0.0.8.tgz#c91824d44f8ffa359dc0241b658cf82cd3d3865b"
-  integrity sha512-L5EKR6aXLUfi+55+Y9Kd0SEIOSvZx0x/6mmyGpnH+sMLl3WMtUNVsBqwWs6WqajxZuZtaP4ZUWO6uyOgrzVBVg==
-  dependencies:
-    qoijs "^1.0.0"
-    shadowrealm-api "^0.8.2"
-
 "@mantou/nes-wasm4@^0.0.6":
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/@mantou/nes-wasm4/-/nes-wasm4-0.0.6.tgz#4cae22789935867aaae66b58abea99b682c7506c"

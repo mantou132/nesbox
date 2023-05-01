@@ -14,7 +14,7 @@
   "dependencies": {
     "@mantou/gem": "^1.6.18",
     "@mantou/nes": "^1.0.14",
-    "@mantou/nes-sandbox": "^0.0.12",
+    "@mantou/nes-sandbox": "^0.0.13",
     "@nesbox/arcade": "^0.0.1",
     "@nesbox/fceux": "^0.0.1",
     "@nesbox/mtapp": "^0.0.1",
