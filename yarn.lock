@@ -1235,10 +1235,10 @@
   resolved "https://registry.yarnpkg.com/@mantou/ecs/-/ecs-0.0.1.tgz#3bf38d0369de8494af6df7bbe363819cef447e82"
   integrity sha512-8l2f0SeXmd0VIwHpnz5DtzHjBE8D/sz3T7Fog/rVRj6d8874WEG7sZA415U67yU0G7HOorYZUhflKzKiXs2I6A==
 
-"@mantou/fbneo@^0.0.2":
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/@mantou/fbneo/-/fbneo-0.0.2.tgz#63d657d0df661e776880caae1584f581ee8a2e3c"
-  integrity sha512-tFsDKZ8NqN0NhWyCopEk/ck89ioDxU36bOby5gg65kukCIQDmknDIUMEO9iUb7gsqdF2VYKEvmGHm7rvLUXCWg==
+"@mantou/fbneo@^0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@mantou/fbneo/-/fbneo-0.0.4.tgz#223b34df6de56f62179372bcfad61c2ff19f8154"
+  integrity sha512-tqkckKnxP378jX4wpTL1mJKkC9TJ6LuZ0sOAHqC3ChpfIcWK5paz7tgfwG1EwwPI2tR7mlOPnw5kjATUghG7/w==
 
 "@mantou/fceux@^0.0.5":
   version "0.0.5"
