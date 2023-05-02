@@ -1245,12 +1245,20 @@
   resolved "https://registry.yarnpkg.com/@mantou/fceux/-/fceux-0.0.5.tgz#a974a886273e47bbb49bad047a9ed0f3bccccd63"
   integrity sha512-DuupPEP5I+eC6ZjtXQXbamyAnCeb+0NvJ+tFH4YQj7kJyz4pEPV7mEpzcWLQnGYsAdnvLiePlSISCZ9cFgBRxQ==
 
-"@mantou/gem@^1.6.18":
-  version "1.6.18"
-  resolved "https://registry.yarnpkg.com/@mantou/gem/-/gem-1.6.18.tgz#2503f5f4576cb30a754be630978f3f01febf8ee0"
-  integrity sha512-i0ZXQnPi2D6BsUsRWwAC8JfqOHUxWSvjZss2jaVFMwPcaDQCAxC5suaeRFnRhU36JGRGsPDGQgpoyfWpoXtTaw==
+"@mantou/gem@^1.6.19":
+  version "1.6.19"
+  resolved "https://registry.yarnpkg.com/@mantou/gem/-/gem-1.6.19.tgz#a87c1b669668e8c62d17721b7e46ae0a99afaefd"
+  integrity sha512-x0+B7fp/VhwzqaJgZ9dgC2clWVp7I5N8eq8vlj3JTBxNQiZGLoK+9j1QQcuuf6VJOJL6J/1nKVAQbaY06DiLFg==
   dependencies:
     lit-html "^1.4.1"
+
+"@mantou/nes-sandbox@^0.0.8":
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/@mantou/nes-sandbox/-/nes-sandbox-0.0.8.tgz#c91824d44f8ffa359dc0241b658cf82cd3d3865b"
+  integrity sha512-L5EKR6aXLUfi+55+Y9Kd0SEIOSvZx0x/6mmyGpnH+sMLl3WMtUNVsBqwWs6WqajxZuZtaP4ZUWO6uyOgrzVBVg==
+  dependencies:
+    qoijs "^1.0.0"
+    shadowrealm-api "^0.8.2"
 
 "@mantou/nes-wasm4@^0.0.6":
   version "0.0.6"
