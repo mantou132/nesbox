@@ -20,6 +20,7 @@ import { GamepadBtnIndex } from 'src/gamepad';
 import { store } from 'src/store';
 import { leaveRoom, updateRoomScreenshot } from 'src/services/api';
 import { configure } from 'src/configure';
+import { theme } from 'src/theme';
 
 import type { MStageElement } from 'src/modules/stage';
 import type { MVoiceRoomElement } from 'src/modules/room-voice';
@@ -39,6 +40,12 @@ const style = createCSSSheet(css`
     position: absolute;
     right: 1rem;
     top: 1rem;
+  }
+  .icon {
+    display: inline-flex;
+    width: 1.3em;
+    padding: 0.2em;
+    border-radius: ${theme.smallRound};
   }
 `);
 
@@ -113,13 +120,12 @@ export class PMtRoomElement extends GemElement {
 
   render = () => {
     return html`
-      <m-stage class="stage" ref=${this.stageRef.ref} .padding=${'2em 5em 5em'}></m-stage>
-
+      <m-stage class="stage" ref=${this.stageRef.ref} .padding=${'2em 0 5em'}></m-stage>
       <dy-space class="info">
         ${this.#playing?.host === configure.user?.id
           ? html`<nesbox-fps></nesbox-fps>`
           : html`<nesbox-ping></nesbox-ping>`}
-        <m-room-voice ref=${this.voiceRef.ref}></m-room-voice>
+        <m-room-voice class="icon" ref=${this.voiceRef.ref}></m-room-voice>
       </dy-space>
     `;
   };

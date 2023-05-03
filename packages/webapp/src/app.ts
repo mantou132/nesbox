@@ -15,7 +15,6 @@ import {
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { Loadbar } from 'duoyun-ui/elements/page-loadbar';
 import { createPath } from '@mantou/gem/elements/route';
-import { forever } from 'duoyun-ui/lib/utils';
 import { routes, locationStore } from 'src/routes';
 import { DuoyunRouteElement } from 'duoyun-ui/elements/route';
 
@@ -54,6 +53,7 @@ const style = createCSSSheet(css`
     flex-direction: column;
   }
   .content {
+    position: relative;
     height: 0;
     flex-grow: 1;
     display: block;

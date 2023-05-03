@@ -51,8 +51,6 @@ import 'src/elements/game-controller';
 import 'src/elements/fps';
 import 'src/elements/ping';
 
-const PADDING = '5em';
-
 const style = createCSSSheet(css`
   .stage,
   .controller {
@@ -74,7 +72,7 @@ const style = createCSSSheet(css`
   .ads {
     position: absolute;
     right: ${theme.gridGutter};
-    top: ${PADDING};
+    top: 1em;
   }
   .info {
     position: absolute;
@@ -403,7 +401,12 @@ export class PRoomElement extends GemElement {
 
   render = () => {
     return html`
-      <m-stage class="stage" ref=${this.stageRef.ref} @contextmenu=${this.#onContextMenu} .padding=${PADDING}></m-stage>
+      <m-stage
+        class="stage"
+        ref=${this.stageRef.ref}
+        @contextmenu=${this.#onContextMenu}
+        .padding=${'1em 0 5em'}
+      ></m-stage>
       <nesbox-game-controller class="controller"></nesbox-game-controller>
       <dy-space class="info">
         ${this.#isHost ? html`<nesbox-fps></nesbox-fps>` : html`<nesbox-ping></nesbox-ping>`}
