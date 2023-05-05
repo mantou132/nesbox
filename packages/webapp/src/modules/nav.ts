@@ -8,6 +8,8 @@ import {
   connectStore,
   attribute,
   history,
+  createStore,
+  updateStore,
 } from '@mantou/gem';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { commonHandle } from 'duoyun-ui/lib/hotkeys';
@@ -16,7 +18,7 @@ import { focusStyle } from 'duoyun-ui/lib/styles';
 import { locationStore, routes } from 'src/routes';
 import { createPath, RouteItem } from 'duoyun-ui/elements/route';
 
-import { paramKeys, viewTransitionName } from 'src/constants';
+import { viewTransitionName } from 'src/constants';
 import { i18n } from 'src/i18n/basic';
 import { configure, SearchCommand, setSearchCommand, toggleFriendListState, toggleSearchState } from 'src/configure';
 import { theme } from 'src/theme';
@@ -34,30 +36,13 @@ import 'src/elements/tooltip';
 import 'src/modules/avatar';
 import 'src/modules/badge';
 
-export const navRoutes: RouteItem[] = [
-  {
-    ...routes.game,
-    getContent: (params) => html`<m-nav page="game" id=${params[paramKeys.GAME_ID]}></m-nav>`,
-  },
-  {
-    ...routes.room,
-    content: html`<m-nav page="room"></m-nav>`,
-  },
-  { pattern: '*', content: html`<m-nav></m-nav>` },
-];
-
 const style = createCSSSheet(css`
   :host {
     position: relative;
     z-index: 1;
     display: flex;
-    background: ${theme.backgroundColor};
     view-transition-name: ${viewTransitionName.HEADER};
     box-shadow: ${theme.titleBarColor} 0px 1px 0px;
-  }
-  :host([page='room']) {
-    background-color: black;
-    background-image: linear-gradient(${theme.lightBackgroundColor} -60%, transparent);
   }
   .nav {
     width: 100%;
@@ -121,12 +106,20 @@ const style = createCSSSheet(css`
   }
 `);
 
+const navStore = createStore({
+  room: false,
+});
+
+export const mountedRoom = () => updateStore(navStore, { room: true });
+export const unmountedRoom = () => updateStore(navStore, { room: false });
+
 /**
  * @customElement m-nav
  */
 @customElement('m-nav')
 @adoptedStyle(style)
 @adoptedStyle(focusStyle)
+@connectStore(navStore)
 @connectStore(store)
 @connectStore(locationStore)
 @connectStore(i18n.store)
@@ -251,6 +244,14 @@ export class MNavElement extends GemElement {
 
   render = () => {
     return html`
+      <style>
+        :host {
+          background-color: ${navStore.room ? 'black' : theme.backgroundColor};
+          background-image: ${navStore.room
+            ? 'none'
+            : `linear-gradient(${theme.lightBackgroundColor} -60%, transparent)`};
+        }
+      </style>
       <nav class="nav">
         ${this.page === 'game'
           ? this.#renderGameTitle()

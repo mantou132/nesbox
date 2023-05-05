@@ -35,6 +35,7 @@ import { closeListenerSet } from 'src/elements/titlebar';
 import { logger } from 'src/logger';
 import { ScUserStatus } from 'src/generated/graphql';
 import { theme } from 'src/theme';
+import { mountedRoom, unmountedRoom } from 'src/modules/nav';
 
 import type { MStageElement } from 'src/modules/stage';
 
@@ -392,10 +393,12 @@ export class PRoomElement extends GemElement {
 
     closeListenerSet.add(this.#autoSave);
     addEventListener('keydown', this.#onKeyDown);
+    mountedRoom();
     return () => {
       bc?.close();
       closeListenerSet.delete(this.#autoSave);
       removeEventListener('keydown', this.#onKeyDown);
+      unmountedRoom();
     };
   };
 
