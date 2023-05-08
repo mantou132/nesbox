@@ -465,21 +465,24 @@ impl juniper::Context for GuestContext {}
 
 #[juniper::graphql_object(Context = GuestContext)]
 impl GuestMutationRoot {
-    fn register(context: &GuestContext, input: ScLoginReq) -> FieldResult<ScLoginResp> {
+    fn register(context: &GuestContext, input: ScRegisterReq) -> FieldResult<ScLoginResp> {
         let conn = DB_POOL.get().unwrap();
         register(&conn, input, &context.secret)
     }
 
     fn login(context: &GuestContext, input: ScLoginReq) -> FieldResult<ScLoginResp> {
         let conn = DB_POOL.get().unwrap();
+        let disable_sso = input.disable_sso.unwrap_or_default();
         let resp = login(&conn, input, &context.secret)?;
-        notify(
-            resp.user.id,
-            ScNotifyMessageBuilder::default()
-                .login(true)
-                .build()
-                .unwrap(),
-        );
+        if !disable_sso {
+            notify(
+                resp.user.id,
+                ScNotifyMessageBuilder::default()
+                    .login(true)
+                    .build()
+                    .unwrap(),
+            );
+        }
         Ok(resp)
     }
 }

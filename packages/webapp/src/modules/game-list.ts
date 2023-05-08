@@ -8,6 +8,8 @@ import {
   connectStore,
   boolattribute,
   repeat,
+  refobject,
+  RefObject,
 } from '@mantou/gem';
 import { isNotNullish } from 'duoyun-ui/lib/types';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
@@ -20,6 +22,7 @@ import { i18n } from 'src/i18n/basic';
 import { theme } from 'src/theme';
 import { gameKindList, gameSeriesList } from 'src/enums';
 import { ScGameKind, ScGameSeries } from 'src/generated/graphql';
+import { icons } from 'src/icons';
 
 import 'duoyun-ui/elements/heading';
 import 'duoyun-ui/elements/divider';
@@ -58,10 +61,6 @@ const style = createCSSSheet(css`
     .list {
       grid-template-columns: repeat(auto-fill, minmax(8em, 1fr));
     }
-    .heading {
-      flex-direction: column;
-      align-items: start;
-    }
   }
 `);
 
@@ -78,6 +77,7 @@ export class MGameListElement extends GemElement {
   @boolattribute recent: boolean;
   @boolattribute new: boolean;
   @boolattribute all: boolean;
+  @refobject selectRef: RefObject<HTMLSelectElement>;
 
   constructor() {
     super();
@@ -191,31 +191,53 @@ export class MGameListElement extends GemElement {
             <div class="heading">
               <dy-heading lv="3">${i18n.get('allGame')}</dy-heading>
               <span style="flex-grow: 1;"></span>
-              <dy-select
-                style="width: 12em;"
-                .dropdownStyle=${{ width: '12em' }}
-                .multiple=${true}
-                .placeholder=${i18n.get('gameKind')}
-                .value=${this.#gameKinds}
-                .options=${gameKindList.map((e) => ({ ...e, label: i18n.get(e.label) }))}
-                @change=${this.#onChangeKind}
-              ></dy-select>
-              <dy-pick
-                .placeholder=${i18n.get('gameSeries')}
-                .value=${this.#gameSeries}
-                .options=${gameSeriesList.map((e) => ({ ...e, label: i18n.get(e.label) }))}
-                @change=${({ detail }: CustomEvent<ScGameSeries | ''>) => changeQuery(queryKeys.GAME_SERIES, detail)}
-              ></dy-pick>
-              <dy-select
-                .dropdownStyle=${{ width: '8em' }}
-                .placeholder=${i18n.get('gameMaxPlayer')}
-                .value=${this.#gamePlayer}
-                .options=${['', '1', '2', '4'].map((value) => ({
-                  value,
-                  label: value ? i18n.get('gamePlayer', value) : i18n.get('noLimit'),
-                }))}
-                @change=${({ detail }: CustomEvent<string>) => changeQuery(queryKeys.GAME_PLAYER, detail)}
-              ></dy-select>
+              ${mediaQuery.isPhone
+                ? html`
+                    <select
+                      hidden
+                      ref=${this.selectRef.ref}
+                      @change=${() => changeQuery(queryKeys.GAME_PLAYER, this.selectRef.element!.value)}
+                    >
+                      ${['', '1', '2', '4'].map(
+                        (value) => html`
+                          <option value=${value}>${value ? i18n.get('gamePlayer', value) : i18n.get('noLimit')}</option>
+                        `,
+                      )}
+                    </select>
+                    <dy-use
+                      .element=${icons.tune}
+                      style="width: 1.5em"
+                      @click=${() => this.selectRef.element!.click()}
+                    ></dy-use>
+                  `
+                : html`
+                    <dy-select
+                      style="width: 12em;"
+                      .dropdownStyle=${{ width: '12em' }}
+                      .multiple=${true}
+                      .placeholder=${i18n.get('gameKind')}
+                      .value=${this.#gameKinds}
+                      .options=${gameKindList.map((e) => ({ ...e, label: i18n.get(e.label) }))}
+                      @change=${this.#onChangeKind}
+                    ></dy-select>
+                    <dy-pick
+                      .placeholder=${i18n.get('gameSeries')}
+                      .value=${this.#gameSeries}
+                      .options=${gameSeriesList.map((e) => ({ ...e, label: i18n.get(e.label) }))}
+                      @change=${({ detail }: CustomEvent<ScGameSeries | ''>) =>
+                        changeQuery(queryKeys.GAME_SERIES, detail)}
+                    ></dy-pick>
+                    <dy-select
+                      .dropdownStyle=${{ width: '8em' }}
+                      .placeholder=${i18n.get('gameMaxPlayer')}
+                      .value=${this.#gamePlayer}
+                      .options=${['', '1', '2', '4'].map((value) => ({
+                        value,
+                        label: value ? i18n.get('gamePlayer', value) : i18n.get('noLimit'),
+                      }))}
+                      @change=${({ detail }: CustomEvent<string>) => changeQuery(queryKeys.GAME_PLAYER, detail)}
+                    ></dy-select>
+                  `}
             </div>
             <dy-divider></dy-divider>
           `}

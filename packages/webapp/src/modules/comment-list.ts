@@ -56,6 +56,9 @@ const style = createCSSSheet(css`
     width: 5.5em;
   }
   @media ${mediaQuery.PHONE} {
+    .comment-title dy-heading {
+      flex-grow: 1;
+    }
     .list {
       column-count: 1;
       gap: 1em;

@@ -21,6 +21,7 @@ import {
   GetRooms,
   GetRoomsQuery,
   GetRoomsQueryVariables,
+  ScRegisterReq,
 } from 'src/generated/guestgraphql';
 import { configure, parseAccount } from 'src/configure';
 import { store, convertGame } from 'src/store';
@@ -51,7 +52,7 @@ export const login = async (input: ScLoginReq) => {
   setUser(login);
 };
 
-export const register = async (input: ScLoginReq) => {
+export const register = async (input: ScRegisterReq) => {
   const { register } = await request<RegisterMutation, RegisterMutationVariables>(Register, { input }, options);
   setUser(register);
 };

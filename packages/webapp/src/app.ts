@@ -11,12 +11,14 @@ import {
   refobject,
   RefObject,
   QueryString,
+  classMap,
 } from '@mantou/gem';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { Loadbar } from 'duoyun-ui/elements/page-loadbar';
 import { createPath, RouteItem } from '@mantou/gem/elements/route';
 import { routes, locationStore } from 'src/routes';
 import { DuoyunRouteElement } from 'duoyun-ui/elements/route';
+import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
 import { preventDefault } from 'src/utils/common';
 import { paramKeys, queryKeys, viewTransitionName } from 'src/constants';
@@ -34,11 +36,13 @@ import { getGames } from 'src/services/guest-api';
 import { i18n } from 'src/i18n/basic';
 import { clearLobbyMessage, friendStore, toggleFriendChatState } from 'src/store';
 import { ScFriendStatus } from 'src/generated/graphql';
+import { theme } from 'src/theme';
 
 import 'duoyun-ui/elements/input-capture';
 import 'duoyun-ui/elements/drawer';
 import 'duoyun-ui/elements/modal';
 import 'src/modules/settings';
+import 'src/modules/side-nav';
 import 'src/modules/search';
 import 'src/modules/friend-list';
 import 'src/modules/chat';
@@ -58,11 +62,22 @@ const navRoutes: RouteItem[] = [
 
 const style = createCSSSheet(css`
   :host {
+    display: contents;
+  }
+  .app {
     position: relative;
     height: 0;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
+    background-color: ${theme.backgroundColor};
+    transition: all 0.3s ${theme.timingEasingFunction};
+    transform-origin: left center;
+  }
+  .app.out {
+    transform: translateX(80vw) scale(0.9);
+    border-radius: 0.5em;
+    overflow: hidden;
   }
   .content {
     position: relative;
@@ -199,21 +214,24 @@ export class AppRootElement extends GemElement {
 
   render = () => {
     return html`
-      <dy-route .locationStore=${locationStore} .routes=${navRoutes}></dy-route>
-      <div tabindex="-1" class="content" ref=${this.contentRef.ref}>
-        <main style="display: contents">
-          <dy-route
-            ref=${this.routeRef.ref}
-            @loading=${this.#onLoading}
-            @routechange=${this.#onChange}
-            .routes=${routes}
-            .locationStore=${locationStore}
-            .transition=${!!configure.user?.settings.ui.viewTransition}
-          >
-            <div style="height: 100vh"></div>
-          </dy-route>
-          <div style="height: 3em"></div>
-        </main>
+      ${mediaQuery.isPhone ? html`<m-side-nav ?open=${configure.sideNavState}></m-side-nav>` : ''}
+      <div class=${classMap({ app: true, out: !!configure.sideNavState })}>
+        <dy-route .locationStore=${locationStore} .routes=${navRoutes}></dy-route>
+        <div tabindex="-1" class="content" ?inert=${configure.sideNavState} ref=${this.contentRef.ref}>
+          <main style="display: contents">
+            <dy-route
+              ref=${this.routeRef.ref}
+              @loading=${this.#onLoading}
+              @routechange=${this.#onChange}
+              .routes=${routes}
+              .locationStore=${locationStore}
+              .transition=${!!configure.user?.settings.ui.viewTransition && !mediaQuery.isPhone}
+            >
+              <div style="height: 100vh"></div>
+            </dy-route>
+            <div style="height: 3em"></div>
+          </main>
+        </div>
       </div>
 
       <m-chat></m-chat>

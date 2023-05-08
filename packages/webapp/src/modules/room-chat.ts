@@ -17,7 +17,6 @@ import {
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { sleep } from 'duoyun-ui/lib/utils';
 import { Time } from 'duoyun-ui/lib/time';
-import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
 import { SysMsg, TextMsg } from 'src/netplay/common';
 import { i18n } from 'src/i18n/basic';
@@ -64,11 +63,6 @@ const style = createCSSSheet(css`
   .input {
     flex-shrink: 0;
     border-radius: ${theme.smallRound};
-  }
-  @media ${mediaQuery.PHONE} {
-    :host {
-      display: none;
-    }
   }
 `);
 

@@ -12,6 +12,7 @@ import {
 } from '@mantou/gem';
 import { createPath } from 'duoyun-ui/elements/route';
 import { routes } from 'src/routes';
+import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
 import { getCDNSrc, setViewTransitionName } from 'src/utils/common';
 import { paramKeys, viewTransitionName } from 'src/constants';
@@ -106,7 +107,9 @@ export class MGameItemElement extends GemElement {
         src=${getCDNSrc(this.game.preview)}
       />
       <dy-space class="actions" size="small">
-        <dy-button data-cy="start" class="play" small @click=${this.#onGameClick}>${i18n.get('startGame')}</dy-button>
+        <dy-button data-cy="start" class="play" small ?hidden=${mediaQuery.isPhone} @click=${this.#onGameClick}>
+          ${i18n.get('startGame')}
+        </dy-button>
         <dy-button
           data-cy="favorite"
           small

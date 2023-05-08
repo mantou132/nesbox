@@ -166,6 +166,7 @@ interface Configure {
   settingsState?: boolean;
   searchCommand?: SearchCommand;
   searchState?: boolean;
+  sideNavState?: boolean;
   usedRelease?: number;
   openNesFile?: File;
   windowHasFocus: boolean;
@@ -211,6 +212,10 @@ export const toggleFriendListState = () => {
 export const toggleSettingsState = () => {
   updateStore(configure, { settingsState: !configure.settingsState });
   if (!configure.settingsState) dispatchGlobalEvent(globalEvents.CLOSE_SETTINGS, null);
+};
+
+export const toggleSideNavState = () => {
+  updateStore(configure, { sideNavState: !configure.sideNavState });
 };
 
 export const toggleSearchState = () => {

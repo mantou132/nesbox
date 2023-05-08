@@ -20,7 +20,14 @@ import { createPath, RouteItem } from 'duoyun-ui/elements/route';
 
 import { viewTransitionName } from 'src/constants';
 import { i18n } from 'src/i18n/basic';
-import { configure, SearchCommand, setSearchCommand, toggleFriendListState, toggleSearchState } from 'src/configure';
+import {
+  configure,
+  SearchCommand,
+  setSearchCommand,
+  toggleFriendListState,
+  toggleSearchState,
+  toggleSideNavState,
+} from 'src/configure';
 import { theme } from 'src/theme';
 import { createRoom, favoriteGame, leaveRoom } from 'src/services/api';
 import { store } from 'src/store';
@@ -43,6 +50,7 @@ const style = createCSSSheet(css`
     display: flex;
     view-transition-name: ${viewTransitionName.HEADER};
     box-shadow: ${theme.titleBarColor} 0px 1px 0px;
+    --height: 3em;
   }
   .nav {
     width: 100%;
@@ -80,11 +88,11 @@ const style = createCSSSheet(css`
   .space {
     flex-grow: 1;
     align-self: stretch;
-    height: 3em;
+    height: var(--height);
   }
   .icon {
     flex-shrink: 0;
-    width: 3em;
+    width: var(--height);
     box-sizing: border-box;
     border-radius: ${theme.normalRound};
   }
@@ -95,10 +103,23 @@ const style = createCSSSheet(css`
     background-color: ${theme.hoverBackgroundColor};
   }
   @media ${mediaQuery.PHONE} {
+    :host {
+      --height: 2.5em;
+    }
     .nav {
       gap: 0.5em;
+      padding: 0.5em 0.75em;
     }
-    .heart,
+    .icon {
+      border-radius: 100%;
+    }
+    .link:not(:where(:--active, [data-active])) {
+      display: none;
+    }
+    .link:where(:--active, [data-active])::after {
+      display: none;
+    }
+    .play,
     .group,
     .avatar {
       display: none;
@@ -216,7 +237,20 @@ export class MNavElement extends GemElement {
         }}
       ></dy-use>
       <div class="title">${store.games[gameId]?.name}</div>
-      ${this.#renderFavoriteBtn(gameId)}
+      ${mediaQuery.isPhone ? '' : this.#renderFavoriteBtn(gameId)}
+    `;
+  };
+
+  #renderNavMenu = () => {
+    return html`
+      <dy-use
+        class="icon"
+        tabindex="0"
+        @keydown=${commonHandle}
+        .element=${icons.menu}
+        @click=${toggleSideNavState}
+      ></dy-use>
+      ${this.#renderLinks()}
     `;
   };
 
@@ -257,6 +291,8 @@ export class MNavElement extends GemElement {
           ? this.#renderGameTitle()
           : this.page === 'room'
           ? this.#renderRoomTitle()
+          : mediaQuery.isPhone
+          ? this.#renderNavMenu()
           : this.#renderLinks()}
         <span class="space" @dblclick=${this.#goTop}></span>
         ${!configure.user
@@ -271,9 +307,17 @@ export class MNavElement extends GemElement {
                 .element=${icons.share}
                 @click=${this.#share}
               ></dy-use>
-              <dy-button data-cy="start" @click=${() => createRoom({ gameId: Number(this.id), private: false })}>
-                ${i18n.get('startGame')}
-              </dy-button>
+              ${mediaQuery.isPhone
+                ? this.#renderFavoriteBtn(Number(this.id))
+                : html`
+                    <dy-button
+                      data-cy="start"
+                      class="play"
+                      @click=${() => createRoom({ gameId: Number(this.id), private: false })}
+                    >
+                      ${i18n.get('startGame')}
+                    </dy-button>
+                  `}
             `
           : this.#renderMenu()}
       </nav>

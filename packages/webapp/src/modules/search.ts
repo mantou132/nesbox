@@ -10,12 +10,15 @@ import {
   raw,
   RefObject,
   refobject,
+  history,
 } from '@mantou/gem';
 import { locale } from 'duoyun-ui/lib/locale';
 import { isIncludesString } from 'duoyun-ui/lib/utils';
 import { isNotNullish } from 'duoyun-ui/lib/types';
 import { getDisplayKey, hotkeys, isMac } from 'duoyun-ui/lib/hotkeys';
 import { routes } from 'src/routes';
+import { mediaQuery } from '@mantou/gem/helper/mediaquery';
+import { createPath } from 'duoyun-ui/elements/route';
 
 import { getCDNSrc, getTempText, matchRoute } from 'src/utils/common';
 import { friendStore, store, toggleFriendChatState } from 'src/store';
@@ -24,6 +27,7 @@ import { i18n } from 'src/i18n/basic';
 import { icons } from 'src/icons';
 import { configure, getShortcut, SearchCommand, setSearchCommand, toggleSearchState } from 'src/configure';
 import { createInvite, createRoom, enterPubRoom, updateRoom } from 'src/services/api';
+import { paramKeys } from 'src/constants';
 
 import type { DuoyunInputElement } from 'duoyun-ui/elements/input';
 import type { DuoyunOptionsElement, Option } from 'duoyun-ui/elements/options';
@@ -173,7 +177,9 @@ export class MSearchElement extends GemElement<State> {
               `,
               tagIcon: icons.received,
               onClick: async () => {
-                if (this.#playing) {
+                if (mediaQuery.isPhone) {
+                  history.push({ path: createPath(routes.game, { params: { [paramKeys.GAME_ID]: String(game.id) } }) });
+                } else if (this.#playing) {
                   updateRoom({
                     id: this.#playing.id,
                     private: this.#playing.private,
@@ -294,7 +300,9 @@ export class MSearchElement extends GemElement<State> {
         options.push(...this.#genGameOptions());
       }
 
-      options.push(...this.#genFriendOptions());
+      if (!mediaQuery.isPhone) {
+        options.push(...this.#genFriendOptions());
+      }
 
       return options.sort((a, b) => (a.label > b.label ? 1 : -1));
     }
@@ -313,7 +321,7 @@ export class MSearchElement extends GemElement<State> {
     const { search } = this.state;
     const options = this.#genOptions();
 
-    if (configure.searchCommand !== SearchCommand.HELP) {
+    if (configure.searchCommand !== SearchCommand.HELP && !mediaQuery.isPhone) {
       options.forEach((option, index) => {
         if (index < 9) {
           option.tag = html`

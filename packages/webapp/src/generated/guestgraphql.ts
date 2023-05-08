@@ -25,7 +25,7 @@ export type GuestMutationRootLoginArgs = {
 
 
 export type GuestMutationRootRegisterArgs = {
-  input: ScLoginReq;
+  input: ScRegisterReq;
 };
 
 export type GuestQueryRoot = {
@@ -111,6 +111,7 @@ export enum ScGameSeries {
 }
 
 export type ScLoginReq = {
+  disableSso?: InputMaybe<Scalars['Boolean']>;
   password: Scalars['String'];
   username: Scalars['String'];
 };
@@ -119,6 +120,11 @@ export type ScLoginResp = {
   __typename?: 'ScLoginResp';
   token: Scalars['String'];
   user: ScUser;
+};
+
+export type ScRegisterReq = {
+  password: Scalars['String'];
+  username: Scalars['String'];
 };
 
 export type ScRoom = {
@@ -188,7 +194,7 @@ export type LoginMutationVariables = Exact<{
 export type LoginMutation = { __typename?: 'GuestMutationRoot', login: { __typename?: 'ScLoginResp', token: string, user: { __typename?: 'ScUser', id: number, username: string, nickname: string, settings?: string, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } } } };
 
 export type RegisterMutationVariables = Exact<{
-  input: ScLoginReq;
+  input: ScRegisterReq;
 }>;
 
 
@@ -297,7 +303,7 @@ export const Login = `
     ${ScAccountPart}
 ${ScRoomBasicPart}`;
 export const Register = `
-    mutation register($input: ScLoginReq!) {
+    mutation register($input: ScRegisterReq!) {
   register(input: $input) {
     token
     user {

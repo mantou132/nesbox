@@ -106,6 +106,7 @@ const style = createCSSSheet(css`
   }
   .actions {
     display: flex;
+    flex-wrap: wrap;
     flex-direction: row-reverse;
     margin-block: min(3em, 5vh) 1em;
     gap: 1em;
@@ -124,6 +125,10 @@ const style = createCSSSheet(css`
     }
     .content {
       width: 100%;
+    }
+    .actions * {
+      width: 100%;
+      text-align: center;
     }
   }
 `);
@@ -193,7 +198,7 @@ export class PLoginElement extends GemElement<State> {
       if (this.register) {
         await register({ username, password });
       } else {
-        await login({ username, password });
+        await login({ username, password, disableSso: mediaQuery.isPhone });
       }
     } finally {
       this.setState({ loading: false });
@@ -254,7 +259,7 @@ export class PLoginElement extends GemElement<State> {
           </dy-action-text>
         </div>
       </div>
-      ${isMtApp ? '' : html`<m-guest></m-guest>`}
+      <m-guest ?hidden=${isMtApp || mediaQuery.isPhone}></m-guest>
     `;
   };
 }

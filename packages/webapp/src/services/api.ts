@@ -1,6 +1,7 @@
 import { updateStore } from '@mantou/gem';
 import { Toast } from 'duoyun-ui/elements/toast';
 import { debounce } from 'duoyun-ui/lib/utils';
+import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
 import { documentVisible, playHintSound, playSound } from 'src/utils/common';
 import { globalEvents, Signal, COMMAND, dispatchGlobalEvent } from 'src/constants';
@@ -486,7 +487,7 @@ export const subscribeEvent = () => {
         });
       }
 
-      if (login) {
+      if (login && !mediaQuery.isPhone) {
         logout();
       }
     }

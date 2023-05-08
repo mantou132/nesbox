@@ -48,13 +48,11 @@ import 'src/modules/room-voice';
 import 'src/modules/ads';
 import 'src/modules/cheat-settings';
 import 'src/elements/list';
-import 'src/elements/game-controller';
 import 'src/elements/fps';
 import 'src/elements/ping';
 
 const style = createCSSSheet(css`
-  .stage,
-  .controller {
+  .stage {
     position: absolute;
     inset: 0;
   }
@@ -64,11 +62,6 @@ const style = createCSSSheet(css`
     right: 15em;
     width: 1px;
     height: 1px;
-  }
-  @media ${`not all and ${mediaQuery.PHONE_LANDSCAPE}`} {
-    .controller {
-      display: none;
-    }
   }
   .ads {
     position: absolute;
@@ -88,13 +81,6 @@ const style = createCSSSheet(css`
   }
   .icon:hover {
     background: ${theme.lightBackgroundColor};
-  }
-  @media ${mediaQuery.PHONE} {
-    .info {
-      right: 0;
-      bottom: 0;
-      font-size: 0.15em;
-    }
   }
 `);
 
@@ -410,7 +396,6 @@ export class PRoomElement extends GemElement {
         @contextmenu=${this.#onContextMenu}
         .padding=${'1em 0 5em'}
       ></m-stage>
-      <nesbox-game-controller class="controller"></nesbox-game-controller>
       <dy-space class="info">
         ${this.#isHost ? html`<nesbox-fps></nesbox-fps>` : html`<nesbox-ping></nesbox-ping>`}
         <m-room-recorder class="icon" .getStream=${() => this.stageRef.element!.getStream()}></m-room-recorder>

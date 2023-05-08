@@ -1,4 +1,5 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, property } from '@mantou/gem';
+import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
 import { getCDNSrc } from 'src/utils/common';
 import { theme } from 'src/theme';
@@ -28,8 +29,12 @@ const style = createCSSSheet(css`
     filter: ${theme.imageFilter};
     border-radius: ${theme.normalRound};
   }
+  @media ${mediaQuery.PHONE} {
+    .img {
+      width: 100%;
+    }
+  }
 `);
-
 type State = {
   current: number;
 };

@@ -7,7 +7,7 @@ mutation login($input: ScLoginReq!) {
   }
 }
 
-mutation register($input: ScLoginReq!) {
+mutation register($input: ScRegisterReq!) {
   register(input: $input) {
     token
     user {

@@ -48,9 +48,16 @@ pub struct ScUserBasic {
 }
 
 #[derive(GraphQLInputObject)]
+pub struct ScRegisterReq {
+    username: String,
+    password: String,
+}
+
+#[derive(GraphQLInputObject)]
 pub struct ScLoginReq {
     username: String,
     password: String,
+    pub disable_sso: Option<bool>,
 }
 
 #[derive(GraphQLInputObject)]
@@ -189,7 +196,7 @@ pub fn login(conn: &PgConnection, req: ScLoginReq, secret: &str) -> FieldResult<
     Ok(ScLoginResp { user, token })
 }
 
-pub fn register(conn: &PgConnection, req: ScLoginReq, secret: &str) -> FieldResult<ScLoginResp> {
+pub fn register(conn: &PgConnection, req: ScRegisterReq, secret: &str) -> FieldResult<ScLoginResp> {
     let new_user = NewUser {
         username: &req.username,
         password: &hash_password(&req.password),

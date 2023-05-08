@@ -61,24 +61,32 @@ const style = createCSSSheet(css`
   @media ${mediaQuery.PHONE} {
     .top {
       aspect-ratio: 2/1;
+      margin-block-end: 1em;
     }
     .top::part(img) {
-      --mask-range: 120%;
+      --mask-range: 50%;
       inset: 0;
       width: 100%;
       max-width: none;
       max-height: 100%;
       border-radius: 0;
     }
-    .top::part(title) {
-      text-shadow: 0 0.1em 0.3em rgba(0, 0, 0, 0.6);
-    }
-    .top::part(description) {
+    .top::part(description),
+    .top::part(button) {
       display: none;
+    }
+    .top::part(title) {
+      margin-block-end: 0.5em;
+    }
+    .top::part(content) {
+      justify-content: flex-end;
+    }
+    .top::part(nav) {
+      bottom: -1.5em;
     }
     .top::part(content) {
       padding-inline: ${theme.gridGutter};
-      max-width: 75%;
+      max-width: 100%;
     }
   }
   .add {
