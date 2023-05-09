@@ -130,6 +130,9 @@ const style = createCSSSheet(css`
       width: 100%;
       text-align: center;
     }
+    .header ~ * {
+      font-size: 1.15em;
+    }
   }
 `);
 

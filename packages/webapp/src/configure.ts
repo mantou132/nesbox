@@ -214,8 +214,8 @@ export const toggleSettingsState = () => {
   if (!configure.settingsState) dispatchGlobalEvent(globalEvents.CLOSE_SETTINGS, null);
 };
 
-export const toggleSideNavState = () => {
-  updateStore(configure, { sideNavState: !configure.sideNavState });
+export const toggleSideNavState = (sideNavState = !configure.sideNavState) => {
+  updateStore(configure, { sideNavState });
 };
 
 export const toggleSearchState = () => {

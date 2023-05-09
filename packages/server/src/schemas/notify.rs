@@ -24,6 +24,8 @@ pub struct ScNotifyMessage {
     apply_friend: Option<ScFriend>,
     accept_friend: Option<ScFriend>,
     delete_friend: Option<i32>,
+    favorite: Option<i32>,
+    delete_favorite: Option<i32>,
     update_user: Option<ScUserBasic>,
     send_signal: Option<ScSignal>,
     login: Option<bool>,

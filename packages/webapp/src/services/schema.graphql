@@ -217,5 +217,7 @@ subscription event {
       json
     }
     login
+    favorite
+    deleteFavorite
   }
 }

@@ -177,8 +177,22 @@ impl MutationRoot {
         let conn = DB_POOL.get().unwrap();
         if input.favorite {
             create_favorite(&conn, context.user_id, input.game_id).ok();
+            notify(
+                context.user_id,
+                ScNotifyMessageBuilder::default()
+                    .favorite(input.game_id)
+                    .build()
+                    .unwrap(),
+            );
         } else {
             delete_favorite(&conn, context.user_id, input.game_id);
+            notify(
+                context.user_id,
+                ScNotifyMessageBuilder::default()
+                    .delete_favorite(input.game_id)
+                    .build()
+                    .unwrap(),
+            );
         }
         Ok("Ok".into())
     }

@@ -25,14 +25,17 @@ import 'duoyun-ui/elements/space';
 const style = createCSSSheet(css`
   :host {
     position: absolute;
-    display: block;
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
     width: 100vw;
     height: 100vh;
     top: 0;
     left: 0;
     transition: all 0.3s ${theme.timingEasingFunction};
-    transform: translateX(-100vw);
+    transform: translateX(calc(-100vw + ${theme.gridGutter}));
     transform-origin: left center;
+    z-index: 2;
   }
   :host([open]) {
     transform: translateX(5vw) scale(0.9);
@@ -41,11 +44,10 @@ const style = createCSSSheet(css`
     display: flex;
     flex-direction: column;
     width: 80vw;
-    height: 100%;
     background: ${theme.backgroundColor};
     border-radius: 0.5em;
     box-sizing: border-box;
-    padding: 2em 1em;
+    padding: 1em;
   }
   .nav * {
     font-size: ${1 / 0.9}em;
@@ -63,14 +65,17 @@ export class MSideNavElement extends GemElement {
   @boolattribute open: boolean;
 
   #onSwipe = ({ detail }: CustomEvent<SwipeEventDetail>) => {
-    if (detail.direction === 'left' && configure.sideNavState) {
-      toggleSideNavState();
+    if (detail.direction === 'right') {
+      toggleSideNavState(true);
+    }
+    if (detail.direction === 'left') {
+      toggleSideNavState(false);
     }
   };
 
   mounted = () => {
     this.effect(
-      () => configure.sideNavState && toggleSideNavState(),
+      () => toggleSideNavState(false),
       () => [history.getParams().path],
     );
   };
@@ -95,6 +100,7 @@ export class MSideNavElement extends GemElement {
             `
           : html`<dy-action-text @click=${gotoLogin}>${i18n.get('login')}</dy-action-text>`}
       </dy-gesture>
+      <dy-gesture @swipe=${this.#onSwipe} @click=${() => toggleSideNavState(false)} style="flex-grow: 1;"></dy-gesture>
     `;
   };
 }

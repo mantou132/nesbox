@@ -366,6 +366,8 @@ export const subscribeEvent = () => {
         sendSignal,
         login,
         voiceSignal,
+        favorite,
+        deleteFavorite,
       } = event;
 
       if (lobbyMessage) {
@@ -489,6 +491,17 @@ export const subscribeEvent = () => {
 
       if (login && !mediaQuery.isPhone) {
         logout();
+      }
+
+      // 同步 favorite 列表，例如手机同步到电视
+      if (favorite && !store.favoriteIds?.includes(favorite)) {
+        store.favoriteIds = [favorite, ...(store.favoriteIds || [])];
+        updateStore(store);
+      }
+
+      if (deleteFavorite && store.favoriteIds?.includes(deleteFavorite)) {
+        store.favoriteIds = store.favoriteIds?.filter((id) => id !== deleteFavorite);
+        updateStore(store);
       }
     }
   })();

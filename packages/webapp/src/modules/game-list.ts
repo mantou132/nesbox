@@ -8,8 +8,7 @@ import {
   connectStore,
   boolattribute,
   repeat,
-  refobject,
-  RefObject,
+  styleMap,
 } from '@mantou/gem';
 import { isNotNullish } from 'duoyun-ui/lib/types';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
@@ -60,6 +59,7 @@ const style = createCSSSheet(css`
   @media ${mediaQuery.PHONE} {
     .list {
       grid-template-columns: repeat(auto-fill, minmax(8em, 1fr));
+      grid-gap: ${theme.gridGutter};
     }
   }
 `);
@@ -77,7 +77,6 @@ export class MGameListElement extends GemElement {
   @boolattribute recent: boolean;
   @boolattribute new: boolean;
   @boolattribute all: boolean;
-  @refobject selectRef: RefObject<HTMLSelectElement>;
 
   constructor() {
     super();
@@ -154,6 +153,7 @@ export class MGameListElement extends GemElement {
       },
       () => [
         store.topGameIds,
+        store.favoriteIds,
         // filter
         this.all ? locationStore.query.toString() : '',
       ],
@@ -193,22 +193,25 @@ export class MGameListElement extends GemElement {
               <span style="flex-grow: 1;"></span>
               ${mediaQuery.isPhone
                 ? html`
-                    <select
-                      hidden
-                      ref=${this.selectRef.ref}
-                      @change=${() => changeQuery(queryKeys.GAME_PLAYER, this.selectRef.element!.value)}
-                    >
-                      ${['', '1', '2', '4'].map(
-                        (value) => html`
-                          <option value=${value}>${value ? i18n.get('gamePlayer', value) : i18n.get('noLimit')}</option>
-                        `,
-                      )}
-                    </select>
                     <dy-use
                       .element=${icons.tune}
-                      style="width: 1.5em"
-                      @click=${() => this.selectRef.element!.click()}
-                    ></dy-use>
+                      style=${styleMap({ width: '1.5em', position: 'relative', overflow: 'hidden' })}
+                    >
+                      <select
+                        multiple
+                        style=${styleMap({ opacity: 0, position: 'absolute', inset: '0' })}
+                        @change=${({ target }: Event) =>
+                          this.#onChangeKind(
+                            new CustomEvent('', {
+                              detail: [...(target as HTMLSelectElement).options]
+                                .filter((e) => e.selected)
+                                .map((e) => e.value as ScGameKind),
+                            }),
+                          )}
+                      >
+                        ${gameKindList.map((e) => html`<option value=${e.value}>${i18n.get(e.label)}</option>`)}
+                      </select>
+                    </dy-use>
                   `
                 : html`
                     <dy-select
