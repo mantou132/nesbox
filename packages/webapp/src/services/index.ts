@@ -106,8 +106,6 @@ export function subscribe<Result, InputVar = Record<string, any>>(
     },
   );
 
-  addEventListener('unload', () => client.close());
-
   let deferred: {
     resolve: (done: boolean) => void;
     reject: (err: unknown) => void;
@@ -149,6 +147,7 @@ export function subscribe<Result, InputVar = Record<string, any>>(
     },
     async return() {
       dispose.unsubscribe();
+      client.close();
       return { done: true, value: undefined };
     },
   };

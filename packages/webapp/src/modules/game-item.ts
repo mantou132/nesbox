@@ -52,15 +52,17 @@ const style = createCSSSheet(css`
     image-rendering: pixelated;
     filter: ${theme.imageFilter};
   }
-  :host(:hover) .cover {
-    opacity: 0.7;
-  }
   .title {
     padding: 0.3em 0.5em;
     text-align: center;
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
+  }
+  @media (hover) {
+    :host(:hover) .cover {
+      opacity: 0.7;
+    }
   }
 `);
 

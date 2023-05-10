@@ -85,10 +85,14 @@ export const saveFile = async (file: File) => {
     const a = document.createElement('a');
     a.download = file.name;
     a.href = URL.createObjectURL(file);
+    a.style.display = 'none';
     document.body.append(a);
     a.click();
-    a.remove();
-    addEventListener('focus', () => setTimeout(() => URL.revokeObjectURL(a.href), 1000), { once: true });
+    setTimeout(() => {
+      // UA has already held a blob ref
+      URL.revokeObjectURL(a.href);
+      a.remove();
+    }, 1000);
     return undefined;
   }
 };

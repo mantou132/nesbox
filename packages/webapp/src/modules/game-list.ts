@@ -13,6 +13,7 @@ import {
 import { isNotNullish } from 'duoyun-ui/lib/types';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { locationStore } from 'src/routes';
+import { isMtApp } from '@nesbox/mtapp';
 
 import { changeQuery } from 'src/utils/common';
 import { queryKeys } from 'src/constants';
@@ -153,7 +154,8 @@ export class MGameListElement extends GemElement {
       },
       () => [
         store.topGameIds,
-        store.favoriteIds,
+        // mt app need immediately update
+        isMtApp && store.favoriteIds,
         // filter
         this.all ? locationStore.query.toString() : '',
       ],

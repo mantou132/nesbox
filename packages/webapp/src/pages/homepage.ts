@@ -47,6 +47,7 @@ const style = createCSSSheet(css`
   :host {
     display: block;
     height: 100vh;
+    height: 100dvh;
     overflow: auto;
     scrollbar-width: thin;
   }
@@ -66,7 +67,7 @@ const style = createCSSSheet(css`
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: black;
+    background: ${theme.backgroundColor};
     overflow: hidden;
   }
   .bg {

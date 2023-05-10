@@ -29,7 +29,7 @@ const style = createCSSSheet(css`
     justify-content: space-between;
     align-items: stretch;
     width: 100vw;
-    height: 100vh;
+    height: 100%;
     top: 0;
     left: 0;
     transition: all 0.3s ${theme.timingEasingFunction};
@@ -84,6 +84,13 @@ export class MSideNavElement extends GemElement {
     this.open = !!configure.sideNavState;
 
     return html`
+      <dy-reflect>
+        <style>
+          body {
+            background: black !important;
+          }
+        </style>
+      </dy-reflect>
       <dy-gesture class="nav" @swipe=${this.#onSwipe}>
         <dy-side-navigation
           .items=${[routes.games, routes.favorites].filter((e) => !!e.getContent)}

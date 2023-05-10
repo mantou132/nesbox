@@ -3,6 +3,8 @@ import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
 import { i18n } from 'src/i18n/basic';
 import { themeStore } from 'src/theme';
+import { isSafari } from 'src/constants';
+import { navStore } from 'src/modules/nav';
 
 import 'duoyun-ui/elements/title';
 import 'duoyun-ui/elements/reflect';
@@ -18,6 +20,7 @@ const style = createCSSSheet(css`
  */
 @customElement('m-meta')
 @connectStore(themeStore)
+@connectStore(navStore)
 @connectStore(i18n.store)
 @adoptedStyle(style)
 export class ModuleMetaElement extends GemElement {
@@ -25,7 +28,10 @@ export class ModuleMetaElement extends GemElement {
     return html`
       <dy-title suffix=${mediaQuery.isPWA ? '' : ` - ${i18n.get('title')}`}></dy-title>
       <dy-reflect>
-        <meta name="theme-color" content=${themeStore.titleBarColor} />
+        <meta
+          name="theme-color"
+          content=${navStore.room ? '#000' : isSafari ? themeStore.backgroundColor : themeStore.titleBarColor}
+        />
         <meta name="description" content=${i18n.get('sloganDesc')} />
       </dy-reflect>
     `;

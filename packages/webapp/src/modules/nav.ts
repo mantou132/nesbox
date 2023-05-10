@@ -127,7 +127,7 @@ const style = createCSSSheet(css`
   }
 `);
 
-const navStore = createStore({
+export const navStore = createStore({
   room: false,
 });
 
@@ -282,8 +282,8 @@ export class MNavElement extends GemElement {
         :host {
           background-color: ${navStore.room ? 'black' : theme.backgroundColor};
           background-image: ${navStore.room
-            ? 'none'
-            : `linear-gradient(${theme.lightBackgroundColor} -60%, transparent)`};
+            ? `linear-gradient(${theme.lightBackgroundColor} -60%, transparent)`
+            : 'none'};
         }
       </style>
       <nav class="nav">

@@ -83,7 +83,7 @@ render(
         padding: 0;
         font-size: 1rem;
         color: ${theme.textColor};
-        background-color: ${mediaQuery.isPhone ? theme.titleBarColor : theme.backgroundColor};
+        background: ${theme.backgroundColor};
       }
       dy-drop-area {
         display: flex;
