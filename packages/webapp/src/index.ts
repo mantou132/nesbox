@@ -74,6 +74,7 @@ render(
         -webkit-tap-highlight-color: transparent;
         height: 100%;
         overflow: hidden;
+        overscroll-behavior: none;
       }
       body {
         display: flex;

@@ -6,10 +6,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:flutter/services.dart';
-import './webpage.dart';
-import './eventbus.dart';
-import './utils.dart';
-import './config.dart';
+import 'package:flutter_app/webpage.dart';
+import 'package:flutter_app/eventbus.dart';
+import 'package:flutter_app/utils.dart';
+import 'package:flutter_app/config.dart';
 
 var battery = Battery();
 
@@ -37,22 +37,25 @@ class Home extends StatefulWidget {
 }
 
 class HomeState extends State<Home> {
-  final Completer<WebViewController> _controller = Completer<WebViewController>();
-
+  final WebViewController _controller = WebViewController();
   HomeState() {
     eventBus.on<HomePageChangeEvent>().listen((HomePageChangeEvent event) async {
       if (kDebugMode) {
         print('HomePageChangeEvent==========> $event');
       }
-      var controller = await _controller.future;
-      controller.loadUrl(event.url);
+      _controller.loadRequest(Uri.parse(event.url));
     });
     eventBus.on<HomeActivationEvent>().listen((HomeActivationEvent event) async {
+      if (kDebugMode) {
+        print('HomeActivationEvent==========> $event');
+      }
       Timer(const Duration(milliseconds: 500), () => setState(() {}));
     });
   }
 
-  _setOrientation(String orientation) async {
+  bool _ready = false;
+
+  void _setOrientation(String orientation) async {
     switch (orientation) {
       case 'landscape':
         await SystemChrome.setPreferredOrientations([
@@ -71,7 +74,7 @@ class HomeState extends State<Home> {
     }
   }
 
-  _setStatusbarStyle(String statusBarStyle) async {
+  void _setStatusbarStyle(String statusBarStyle) async {
     if (statusBarStyle == 'none') {
       await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
     } else {
@@ -93,21 +96,41 @@ class HomeState extends State<Home> {
     }
   }
 
-  void _openWebPage(BuildContext context, String url) {
+  void _openWebPage(String url) {
     Navigator.push(context, MaterialPageRoute(builder: (context) => WebPage(url)));
   }
 
   void _sendMessage(int msgId, data) async {
-    var controller = await _controller.future;
     // resolve promise when detail is truly
     var string = json.encode(data);
     if (kDebugMode) {
       print(string);
     }
-    controller.runJavascript('dispatchEvent(new CustomEvent("mtappmessage$msgId", {detail: $string}));');
+    _controller.runJavaScript('dispatchEvent(new CustomEvent("mtappmessage$msgId", {detail: $string}));');
   }
 
-  JavascriptChannel _getJavascriptChannel(BuildContext context) {
+  Future<bool> _onWillPop() async {
+    if (await _controller.canGoBack()) {
+      _controller.goBack();
+      return false;
+    } else {
+      // will exit app
+      return true;
+    }
+  }
+
+  NavigationDecision _navigationDelegate(NavigationRequest request) {
+    if (kDebugMode) {
+      print('Home============> $request');
+    }
+    if (isExternalRequest(request)) {
+      _openWebPage(request.url);
+      return NavigationDecision.prevent;
+    }
+    return NavigationDecision.navigate;
+  }
+
+  String _getChannelName() {
     var padding = MediaQuery.of(context).padding;
     var data = {
       'notch': {
@@ -118,97 +141,72 @@ class HomeState extends State<Home> {
         'bottom': isIOS ? 0 : padding.bottom,
       }
     };
+    return '__MT__APP__BRIDGE____${encodeMapToBase64(data)}';
+  }
 
-    // https://github.com/mantou132/mt-music-player/blob/feat/mt-app/fe/jsbridge.js
-    return JavascriptChannel(
-        name: '__MT__APP__BRIDGE____${encodeMapToBase64(data)}',
-        onMessageReceived: (JavascriptMessage message) async {
-          try {
-            var msg = json.decode(message.message);
-            switch (msg['type']) {
-              case 'open':
-                _openWebPage(context, msg['data']);
-                _sendMessage(msg['id'], true);
-                break;
-              case 'statusbarstyle':
-                await _setStatusbarStyle(msg['data']);
-                _sendMessage(msg['id'], true);
-                break;
-              case 'orientation':
-                await _setOrientation(msg['data']);
-                _sendMessage(msg['id'], true);
-                break;
-              case 'battery':
-                _sendMessage(msg['id'], await BatteryInfo().query());
-                break;
-              case 'playsound':
-                switch (msg['data']) {
-                  case 'click':
-                    SystemSound.play(SystemSoundType.click);
-                    break;
-                  case 'alert':
-                    SystemSound.play(SystemSoundType.alert);
-                    break;
-                }
-                break;
-              case 'close':
-                exit(0);
-            }
-          } finally {
-            if (kDebugMode) {
-              print(message.message);
-            }
+  void _onMessageReceived(JavaScriptMessage message) async {
+    try {
+      var msg = json.decode(message.message);
+      switch (msg['type']) {
+        case 'open':
+          _openWebPage(msg['data']);
+          _sendMessage(msg['id'], true);
+          break;
+        case 'statusbarstyle':
+          _setStatusbarStyle(msg['data']);
+          _sendMessage(msg['id'], true);
+          break;
+        case 'orientation':
+          _setOrientation(msg['data']);
+          _sendMessage(msg['id'], true);
+          break;
+        case 'battery':
+          _sendMessage(msg['id'], await BatteryInfo().query());
+          break;
+        case 'playsound':
+          switch (msg['data']) {
+            case 'click':
+              SystemSound.play(SystemSoundType.click);
+              break;
+            case 'alert':
+              SystemSound.play(SystemSoundType.alert);
+              break;
           }
-        });
-  }
-
-  Future<bool> _onWillPop() async {
-    var controller = await _controller.future;
-    if (await controller.canGoBack()) {
-      controller.goBack();
-      return false;
-    } else {
-      // will exit app
-      return true;
+          break;
+        case 'close':
+          exit(0);
+      }
+    } finally {
+      if (kDebugMode) {
+        print(message.message);
+      }
     }
-  }
-
-  NavigationDecision _navigationDelegate(BuildContext context, NavigationRequest request) {
-    if (kDebugMode) {
-      print('Home============> $request');
-    }
-    if (isExternalRequest(request)) {
-      _openWebPage(context, request.url);
-      return NavigationDecision.prevent;
-    }
-    return NavigationDecision.navigate;
   }
 
   @override
   Widget build(BuildContext context) {
     if (kDebugMode) {
-      print('=========> Homebuild');
+      print('=========> HomeBuild');
+    }
+
+    // allowsInlineMediaPlayback: true,
+    // initialMediaPlaybackPolicy: AutoMediaPlaybackPolicy.always_allow,
+    // zoomEnabled: false,
+    // debuggingEnabled: debug,
+    if (!_ready) {
+      _ready = true;
+      _controller
+        ..loadRequest(Uri.parse(startUrl))
+        ..addJavaScriptChannel(_getChannelName(), onMessageReceived: _onMessageReceived)
+        ..setBackgroundColor(const Color.fromARGB(255, 0, 0, 0))
+        ..setJavaScriptMode(JavaScriptMode.unrestricted)
+        ..setNavigationDelegate(NavigationDelegate(onNavigationRequest: _navigationDelegate));
     }
 
     return WillPopScope(
         onWillPop: _onWillPop,
-        child: WebView(
-          initialUrl: startUrl,
-          javascriptChannels: <JavascriptChannel>{
-            _getJavascriptChannel(context),
-          },
-          allowsInlineMediaPlayback: true,
-          initialMediaPlaybackPolicy: AutoMediaPlaybackPolicy.always_allow,
-          zoomEnabled: false,
-          backgroundColor: const Color.fromARGB(255, 0, 0, 0),
-          debuggingEnabled: debug,
-          javascriptMode: JavascriptMode.unrestricted,
-          onWebViewCreated: (WebViewController webViewController) {
-            _controller.complete(webViewController);
-          },
-          navigationDelegate: (NavigationRequest request) {
-            return _navigationDelegate(context, request);
-          },
+        child: WebViewWidget(
+          controller: _controller,
         ));
   }
 

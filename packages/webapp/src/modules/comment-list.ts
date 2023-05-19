@@ -117,7 +117,7 @@ export class MCommentListElement extends GemElement {
         <dy-input
           autofocus
           type="textarea"
-          style=${styleMap({ width: '30em' })}
+          style=${styleMap({ width: 'min(30em, 100%)' })}
           .value=${this.#comment?.body || ''}
           @change=${({ target, detail }: CustomEvent<string>) => ((target as HTMLInputElement).value = detail)}
         ></dy-input>
