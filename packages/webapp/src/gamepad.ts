@@ -46,16 +46,17 @@ function dispatchReleaseEvent(index: GamepadBtnIndex, padIndex = 0) {
   const player = playerMap[padIndex];
   const btn = buttonMap[index];
   if (player === Player.One) dispatchGlobalEvent(globalEvents.RELEASE_HOST_BUTTON_INDEX, index);
-  if (btn && player) dispatchGlobalEvent(globalEvents.RELEASE_BUTTON, { detail: { player, btn } });
+  if (btn !== undefined) dispatchGlobalEvent(globalEvents.RELEASE_BUTTON, { player, btn });
 }
 
 function dispatchPressEvent(index: GamepadBtnIndex, padIndex = 0) {
   const player = playerMap[padIndex];
   const btn = buttonMap[index];
   if (player === Player.One) dispatchGlobalEvent(globalEvents.PRESS_HOST_BUTTON_INDEX, index);
-  if (btn && player) dispatchGlobalEvent(globalEvents.PRESS_BUTTON, { player, btn });
+  if (btn !== undefined) dispatchGlobalEvent(globalEvents.PRESS_BUTTON, { player, btn });
 }
 
+const AXES_LIMIT = 0.2;
 function readGamepad() {
   const gamepads = navigator
     .getGamepads()
@@ -63,7 +64,22 @@ function readGamepad() {
     .filter((e) => e.connected);
 
   gamepads.forEach((gamepad, padIndex) => {
-    gamepad.buttons.forEach((button, index) => {
+    const axesButtonMap: Record<number, GamepadButton | undefined> = {};
+    if (gamepad.axes[0] > AXES_LIMIT) {
+      axesButtonMap[GamepadBtnIndex.Right] = { pressed: true, touched: true, value: 1 };
+    }
+    if (gamepad.axes[0] < -AXES_LIMIT) {
+      axesButtonMap[GamepadBtnIndex.Left] = { pressed: true, touched: true, value: 1 };
+    }
+    if (gamepad.axes[1] > AXES_LIMIT) {
+      axesButtonMap[GamepadBtnIndex.Down] = { pressed: true, touched: true, value: 1 };
+    }
+    if (gamepad.axes[1] < -AXES_LIMIT) {
+      axesButtonMap[GamepadBtnIndex.Up] = { pressed: true, touched: true, value: 1 };
+    }
+
+    gamepad.buttons.forEach((b, index) => {
+      const button = axesButtonMap[index] || b;
       if (pressedButton.has(index)) {
         if (!button.pressed) {
           pressedButton.delete(index);
