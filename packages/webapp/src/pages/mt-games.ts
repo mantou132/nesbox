@@ -33,6 +33,11 @@ import 'src/elements/rotor';
 import 'src/elements/scroll';
 
 const mtGamesStore = createStore({ currentIndex: 0, focusId: 0 });
+const setMtGamesStore = (obj: Partial<typeof mtGamesStore>) => {
+  queueMicrotask(() => {
+    updateStore(mtGamesStore, obj);
+  });
+};
 
 const style = createCSSSheet(css`
   :host {
@@ -118,7 +123,7 @@ export class PMtGamesElement extends GemElement {
   }
 
   #onDetail = (gameId: number) => {
-    updateStore(mtGamesStore, { focusId: gameId });
+    setMtGamesStore({ focusId: gameId });
     getComments(gameId);
     getRecord(gameId);
   };
@@ -127,8 +132,12 @@ export class PMtGamesElement extends GemElement {
     if (!mtGamesStore.focusId) return;
     switch (evt.detail) {
       case GamepadBtnIndex.FrontLeftTop:
-        playHintSound();
-        updateStore(mtGamesStore, { focusId: 0 });
+      case GamepadBtnIndex.A:
+      case GamepadBtnIndex.B:
+        if (mtGamesStore.focusId) {
+          playHintSound();
+          setMtGamesStore({ focusId: 0 });
+        }
         break;
     }
   };
@@ -138,7 +147,7 @@ export class PMtGamesElement extends GemElement {
     this.effect(
       (args) => {
         if (this.#queryWatching || args![0]) {
-          updateStore(mtGamesStore, { focusId: 0, currentIndex: 0 });
+          setMtGamesStore({ focusId: 0, currentIndex: 0 });
         } else {
           this.#queryWatching = true;
         }
@@ -150,13 +159,13 @@ export class PMtGamesElement extends GemElement {
       updateMtApp({ inertNav: !!mtGamesStore.focusId });
     });
 
-    this.addEventListener('dblclick', () => updateStore(mtGamesStore, { focusId: 0 }));
+    this.addEventListener('dblclick', () => setMtGamesStore({ focusId: 0 }));
 
     addEventListener(globalEvents.PRESS_HOST_BUTTON_INDEX, this.#pressButton);
     return () => {
       removeEventListener(globalEvents.PRESS_HOST_BUTTON_INDEX, this.#pressButton);
       updateMtApp({ inertNav: false });
-      updateStore(mtGamesStore, { focusId: 0 });
+      setMtGamesStore({ focusId: 0 });
     };
   };
 
@@ -176,7 +185,7 @@ export class PMtGamesElement extends GemElement {
                 <nesbox-rotor
                   ?inert=${!!mtGamesStore.focusId}
                   .finite=${this.#data!.length < 3}
-                  @change=${({ detail }: CustomEvent<number>) => updateStore(mtGamesStore, { currentIndex: detail })}
+                  @change=${({ detail }: CustomEvent<number>) => setMtGamesStore({ currentIndex: detail })}
                   .index=${Math.min(mtGamesStore.currentIndex, this.#data!.length - 1)}
                   .data=${this.#data!.map((id) => ({
                     id,
@@ -207,7 +216,7 @@ export class PMtGamesElement extends GemElement {
             <nesbox-scroll class="info">
               <dy-heading lv="1">${game.name}</dy-heading>
               <dy-divider></dy-divider>
-              <m-game-detail .md=${game.description}></m-game-detail>
+              <m-game-detail .game=${game}></m-game-detail>
             </nesbox-scroll>
           `
         : ''}

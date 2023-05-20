@@ -1,5 +1,6 @@
 import { html, adoptedStyle, customElement, createCSSSheet, css, GemElement, property } from '@mantou/gem';
 import { marked } from 'marked';
+import { isMtApp } from '@nesbox/mtapp';
 
 import { Game } from 'src/store';
 
@@ -52,7 +53,7 @@ export class MGameDetailElement extends GemElement {
     if (!doc.body.textContent?.trim()) return html`<dy-empty></dy-empty>`;
 
     return html`
-      <dy-more>
+      <dy-more .maxheight=${isMtApp ? 'Infinity' : ''}>
         <dy-unsafe .content=${doc.body.innerHTML} .contentcss=${contentCSS}></dy-unsafe>
       </dy-more>
     `;

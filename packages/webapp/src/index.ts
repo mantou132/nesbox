@@ -7,12 +7,12 @@ import { isMtApp, mtApp } from '@nesbox/mtapp';
 import { routes } from 'src/routes';
 
 import { matchRoute } from 'src/utils/common';
-import { COMMAND, isApp, isTauriMacApp, isTauriWinApp, RELEASE } from 'src/constants';
+import { COMMAND, globalEvents, isApp, isTauriMacApp, isTauriWinApp, RELEASE } from 'src/constants';
 import { theme } from 'src/theme';
 import { configure } from 'src/configure';
 import { logger } from 'src/logger';
 import { gotoRedirectUri, isExpiredProfile, logout } from 'src/auth';
-import { listener, startKeyboardSimulation } from 'src/gamepad';
+import { GamepadBtnIndex, listener, startKeyboardSimulation } from 'src/gamepad';
 import { dropHandler } from 'src/drop';
 
 import 'src/modules/meta';
@@ -141,6 +141,20 @@ render(
   `,
   document.body,
 );
+
+addEventListener(globalEvents.PRESS_HOST_BUTTON_INDEX, ({ timeStamp, detail }) => {
+  if (detail === GamepadBtnIndex.FrontLeftTop) {
+    addEventListener(
+      globalEvents.RELEASE_HOST_BUTTON_INDEX,
+      (evt) => {
+        if (evt.timeStamp - timeStamp > 3000) {
+          close();
+        }
+      },
+      { once: true },
+    );
+  }
+});
 
 let unloading = false;
 addEventListener('beforeunload', () => {

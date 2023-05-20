@@ -120,7 +120,6 @@ export class NesboxRotorElement extends GemElement {
         this.#uidIndex++;
         this.change(this.#addIndex(1));
         break;
-      case GamepadBtnIndex.FrontRightTop:
       case GamepadBtnIndex.Start:
         playHintSound();
         this.data?.[this.index]?.handle();

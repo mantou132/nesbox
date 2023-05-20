@@ -119,13 +119,16 @@ export const startKeyboardSimulation = () => {
       a: () => dispatchPressEvent(GamepadBtnIndex.Left),
       s: () => dispatchPressEvent(GamepadBtnIndex.Down),
       d: () => dispatchPressEvent(GamepadBtnIndex.Right),
-      // select/switch
+      // select/start
+      f: () => dispatchPressEvent(GamepadBtnIndex.Select),
+      h: () => dispatchPressEvent(GamepadBtnIndex.Start),
+      // detail/switch
       j: () => dispatchPressEvent(GamepadBtnIndex.B),
       k: () => dispatchPressEvent(GamepadBtnIndex.A),
       space: () => dispatchPressEvent(GamepadBtnIndex.A),
-      // back
+      // exit
       4: () => dispatchPressEvent(GamepadBtnIndex.FrontLeftTop),
-      // foreword
+      // settings
       5: () => dispatchPressEvent(GamepadBtnIndex.FrontRightTop),
       // page/tab navigation
       6: () => dispatchPressEvent(GamepadBtnIndex.FrontLeftBottom),
@@ -139,6 +142,8 @@ export const startKeyboardSimulation = () => {
       a: () => dispatchReleaseEvent(GamepadBtnIndex.Left),
       s: () => dispatchReleaseEvent(GamepadBtnIndex.Down),
       d: () => dispatchReleaseEvent(GamepadBtnIndex.Right),
+      f: () => dispatchReleaseEvent(GamepadBtnIndex.Select),
+      h: () => dispatchReleaseEvent(GamepadBtnIndex.Start),
       j: () => dispatchReleaseEvent(GamepadBtnIndex.B),
       k: () => dispatchReleaseEvent(GamepadBtnIndex.A),
       space: () => dispatchReleaseEvent(GamepadBtnIndex.A),

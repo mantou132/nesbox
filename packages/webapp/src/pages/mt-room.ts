@@ -21,6 +21,7 @@ import { store } from 'src/store';
 import { leaveRoom, updateRoomScreenshot } from 'src/services/api';
 import { configure } from 'src/configure';
 import { theme } from 'src/theme';
+import { updateMtApp } from 'src/mt-app';
 
 import type { MStageElement } from 'src/modules/stage';
 import type { MVoiceRoomElement } from 'src/modules/room-voice';
@@ -112,8 +113,10 @@ export class PMtRoomElement extends GemElement {
       () => [this.#playing],
     );
 
+    updateMtApp({ inertNav: true });
     addEventListener(globalEvents.PRESS_HOST_BUTTON_INDEX, this.#onPressButtonIndex);
     return () => {
+      updateMtApp({ inertNav: false });
       removeEventListener(globalEvents.PRESS_HOST_BUTTON_INDEX, this.#onPressButtonIndex);
     };
   };
