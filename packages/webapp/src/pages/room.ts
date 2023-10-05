@@ -36,6 +36,7 @@ import { logger } from 'src/logger';
 import { ScUserStatus } from 'src/generated/graphql';
 import { theme } from 'src/theme';
 import { mountedRoom, unmountedRoom } from 'src/modules/nav';
+import { wakeLock } from 'src/effects/wake-lock';
 
 import type { MStageElement } from 'src/modules/stage';
 
@@ -352,6 +353,7 @@ export class PRoomElement extends GemElement {
   });
 
   mounted = () => {
+    this.effect(wakeLock, () => []);
     this.effect(
       () => {
         if (configure.user && !this.#playing) {

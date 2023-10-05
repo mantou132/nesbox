@@ -33,6 +33,7 @@
     "@graphql-codegen/typescript-operations": "^2.2.1",
     "@nesbox/config": "^0.0.1",
     "@tauri-apps/api": "1.0.0-rc.7",
+    "@types/dom-screen-wake-lock": "^1.0.1",
     "@types/dom-speech-recognition": "^0.0.1",
     "@types/marked": "^4.0.3",
     "dotenv": "^16.0.1",

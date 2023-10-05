@@ -22,6 +22,7 @@ import { leaveRoom, updateRoomScreenshot } from 'src/services/api';
 import { configure } from 'src/configure';
 import { theme } from 'src/theme';
 import { updateMtApp } from 'src/mt-app';
+import { wakeLock } from 'src/effects/wake-lock';
 
 import type { MStageElement } from 'src/modules/stage';
 import type { MVoiceRoomElement } from 'src/modules/room-voice';
@@ -95,6 +96,7 @@ export class PMtRoomElement extends GemElement {
   };
 
   mounted = () => {
+    this.effect(wakeLock, () => []);
     this.effect(
       () => {
         if (configure.user && !this.#playing) {
