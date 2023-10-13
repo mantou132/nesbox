@@ -5,7 +5,7 @@ import { default as initNes, Nes, Button } from '@mantou/nes';
 import { VideoRefreshRate } from 'src/constants';
 import { logger } from 'src/logger';
 
-import type { Cheat } from 'src/configure';
+import type { Cheat, Combo } from 'src/configure';
 import type { NesboxCanvasElement } from 'src/elements/canvas';
 
 export function requestFrame(render: () => void, generator = VideoRefreshRate.AUTO) {
@@ -207,5 +207,22 @@ export function parseCheatCode(cheat: Cheat) {
     len: length,
     bytes,
     val: new Uint32Array(new Uint8Array([...bytes, ...Array(4 - bytes.length)]).buffer)[0],
+  };
+}
+
+export function parseComboCode(combo: Combo) {
+  return {
+    combo,
+    enabled: combo.enabled,
+    // jk*4-*4-j*4
+    frames: combo.code
+      .split('-')
+      .map((str) => {
+        const arr = str.split('*');
+        const keys = [...arr[0]];
+        const repeat = parseInt(arr[1]) || 1;
+        return new Array<string[]>(repeat).fill(keys);
+      })
+      .flat(),
   };
 }

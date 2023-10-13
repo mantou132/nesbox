@@ -109,6 +109,7 @@ const defaultUISettings = {
 };
 
 export type Cheat = { code: string; enabled: boolean; toggleKey: string; comment: string };
+export type Combo = { code: string; enabled: boolean; binding: string; comment: string };
 
 export type Settings = {
   keybinding: typeof defaultKeybinding;
@@ -117,6 +118,7 @@ export type Settings = {
   video: typeof defaultVideoSettings;
   ui: typeof defaultUISettings;
   cheat: Record<number, Cheat[] | undefined>;
+  combo: Record<number, Combo[] | undefined>;
   tourIndex: number;
 };
 
@@ -140,6 +142,7 @@ export const parseAccount = (account: GetAccountQuery['account']): User => {
       video: mergeSettings(defaultVideoSettings, settings.video),
       ui: mergeSettings(defaultUISettings, settings.ui),
       cheat: settings.cheat || {},
+      combo: settings.combo || {},
       tourIndex: settings.tourIndex || 0,
     },
   };

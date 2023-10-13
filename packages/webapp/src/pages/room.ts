@@ -48,6 +48,7 @@ import 'src/modules/room-recorder';
 import 'src/modules/room-voice';
 import 'src/modules/ads';
 import 'src/modules/cheat-settings';
+import 'src/modules/combo-settings';
 import 'src/elements/list';
 import 'src/elements/fps';
 import 'src/elements/ping';
@@ -187,6 +188,10 @@ export class PRoomElement extends GemElement {
           handle: this.#openCheatModal,
           tag: getShortcut('OPEN_CHEAT_SETTINGS', true),
         },
+        this.#isHost && {
+          text: i18n.get('settings.shortcut.openCombo'),
+          handle: this.#openComboModal,
+        },
       ].filter(isNotBoolean),
       {
         x: event.clientX,
@@ -304,6 +309,26 @@ export class PRoomElement extends GemElement {
       'viewer',
       'width=480,height=640,top=0,left=0',
     );
+  };
+
+  #openComboModal = () => {
+    if (!this.#playing) return;
+    Modal.open({
+      header: i18n.get('settings.combo.title', store.games[this.#playing.gameId]?.name || ''),
+      body: html`
+        <m-combo-settings .gameId=${this.#playing.gameId}></m-combo-settings>
+        <style>
+          .footer {
+            display: none !important;
+          }
+        </style>
+      `,
+      disableDefaultCancelBtn: true,
+      disableDefaultOKBtn: true,
+      maskCloseable: true,
+    }).catch(() => {
+      //
+    });
   };
 
   #openCheatModal = () => {

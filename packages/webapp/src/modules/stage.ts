@@ -47,6 +47,7 @@ import {
   createGame,
   mapPointerButton,
   parseCheatCode,
+  parseComboCode,
   positionMapping,
   requestFrame,
   watchDevRom,
@@ -97,6 +98,8 @@ type State = {
   roles: Partial<Record<Player, Role>>;
   cheats: Exclude<ReturnType<typeof parseCheatCode>, undefined>[];
   cheatKeyHandles: Record<string, (evt: KeyboardEvent) => void>;
+  combos: ReturnType<typeof parseComboCode>[];
+  comboKeyHandles: Record<string, (evt: KeyboardEvent) => void>;
   canvasWidth: number;
   canvasHeight: number;
 };
@@ -119,6 +122,8 @@ export class MStageElement extends GemElement<State> {
     roles: {},
     cheats: [],
     cheatKeyHandles: {},
+    combos: [],
+    comboKeyHandles: {},
     canvasWidth: 0,
     canvasHeight: 0,
   };
@@ -235,12 +240,36 @@ export class MStageElement extends GemElement<State> {
     });
   };
 
+  #currentComboMap = new Map<ReturnType<typeof parseComboCode>, number>();
+  #stepCombo = () => {
+    this.#currentComboMap.forEach((index, combo) => {
+      const prevFrame = combo.frames[index - 1];
+      const frame = combo.frames[index];
+      if (frame === prevFrame) {
+        this.#currentComboMap.set(combo, index + 1);
+        return;
+      }
+      prevFrame?.forEach((key) => {
+        this.#onKeyUp(new KeyboardEvent('keyup', { key }));
+      });
+      if (frame) {
+        frame.forEach((key) => {
+          this.#onKeyDown(new KeyboardEvent('keydown', { key }));
+        });
+        this.#currentComboMap.set(combo, index + 1);
+      } else {
+        this.#currentComboMap.delete(combo);
+      }
+    });
+  };
+
   #sampleRate = 44100;
   #bufferSize = this.#sampleRate / 60;
   #nextStartTime = 0;
   #loop = () => {
     if (!this.#gameInstance || !this.#isVisible) return;
     this.#execCheat();
+    this.#stepCombo();
     const frameNum = this.#gameInstance.clock_frame();
 
     const memory = this.#gameInstance.mem();
@@ -454,6 +483,7 @@ export class MStageElement extends GemElement<State> {
           event.stopPropagation();
         },
         ...this.state.cheatKeyHandles,
+        ...this.state.comboKeyHandles,
       })(event);
     }
   };
@@ -533,24 +563,48 @@ export class MStageElement extends GemElement<State> {
       () => {
         const gameId = this.#playing?.gameId;
         const cheatSettings = this.#settings?.cheat;
-        if (gameId && cheatSettings) {
-          const cheats = (cheatSettings[gameId] || []).map((cheat) => parseCheatCode(cheat)).filter(isNotNullish);
+        if (!gameId || !cheatSettings) return;
+        const cheats = (cheatSettings[gameId] || []).map((cheat) => parseCheatCode(cheat)).filter(isNotNullish);
 
-          this.setState({
-            cheats,
-            cheatKeyHandles: Object.fromEntries(
-              cheats
-                .filter((cheat) => cheat.cheat.toggleKey)
-                .map((cheat) => [
-                  cheat.cheat.toggleKey,
-                  (evt: KeyboardEvent) => {
-                    cheat.enabled = !cheat.enabled;
-                    evt.stopPropagation();
-                  },
-                ]),
-            ),
-          });
-        }
+        this.setState({
+          cheats,
+          cheatKeyHandles: Object.fromEntries(
+            cheats
+              .filter((cheat) => cheat.cheat.toggleKey)
+              .map((cheat) => [
+                cheat.cheat.toggleKey,
+                (evt: KeyboardEvent) => {
+                  cheat.enabled = !cheat.enabled;
+                  evt.stopPropagation();
+                },
+              ]),
+          ),
+        });
+      },
+      () => [this.#playing?.gameId, this.#settings?.cheat],
+    );
+
+    this.memo(
+      () => {
+        const gameId = this.#playing?.gameId;
+        const comboSettings = this.#settings?.combo;
+        if (!gameId || !comboSettings) return;
+        const combos = (comboSettings[gameId] || []).map((combo) => parseComboCode(combo));
+
+        this.setState({
+          combos,
+          comboKeyHandles: Object.fromEntries(
+            combos.map((combo) => [
+              combo.combo.binding,
+              (evt: KeyboardEvent) => {
+                // only once combo
+                if (this.#currentComboMap.size) return;
+                this.#currentComboMap.set(combo, 0);
+                evt.stopPropagation();
+              },
+            ]),
+          ),
+        });
       },
       () => [this.#playing?.gameId, this.#settings?.cheat],
     );
