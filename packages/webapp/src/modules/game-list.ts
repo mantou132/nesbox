@@ -9,6 +9,7 @@ import {
   boolattribute,
   repeat,
   styleMap,
+  numattribute,
 } from '@mantou/gem';
 import { isNotNullish } from 'duoyun-ui/lib/types';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
@@ -78,6 +79,7 @@ export class MGameListElement extends GemElement {
   @boolattribute recent: boolean;
   @boolattribute new: boolean;
   @boolattribute all: boolean;
+  @numattribute length: number;
 
   constructor() {
     super();
@@ -93,9 +95,9 @@ export class MGameListElement extends GemElement {
 
   get #data() {
     if (this.new) {
-      return store.gameIds?.slice(store.gameIds.length - 4).reverse();
+      return store.gameIds?.slice(store.gameIds.length - this.length).reverse();
     } else if (this.recent) {
-      return store.recentGameIds?.slice(0, 4);
+      return store.recentGameIds?.slice(0, this.length);
     } else if (this.favorite) {
       return store.favoriteIds;
     } else {
@@ -153,6 +155,7 @@ export class MGameListElement extends GemElement {
         }
       },
       () => [
+        this.length,
         store.topGameIds,
         // mt app need immediately update
         isMtApp && store.favoriteIds,

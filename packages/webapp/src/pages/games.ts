@@ -125,6 +125,12 @@ export class PGamesElement extends GemElement<State> {
 
   #canvas = document.createElement('canvas');
 
+  #media = matchMedia('(width > 1024px)');
+
+  get #gamesLength() {
+    return this.#media.matches ? 5 : 4;
+  }
+
   #getBackgroundImageUrl = async (text: string) => {
     await fontLoading(pixelFont);
     const font = `bold 10px '${pixelFont.family}', sans-serif`;
@@ -166,6 +172,10 @@ export class PGamesElement extends GemElement<State> {
     });
   };
 
+  mounted = () => {
+    this.#media.onchange = this.update;
+  };
+
   render = () => {
     const topData = store.topGameIds?.map((id) => ({
       onClick: (evt: PointerEvent) => {
@@ -192,8 +202,8 @@ export class PGamesElement extends GemElement<State> {
         .interval=${7000}
         @change=${({ detail }: CustomEvent<number>) => this.#onTopChange(detail, topData?.length)}
       ></dy-carousel>
-      <m-game-list class="list" .recent=${true}></m-game-list>
-      <m-game-list class="list" .new=${true}></m-game-list>
+      <m-game-list class="list" .recent=${true} .length=${this.#gamesLength}></m-game-list>
+      <m-game-list class="list" .new=${true} .length=${this.#gamesLength}></m-game-list>
       <m-game-list class="list" .all=${true}></m-game-list>
     `;
   };
