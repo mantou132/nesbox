@@ -8,7 +8,6 @@ import {
   connectStore,
   attribute,
   history,
-  createStore,
   updateStore,
 } from '@mantou/gem';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
@@ -27,6 +26,7 @@ import {
   toggleFriendListState,
   toggleSearchState,
   toggleSideNavState,
+  navStore,
 } from 'src/configure';
 import { theme } from 'src/theme';
 import { createRoom, favoriteGame, leaveRoom } from 'src/services/api';
@@ -126,10 +126,6 @@ const style = createCSSSheet(css`
     }
   }
 `);
-
-export const navStore = createStore({
-  room: false,
-});
 
 export const mountedRoom = () => updateStore(navStore, { room: true });
 export const unmountedRoom = () => updateStore(navStore, { room: false });

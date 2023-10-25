@@ -219,3 +219,7 @@ if (COMMAND === 'build') {
 } else {
   navigator.serviceWorker?.getRegistration().then((reg) => reg?.unregister());
 }
+
+addEventListener('load', () => {
+  logger.info('Loaded!');
+});

@@ -4,7 +4,7 @@ import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { i18n } from 'src/i18n/basic';
 import { themeStore } from 'src/theme';
 import { isSafari } from 'src/constants';
-import { navStore } from 'src/modules/nav';
+import { navStore } from 'src/configure';
 
 import 'duoyun-ui/elements/title';
 import 'duoyun-ui/elements/reflect';

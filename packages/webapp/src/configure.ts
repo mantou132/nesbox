@@ -1,4 +1,4 @@
-import { updateStore } from '@mantou/gem';
+import { createStore, updateStore } from '@mantou/gem';
 import { isMac, getDisplayKey } from 'duoyun-ui/lib/hotkeys';
 import { Modify } from 'duoyun-ui/lib/types';
 import { createCacheStore } from 'duoyun-ui/lib/utils';
@@ -235,3 +235,7 @@ export const setSearchCommand = (command: SearchCommand | null) => {
 export const setNesFile = (file?: File) => {
   updateStore(configure, { openNesFile: file });
 };
+
+export const navStore = createStore({
+  room: false,
+});
