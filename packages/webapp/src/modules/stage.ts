@@ -10,6 +10,7 @@ import {
   RefObject,
   styleMap,
   attribute,
+  state,
 } from '@mantou/gem';
 import JSZip from 'jszip';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
@@ -68,6 +69,9 @@ const style = createCSSSheet(css`
     display: block;
     background: black;
   }
+  :host(:where(:--playing, :state(playing))) {
+    cursor: none;
+  }
   .canvas {
     position: absolute;
     inset: 0;
@@ -116,6 +120,7 @@ export class MStageElement extends GemElement<State> {
   @refobject audioRef: RefObject<HTMLAudioElement>;
   @refobject chatRef: RefObject<MRoomChatElement>;
   @attribute padding: string;
+  @state playing: boolean;
 
   state: State = {
     messages: [],
@@ -443,6 +448,7 @@ export class MStageElement extends GemElement<State> {
   };
 
   #onPointerMove = (event: PointerEvent) => {
+    this.playing = false;
     if (!this.#gameInstance) return;
     const [x, y, dx, dy] = positionMapping(event, this.canvasRef.element!);
     if (this.#isHost) {
@@ -453,6 +459,9 @@ export class MStageElement extends GemElement<State> {
   };
 
   #pressButton = (player: Player, button: Button) => {
+    if (button !== Button.PointerPrimary && button !== Button.PointerSecondary) {
+      this.playing = true;
+    }
     if (button === Button.Reset) {
       this.#gameInstance?.reset();
     } else {
