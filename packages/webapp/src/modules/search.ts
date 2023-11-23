@@ -83,6 +83,7 @@ const style = createCSSSheet(css`
 
 type State = {
   search: string;
+  result: Option[];
 };
 
 /**
@@ -100,6 +101,7 @@ export class MSearchElement extends GemElement<State> {
 
   state: State = {
     search: '',
+    result: [],
   };
 
   get #isRooms() {
@@ -121,6 +123,7 @@ export class MSearchElement extends GemElement<State> {
     } else {
       this.setState({ search: detail });
     }
+    this.setState({ result: this.#genOptions() });
   };
 
   #getItemHotKey = (index: number) => [isMac ? 'command' : 'ctrl', String(index + 1)];
@@ -160,13 +163,32 @@ export class MSearchElement extends GemElement<State> {
     `;
   };
 
+  #pinyin: typeof import('pinyin').pinyin | undefined = undefined;
+  #matchSearch = (str: string) => {
+    const { search } = this.state;
+    if (!search) return true;
+
+    const pyList = this.#pinyin?.(str, {
+      style: 'normal',
+      heteronym: true,
+      segment: false,
+      compact: true,
+    }).map((e) => e.join(''));
+    for (const py of pyList || []) {
+      if (isIncludesString(py, search)) {
+        return true;
+      }
+    }
+    return isIncludesString(str, search);
+  };
+
   #genGameOptions = (): Option[] => {
     const favorites = new Set(store.favoriteIds);
     return (
       store.gameIds
         ?.map((id) => {
           const game = store.games[id];
-          if (game && isIncludesString(game.name, this.state.search)) {
+          if (game && this.#matchSearch(game.name)) {
             return {
               icon: icons.game,
               label: html`
@@ -201,7 +223,7 @@ export class MSearchElement extends GemElement<State> {
   #genHelpOptions = (): Option[] => {
     return this.#helpMessages
       .map((value) => {
-        if (!isIncludesString(value, this.state.search)) return;
+        if (!this.#matchSearch(value)) return;
         const [title, desc] = value.split('\n');
         return {
           label: html`
@@ -226,7 +248,7 @@ export class MSearchElement extends GemElement<State> {
       friendStore.friendIds
         ?.map((id) => {
           const friend = friendStore.friends[id];
-          if (friend && isIncludesString(friend.user.nickname, this.state.search)) {
+          if (friend && this.#matchSearch(friend.user.nickname)) {
             return {
               icon: icons.person,
               label: friend.user.nickname,
@@ -255,7 +277,7 @@ export class MSearchElement extends GemElement<State> {
           const game = store.games[room.gameId];
           const hostNickname = room.users.find((u) => room.host === u.id)?.nickname || '';
           if (!game) return;
-          if (isIncludesString(game.name, this.state.search) || isIncludesString(hostNickname, this.state.search)) {
+          if (this.#matchSearch(game.name) || this.#matchSearch(hostNickname)) {
             return {
               label: html`
                 <dy-list-item
@@ -314,15 +336,21 @@ export class MSearchElement extends GemElement<State> {
       this.#helpMessages = Object.values(resources);
     });
 
+    if (i18n.currentLanguage.startsWith('zh-')) {
+      import('pinyin').then(({ default: pinyin }) => {
+        this.#pinyin = pinyin;
+        this.setState({ result: this.#genOptions() });
+      });
+    }
+
     this.addEventListener('keydown', this.#onKeydown);
   };
 
   render = () => {
-    const { search } = this.state;
-    const options = this.#genOptions();
+    const { search, result } = this.state;
 
     if (configure.searchCommand !== SearchCommand.HELP && !mediaQuery.isPhone) {
-      options.forEach((option, index) => {
+      result.forEach((option, index) => {
         if (index < 9) {
           option.tag = html`
             <dy-paragraph>
@@ -373,7 +401,7 @@ export class MSearchElement extends GemElement<State> {
               <dy-options
                 class="options"
                 ref=${this.options.ref}
-                .options=${options.length ? options : [{ label: locale.noData }]}
+                .options=${result.length ? result : [{ label: locale.noData }]}
               ></dy-options>
             `
           : ''}
