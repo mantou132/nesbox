@@ -51,7 +51,7 @@ export class MFriendListElement extends GemElement {
     const activeElement = this.shadowRoot?.activeElement as HTMLElement | null;
     try {
       const input = await Modal.open<DuoyunInputElement>({
-        header: i18n.get('addFriend'),
+        header: i18n.get('page.friend.add'),
         body: html`
           <dy-input
             autofocus
@@ -80,7 +80,7 @@ export class MFriendListElement extends GemElement {
               <dy-result
                 style="width: 100%; height: 100%"
                 .illustrator=${icons.person}
-                .header=${i18n.get('notDataTitle')}
+                .header=${i18n.get('global.noData')}
               ></dy-result>
             `
           : friendStore.friendIds?.map(
@@ -95,7 +95,7 @@ export class MFriendListElement extends GemElement {
           type="reverse"
           .icon=${icons.addPerson}
         >
-          ${i18n.get('addFriend')}
+          ${i18n.get('page.friend.add')}
         </dy-button>
       </div>
     `;

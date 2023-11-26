@@ -67,7 +67,7 @@ export class MVideoSettingsElement extends GemElement {
         ></dy-select>
         <div>
           ${i18n.get('settings.video.transport')}
-          <dy-tooltip .content=${i18n.get('tip.settings.onlyHost')}>
+          <dy-tooltip .content=${i18n.get('tooltip.settings.onlyHost')}>
             <dy-use class="help" .element=${icons.help}></dy-use>
           </dy-tooltip>
         </div>

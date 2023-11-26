@@ -189,7 +189,7 @@ export class PGamesElement extends GemElement<State> {
       img: getCDNSrc(store.games[id]?.preview || ''),
       title: store.games[id]?.name,
       action: {
-        text: i18n.get('startGame'),
+        text: i18n.get('page.game.start'),
         handle: () => createRoom({ private: false, gameId: id }),
       },
     }));

@@ -34,7 +34,11 @@ export class PFavoritesElement extends GemElement {
     return html`
       ${store.favoriteIds?.length === 0
         ? html`
-            <dy-result style="height: 60vh" .illustrator=${icons.empty} .header=${i18n.get('notDataTitle')}></dy-result>
+            <dy-result
+              style="height: 60vh"
+              .illustrator=${icons.empty}
+              .header=${i18n.get('global.noData')}
+            ></dy-result>
           `
         : html`<m-game-list .favorite=${true}></m-game-list>`}
     `;

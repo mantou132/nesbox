@@ -45,6 +45,7 @@ function VitePluginPrefetchAll(): Plugin {
       if (!ctx.bundle) return html;
 
       return Object.values(ctx.bundle)
+        .filter((bundle) => !bundle.fileName.endsWith('.map'))
         .map((bundle) => `${viteConfig.server.base ?? ''}/${bundle.fileName}`)
         .map((href) => ({
           tag: 'link',

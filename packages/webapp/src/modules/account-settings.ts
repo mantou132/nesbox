@@ -86,19 +86,19 @@ export class MAccountSettingsElement extends GemElement<State> {
       >
         <dy-heading class="heading" lv="4">${i18n.get('settings.account.password')}</dy-heading>
         <dy-form-item
-          label=${i18n.get('oldpassword')}
+          label=${i18n.get('settings.account.oldpassword')}
           type="password"
           name="oldpassword"
           .value=${this.state.oldpassword}
         ></dy-form-item>
         <dy-form-item
-          label=${i18n.get('newpassword')}
+          label=${i18n.get('settings.account.newpassword')}
           type="password"
           name="password"
           .value=${this.state.password}
         ></dy-form-item>
         <dy-form-item
-          label=${i18n.get('renewpassword')}
+          label=${i18n.get('settings.account.renewpassword')}
           type="password"
           name="renewpassword"
           .rules=${[

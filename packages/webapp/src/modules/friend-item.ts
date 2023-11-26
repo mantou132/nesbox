@@ -86,7 +86,7 @@ export class MFriendItemElement extends GemElement {
   }
 
   #deleteFriend = async (id: number, activeElement: HTMLElement) => {
-    await ContextMenu.confirm(i18n.get('deleteFriendConfirm'), { activeElement, width: '16em', danger: true });
+    await ContextMenu.confirm(i18n.get('page.friend.deleteConfirm'), { activeElement, width: '16em', danger: true });
     deleteFriend(id);
   };
 
@@ -101,14 +101,14 @@ export class MFriendItemElement extends GemElement {
     ContextMenu.open(
       [
         {
-          text: i18n.get('inviteFriend'),
+          text: i18n.get('page.friend.invite'),
           disabled: !configure.user?.playing,
           handle: () => {
             createInvite({ targetId: this.friend.user.id, roomId: configure.user!.playing!.id });
           },
         },
         {
-          text: i18n.get('deleteFriend'),
+          text: i18n.get('page.friend.delete'),
           danger: true,
           handle: () => this.#deleteFriend(this.friend.user.id, activeElement),
         },
@@ -148,8 +148,8 @@ export class MFriendItemElement extends GemElement {
           ${!this.#isOnline || !this.#isFriend
             ? ''
             : playing
-            ? i18n.get('playing', store.games[playing.gameId]?.name || '')
-            : i18n.get('notPlaying')}
+            ? i18n.get('page.friend.playing', store.games[playing.gameId]?.name || '')
+            : i18n.get('page.friend.notPlaying')}
         </dy-help-text>
       </div>
       <m-badge .friendid=${id}></m-badge>

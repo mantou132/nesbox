@@ -203,7 +203,8 @@ export class MRoomChatElement extends GemElement<State> {
           (msg) => html`
             <div class=${classMap({ msg: true, system: !msg.userId })}>
               <span>
-                [${new Time(msg.timestamp).format('HH:mm:ss')}] ${msg.userId ? msg.nickname : i18n.get('system')}
+                [${new Time(msg.timestamp).format('HH:mm:ss')}]
+                ${msg.userId ? msg.nickname : i18n.get('page.room.systemName')}
               </span>
               :
               <span>${msg.userId ? msg.text : i18n.get(...(msg.text.split('\n') as SysMsg))}</span>

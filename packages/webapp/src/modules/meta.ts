@@ -1,9 +1,9 @@
-import { GemElement, html, adoptedStyle, createCSSSheet, css, customElement, connectStore } from '@mantou/gem';
+import { GemElement, html, adoptedStyle, createCSSSheet, css, customElement, connectStore, history } from '@mantou/gem';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
 import { i18n } from 'src/i18n/basic';
 import { themeStore } from 'src/theme';
-import { isSafari } from 'src/constants';
+import { canonicalOrigin, isSafari } from 'src/constants';
 import { navStore } from 'src/configure';
 
 import 'duoyun-ui/elements/title';
@@ -22,17 +22,19 @@ const style = createCSSSheet(css`
 @connectStore(themeStore)
 @connectStore(navStore)
 @connectStore(i18n.store)
+@connectStore(history.store)
 @adoptedStyle(style)
 export class ModuleMetaElement extends GemElement {
   render = () => {
     return html`
-      <dy-title suffix=${mediaQuery.isPWA ? '' : ` - ${i18n.get('title')}`}></dy-title>
+      <dy-title suffix=${mediaQuery.isPWA ? '' : ` - ${i18n.get('global.title')}`}></dy-title>
       <dy-reflect>
         <meta
           name="theme-color"
           content=${navStore.room ? '#000' : isSafari ? themeStore.backgroundColor : themeStore.titleBarColor}
         />
-        <meta name="description" content=${i18n.get('sloganDesc')} />
+        <meta name="description" content=${i18n.get('global.sloganDesc')} />
+        <link rel="canonical" href=${`${canonicalOrigin}${history.getParams().path}`} />
       </dy-reflect>
     `;
   };

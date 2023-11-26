@@ -55,7 +55,7 @@ export class RTCClient extends RTCBasic {
       // 也许是重连
       this.send(new RoleOffer(this.getPlayer(configure.user!.id)));
 
-      const textMsg = new TextMsg(['enterRoomMsg', configure.user!.nickname]).toSystemRole();
+      const textMsg = new TextMsg(['page.room.enterRoomMsg', configure.user!.nickname]).toSystemRole();
       this.send(textMsg);
 
       this.#sendPing();

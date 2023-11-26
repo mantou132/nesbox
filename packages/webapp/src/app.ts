@@ -247,7 +247,7 @@ export class AppRootElement extends GemElement {
       <dy-modal
         .header=${i18n.get('settings.title')}
         .disableDefaultOKBtn=${true}
-        .cancelText=${i18n.get('close')}
+        .cancelText=${i18n.get('global.close')}
         .open=${!!configure.settingsState}
         @close=${toggleSettingsState}
       >

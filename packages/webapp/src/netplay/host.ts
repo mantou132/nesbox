@@ -64,7 +64,7 @@ export class RTCHost extends RTCBasic {
         delete this.roles[this.getPlayer(userId)!];
         this.#emitAnswer();
 
-        const textMsg = new TextMsg(['leaveRoomMsg', nickname]).toSystemRole();
+        const textMsg = new TextMsg(['page.room.leaveRoomMsg', nickname]).toSystemRole();
         this.channelMap.forEach((channel) => channel.send(textMsg.toString()));
         this.emitMessage(textMsg);
       };

@@ -19,7 +19,7 @@ export class PageNotfoundElement extends GemElement {
         .illustrator=${notfound}
         .header=${i18n.get('page.notFound.title')}
         .description=${i18n.get(
-          'notFoundDetail',
+          'page.notFound.detail',
           (text) => html`<dy-link .route=${routes.home as RouteItem}>${text}</dy-link>`,
         )}
       >

@@ -186,7 +186,7 @@ export class MGameListElement extends GemElement {
         : this.new
         ? html`
             <div class="heading">
-              <dy-heading lv="3">${i18n.get('newGame')}</dy-heading>
+              <dy-heading lv="3">${i18n.get('page.games.new')}</dy-heading>
             </div>
             <dy-divider></dy-divider>
           `
@@ -194,7 +194,7 @@ export class MGameListElement extends GemElement {
         ? ''
         : html`
             <div class="heading">
-              <dy-heading lv="3">${i18n.get('allGame')}</dy-heading>
+              <dy-heading lv="3">${i18n.get('page.games.all')}</dy-heading>
               <span style="flex-grow: 1;"></span>
               ${mediaQuery.isPhone
                 ? html`
@@ -223,13 +223,13 @@ export class MGameListElement extends GemElement {
                       style="width: 12em;"
                       .dropdownStyle=${{ width: '12em' }}
                       .multiple=${true}
-                      .placeholder=${i18n.get('gameKind')}
+                      .placeholder=${i18n.get('page.game.kind')}
                       .value=${this.#gameKinds}
                       .options=${gameKindList.map((e) => ({ ...e, label: i18n.get(e.label) }))}
                       @change=${this.#onChangeKind}
                     ></dy-select>
                     <dy-pick
-                      .placeholder=${i18n.get('gameSeries')}
+                      .placeholder=${i18n.get('page.game.series')}
                       .value=${this.#gameSeries}
                       .options=${gameSeriesList.map((e) => ({ ...e, label: i18n.get(e.label) }))}
                       @change=${({ detail }: CustomEvent<ScGameSeries | ''>) =>
@@ -237,11 +237,11 @@ export class MGameListElement extends GemElement {
                     ></dy-pick>
                     <dy-select
                       .dropdownStyle=${{ width: '8em' }}
-                      .placeholder=${i18n.get('gameMaxPlayer')}
+                      .placeholder=${i18n.get('page.game.maxPlayer')}
                       .value=${this.#gamePlayer}
                       .options=${['', '1', '2', '4'].map((value) => ({
                         value,
-                        label: value ? i18n.get('gamePlayer', value) : i18n.get('noLimit'),
+                        label: value ? i18n.get('page.game.player', value) : i18n.get('global.noLimit'),
                       }))}
                       @change=${({ detail }: CustomEvent<string>) => changeQuery(queryKeys.GAME_PLAYER, detail)}
                     ></dy-select>

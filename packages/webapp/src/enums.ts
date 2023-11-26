@@ -7,7 +7,7 @@ import { ScGameKind, ScGameSeries } from 'src/generated/graphql';
 export const gameKindList: { value: ScGameKind | ''; label: LocaleKey }[] = [
   {
     value: '',
-    label: 'noLimit',
+    label: 'global.noLimit',
   },
   {
     value: ScGameKind.Act,
@@ -45,55 +45,55 @@ export const gameKindMap = convertToMap<ElementOf<typeof gameKindList>, LocaleKe
 export const gameSeriesList: { value: ScGameSeries | ''; label: LocaleKey }[] = [
   {
     value: '',
-    label: 'noLimit',
+    label: 'global.noLimit',
   },
   {
     value: ScGameSeries.Mario,
-    label: 'gameSeriesMario',
+    label: 'enum.gameSeries.mario',
   },
   {
     value: ScGameSeries.Contra,
-    label: 'gameSeriesContra',
+    label: 'enum.gameSeries.contra',
   },
   {
     value: ScGameSeries.DoubleDragon,
-    label: 'gameSeriesDoubleDragon',
+    label: 'enum.gameSeries.doubleDragon',
   },
   {
     value: ScGameSeries.MegaMan,
-    label: 'gameSeriesMegaMan',
+    label: 'enum.gameSeries.megaMan',
   },
   {
     value: ScGameSeries.Nekketsu,
-    label: 'gameSeriesNekketsu',
+    label: 'enum.gameSeries.nekketsu',
   },
   {
     value: ScGameSeries.NinjaGaiden,
-    label: 'gameSeriesNinjaGaiden',
+    label: 'enum.gameSeries.ninjaGaiden',
   },
   {
     value: ScGameSeries.StreetFighter,
-    label: 'gameSeriesStreetFighter',
+    label: 'enum.gameSeries.streetFighter',
   },
   {
     value: ScGameSeries.Kof,
-    label: 'gameSeriesKof',
+    label: 'enum.gameSeries.kof',
   },
   {
     value: ScGameSeries.Tank,
-    label: 'gameSeriesTank',
+    label: 'enum.gameSeries.tank',
   },
   {
     value: ScGameSeries.Tmnt,
-    label: 'gameSeriesTmnt',
+    label: 'enum.gameSeries.tmnt',
   },
   {
     value: ScGameSeries.AdventureIsland,
-    label: 'gameSeriesAdventureIsland',
+    label: 'enum.gameSeries.adventureIsland',
   },
   {
     value: ScGameSeries.SanGokuShi,
-    label: 'gameSeriesSanGokuShi',
+    label: 'enum.gameSeries.sanGokuShi',
   },
 ];
 export const gameSeriesMap = convertToMap<ElementOf<typeof gameSeriesList>, LocaleKey>(

@@ -79,7 +79,9 @@ export class MInviteItemElement extends GemElement {
     return html`
       <div class="title">${store.games[this.invite.room.gameId]?.name || ''}</div>
       <div class="invite">
-        <div class="invite-tip">${i18n.get('sendToMeInvite', friend?.user.nickname || i18n.get('unknown'))}</div>
+        <div class="invite-tip">
+          ${i18n.get('page.friend.sendToMeInvite', friend?.user.nickname || i18n.get('global.unknown'))}
+        </div>
         <dy-use class="action" .element=${icons.check} @click=${this.#onAcceptInvite}></dy-use>
         <dy-use class="action" .element=${icons.close} @click=${this.#onDenyInvite}></dy-use>
       </div>

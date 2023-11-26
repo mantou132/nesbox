@@ -6,8 +6,10 @@ import { icons } from 'src/icons';
 import { sendVoiceMsg } from 'src/services/api';
 import { logger } from 'src/logger';
 import { ScVoiceMsgKind } from 'src/generated/graphql';
+import { i18n } from 'src/i18n/basic';
 
 import 'duoyun-ui/elements/use';
+import 'src/elements/tooltip';
 
 export const voiceStore = createStore<{ audioLevel: Record<number, number> }>({
   audioLevel: {},
@@ -160,8 +162,14 @@ export class MVoiceRoomElement extends GemElement<State> {
   };
 
   render = () => {
+    const { joined } = this.state;
     return html`
-      <dy-use class="icon" @click=${this.toggleVoice} .element=${this.state.joined ? icons.mic : icons.micOff}></dy-use>
+      <nesbox-tooltip
+        .content=${joined ? i18n.get('tooltip.room.stopVoice') : i18n.get('tooltip.room.startVoice')}
+        position="left"
+      >
+        <dy-use class="icon" @click=${this.toggleVoice} .element=${joined ? icons.mic : icons.micOff}></dy-use>
+      </nesbox-tooltip>
     `;
   };
 }

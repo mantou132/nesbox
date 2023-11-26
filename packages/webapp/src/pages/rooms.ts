@@ -47,7 +47,11 @@ export class PRoomsElement extends GemElement {
         ? html`<dy-loading></dy-loading>`
         : store.roomIds.length === 0
         ? html`
-            <dy-result style="height: 60vh" .illustrator=${icons.empty} .header=${i18n.get('notDataTitle')}></dy-result>
+            <dy-result
+              style="height: 60vh"
+              .illustrator=${icons.empty}
+              .header=${i18n.get('global.noData')}
+            ></dy-result>
           `
         : html`<m-room-list></m-room-list>`}
       ${!mediaQuery.isPhone && configure.user ? html`<m-lobby-chat class="chat"></m-lobby-chat>` : ''}

@@ -14,6 +14,8 @@ export const isTauriWinApp = navigator.appName === 'nesbox-windows';
 export const isApp = window.__TAURI__ || mediaQuery.isPWA || isMtApp;
 export const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
+export const canonicalOrigin = 'https://nesbox.xianqiao.wang';
+export const corsOrigin = 'https://files.xianqiao.wang';
 export const githubUrl = 'https://github.com/mantou132/nesbox';
 export const githubIssue = `${githubUrl}/issues`;
 export const githubRelease = `${githubUrl}/releases`;

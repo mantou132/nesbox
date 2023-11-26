@@ -6,7 +6,7 @@ import { ValueOf } from 'duoyun-ui/lib/types';
 import { isMtApp, mtApp } from '@nesbox/mtapp';
 import { changeLoading } from 'duoyun-ui/elements/wait';
 
-import { githubIssue, queryKeys } from 'src/constants';
+import { corsOrigin, githubIssue, queryKeys } from 'src/constants';
 import { configure } from 'src/configure';
 import { logger } from 'src/logger';
 
@@ -19,7 +19,7 @@ export const setViewTransitionName = (ele: HTMLElement | null, name: string) => 
 export const isValidGameFile = (filename: string) => /\.(js|nes|wasm|zip)$/i.test(filename);
 
 export const getCorSrc = (url: string) => {
-  return `https://files.xianqiao.wang/${url}`;
+  return `${corsOrigin}/${url}`;
 };
 
 export const getCDNSrc = (url: string) => {

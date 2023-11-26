@@ -49,7 +49,7 @@ export class MKeybindingElement extends GemElement {
 
     return html`
       <div class="header">
-        <dy-heading class="heading" lv="4"> ${i18n.get('keySettingJoypad1')} </dy-heading>
+        <dy-heading class="heading" lv="4"> ${i18n.get('settings.keybinding.joypad1')} </dy-heading>
         <dy-button
           small
           @click=${() => {
@@ -70,7 +70,7 @@ export class MKeybindingElement extends GemElement {
               Reset: defaultKeybinding.Reset,
             });
           }}
-          >${i18n.get('reset')}</dy-button
+          >${i18n.get('settings.keybinding.reset')}</dy-button
         >
       </div>
       <nesbox-gamepad
@@ -97,7 +97,7 @@ export class MKeybindingElement extends GemElement {
       ></nesbox-gamepad>
 
       <div class="header">
-        <dy-heading class="heading" lv="4">${i18n.get('keySettingJoypad2')}</dy-heading>
+        <dy-heading class="heading" lv="4">${i18n.get('settings.keybinding.joypad2')}</dy-heading>
         <dy-button
           small
           @click=${() => {
@@ -115,7 +115,7 @@ export class MKeybindingElement extends GemElement {
               TurboC_2: defaultKeybinding.TurboC_2,
             });
           }}
-          >${i18n.get('reset')}</dy-button
+          >${i18n.get('settings.keybinding.reset')}</dy-button
         >
       </div>
       <nesbox-gamepad

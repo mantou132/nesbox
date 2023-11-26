@@ -11,28 +11,6 @@
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="preload" href="/fonts/regular.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
     <link rel="preload" href="/fonts/medium.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-    <script>
-      // hack @mantou/gem
-      window.globalThis = window.globalThis || {
-        queueMicrotask: function (callback) {
-          Promise.resolve().then(callback);
-        },
-      };
-      window.globalThis.EventTarget = Image;
-      if (!Element.prototype.toggleAttribute) {
-        Element.prototype.toggleAttribute = function (name, force) {
-          if (force !== void 0) force = !!force;
-          if (this.hasAttribute(name)) {
-            if (force) return true;
-            this.removeAttribute(name);
-            return false;
-          }
-          if (force === false) return false;
-          this.setAttribute(name, '');
-          return true;
-        };
-      }
-    </script>
     <script async type="module" src="./index.ts"></script>
   </head>
   <body>

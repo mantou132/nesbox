@@ -378,9 +378,9 @@ export class MSearchElement extends GemElement<State> {
           placeholder=${getTempText(
             i18n.get(
               configure.searchCommand === SearchCommand.HELP
-                ? 'help'
+                ? 'tooltip.docs.help'
                 : configure.searchCommand === SearchCommand.SELECT_GAME
-                ? 'selectGame'
+                ? 'tooltip.game.change'
                 : this.#isRooms
                 ? 'placeholder.roomSearch'
                 : configure.user?.playing

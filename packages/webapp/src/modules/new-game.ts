@@ -129,7 +129,7 @@ export class MNewGameElement extends GemElement<State> {
           <dy-input-group>
             <dy-input
               .autofocus=${true}
-              .placeholder=${i18n.get('gameName')}
+              .placeholder=${i18n.get('page.game.name')}
               .value=${title}
               .dataList=${metadata?.map((e) => ({ label: e.title }))}
               @change=${this.#onChange}
@@ -138,16 +138,16 @@ export class MNewGameElement extends GemElement<State> {
           <dy-input-group>
             <dy-pick
               .value=${maxPlayer ?? undefined}
-              .placeholder=${i18n.get('gameMaxPlayer')}
+              .placeholder=${i18n.get('page.game.maxPlayer')}
               .options=${['', '1', '2', '4'].map((value) => ({
                 value: value && `game.max_player.${value}`,
-                label: value ? i18n.get('gamePlayer', value) : i18n.get('noLimit'),
+                label: value ? i18n.get('page.game.player', value) : i18n.get('global.noLimit'),
               }))}
               @change=${({ detail }: CustomEvent<string>) => this.setState({ maxPlayer: detail })}
             ></dy-pick>
             <dy-pick
               .value=${kind ?? undefined}
-              .placeholder=${i18n.get('gameKind')}
+              .placeholder=${i18n.get('page.game.kind')}
               .options=${gameKindList.map((e) => ({
                 value: e.value && `game.kind.${e.value.toLowerCase()}`,
                 label: i18n.get(e.label),
@@ -156,7 +156,7 @@ export class MNewGameElement extends GemElement<State> {
             ></dy-pick>
             <dy-pick
               .value=${series ?? undefined}
-              .placeholder=${i18n.get('gameSeries')}
+              .placeholder=${i18n.get('page.game.series')}
               .options=${gameSeriesList.map((e) => ({
                 value: e.value && `game.series.${e.value.toLowerCase()}`,
                 label: i18n.get(e.label),

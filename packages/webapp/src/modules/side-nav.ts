@@ -101,11 +101,11 @@ export class MSideNavElement extends GemElement {
               <dy-space @click=${logout}>
                 <dy-avatar size="small" src=${getAvatar(configure.user?.username)}></dy-avatar>
                 <dy-action-text color=${theme.negativeColor}>
-                  ${i18n.get('logoutAccount', configure.user?.username || '')}
+                  ${i18n.get('menu.account.logout', configure.user?.username || '')}
                 </dy-action-text>
               </dy-space>
             `
-          : html`<dy-action-text @click=${gotoLogin}>${i18n.get('login')}</dy-action-text>`}
+          : html`<dy-action-text @click=${gotoLogin}>${i18n.get('menu.account.login')}</dy-action-text>`}
       </dy-gesture>
       <dy-gesture @swipe=${this.#onSwipe} @click=${() => toggleSideNavState(false)} style="flex-grow: 1;"></dy-gesture>
     `;

@@ -177,7 +177,7 @@ export class MNavElement extends GemElement {
     const gameId = playing?.gameId || 0;
 
     return html`
-      <nesbox-tooltip .position=${'bottom'} .content=${i18n.get('leaveRoom')}>
+      <nesbox-tooltip .position=${'bottom'} .content=${i18n.get('tooltip.room.leave')}>
         <dy-use
           data-cy="back"
           class="icon"
@@ -190,7 +190,7 @@ export class MNavElement extends GemElement {
       ${playing?.host !== configure.user?.id
         ? html`<div class="title">${store.games[gameId]?.name}</div>`
         : html`
-            <nesbox-tooltip .position=${'bottom'} .content=${i18n.get('selectGame')}>
+            <nesbox-tooltip .position=${'bottom'} .content=${i18n.get('tooltip.game.change')}>
               <dy-action-text
                 class="title"
                 tabindex="0"
@@ -208,14 +208,19 @@ export class MNavElement extends GemElement {
   #renderFavoriteBtn = (gameId: number) => {
     const favorited = store.favoriteIds?.includes(gameId);
     return html`
-      <dy-use
-        class="icon heart"
-        tabindex="0"
-        @keydown=${commonHandle}
-        data-cy="favorite"
-        .element=${favorited ? icons.favorited : icons.favorite}
-        @click=${() => favoriteGame(gameId, !favorited)}
-      ></dy-use>
+      <nesbox-tooltip
+        .position=${'bottom'}
+        .content=${favorited ? i18n.get('tooltip.game.cancelFavorite') : i18n.get('tooltip.game.favorite')}
+      >
+        <dy-use
+          class="icon heart"
+          tabindex="0"
+          @keydown=${commonHandle}
+          data-cy="favorite"
+          .element=${favorited ? icons.favorited : icons.favorite}
+          @click=${() => favoriteGame(gameId, !favorited)}
+        ></dy-use>
+      </nesbox-tooltip>
     `;
   };
 
@@ -292,7 +297,7 @@ export class MNavElement extends GemElement {
           : this.#renderLinks()}
         <span class="space" @dblclick=${this.#goTop}></span>
         ${!configure.user
-          ? html`<dy-action-text @click=${gotoLogin} data-cy="login">${i18n.get('login')}</dy-action-text>`
+          ? html`<dy-action-text @click=${gotoLogin} data-cy="login">${i18n.get('menu.account.login')}</dy-action-text>`
           : this.page === 'game'
           ? html`
               <dy-use
@@ -311,7 +316,7 @@ export class MNavElement extends GemElement {
                       class="play"
                       @click=${() => createRoom({ gameId: Number(this.id), private: false })}
                     >
-                      ${i18n.get('startGame')}
+                      ${i18n.get('page.game.start')}
                     </dy-button>
                   `}
             `

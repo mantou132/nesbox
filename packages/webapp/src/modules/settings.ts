@@ -130,7 +130,7 @@ export class MSettingsElement extends GemElement<State> {
             },
           },
           {
-            tab: i18n.get('license'),
+            tab: i18n.get('settings.license'),
             getContent() {
               return html`
                 <dy-tab-panel>

@@ -46,7 +46,7 @@ export class MShortcutSettingsElement extends GemElement {
   render = () => {
     if (!configure.user) return html``;
 
-    const labelMap: LabelMap = {
+    const globalShortcutLabelMap: LabelMap = {
       OPEN_SEARCH: i18n.get('settings.shortcut.search'),
       OPEN_HELP: i18n.get('settings.shortcut.openHelp'),
       OPEN_SETTINGS: i18n.get('settings.shortcut.settings'),
@@ -54,12 +54,12 @@ export class MShortcutSettingsElement extends GemElement {
       ROOM_SPEECH: i18n.get('settings.shortcut.voiceInput'),
     };
 
-    const labelMap2: LabelMap = {
-      SCREENSHOT: i18n.get('settings.shortcut.screenshot'),
-      SAVE_GAME_STATE: i18n.get('settings.shortcut.stateSave'),
-      LOAD_GAME_STATE: i18n.get('settings.shortcut.stateLoad'),
-      OPEN_RAM_VIEWER: i18n.get('settings.shortcut.openRam'),
-      OPEN_CHEAT_SETTINGS: i18n.get('settings.shortcut.openCheat'),
+    const gameShortcutLabelMap2: LabelMap = {
+      SCREENSHOT: i18n.get('menu.game.screenshot'),
+      SAVE_GAME_STATE: i18n.get('menu.game.stateSave'),
+      LOAD_GAME_STATE: i18n.get('menu.game.loadState'),
+      OPEN_RAM_VIEWER: i18n.get('menu.game.openRam'),
+      OPEN_CHEAT_SETTINGS: i18n.get('menu.game.openCheat'),
     };
 
     const render = (labelMap: LabelMap, onlyHost?: (key: SettingsKey) => boolean) => html`
@@ -72,7 +72,7 @@ export class MShortcutSettingsElement extends GemElement {
                 ${labelMap[name as SettingsKey]}
                 ${onlyHost?.(name as SettingsKey)
                   ? html`
-                      <dy-tooltip .content=${i18n.get('tip.settings.onlyHost')}>
+                      <dy-tooltip .content=${i18n.get('tooltip.settings.onlyHost')}>
                         <dy-use class="help" .element=${icons.help}></dy-use>
                       </dy-tooltip>
                     `
@@ -102,9 +102,9 @@ export class MShortcutSettingsElement extends GemElement {
 
     return html`
       <dy-heading class="heading" lv="4">${i18n.get('settings.shortcut.global')}</dy-heading>
-      ${render(labelMap)}
+      ${render(globalShortcutLabelMap)}
       <dy-heading class="heading" lv="4">${i18n.get('settings.shortcut.inGame')}</dy-heading>
-      ${render(labelMap2, (name) => name !== 'SCREENSHOT')}
+      ${render(gameShortcutLabelMap2, (name) => name !== 'SCREENSHOT')}
     `;
   };
 }

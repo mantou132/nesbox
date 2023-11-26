@@ -293,7 +293,7 @@ export class PHomepageElement extends GemElement {
                 value: code,
               }))}
             ></dy-select>
-            <dy-link .route=${routes.login as RouteItem} data-cy="login">${i18n.get('login')}</dy-link>
+            <dy-link .route=${routes.login as RouteItem} data-cy="login">${i18n.get('menu.account.login')}</dy-link>
           </div>
         </nav>
         <div class="content main">

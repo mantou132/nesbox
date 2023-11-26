@@ -4,10 +4,12 @@ import { Time } from 'duoyun-ui/lib/time';
 import { icons } from 'src/icons';
 import { saveFile } from 'src/utils/common';
 import { theme } from 'src/theme';
+import { i18n } from 'src/i18n/basic';
 
 import type { MStageElement } from 'src/modules/stage';
 
 import 'duoyun-ui/elements/use';
+import 'src/elements/tooltip';
 
 const style = createCSSSheet(css`
   .recording {
@@ -55,12 +57,18 @@ export class MRoomRecorderElement extends GemElement<State> {
   };
 
   render = () => {
+    const { recorder } = this.state;
     return html`
-      <dy-use
-        class=${classMap({ recording: !!this.state.recorder })}
-        .element=${icons.screenRecord}
-        @click=${this.#onClick}
-      ></dy-use>
+      <nesbox-tooltip
+        .content=${recorder ? i18n.get('tooltip.game.stopRecord') : i18n.get('tooltip.game.startRecord')}
+        position="left"
+      >
+        <dy-use
+          class=${classMap({ recording: !!recorder })}
+          .element=${icons.screenRecord}
+          @click=${this.#onClick}
+        ></dy-use>
+      </nesbox-tooltip>
     `;
   };
 }

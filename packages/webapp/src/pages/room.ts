@@ -115,7 +115,7 @@ export class PRoomElement extends GemElement {
     ContextMenu.open(
       [
         !!friendStore.friendIds?.length && {
-          text: i18n.get('inviteValidFriend'),
+          text: i18n.get('page.friend.inviteValid'),
           menu: friendStore.friendIds?.map((id) => ({
             text: friendStore.friends[id]?.user.nickname || '',
             tag:
@@ -126,10 +126,10 @@ export class PRoomElement extends GemElement {
           })),
         },
         {
-          text: i18n.get('inviteFriend'),
+          text: i18n.get('page.friend.invite'),
           handle: async () => {
             const input = await Modal.open<DuoyunInputElement>({
-              header: i18n.get('inviteFriend'),
+              header: i18n.get('page.friend.invite'),
               body: html`
                 <dy-input
                   autofocus
@@ -143,7 +143,7 @@ export class PRoomElement extends GemElement {
           },
         },
         {
-          text: i18n.get('share'),
+          text: i18n.get('menu.game.share'),
           handle: () => {
             const url = `${location.origin}${createPath(routes.games)}${new QueryString({
               [queryKeys.JOIN_ROOM]: this.#playing!.id,
@@ -152,7 +152,9 @@ export class PRoomElement extends GemElement {
               ? navigator
                   .share({
                     url,
-                    text: getStringFromTemplate(i18n.get('shareDesc', store.games[this.#playing!.gameId]?.name || '')),
+                    text: getStringFromTemplate(
+                      i18n.get('menu.game.shareDesc', store.games[this.#playing!.gameId]?.name || ''),
+                    ),
                   })
                   .catch(() => {
                     //
@@ -164,32 +166,32 @@ export class PRoomElement extends GemElement {
           text: '---',
         },
         {
-          text: i18n.get('settings.shortcut.screenshot'),
+          text: i18n.get('menu.game.screenshot'),
           handle: this.#saveScreenshot,
           tag: getShortcut('SCREENSHOT', true),
         },
         this.#isHost && {
-          text: i18n.get('settings.shortcut.stateSave') + ' (Local)',
+          text: i18n.get('menu.game.stateSave') + ' (Local)',
           handle: this.#save,
           tag: getShortcut('SAVE_GAME_STATE', true),
         },
         this.#isHost && {
-          text: i18n.get('settings.shortcut.stateLoad') + ' (Local)',
+          text: i18n.get('menu.game.loadState') + ' (Local)',
           handle: this.#load,
           tag: getShortcut('LOAD_GAME_STATE', true),
         },
         this.#isHost && {
-          text: i18n.get('settings.shortcut.openRam'),
+          text: i18n.get('menu.game.openRam'),
           handle: this.#openRamViewer,
           tag: getShortcut('OPEN_RAM_VIEWER', true),
         },
         this.#isHost && {
-          text: i18n.get('settings.shortcut.openCheat'),
+          text: i18n.get('menu.game.openCheat'),
           handle: this.#openCheatModal,
           tag: getShortcut('OPEN_CHEAT_SETTINGS', true),
         },
         this.#isHost && {
-          text: i18n.get('settings.shortcut.openCombo'),
+          text: i18n.get('menu.game.openCombo'),
           handle: this.#openComboModal,
         },
       ].filter(isNotBoolean),

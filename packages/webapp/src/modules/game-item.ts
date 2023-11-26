@@ -110,7 +110,7 @@ export class MGameItemElement extends GemElement {
       />
       <dy-space class="actions" size="small">
         <dy-button data-cy="start" class="play" small ?hidden=${mediaQuery.isPhone} @click=${this.#onGameClick}>
-          ${i18n.get('startGame')}
+          ${i18n.get('page.game.start')}
         </dy-button>
         <dy-button
           data-cy="favorite"

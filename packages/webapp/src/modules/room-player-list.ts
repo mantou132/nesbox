@@ -192,11 +192,11 @@ export class MRoomPlayerItemElement extends GemElement {
       ContextMenu.open(
         [
           this.#isAllowKickOut && {
-            text: i18n.get('kickOutRole'),
+            text: i18n.get('page.room.kickOutRole'),
             handle: () => this.kickout(this.playerRole!.userId),
           },
           {
-            text: i18n.get('addFriend'),
+            text: i18n.get('page.friend.add'),
             disabled: !!friendStore.friends[this.playerRole!.userId],
             handle: () => applyFriend(this.playerRole!.username),
           },
@@ -219,7 +219,7 @@ export class MRoomPlayerItemElement extends GemElement {
           ? html`<dy-use class="icon" .element=${icons.loading}></dy-use>`
           : this.#isJoinable
           ? html`<dy-use class="icon" tabindex="0" .element=${icons.received}></dy-use>`
-          : i18n.get('roomEmptyRole'),
+          : i18n.get('page.room.emptyRole'),
       };
     } else {
       return {

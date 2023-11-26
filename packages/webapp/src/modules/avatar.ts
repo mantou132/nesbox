@@ -56,7 +56,7 @@ export class MAvatarElement extends GemElement {
 
   #addGame = async () => {
     const newGameElement = await Modal.open<MNewGameElement>({
-      header: i18n.get('addGame'),
+      header: i18n.get('menu.game.add'),
       body: html`
         <m-new-game>
           <style>
@@ -122,19 +122,19 @@ export class MAvatarElement extends GemElement {
           handle: toggleScreencastMode,
         },
         {
-          text: i18n.get('feedback'),
+          text: i18n.get('menu.link.feedback'),
           tagIcon: icons.openNewWindow,
           handle: () => {
             open(githubIssue);
           },
         },
         {
-          text: i18n.get('addGame'),
+          text: i18n.get('menu.game.add'),
           tagIcon: icons.openNewWindow,
           handle: this.#addGame,
         },
         {
-          text: i18n.get('official'),
+          text: i18n.get('menu.link.official'),
           tagIcon: icons.openNewWindow,
           handle: () => {
             open(location.origin);
@@ -144,7 +144,7 @@ export class MAvatarElement extends GemElement {
           text: '---',
         },
         {
-          text: i18n.get('logoutAccount', configure.user?.username || ''),
+          text: i18n.get('menu.account.logout', configure.user?.username || ''),
           danger: true,
           handle: logout,
         },

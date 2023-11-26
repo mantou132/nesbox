@@ -119,7 +119,7 @@ export class MLobbyChatElement extends GemElement<State> {
               .icon=${icons.chat}
               @click=${() => this.setState({ start: true })}
             >
-              ${i18n.get('lobbyUserCount', String(lobbyInfo?.lobbyUserCount || 1))}
+              ${i18n.get('page.rooms.currentUser', String(lobbyInfo?.lobbyUserCount || 1))}
             </dy-button>
           `}
     `;

@@ -223,16 +223,16 @@ export class PLoginElement extends GemElement<State> {
     const { username, password, loading } = this.state;
     return html`
       <div class="bg-copyright">
-        <nesbox-tooltip .content=${i18n.get('bgCopyright')}>
+        <nesbox-tooltip .content=${i18n.get('tooltip.login.imgCopyright')}>
           <dy-link @click=${() => open('https://dribbble.com/shots/10244007-Old-tech-devices-2')}>
             @Tanner Wayment
           </dy-link>
         </nesbox-tooltip>
       </div>
       <div class="slogan">
-        <h1>${i18n.get('slogan')}</h1>
+        <h1>${i18n.get('global.slogan')}</h1>
         ${i18n
-          .get('sloganDesc')
+          .get('global.sloganDesc')
           .split('\n')
           .map((line) => html`<p>${line}</p>`)}
       </div>
@@ -255,10 +255,10 @@ export class PLoginElement extends GemElement<State> {
         </dy-form>
         <div class="actions">
           <dy-button data-cy="submit" @click=${this.#onSubmit} .icon=${loading ? icons.loading : undefined}>
-            ${loading ? '' : this.register ? i18n.get('register') : i18n.get('login')}
+            ${loading ? '' : this.register ? i18n.get('page.login.register') : i18n.get('menu.account.login')}
           </dy-button>
           <dy-action-text @click=${this.#goto} ?hidden=${isMtApp}>
-            ${this.register ? i18n.get('goLogin') : i18n.get('goRegister')}
+            ${this.register ? i18n.get('page.login.goLogin') : i18n.get('page.login.goRegister')}
           </dy-action-text>
         </div>
       </div>

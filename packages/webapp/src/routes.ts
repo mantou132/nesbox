@@ -109,7 +109,7 @@ const getInitRoutes = () => {
       },
     },
     register: {
-      title: i18n.get('page.register.title'),
+      title: i18n.get('page.login.register'),
       pattern: '/register',
       async getContent(_params: Record<string, string>) {
         await import('src/pages/login');
