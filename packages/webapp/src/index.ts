@@ -223,3 +223,13 @@ if (COMMAND === 'build') {
 addEventListener('load', () => {
   logger.info('Loaded!');
 });
+
+// Installed
+matchMedia(mediaQuery.PWA).addEventListener('change', ({ matches }) => {
+  if (matches) {
+    const w = 1024;
+    const h = 640;
+    resizeTo(w, h);
+    moveTo((screen.width - w) / 2, (screen.height - h) / 2);
+  }
+});

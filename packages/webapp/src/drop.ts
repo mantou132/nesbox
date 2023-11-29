@@ -7,6 +7,7 @@ import { setNesFile } from 'src/configure';
 
 window.launchQueue?.setConsumer(async (launchParams: any) => {
   if (!launchParams.files.length) return;
+  // 为啥刷新还是会触发
 
   // https://github.com/WICG/file-system-access/blob/master/EXPLAINER.md#example-code
   const files = await Promise.all(launchParams.files.map((h: any) => h.getFile()));

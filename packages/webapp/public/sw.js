@@ -8,7 +8,7 @@
 const sw = self;
 
 const cacheName = 'console';
-const assetsToCache = [...new Set([sw.location.pathname, '/'])].map((path) => sw.location.origin + path);
+const assetsToCache = [...new Set(['/'])].map((path) => location.origin + path);
 
 sw.addEventListener('activate', (event) => {
   event.waitUntil(sw.registration.navigationPreload?.enable() || Promise.resolve());
@@ -16,7 +16,7 @@ sw.addEventListener('activate', (event) => {
 
 sw.addEventListener('install', () => {
   sw.skipWaiting();
-  sw.caches.open(cacheName).then((cache) => {
+  caches.open(cacheName).then((cache) => {
     cache.addAll(assetsToCache);
   });
 });
@@ -29,6 +29,7 @@ sw.addEventListener('push', function (event) {
     payload = { title: event.data.text() };
   }
   event.waitUntil(
+    // 需要在 client 请求权限
     sw.registration.showNotification(payload.title, {
       icon: '/logo-144.png',
       body: payload.body,
@@ -44,16 +45,36 @@ sw.addEventListener('notificationclick', function (event) {
   event.notification.close();
 });
 
+/**
+ *
+ * @param {FetchEvent} event
+ */
+function handleShareTarget(event) {
+  event.respondWith(
+    (async () => {
+      const formData = await event.request.formData();
+      const file = formData.get('file');
+      // TODO: add to caches -> client open emulator
+      return Response.redirect('/', 303);
+    })(),
+  );
+}
+
 sw.addEventListener('fetch', (event) => {
   const { request } = event;
   const requestUrl = new URL(request.url);
-  const isSomeOrigin = requestUrl.origin === sw.location.origin;
+  const isSomeOrigin = requestUrl.origin === location.origin;
   const isApiFetch = (isSomeOrigin && requestUrl.pathname.startsWith('/api')) || requestUrl.origin.includes('api.');
+
+  if (requestUrl.pathname === '/_share_target') {
+    handleShareTarget(event);
+    return;
+  }
 
   if (request.method !== 'GET') return;
   if (!isSomeOrigin && !isApiFetch) return;
 
-  const getCache = () => sw.caches.match(request, { ignoreSearch: request.mode === 'navigate' });
+  const getCache = () => caches.match(request, { ignoreSearch: request.mode === 'navigate' });
 
   event.respondWith(
     (async function () {
@@ -64,7 +85,7 @@ sw.addEventListener('fetch', (event) => {
         .then(async (response) => {
           if (response.ok) {
             const responseCache = response.clone();
-            sw.caches.open(cacheName).then((cache) => cache.put(request, responseCache));
+            caches.open(cacheName).then((cache) => cache.put(request, responseCache));
             return response;
           } else {
             const cache = await getCache();
