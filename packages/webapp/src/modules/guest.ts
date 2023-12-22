@@ -1,7 +1,7 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, connectStore } from '@mantou/gem';
 import { icons } from 'duoyun-ui/lib/icons';
 import { commonHandle } from 'duoyun-ui/lib/hotkeys';
-import { ContextMenu } from 'duoyun-ui/elements/menu';
+import { ContextMenu } from 'duoyun-ui/elements/contextmenu';
 import { waitLoading } from 'duoyun-ui/elements/wait';
 import { focusStyle } from 'duoyun-ui/lib/styles';
 

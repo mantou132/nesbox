@@ -4,7 +4,7 @@ import { getInputItemType, getInputItemValue, normalizeFilename, saveFile } from
 import QOI from 'qoijs';
 import JSZip from 'jszip';
 
-import 'duoyun-ui/elements/file-pick';
+import 'duoyun-ui/elements/file-picker';
 import 'duoyun-ui/elements/form';
 import 'duoyun-ui/elements/input';
 import 'duoyun-ui/elements/button';
@@ -151,7 +151,7 @@ export class PImageElement extends GemElement<State> {
     const { files, args, result } = this.state;
     return html`
       <dy-drop-area class="input" accept="image/*" @change=${this.#onDropChange}>
-        <dy-file-pick .multiple=${true} .type=${'image'} .value=${files} @change=${this.#onChange}></dy-file-pick>
+        <dy-file-picker .multiple=${true} .type=${'image'} .value=${files} @change=${this.#onChange}></dy-file-picker>
       </dy-drop-area>
       <dy-form @itemchange=${this.#onArgChange} .inline=${true}>
         ${Object.entries(args).map(

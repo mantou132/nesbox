@@ -257,7 +257,7 @@ export class AppRootElement extends GemElement {
       <dy-modal
         customize
         @close=${toggleSearchState}
-        .maskCloseable=${true}
+        .maskClosable=${true}
         .open=${!!configure.searchState}
         .body=${html`<m-search></m-search>`}
       >

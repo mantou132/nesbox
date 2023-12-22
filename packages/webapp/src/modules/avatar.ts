@@ -1,5 +1,5 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, connectStore } from '@mantou/gem';
-import { ContextMenu } from 'duoyun-ui/elements/menu';
+import { ContextMenu } from 'duoyun-ui/elements/contextmenu';
 import { waitLoading } from 'duoyun-ui/elements/wait';
 import { commonHandle } from 'duoyun-ui/lib/hotkeys';
 import { Modal } from 'duoyun-ui/elements/modal';

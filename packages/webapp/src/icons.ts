@@ -1,5 +1,5 @@
 import { raw } from '@mantou/gem';
-import { setIcons } from 'duoyun-ui/lib/icons';
+import { extendIcons } from 'duoyun-ui/lib/icons';
 
 function genIcon(d: string, ext = '') {
   return raw`
@@ -22,7 +22,7 @@ function genIconV2(d: string, ext = '', viewBox = '0 0 960 960') {
 }
 
 // https://fonts.google.com/icons?icon.style=Rounded&icon.set=Material+Symbols
-export const icons = setIcons({
+export const icons = extendIcons({
   screenRecord: genIconV2(
     'M159 813q-37-51-58-110.5T80 576q0-67 20.5-127T158 339l43 43q-29 42-45 91t-16 103q0 54 16.5 103.5T202 771l-43 42Zm321 163q-66 0-126.5-20.5T243 898l43-43q42 29 91 45t103 16q54 0 103-16t91-45l43 43q-50 37-110 57.5T480 976Zm322-162-43-43q29-42 45-91.5T820 576q0-54-16-103t-45-91l43-43q37 50 57.5 110T880 576q0 67-20.5 127T802 814ZM285 297l-43-43q51-37 111-57.5T480 176q67 0 127 21t111 58l-43 43q-42-29-91-45.5T480 236q-54 0-103.5 16T285 297Zm195 469q-79 0-134.5-55.5T290 576q0-79 55.5-134.5T480 386q79 0 134.5 55.5T670 576q0 79-55.5 134.5T480 766Z',
     '',

@@ -61,7 +61,7 @@ export class MRoomRecorderElement extends GemElement<State> {
     return html`
       <nesbox-tooltip
         .content=${recorder ? i18n.get('tooltip.game.stopRecord') : i18n.get('tooltip.game.startRecord')}
-        position="left"
+        position="topRight"
       >
         <dy-use
           class=${classMap({ recording: !!recorder })}

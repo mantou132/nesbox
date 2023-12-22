@@ -11,7 +11,7 @@ import { GameAttributes, store } from 'src/store';
 
 import 'duoyun-ui/elements/alert';
 import 'duoyun-ui/elements/link';
-import 'duoyun-ui/elements/pick';
+import 'duoyun-ui/elements/picker';
 import 'duoyun-ui/elements/input';
 import 'duoyun-ui/elements/button';
 import 'duoyun-ui/elements/paragraph';
@@ -136,7 +136,7 @@ export class MNewGameElement extends GemElement<State> {
             ></dy-input>
           </dy-input-group>
           <dy-input-group>
-            <dy-pick
+            <dy-picker
               .value=${maxPlayer ?? undefined}
               .placeholder=${i18n.get('page.game.maxPlayer')}
               .options=${['', '1', '2', '4'].map((value) => ({
@@ -144,8 +144,8 @@ export class MNewGameElement extends GemElement<State> {
                 label: value ? i18n.get('page.game.player', value) : i18n.get('global.noLimit'),
               }))}
               @change=${({ detail }: CustomEvent<string>) => this.setState({ maxPlayer: detail })}
-            ></dy-pick>
-            <dy-pick
+            ></dy-picker>
+            <dy-picker
               .value=${kind ?? undefined}
               .placeholder=${i18n.get('page.game.kind')}
               .options=${gameKindList.map((e) => ({
@@ -153,8 +153,8 @@ export class MNewGameElement extends GemElement<State> {
                 label: i18n.get(e.label),
               }))}
               @change=${({ detail }: CustomEvent<string>) => this.setState({ kind: detail })}
-            ></dy-pick>
-            <dy-pick
+            ></dy-picker>
+            <dy-picker
               .value=${series ?? undefined}
               .placeholder=${i18n.get('page.game.series')}
               .options=${gameSeriesList.map((e) => ({
@@ -162,7 +162,7 @@ export class MNewGameElement extends GemElement<State> {
                 label: i18n.get(e.label),
               }))}
               @change=${({ detail }: CustomEvent<string>) => this.setState({ series: detail })}
-            ></dy-pick>
+            ></dy-picker>
           </dy-input-group>
         `;
     }

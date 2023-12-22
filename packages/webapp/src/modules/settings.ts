@@ -32,7 +32,7 @@ const style = createCSSSheet(css`
   .tabs::part(tab):hover {
     color: currentColor;
   }
-  .tabs::part(current-tab) {
+  .tabs::part(current) {
     color: currentColor;
     background-color: ${theme.hoverBackgroundColor};
     border-radius: ${`${theme.normalRound} 0 0 ${theme.normalRound}`};
@@ -68,9 +68,9 @@ export class MSettingsElement extends GemElement<State> {
         orientation="vertical"
         @change=${this.#onChange}
         .value=${this.state.tab}
-        .data=${[
+        .items=${[
           {
-            tab: i18n.get('settings.keybinding.title'),
+            label: i18n.get('settings.keybinding.title'),
             getContent() {
               return html`
                 <dy-tab-panel>
@@ -80,7 +80,7 @@ export class MSettingsElement extends GemElement<State> {
             },
           },
           {
-            tab: i18n.get('settings.shortcut.title'),
+            label: i18n.get('settings.shortcut.title'),
             getContent() {
               return html`
                 <dy-tab-panel>
@@ -90,7 +90,7 @@ export class MSettingsElement extends GemElement<State> {
             },
           },
           {
-            tab: i18n.get('settings.sound.title'),
+            label: i18n.get('settings.sound.title'),
             getContent() {
               return html`
                 <dy-tab-panel>
@@ -100,7 +100,7 @@ export class MSettingsElement extends GemElement<State> {
             },
           },
           {
-            tab: i18n.get('settings.video.title'),
+            label: i18n.get('settings.video.title'),
             getContent() {
               return html`
                 <dy-tab-panel>
@@ -110,7 +110,7 @@ export class MSettingsElement extends GemElement<State> {
             },
           },
           {
-            tab: i18n.get('settings.ui.title'),
+            label: i18n.get('settings.ui.title'),
             getContent() {
               return html`
                 <dy-tab-panel>
@@ -120,7 +120,7 @@ export class MSettingsElement extends GemElement<State> {
             },
           },
           {
-            tab: i18n.get('settings.account.title'),
+            label: i18n.get('settings.account.title'),
             getContent() {
               return html`
                 <dy-tab-panel>
@@ -130,7 +130,7 @@ export class MSettingsElement extends GemElement<State> {
             },
           },
           {
-            tab: i18n.get('settings.license'),
+            label: i18n.get('settings.license'),
             getContent() {
               return html`
                 <dy-tab-panel>

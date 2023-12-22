@@ -166,7 +166,7 @@ export class MVoiceRoomElement extends GemElement<State> {
     return html`
       <nesbox-tooltip
         .content=${joined ? i18n.get('tooltip.room.stopVoice') : i18n.get('tooltip.room.startVoice')}
-        position="left"
+        position="topRight"
       >
         <dy-use class="icon" @click=${this.toggleVoice} .element=${joined ? icons.mic : icons.micOff}></dy-use>
       </nesbox-tooltip>

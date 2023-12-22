@@ -28,7 +28,7 @@ import { icons } from 'src/icons';
 import 'duoyun-ui/elements/heading';
 import 'duoyun-ui/elements/divider';
 import 'duoyun-ui/elements/select';
-import 'duoyun-ui/elements/pick';
+import 'duoyun-ui/elements/picker';
 import 'duoyun-ui/elements/use';
 import 'src/modules/game-item';
 
@@ -37,7 +37,7 @@ const style = createCSSSheet(css`
     margin-block: 0;
   }
   dy-select,
-  dy-pick {
+  dy-picker {
     width: 8em;
     padding-block: 0;
     border: none;
@@ -228,13 +228,13 @@ export class MGameListElement extends GemElement {
                       .options=${gameKindList.map((e) => ({ ...e, label: i18n.get(e.label) }))}
                       @change=${this.#onChangeKind}
                     ></dy-select>
-                    <dy-pick
+                    <dy-picker
                       .placeholder=${i18n.get('page.game.series')}
                       .value=${this.#gameSeries}
                       .options=${gameSeriesList.map((e) => ({ ...e, label: i18n.get(e.label) }))}
                       @change=${({ detail }: CustomEvent<ScGameSeries | ''>) =>
                         changeQuery(queryKeys.GAME_SERIES, detail)}
-                    ></dy-pick>
+                    ></dy-picker>
                     <dy-select
                       .dropdownStyle=${{ width: '8em' }}
                       .placeholder=${i18n.get('page.game.maxPlayer')}

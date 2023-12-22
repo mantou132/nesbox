@@ -7,7 +7,7 @@ import QOI from 'qoijs';
 import JSZip from 'jszip';
 
 import 'duoyun-ui/elements/drop-area';
-import 'duoyun-ui/elements/file-pick';
+import 'duoyun-ui/elements/file-picker';
 import 'duoyun-ui/elements/form';
 import 'duoyun-ui/elements/input';
 import 'duoyun-ui/elements/action-text';
@@ -196,7 +196,7 @@ export class PAudioElement extends GemElement<State> {
 
     return html`
       <dy-drop-area class="input" accept="audio/*" @change=${this.#onDropChange}>
-        <dy-file-pick .multiple=${true} .type=${'file'} .value=${files} @change=${this.#onChange}>
+        <dy-file-picker .multiple=${true} .type=${'file'} .value=${files} @change=${this.#onChange}>
           ${charts.map(
             (
               e,
@@ -223,7 +223,7 @@ export class PAudioElement extends GemElement<State> {
                 </dy-action-text>
               `,
           )}
-        </dy-file-pick>
+        </dy-file-picer>
       </dy-drop-area>
       <dy-form @itemchange=${this.#onArgChange} .inline=${true}>
         ${Object.entries(args).map(([k, v]) =>

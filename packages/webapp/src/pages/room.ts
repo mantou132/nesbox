@@ -1,5 +1,4 @@
 import {
-  GemElement,
   html,
   adoptedStyle,
   customElement,
@@ -13,7 +12,7 @@ import {
 } from '@mantou/gem';
 import { createPath, matchPath } from 'duoyun-ui/elements/route';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
-import { ContextMenu } from 'duoyun-ui/elements/menu';
+import { ContextMenu } from 'duoyun-ui/elements/contextmenu';
 import { Modal } from 'duoyun-ui/elements/modal';
 import { DuoyunInputElement } from 'duoyun-ui/elements/input';
 import { isNotBoolean } from 'duoyun-ui/lib/types';
@@ -24,6 +23,7 @@ import { getStringFromTemplate, once } from 'duoyun-ui/lib/utils';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { routes } from 'src/routes';
 import { locale } from 'duoyun-ui/lib/locale';
+import { DuoyunWakeLockBaseElement } from 'duoyun-ui/elements/base/wake-lock';
 
 import { preventDefault } from 'src/utils/common';
 import { BcMsgEvent, BcMsgType, queryKeys } from 'src/constants';
@@ -36,7 +36,6 @@ import { logger } from 'src/logger';
 import { ScUserStatus } from 'src/generated/graphql';
 import { theme } from 'src/theme';
 import { mountedRoom, unmountedRoom } from 'src/modules/nav';
-import { wakeLock } from 'src/effects/wake-lock';
 
 import type { MStageElement } from 'src/modules/stage';
 
@@ -94,7 +93,7 @@ const style = createCSSSheet(css`
 @connectStore(configure)
 @adoptedStyle(style)
 @connectStore(i18n.store)
-export class PRoomElement extends GemElement {
+export class PRoomElement extends DuoyunWakeLockBaseElement {
   @refobject stageRef: RefObject<MStageElement>;
 
   get #playing() {
@@ -282,7 +281,7 @@ export class PRoomElement extends GemElement {
         `,
         disableDefaultCancelBtn: true,
         disableDefaultOKBtn: true,
-        maskCloseable: true,
+        maskClosable: true,
       }).catch(() => {
         //
       });
@@ -327,7 +326,7 @@ export class PRoomElement extends GemElement {
       `,
       disableDefaultCancelBtn: true,
       disableDefaultOKBtn: true,
-      maskCloseable: true,
+      maskClosable: true,
     }).catch(() => {
       //
     });
@@ -347,7 +346,7 @@ export class PRoomElement extends GemElement {
       `,
       disableDefaultCancelBtn: true,
       disableDefaultOKBtn: true,
-      maskCloseable: true,
+      maskClosable: true,
     }).catch(() => {
       //
     });
@@ -380,7 +379,6 @@ export class PRoomElement extends GemElement {
   });
 
   mounted = () => {
-    this.effect(wakeLock, () => []);
     this.effect(
       () => {
         if (configure.user && !this.#playing) {

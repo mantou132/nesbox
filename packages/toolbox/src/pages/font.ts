@@ -220,7 +220,7 @@ export class PFontElement extends GemElement<State> {
           @click=${this.#loadLocalFonts}
           @paste=${this.#onPaste}
           .value=${args.currentFont}
-          .dataList=${[...new Set([...this.#buildInFonts, ...webFonts, ...localFonts])].map((e) => ({
+          .options=${[...new Set([...this.#buildInFonts, ...webFonts, ...localFonts])].map((e) => ({
             value: e,
             label: html`<div style="font-family: ${e}">${e}</div>`,
           }))}

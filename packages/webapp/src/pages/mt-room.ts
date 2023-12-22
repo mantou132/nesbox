@@ -1,5 +1,4 @@
 import {
-  GemElement,
   html,
   adoptedStyle,
   customElement,
@@ -13,6 +12,7 @@ import {
 import { createPath, matchPath } from 'duoyun-ui/elements/route';
 import { waitLoading } from 'duoyun-ui/elements/wait';
 import { routes } from 'src/routes';
+import { DuoyunWakeLockBaseElement } from 'duoyun-ui/elements/base/wake-lock';
 
 import { playHintSound } from 'src/utils/common';
 import { globalEvents, queryKeys } from 'src/constants';
@@ -22,7 +22,6 @@ import { leaveRoom, updateRoomScreenshot } from 'src/services/api';
 import { configure } from 'src/configure';
 import { theme } from 'src/theme';
 import { updateMtApp } from 'src/mt-app';
-import { wakeLock } from 'src/effects/wake-lock';
 
 import type { MStageElement } from 'src/modules/stage';
 import type { MVoiceRoomElement } from 'src/modules/room-voice';
@@ -58,7 +57,7 @@ const style = createCSSSheet(css`
 @connectStore(store)
 @connectStore(configure)
 @adoptedStyle(style)
-export class PMtRoomElement extends GemElement {
+export class PMtRoomElement extends DuoyunWakeLockBaseElement {
   @refobject stageRef: RefObject<MStageElement>;
   @refobject voiceRef: RefObject<MVoiceRoomElement>;
 
@@ -96,7 +95,6 @@ export class PMtRoomElement extends GemElement {
   };
 
   mounted = () => {
-    this.effect(wakeLock, () => []);
     this.effect(
       () => {
         if (configure.user && !this.#playing) {

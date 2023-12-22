@@ -12,7 +12,6 @@ import {
 import { isMac } from 'duoyun-ui/lib/hotkeys';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { Toast } from 'duoyun-ui/elements/toast';
-import { GemTitleElement } from 'duoyun-ui/elements/title';
 import { createPath, RouteItem } from 'duoyun-ui/elements/route';
 import { waitLoading } from 'duoyun-ui/elements/wait';
 import { routes } from 'src/routes';
@@ -233,10 +232,6 @@ const style = createCSSSheet(css`
 @adoptedStyle(style)
 @connectStore(homepageI18n.store)
 export class PHomepageElement extends GemElement {
-  #openNesbox = () => {
-    history.push({ path: createPath(routes.games) });
-  };
-
   #download = async () => {
     if (navigator.userAgent.includes('Android')) {
       open(getCorSrc('https://github.com/mantou132/nesbox/releases/download/v1.0.8/nesbox.apk'));
@@ -281,7 +276,7 @@ export class PHomepageElement extends GemElement {
         <nav class="content">
           <dy-link class="logo" href="/">
             <img draggable="false" class="icon" src="/logo-96.png" alt="Logo" />
-            <span>${GemTitleElement.defaultTitle}</span>
+            <span>${i18n.get('global.title')}</span>
           </dy-link>
           <div class="links">
             <dy-select
@@ -303,9 +298,9 @@ export class PHomepageElement extends GemElement {
             <dy-button .icon=${downloadSvg} @click=${this.#download}>
               ${homepageI18n.get('page.homepage.downloadBtn')}
             </dy-button>
-            <dy-button color=${theme.textColor} @click=${this.#openNesbox}>
-              ${homepageI18n.get('page.homepage.openBtn')}
-            </dy-button>
+            <dy-link .route=${routes.games}>
+              <dy-button color=${theme.textColor}>${homepageI18n.get('page.homepage.openBtn')}</dy-button>
+            </dy-link>
           </dy-space>
         </div>
       </header>

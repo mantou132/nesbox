@@ -6,7 +6,7 @@ import { i18n } from 'src/i18n/basic';
 import { theme } from 'src/theme';
 import { getGameIds } from 'src/services/api';
 
-import 'duoyun-ui/elements/carousel';
+import 'duoyun-ui/elements/result';
 import 'src/modules/game-list';
 
 const style = createCSSSheet(css`

@@ -14,7 +14,7 @@ import {
 } from '@mantou/gem';
 import { commonHandle } from 'duoyun-ui/lib/hotkeys';
 import { focusStyle } from 'duoyun-ui/lib/styles';
-import { ContextMenu } from 'duoyun-ui/elements/menu';
+import { ContextMenu } from 'duoyun-ui/elements/contextmenu';
 import { isNotBoolean } from 'duoyun-ui/lib/types';
 import { Player } from '@mantou/nes';
 

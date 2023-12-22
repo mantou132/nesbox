@@ -44,7 +44,6 @@ const style = createCSSSheet(css`
     image-rendering: pixelated;
   }
   .top::part(img) {
-    --mask-range: 0;
     inset: 0 3em 0 auto;
     margin: auto;
     width: auto;
@@ -198,7 +197,7 @@ export class PGamesElement extends GemElement<State> {
       <dy-carousel
         class="top"
         style=${styleMap({ backgroundColor: this.state.background, backgroundImage: this.state.backgroundImage })}
-        .data=${topData}
+        .items=${topData}
         .interval=${7000}
         @change=${({ detail }: CustomEvent<number>) => this.#onTopChange(detail, topData?.length)}
       ></dy-carousel>

@@ -1,5 +1,5 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, property } from '@mantou/gem';
-import { ContextMenu } from 'duoyun-ui/elements/menu';
+import { ContextMenu } from 'duoyun-ui/elements/contextmenu';
 import { commonHandle } from 'duoyun-ui/lib/hotkeys';
 
 import { getAvatar } from 'src/utils/common';

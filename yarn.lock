@@ -1252,10 +1252,10 @@
   resolved "https://registry.yarnpkg.com/@mantou/fceux/-/fceux-0.0.5.tgz#a974a886273e47bbb49bad047a9ed0f3bccccd63"
   integrity sha512-DuupPEP5I+eC6ZjtXQXbamyAnCeb+0NvJ+tFH4YQj7kJyz4pEPV7mEpzcWLQnGYsAdnvLiePlSISCZ9cFgBRxQ==
 
-"@mantou/gem@^1.6.19":
-  version "1.6.19"
-  resolved "https://registry.yarnpkg.com/@mantou/gem/-/gem-1.6.19.tgz#a87c1b669668e8c62d17721b7e46ae0a99afaefd"
-  integrity sha512-x0+B7fp/VhwzqaJgZ9dgC2clWVp7I5N8eq8vlj3JTBxNQiZGLoK+9j1QQcuuf6VJOJL6J/1nKVAQbaY06DiLFg==
+"@mantou/gem@^1.7.5":
+  version "1.7.5"
+  resolved "https://registry.yarnpkg.com/@mantou/gem/-/gem-1.7.5.tgz#789f3d7101f11be6c1c341a6e1ac29e07aa9347d"
+  integrity sha512-mlvLo4/7Q3ehSS1KwNrkB1cb1dsnKLLp0td6IpEJEzHehPe8Kzp4oRBTABQpDJN0+zDj62zdDwDPNQnVEGSJzQ==
   dependencies:
     lit-html "^1.4.1"
 
@@ -3883,10 +3883,10 @@ dset@^3.1.0:
   resolved "https://registry.yarnpkg.com/dset/-/dset-3.1.2.tgz#89c436ca6450398396dc6538ea00abc0c54cd45a"
   integrity sha512-g/M9sqy3oHe477Ar4voQxWtaPIFw1jTdKZuomOjhCcBx9nHUNn0pu6NopuFFrTh/TRZIKEj+76vLWFu9BNKk+Q==
 
-duoyun-ui@^0.0.65:
-  version "0.0.65"
-  resolved "https://registry.yarnpkg.com/duoyun-ui/-/duoyun-ui-0.0.65.tgz#99e044a93c4873b6954e0f1d3e15daa311857d17"
-  integrity sha512-8vnlBWNg2rohN8XlegbHMvWhVJPUvDwtJ9wbtmOYuft7K3VHZ99N4t2oavNqBDVI8WiqPapo9Vu0xuKxg94SJw==
+duoyun-ui@^1.1.5:
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/duoyun-ui/-/duoyun-ui-1.1.5.tgz#a573b4e5346e006f8580763c6d2c7259c2bbf628"
+  integrity sha512-TjcMzdk4GsB1WnRl0z6kCPEXKWp09ccJrr/6z/xY6jeznuD8tQ3Cs5NmcYiOnOSgq+pdZ9329YrRPrCxsmM67Q==
   dependencies:
     d3-geo "^3.0.1"
     deep-query-selector "^1.0.1"
