@@ -65,7 +65,7 @@ const style = createCSSSheet(css`
     opacity: 0.5;
     outline: none;
   }
-  .link:where(:--active, [data-active]) {
+  .link:where(:state(active), [data-active]) {
     opacity: 1;
   }
   .status {

@@ -23,7 +23,7 @@ const style = createCSSSheet(css`
     padding: 4px;
     border-radius: ${theme.normalRound};
   }
-  .menu:where(:hover, :--active, [data-active]) {
+  .menu:where(:hover, :state(active), [data-active]) {
     background-color: ${theme.hoverBackgroundColor};
   }
 `);

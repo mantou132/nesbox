@@ -15,7 +15,7 @@ import {
 } from '@mantou/gem';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { Loadbar } from 'duoyun-ui/elements/page-loadbar';
-import { createPath, RouteItem } from '@mantou/gem/elements/route';
+import { createPath } from '@mantou/gem/elements/route';
 import { routes, locationStore } from 'src/routes';
 import { DuoyunRouteElement } from 'duoyun-ui/elements/route';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
@@ -47,18 +47,6 @@ import 'src/modules/search';
 import 'src/modules/friend-list';
 import 'src/modules/chat';
 import 'src/modules/nav';
-
-const navRoutes: RouteItem[] = [
-  {
-    ...routes.game,
-    getContent: (params) => html`<m-nav page="game" id=${params[paramKeys.GAME_ID]}></m-nav>`,
-  },
-  {
-    ...routes.room,
-    content: html`<m-nav page="room"></m-nav>`,
-  },
-  { pattern: '*', content: html`<m-nav></m-nav>` },
-];
 
 const style = createCSSSheet(css`
   :host {
@@ -216,7 +204,7 @@ export class AppRootElement extends GemElement {
     return html`
       ${mediaQuery.isPhone ? html`<m-side-nav ?open=${configure.sideNavState}></m-side-nav>` : ''}
       <div class=${classMap({ app: true, out: !!configure.sideNavState })}>
-        <dy-route .locationStore=${locationStore} .routes=${navRoutes}></dy-route>
+        <m-nav></m-nav>
         <div tabindex="-1" class="content" ?inert=${configure.sideNavState} ref=${this.contentRef.ref}>
           <main style="display: contents">
             <dy-route

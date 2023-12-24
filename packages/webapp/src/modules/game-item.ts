@@ -30,6 +30,7 @@ import 'duoyun-ui/elements/modal';
 const style = createCSSSheet(css`
   :host {
     position: relative;
+    display: block;
   }
   .actions {
     position: absolute;
@@ -101,13 +102,7 @@ export class MGameItemElement extends GemElement {
 
   render = () => {
     return html`
-      <img
-        draggable="false"
-        class="cover"
-        loading="lazy"
-        @click=${this.#onMoreClick}
-        src=${getCDNSrc(this.game.preview)}
-      />
+      <img draggable="false" class="cover" @click=${this.#onMoreClick} src=${getCDNSrc(this.game.preview)} />
       <dy-space class="actions" size="small">
         <dy-button data-cy="start" class="play" small ?hidden=${mediaQuery.isPhone} @click=${this.#onGameClick}>
           ${i18n.get('page.game.start')}

@@ -25,10 +25,10 @@ const style = createCSSSheet(css`
     padding: 0.5em;
     gap: 0.5em;
   }
-  :host(:where(:--active, [data-active], :hover, :focus)) {
+  :host(:where(:state(active), [data-active], :hover, :focus)) {
     background-color: ${theme.lightBackgroundColor};
   }
-  :host .action:where(:--active, [data-active], :hover, :focus) {
+  :host .action:where(:state(active), [data-active], :hover, :focus) {
     background-color: ${theme.hoverBackgroundColor};
   }
   .avatar {
@@ -57,7 +57,7 @@ const style = createCSSSheet(css`
     padding: 0.2em;
   }
   :host(:hover) .action,
-  .action:where(:--active, [data-active], :hover) {
+  .action:where(:state(active), [data-active], :hover) {
     display: inline-flex;
   }
 `);

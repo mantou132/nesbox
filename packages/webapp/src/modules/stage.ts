@@ -69,7 +69,7 @@ const style = createCSSSheet(css`
     display: block;
     background: black;
   }
-  :host(:where(:--playing, :state(playing))) {
+  :host(:where([data-playing], :state(playing))) {
     cursor: none;
   }
   .canvas {

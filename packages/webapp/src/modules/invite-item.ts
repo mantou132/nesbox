@@ -32,7 +32,7 @@ const style = createCSSSheet(css`
     padding: 0.2em;
     opacity: 0.7;
   }
-  .action:where(:--active, [data-active], :hover, :focus) {
+  .action:where(:state(active), [data-active], :hover, :focus) {
     opacity: 1;
   }
   .invite-tip {

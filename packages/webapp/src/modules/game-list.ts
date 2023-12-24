@@ -7,9 +7,11 @@ import {
   css,
   connectStore,
   boolattribute,
-  repeat,
   styleMap,
   numattribute,
+  RefObject,
+  refobject,
+  history,
 } from '@mantou/gem';
 import { isNotNullish } from 'duoyun-ui/lib/types';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
@@ -25,10 +27,13 @@ import { gameKindList, gameSeriesList } from 'src/enums';
 import { ScGameKind, ScGameSeries } from 'src/generated/graphql';
 import { icons } from 'src/icons';
 
+import type { DuoyunListElement, PersistentState } from 'duoyun-ui/elements/list';
+
 import 'duoyun-ui/elements/heading';
 import 'duoyun-ui/elements/divider';
 import 'duoyun-ui/elements/select';
 import 'duoyun-ui/elements/picker';
+import 'duoyun-ui/elements/list';
 import 'duoyun-ui/elements/use';
 import 'src/modules/game-item';
 
@@ -52,7 +57,7 @@ const style = createCSSSheet(css`
     align-items: center;
     gap: 1em;
   }
-  .list {
+  .list::part(list) {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(12em, 1fr));
     grid-template-rows: max-content;
@@ -66,6 +71,9 @@ const style = createCSSSheet(css`
   }
 `);
 
+// 只缓存 all 列表，不然串数据
+let persistentState: PersistentState | undefined;
+
 /**
  * @customElement m-game-list
  */
@@ -73,8 +81,11 @@ const style = createCSSSheet(css`
 @adoptedStyle(style)
 @connectStore(store)
 @connectStore(locationStore)
+@connectStore(history.store)
 @connectStore(i18n.store)
 export class MGameListElement extends GemElement {
+  @refobject listRef: RefObject<DuoyunListElement>;
+
   @boolattribute favorite: boolean;
   @boolattribute recent: boolean;
   @boolattribute new: boolean;
@@ -125,6 +136,14 @@ export class MGameListElement extends GemElement {
     }
   };
 
+  #renderItem = (id: number) => {
+    const game = store.games[id];
+    if (!game) return html``;
+    return html`<m-game-item .game=${game} .favorited=${this.#favSet.has(id)}></m-game-item>`;
+  };
+
+  #getKey = (id: number) => id;
+
   #filteredData?: number[] = [];
   willMount = () => {
     this.memo(
@@ -162,6 +181,17 @@ export class MGameListElement extends GemElement {
         // filter
         this.all ? locationStore.query.toString() : '',
       ],
+    );
+  };
+
+  mounted = () => {
+    this.effect(
+      () => {
+        if (this.all) {
+          persistentState = this.listRef.element?.persistentState;
+        }
+      },
+      () => [history.getParams().path],
     );
   };
 
@@ -249,14 +279,16 @@ export class MGameListElement extends GemElement {
             </div>
             <dy-divider></dy-divider>
           `}
-      <div class="list">
-        ${repeat(
-          this.#filteredData || [],
-          (id) =>
-            store.games[id] &&
-            html`<m-game-item .game=${store.games[id]!} .favorited=${this.#favSet.has(id)}></m-game-item>`,
-        )}
-      </div>
+      <dy-list
+        class="list"
+        ref=${this.listRef.ref}
+        .items=${this.#filteredData}
+        .key=${store.favoriteIds}
+        .infinite=${this.all}
+        .getKey=${this.#getKey}
+        .renderItem=${this.#renderItem}
+        .persistentState=${this.all ? persistentState : undefined}
+      ></dy-list>
     `;
   };
 }

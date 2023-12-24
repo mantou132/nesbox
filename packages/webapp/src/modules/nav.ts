@@ -6,7 +6,6 @@ import {
   createCSSSheet,
   css,
   connectStore,
-  attribute,
   history,
   updateStore,
 } from '@mantou/gem';
@@ -17,7 +16,7 @@ import { focusStyle } from 'duoyun-ui/lib/styles';
 import { locationStore, routes } from 'src/routes';
 import { createPath, RouteItem } from 'duoyun-ui/elements/route';
 
-import { viewTransitionName } from 'src/constants';
+import { paramKeys, viewTransitionName } from 'src/constants';
 import { i18n } from 'src/i18n/basic';
 import {
   configure,
@@ -34,12 +33,14 @@ import { store } from 'src/store';
 import { icons } from 'src/icons';
 import { AppRootElement } from 'src/app';
 import { gotoLogin } from 'src/auth';
+import { matchRoute } from 'src/utils/common';
 
 import 'duoyun-ui/elements/link';
 import 'duoyun-ui/elements/use';
 import 'duoyun-ui/elements/action-text';
 import 'duoyun-ui/elements/button';
 import 'src/elements/tooltip';
+import 'src/elements/nav-link';
 import 'src/modules/avatar';
 import 'src/modules/badge';
 
@@ -76,7 +77,7 @@ const style = createCSSSheet(css`
     margin: auto;
     border-radius: ${theme.normalRound};
   }
-  .link:where(:--active, [data-active])::after {
+  .link:where(:state(match), [data-match])::after {
     background: currentColor;
   }
   .title {
@@ -113,10 +114,10 @@ const style = createCSSSheet(css`
     .icon {
       border-radius: 100%;
     }
-    .link:not(:where(:--active, [data-active])) {
+    .link:not(:where(:state(match), [data-match])) {
       display: none;
     }
-    .link:where(:--active, [data-active])::after {
+    .link:where(:state(match), [data-match])::after {
       display: none;
     }
     .play,
@@ -142,13 +143,23 @@ export const unmountedRoom = () => updateStore(navStore, { room: false });
 @connectStore(i18n.store)
 @connectStore(configure)
 export class MNavElement extends GemElement {
-  @attribute page: 'room' | 'game' | '';
+  get #gamePageParams() {
+    return matchRoute(routes.game);
+  }
+
+  get #gameId() {
+    return Number(this.#gamePageParams?.[paramKeys.GAME_ID]);
+  }
+
+  get #roomPageParams() {
+    return matchRoute(routes.room);
+  }
 
   #share = () => {
     navigator
       .share?.({
         url: location.href,
-        text: store.games[Number(this.id)]?.name,
+        text: store.games[this.#gameId]?.name,
       })
       .catch(() => {
         //
@@ -167,7 +178,7 @@ export class MNavElement extends GemElement {
   #renderLinks = () => {
     return [routes.games, routes.favorites, routes.rooms].map(
       (route: RouteItem) => html`
-        <dy-active-link class="link" .route=${route} .pattern=${route.pattern}>${route.title}</dy-active-link>
+        <nesbox-nav-link class="link" .route=${route} .pattern=${route.pattern}>${route.title}</nesbox-nav-link>
       `,
     );
   };
@@ -225,7 +236,7 @@ export class MNavElement extends GemElement {
   };
 
   #renderGameTitle = () => {
-    const gameId = Number(this.id);
+    const gameId = this.#gameId;
     return html`
       <dy-use
         data-cy="back"
@@ -288,9 +299,9 @@ export class MNavElement extends GemElement {
         }
       </style>
       <nav class="nav">
-        ${this.page === 'game'
+        ${this.#gamePageParams
           ? this.#renderGameTitle()
-          : this.page === 'room'
+          : this.#roomPageParams
           ? this.#renderRoomTitle()
           : mediaQuery.isPhone
           ? this.#renderNavMenu()
@@ -298,7 +309,7 @@ export class MNavElement extends GemElement {
         <span class="space" @dblclick=${this.#goTop}></span>
         ${!configure.user
           ? html`<dy-action-text @click=${gotoLogin} data-cy="login">${i18n.get('menu.account.login')}</dy-action-text>`
-          : this.page === 'game'
+          : this.#gamePageParams
           ? html`
               <dy-use
                 class="icon"
@@ -309,12 +320,12 @@ export class MNavElement extends GemElement {
                 @click=${this.#share}
               ></dy-use>
               ${mediaQuery.isPhone
-                ? this.#renderFavoriteBtn(Number(this.id))
+                ? this.#renderFavoriteBtn(this.#gameId)
                 : html`
                     <dy-button
                       data-cy="start"
                       class="play"
-                      @click=${() => createRoom({ gameId: Number(this.id), private: false })}
+                      @click=${() => createRoom({ gameId: this.#gameId, private: false })}
                     >
                       ${i18n.get('page.game.start')}
                     </dy-button>

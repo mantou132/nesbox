@@ -63,6 +63,7 @@ export class MFriendListElement extends GemElement {
       });
       applyFriend(input.value);
     } finally {
+      // use `focusVisible: false`
       activeElement?.focus();
     }
   };

@@ -56,16 +56,16 @@ const style = createCSSSheet(css`
     height: 100%;
     transition: all 0.3s ${theme.timingFunction};
   }
-  :host(:where([data-detail], :--detail)) {
+  :host(:where([data-detail], :state(detail))) {
     --size: min(calc(100vh - 10em), 20em, 28vw);
   }
-  :host(:where([data-detail], :--detail)) .rotor {
+  :host(:where([data-detail], :state(detail))) .rotor {
     height: var(--size);
   }
-  :host(:where([data-detail], :--detail)) nesbox-rotor {
+  :host(:where([data-detail], :state(detail))) nesbox-rotor {
     width: var(--size);
   }
-  :host(:where([data-detail], :--detail)) nesbox-rotor::part(other) {
+  :host(:where([data-detail], :state(detail))) nesbox-rotor::part(other) {
     opacity: 0;
   }
   .info,

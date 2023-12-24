@@ -10,6 +10,7 @@ import {
   RefObject,
 } from '@mantou/gem';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
+import { fadeOut, commonAnimationOptions } from 'duoyun-ui/lib/animations';
 
 import { changeFriendChatDraft, friendStore, toggleFriendChatState } from 'src/store';
 import { createMessage, getMessages, readMessage } from 'src/services/api';
@@ -39,6 +40,13 @@ const style = createCSSSheet(css`
     box-shadow: 0 0.3em 0.75em rgba(0, 0, 0, calc(${theme.maskAlpha} - 0.15));
     box-sizing: border-box;
     border-radius: ${theme.normalRound};
+    animation: show 0.15s ${theme.timingFunction} forwards;
+  }
+  @keyframes show {
+    from {
+      transform: translate(0, 50%);
+      opacity: 0;
+    }
   }
   .header {
     display: flex;
@@ -119,28 +127,36 @@ export class MChatElement extends GemElement {
     })(evt);
   };
 
+  willMount() {
+    this.memo(
+      () => (this.inert = !friendStore.friendChatState),
+      () => [friendStore.friendChatState],
+    );
+  }
+
   mounted = () => {
     this.effect(
       async () => {
         if (friendStore.friendChatState) {
           await getMessages(friendStore.friendChatState);
-        }
-        // 保证用户看到信息后才清除未读
-        if (friendStore.friendChatState) {
-          readMessage(friendStore.friendChatState);
+          // 保证用户看到信息后才清除未读
+          friendStore.friendChatState && readMessage(friendStore.friendChatState);
+        } else {
+          await this.animate(fadeOut, commonAnimationOptions).finished;
+          this.inert = false;
+          this.update();
         }
       },
       () => [friendStore.friendChatState],
     );
     this.effect(
-      () => {
-        this.messageRef.element?.scrollTo(0, 10000);
-      },
+      () => this.messageRef.element?.scrollTo(0, 10000),
       () => [friendStore.messageIds[friendStore.friendChatState || 0]],
     );
   };
 
   render = () => {
+    if (this.inert) return undefined;
     if (!friendStore.friendChatState) {
       return html`
         <style>

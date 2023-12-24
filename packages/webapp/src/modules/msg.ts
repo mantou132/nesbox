@@ -21,7 +21,7 @@ const style = createCSSSheet(css`
     flex-direction: column;
     align-items: flex-start;
   }
-  :host(:where(:--self, [data-self])) {
+  :host(:where(:state(self), [data-self])) {
     align-items: flex-end;
   }
   .body {
@@ -32,7 +32,7 @@ const style = createCSSSheet(css`
     background-color: ${theme.noticeColor};
     border-radius: ${theme.smallRound};
   }
-  :host(:where(:--self, [data-self])) .body {
+  :host(:where(:state(self), [data-self])) .body {
     background-color: ${theme.describeColor};
   }
   :host([last]) {
@@ -48,7 +48,7 @@ const style = createCSSSheet(css`
     left: 0;
     border-inline-color: ${theme.noticeColor} transparent;
   }
-  :host(:is(:--self, [data-self])) .body::after {
+  :host(:is(:state(self), [data-self])) .body::after {
     left: auto;
     right: 0;
     border-inline-color: transparent ${theme.describeColor};
