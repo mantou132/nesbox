@@ -43,7 +43,7 @@ export async function request<Result, InputVar>(
       const url = `${endpoint}?operationName=${query.match(/(?:query|mutation)\s+(\w*)(\s|\()/)?.[1]}`;
       const headers = new Headers({
         'Content-Type': 'application/json',
-        'X-Request-ID': randomStr(32, '0123456789abcdef'),
+        'X-Request-ID': crypto.randomUUID(),
       });
       if (configure.profile) {
         headers.set('Authorization', `Bearer ${configure.profile.token}`);
