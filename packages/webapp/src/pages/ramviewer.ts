@@ -3,10 +3,9 @@ import { ComparerType, comparer } from 'duoyun-ui/lib/utils';
 
 import { BcMsgEvent, BcMsgType, Ram } from 'src/constants';
 import { icons } from 'src/icons';
+import { theme } from 'src/theme';
 
-import type { Column } from 'duoyun-ui/elements/table';
-
-import 'duoyun-ui/elements/table';
+import 'duoyun-ui/elements/list';
 import 'duoyun-ui/elements/button';
 import 'duoyun-ui/elements/input';
 import 'duoyun-ui/elements/switch';
@@ -26,10 +25,25 @@ const style = createCSSSheet(css`
     margin-block-end: 1em;
     font-size: 0.875em;
   }
-  dy-table {
+  .list {
     height: 0;
     flex-grow: 1;
     overflow: auto;
+    margin-inline: -1em;
+    padding-inline: 1em;
+  }
+  .list-header,
+  .list::part(item) {
+    display: flex;
+    padding: 0.5em 0;
+    border-block-end: 1px solid ${theme.borderColor};
+  }
+  .list-header {
+    font-weight: 500;
+  }
+  .list-header div,
+  .list::part(column) {
+    width: 33%;
   }
 `);
 
@@ -123,27 +137,15 @@ export class PRamviewerElement extends GemElement<State> {
     },
   ];
 
-  #columns: Column<Row>[] = [
-    {
-      title: 'Addr(HEX)',
-      dataIndex: 'addr',
-      render: ({ addr }) => this.#getHexAddr(addr),
-    },
-    {
-      title: 'Now',
-      dataIndex: 'now',
-      style: {
-        textAlign: 'center',
-      },
-    },
-    {
-      title: 'Prev',
-      dataIndex: 'prev',
-      style: {
-        textAlign: 'center',
-      },
-    },
-  ];
+  #renderRow = (item: Row) => {
+    return html`
+      <div part="column">${this.#getHexAddr(item.addr)}</div>
+      <div part="column">${item.now}</div>
+      <div part="column">${item.prev}</div>
+    `;
+  };
+
+  #getRowKey = (item: Row) => item.addr;
 
   #getRam = async () => {
     const req: BcMsgEvent = { id: performance.now().toString(), type: BcMsgType.RAM_REQ };
@@ -291,7 +293,19 @@ export class PRamviewerElement extends GemElement<State> {
           .value=${valueFilter}
         ></dy-input>
       </div>
-      <dy-table .rowKey=${'addr'} .data=${this.#data.slice(0, 2048)} .columns=${this.#columns}></dy-table>
+      <div class="list-header">
+        <div>Addr(HEX)</div>
+        <div>Now</div>
+        <div>Prev</div>
+      </div>
+      <dy-list
+        class="list"
+        itemexportparts="column"
+        .items=${this.#data}
+        .renderItem=${this.#renderRow}
+        .getKey=${this.#getRowKey}
+        .infinite=${true}
+      ></dy-list>
     `;
   };
 }
