@@ -19,7 +19,7 @@
     "@nesbox/fceux": "^0.0.1",
     "@nesbox/mtapp": "^0.0.1",
     "@nesbox/wasm4": "^0.0.1",
-    "duoyun-ui": "^1.1.8",
+    "duoyun-ui": "^1.1.9",
     "front-matter": "^4.0.2",
     "graphql": "^16.2.0",
     "jszip": "^3.10.0",

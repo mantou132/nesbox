@@ -49,4 +49,12 @@ module.exports = {
       },
     ],
   },
+  overrides: [
+    {
+      files: ['packages/zombie/**/*'],
+      rules: {
+        'no-console': 'off',
+      },
+    },
+  ],
 };

@@ -9,7 +9,7 @@ import {
   refobject,
   RefObject,
 } from '@mantou/gem';
-import { throttle } from 'duoyun-ui/lib/utils';
+import { throttle } from 'duoyun-ui/lib/timer';
 import { locale } from 'duoyun-ui/lib/locale';
 import { Toast } from 'duoyun-ui/elements/toast';
 

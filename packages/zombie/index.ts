@@ -5,7 +5,7 @@ import { fetchList, Item } from 'list';
 import { Game, get8BBitGames } from '8bbit';
 import { fetchImage } from 'image';
 import { fetchEnDes, fetchJaDes, fetchZhDes } from 'description';
-import { existGames, incudesString, normalzile, removePunctuation } from 'utils';
+import { existGames, incudesString, normalize, removePunctuation } from 'utils';
 
 import metadata2 from './metadata2.json';
 import metadata1 from './metadata1.json';
@@ -26,7 +26,7 @@ const metadata: Data[] = [...metadata2];
 const write = () => writeFile(resolve(__dirname, 'metadata2.json'), JSON.stringify(metadata, null, 2));
 
 const appendData = async (lang: keyof Item, item: Item, game: Game) => {
-  const t = normalzile(item[lang]);
+  const t = normalize(item[lang]);
   if (!existGames.includes(t) && !metadataMap[t] && !metadata2Map[t]) {
     try {
       const description = (

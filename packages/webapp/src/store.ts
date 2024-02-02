@@ -1,8 +1,8 @@
 import frontmatter from 'front-matter';
 import { ElementOf } from 'duoyun-ui/lib/types';
-import { createCacheStore, sleep } from 'duoyun-ui/lib/utils';
+import { useCacheStore } from 'duoyun-ui/lib/utils';
+import { sleep } from 'duoyun-ui/lib/timer';
 import { commonAnimationOptions } from 'duoyun-ui/lib/animations';
-import { updateStore } from '@mantou/gem';
 
 import { localStorageKeys } from 'src/constants';
 import {
@@ -56,7 +56,7 @@ interface Store {
   lobbyMessage: LobbyMessage[];
 }
 
-export const [store] = createCacheStore<Store>(
+export const [store, updateStore] = useCacheStore<Store>(
   localStorageKeys.STORE_LOCAL_STORAGE_KEY,
   {
     games: {},
@@ -73,7 +73,7 @@ export const [store] = createCacheStore<Store>(
 );
 
 export function clearLobbyMessage() {
-  updateStore(store, { lobbyMessage: [] });
+  updateStore({ lobbyMessage: [] });
 }
 
 interface FriendStore {
@@ -88,7 +88,7 @@ interface FriendStore {
   friendChatState?: number;
 }
 
-export const [friendStore] = createCacheStore<FriendStore>(
+export const [friendStore, updateFriendStore] = useCacheStore<FriendStore>(
   localStorageKeys.FRIEND_CHAT_STORAGE_KEY,
   {
     draft: {},
@@ -104,17 +104,17 @@ export const [friendStore] = createCacheStore<FriendStore>(
 );
 
 export function changeFriendChatDraft(friendId: number, body?: string) {
-  updateStore(friendStore, { draft: { ...friendStore.draft, [friendId]: body } });
+  updateFriendStore({ draft: { ...friendStore.draft, [friendId]: body } });
 }
 
 export const toggleFriendChatState = async (id?: number) => {
   if (id && id === friendStore.friendChatState) {
     // re-focus on friend chat
-    updateStore(friendStore, { friendChatState: undefined });
+    updateFriendStore({ friendChatState: undefined });
   }
   // wait close animation
   await sleep(Number(commonAnimationOptions.duration));
-  updateStore(friendStore, {
+  updateFriendStore({
     recentFriendChat: id || friendStore.friendChatState || friendStore.recentFriendChat,
     friendChatState: id,
   });

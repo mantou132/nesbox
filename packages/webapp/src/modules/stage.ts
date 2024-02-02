@@ -19,6 +19,7 @@ import { Nes, Button, Player } from '@mantou/nes';
 import { isNotNullish } from 'duoyun-ui/lib/types';
 import { clamp } from 'duoyun-ui/lib/number';
 
+import { logger } from 'src/logger';
 import {
   ChannelMessage,
   ChannelMessageType,
@@ -41,7 +42,6 @@ import {
   VideoFilter,
   VideoRenderMethod,
 } from 'src/constants';
-import { logger } from 'src/logger';
 import { configure } from 'src/configure';
 import { store } from 'src/store';
 import {

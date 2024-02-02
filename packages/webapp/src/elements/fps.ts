@@ -5,9 +5,8 @@ import {
   customElement,
   createCSSSheet,
   css,
-  createStore,
   connectStore,
-  updateStore,
+  useStore,
 } from '@mantou/gem';
 
 import { theme } from 'src/theme';
@@ -20,7 +19,7 @@ export const fpsStyle = createCSSSheet(css`
   }
 `);
 
-const store = createStore({
+const [store, update] = useStore({
   min: 0,
   max: 0,
   fps: 0,
@@ -53,12 +52,7 @@ const tick = () => {
   });
   const avgFps = Math.round(sum / frames.length);
 
-  updateStore(store, {
-    fps,
-    avgFps,
-    min,
-    max,
-  });
+  update({ fps, avgFps, min, max });
 
   timer = requestAnimationFrame(tick);
 };

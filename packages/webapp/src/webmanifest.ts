@@ -1,16 +1,7 @@
-import { utf8ToB64 } from 'duoyun-ui/lib/encode';
 import { routes } from 'src/routes';
 
 import { COMMAND } from 'src/constants';
 import { i18n } from 'src/i18n/basic';
-
-export function getWebManifestURL() {
-  return `data:application/json;base64,${utf8ToB64(
-    JSON.stringify(genWebManifest(), (_, value) =>
-      typeof value === 'string' && value.startsWith('/') ? new URL(value, location.origin).href : value,
-    ),
-  )}`;
-}
 
 export function genWebManifest() {
   return {

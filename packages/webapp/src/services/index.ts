@@ -1,7 +1,6 @@
-import { randomStr } from '@mantou/gem';
 import { SubscriptionClient } from 'subscriptions-transport-ws';
 
-import { errorCodeMap, grapCommonErrorMap, graphqlErrorMap } from 'src/services/error';
+import { errorCodeMap, grpcCommonErrorMap, graphqlErrorMap } from 'src/services/error';
 import { configure } from 'src/configure';
 import { logout, isExpiredProfile } from 'src/auth';
 import { i18n } from 'src/i18n/basic';
@@ -77,7 +76,7 @@ export async function request<Result, InputVar>(
       throw new AggregateError(
         errors.map((err) => {
           const { message, extensions } = err as Error & { extensions?: { code: number } };
-          const i18nMsg = extensions && (graphqlErrorMap[extensions.code] || grapCommonErrorMap[extensions.code]);
+          const i18nMsg = extensions && (graphqlErrorMap[extensions.code] || grpcCommonErrorMap[extensions.code]);
           return new Error(i18nMsg ? i18n.get(i18nMsg) : message);
         }),
       );

@@ -6,7 +6,7 @@ export const removePunctuation = (str: string) =>
     .replace(/\s+/g, '')
     .replace('brothers', 'bros');
 export const incudesString = (str1: string, str2: string) => str1.includes(str2) || str2.includes(str1);
-export const normalzile = (str: string) => str.replaceAll('–', '-').replaceAll('’', "'").replaceAll('‘', "'");
+export const normalize = (str: string) => str.replaceAll('–', '-').replaceAll('’', "'").replaceAll('‘', "'");
 
 export const existGames = [
   '热血格斗传说',

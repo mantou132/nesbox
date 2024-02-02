@@ -16,9 +16,9 @@ import {
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { Loadbar } from 'duoyun-ui/elements/page-loadbar';
 import { createPath } from '@mantou/gem/elements/route';
-import { routes, locationStore } from 'src/routes';
 import { DuoyunRouteElement } from 'duoyun-ui/elements/route';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
+import { routes, locationStore } from 'src/routes';
 
 import { preventDefault } from 'src/utils/common';
 import { paramKeys, queryKeys, viewTransitionName } from 'src/constants';
@@ -239,7 +239,7 @@ export class AppRootElement extends GemElement {
         .open=${!!configure.settingsState}
         @close=${toggleSettingsState}
       >
-        <m-settings slot="body"></m-settings>
+        <m-settings></m-settings>
       </dy-modal>
 
       <dy-modal

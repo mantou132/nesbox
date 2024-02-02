@@ -1,7 +1,7 @@
 import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css } from '@mantou/gem';
 import { theme } from 'duoyun-ui/lib/theme';
 import { utf8ToB64 } from 'duoyun-ui/lib/encode';
-import { throttle } from 'duoyun-ui/lib/utils';
+import { throttle } from 'duoyun-ui/lib/timer';
 import { getInputItemType, getInputItemValue, normalizeFilename, sampleToChart, saveFile } from 'src/utils';
 import QOI from 'qoijs';
 import JSZip from 'jszip';
@@ -223,7 +223,7 @@ export class PAudioElement extends GemElement<State> {
                 </dy-action-text>
               `,
           )}
-        </dy-file-picer>
+        </dy-file-picker>
       </dy-drop-area>
       <dy-form @itemchange=${this.#onArgChange} .inline=${true}>
         ${Object.entries(args).map(([k, v]) =>

@@ -11,8 +11,8 @@ import {
 } from '@mantou/gem';
 import { createPath, matchPath } from 'duoyun-ui/elements/route';
 import { waitLoading } from 'duoyun-ui/elements/wait';
-import { routes } from 'src/routes';
 import { DuoyunWakeLockBaseElement } from 'duoyun-ui/elements/base/wake-lock';
+import { routes } from 'src/routes';
 
 import { playHintSound } from 'src/utils/common';
 import { globalEvents, queryKeys } from 'src/constants';

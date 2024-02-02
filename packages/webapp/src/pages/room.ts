@@ -19,11 +19,12 @@ import { isNotBoolean } from 'duoyun-ui/lib/types';
 import { Toast } from 'duoyun-ui/elements/toast';
 import { hash } from 'duoyun-ui/lib/encode';
 import { Time } from 'duoyun-ui/lib/time';
-import { getStringFromTemplate, once } from 'duoyun-ui/lib/utils';
+import { getStringFromTemplate } from 'duoyun-ui/lib/utils';
+import { once } from 'duoyun-ui/lib/timer';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
-import { routes } from 'src/routes';
 import { locale } from 'duoyun-ui/lib/locale';
 import { DuoyunWakeLockBaseElement } from 'duoyun-ui/elements/base/wake-lock';
+import { routes } from 'src/routes';
 
 import { preventDefault } from 'src/utils/common';
 import { BcMsgEvent, BcMsgType, queryKeys } from 'src/constants';

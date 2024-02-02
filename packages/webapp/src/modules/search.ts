@@ -16,9 +16,9 @@ import { locale } from 'duoyun-ui/lib/locale';
 import { isIncludesString } from 'duoyun-ui/lib/utils';
 import { isNotNullish } from 'duoyun-ui/lib/types';
 import { getDisplayKey, hotkeys, isMac } from 'duoyun-ui/lib/hotkeys';
-import { routes } from 'src/routes';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { createPath } from 'duoyun-ui/elements/route';
+import { routes } from 'src/routes';
 
 import { getCDNSrc, getTempText, matchRoute } from 'src/utils/common';
 import { friendStore, store, toggleFriendChatState } from 'src/store';

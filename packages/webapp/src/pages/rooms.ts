@@ -1,5 +1,5 @@
 import { html, adoptedStyle, customElement, createCSSSheet, css, connectStore, GemElement } from '@mantou/gem';
-import { polling } from 'duoyun-ui/lib/utils';
+import { polling } from 'duoyun-ui/lib/timer';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
 import { getRooms } from 'src/services/guest-api';

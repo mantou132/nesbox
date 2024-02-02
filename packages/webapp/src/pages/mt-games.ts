@@ -6,10 +6,9 @@ import {
   createCSSSheet,
   css,
   connectStore,
-  createStore,
-  updateStore,
   state,
   repeat,
+  useStore,
 } from '@mantou/gem';
 import { formatDuration, Time } from 'duoyun-ui/lib/time';
 import { locationStore } from 'src/routes';
@@ -32,11 +31,9 @@ import 'src/modules/game-detail';
 import 'src/elements/rotor';
 import 'src/elements/scroll';
 
-const mtGamesStore = createStore({ currentIndex: 0, focusId: 0 });
+const [mtGamesStore, updateMtGamesStore] = useStore({ currentIndex: 0, focusId: 0 });
 const setMtGamesStore = (obj: Partial<typeof mtGamesStore>) => {
-  queueMicrotask(() => {
-    updateStore(mtGamesStore, obj);
-  });
+  queueMicrotask(() => updateMtGamesStore(obj));
 };
 
 const style = createCSSSheet(css`

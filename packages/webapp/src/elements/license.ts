@@ -5,16 +5,15 @@ import {
   customElement,
   createCSSSheet,
   css,
-  createStore,
   connectStore,
-  updateStore,
+  useStore,
 } from '@mantou/gem';
 
 import { getCorSrc } from 'src/utils/common';
 
 import 'duoyun-ui/elements/loading';
 
-const store = createStore({ license: '' });
+const [store, update] = useStore({ license: '' });
 
 const style = createCSSSheet(css`
   :host {
@@ -32,7 +31,7 @@ export class NesboxLicenseElement extends GemElement {
     fetch(getCorSrc('https://raw.githubusercontent.com/mantou132/nesbox/dev/LICENSE'))
       .then((res) => res.text())
       .then((license) => {
-        updateStore(store, {
+        update({
           license: license
             .split(/\n{2,}/)
             .map((line) => line.replaceAll('\n', ' '))

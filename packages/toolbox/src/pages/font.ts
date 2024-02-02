@@ -3,7 +3,7 @@ import { theme } from 'duoyun-ui/lib/theme';
 import { getCorSrc, getInputItemType, getInputItemValue, normalizeFilename, saveFile } from 'src/utils';
 import QOI from 'qoijs';
 import { Font, encodeFont } from '@mantou/ecs';
-import { sleep } from 'duoyun-ui/lib/utils';
+import { sleep } from 'duoyun-ui/lib/timer';
 
 import type { DuoyunFormItemElement } from 'duoyun-ui/elements/form';
 import type { DuoyunSelectElement } from 'duoyun-ui/elements/select';

@@ -15,8 +15,8 @@ import {
 } from '@mantou/gem';
 import { isNotNullish } from 'duoyun-ui/lib/types';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
-import { locationStore } from 'src/routes';
 import { isMtApp } from '@nesbox/mtapp';
+import { locationStore } from 'src/routes';
 
 import { changeQuery } from 'src/utils/common';
 import { queryKeys } from 'src/constants';

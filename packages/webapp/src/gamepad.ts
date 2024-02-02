@@ -99,7 +99,7 @@ function readGamepad() {
   }
 }
 
-export const listener = () => {
+export const listenerGamepad = () => {
   if ([...navigator.getGamepads()].find((e) => e?.connected)) {
     readGamepad();
   } else {
@@ -111,46 +111,43 @@ export const listener = () => {
 };
 
 export const startKeyboardSimulation = () => {
+  const map = Object.entries({
+    // scroll
+    w: GamepadBtnIndex.Up,
+    a: GamepadBtnIndex.Left,
+    s: GamepadBtnIndex.Down,
+    d: GamepadBtnIndex.Right,
+    // select/start
+    f: GamepadBtnIndex.Select,
+    h: GamepadBtnIndex.Start,
+    // detail/switch
+    j: GamepadBtnIndex.B,
+    k: GamepadBtnIndex.A,
+    space: GamepadBtnIndex.A,
+    // exit
+    4: GamepadBtnIndex.FrontLeftTop,
+    // settings
+    5: GamepadBtnIndex.FrontRightTop,
+    // page/tab navigation
+    6: GamepadBtnIndex.FrontLeftBottom,
+    7: GamepadBtnIndex.FrontRightBottom,
+  });
   addEventListener(
     'keydown',
-    hotkeys({
-      // scroll
-      w: () => dispatchPressEvent(GamepadBtnIndex.Up),
-      a: () => dispatchPressEvent(GamepadBtnIndex.Left),
-      s: () => dispatchPressEvent(GamepadBtnIndex.Down),
-      d: () => dispatchPressEvent(GamepadBtnIndex.Right),
-      // select/start
-      f: () => dispatchPressEvent(GamepadBtnIndex.Select),
-      h: () => dispatchPressEvent(GamepadBtnIndex.Start),
-      // detail/switch
-      j: () => dispatchPressEvent(GamepadBtnIndex.B),
-      k: () => dispatchPressEvent(GamepadBtnIndex.A),
-      space: () => dispatchPressEvent(GamepadBtnIndex.A),
-      // exit
-      4: () => dispatchPressEvent(GamepadBtnIndex.FrontLeftTop),
-      // settings
-      5: () => dispatchPressEvent(GamepadBtnIndex.FrontRightTop),
-      // page/tab navigation
-      6: () => dispatchPressEvent(GamepadBtnIndex.FrontLeftBottom),
-      7: () => dispatchPressEvent(GamepadBtnIndex.FrontRightBottom),
-    }),
+    hotkeys(
+      map.reduce(
+        (p, [key, btn]) => Object.assign(p, { [key]: () => dispatchPressEvent(btn) }),
+        {} as Record<string, () => void>,
+      ),
+    ),
   );
   addEventListener(
     'keyup',
-    hotkeys({
-      w: () => dispatchReleaseEvent(GamepadBtnIndex.Up),
-      a: () => dispatchReleaseEvent(GamepadBtnIndex.Left),
-      s: () => dispatchReleaseEvent(GamepadBtnIndex.Down),
-      d: () => dispatchReleaseEvent(GamepadBtnIndex.Right),
-      f: () => dispatchReleaseEvent(GamepadBtnIndex.Select),
-      h: () => dispatchReleaseEvent(GamepadBtnIndex.Start),
-      j: () => dispatchReleaseEvent(GamepadBtnIndex.B),
-      k: () => dispatchReleaseEvent(GamepadBtnIndex.A),
-      space: () => dispatchReleaseEvent(GamepadBtnIndex.A),
-      4: () => dispatchReleaseEvent(GamepadBtnIndex.FrontLeftTop),
-      5: () => dispatchReleaseEvent(GamepadBtnIndex.FrontRightTop),
-      6: () => dispatchReleaseEvent(GamepadBtnIndex.FrontLeftBottom),
-      7: () => dispatchReleaseEvent(GamepadBtnIndex.FrontRightBottom),
-    }),
+    hotkeys(
+      map.reduce(
+        (p, [key, btn]) => Object.assign(p, { [key]: () => dispatchReleaseEvent(btn) }),
+        {} as Record<string, () => void>,
+      ),
+    ),
   );
 };

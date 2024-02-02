@@ -15,7 +15,7 @@ import {
   classMap,
 } from '@mantou/gem';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
-import { sleep } from 'duoyun-ui/lib/utils';
+import { sleep } from 'duoyun-ui/lib/timer';
 import { Time } from 'duoyun-ui/lib/time';
 
 import { SysMsg, TextMsg } from 'src/netplay/common';

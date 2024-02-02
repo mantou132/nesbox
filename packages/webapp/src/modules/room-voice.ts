@@ -1,17 +1,17 @@
-import { GemElement, html, customElement, createStore, connectStore, updateStore } from '@mantou/gem';
+import { GemElement, html, customElement, connectStore, useStore } from '@mantou/gem';
 
+import { logger } from 'src/logger';
 import { globalEvents, VoiceSignalDetail } from 'src/constants';
 import { configure } from 'src/configure';
 import { icons } from 'src/icons';
 import { sendVoiceMsg } from 'src/services/api';
-import { logger } from 'src/logger';
 import { ScVoiceMsgKind } from 'src/generated/graphql';
 import { i18n } from 'src/i18n/basic';
 
 import 'duoyun-ui/elements/use';
 import 'src/elements/tooltip';
 
-export const voiceStore = createStore<{ audioLevel: Record<number, number> }>({
+export const [voiceStore, updateVoiceStore] = useStore<{ audioLevel: Record<number, number> }>({
   audioLevel: {},
 });
 
@@ -85,7 +85,7 @@ export class MVoiceRoomElement extends GemElement<State> {
             });
             streams[0].onremovetrack = ({ track }) => {
               const userId = this.state.receiverTracks.find((e) => e.trackId === track.id)?.userId;
-              updateStore(voiceStore, { audioLevel: { ...voiceStore.audioLevel, [String(userId)]: undefined } });
+              updateVoiceStore({ audioLevel: { ...voiceStore.audioLevel, [String(userId)]: undefined } });
             };
           });
 
@@ -130,7 +130,7 @@ export class MVoiceRoomElement extends GemElement<State> {
               const inboundRtp = stats.find(([_, stat]) => stat.type === 'inbound-rtp')?.[1];
               const userId = this.state.receiverTracks[i]?.userId;
               if (inboundRtp) {
-                updateStore(voiceStore, {
+                updateVoiceStore({
                   audioLevel: { ...voiceStore.audioLevel, [userId]: inboundRtp.audioLevel || 0 },
                 });
               }
@@ -140,7 +140,7 @@ export class MVoiceRoomElement extends GemElement<State> {
               const mediaSource = stats.find(([_, stat]) => stat.type === 'media-source')?.[1];
               if (mediaSource) {
                 // Safari not support
-                updateStore(voiceStore, {
+                updateVoiceStore({
                   audioLevel: { ...voiceStore.audioLevel, [configure.user!.id]: mediaSource.audioLevel || 0 },
                 });
               }
@@ -148,7 +148,7 @@ export class MVoiceRoomElement extends GemElement<State> {
           }, 60);
 
           return () => {
-            updateStore(voiceStore, { audioLevel: {} });
+            updateVoiceStore({ audioLevel: {} });
             clearInterval(intervalTimer);
             this.#audioEle.pause();
             userMediaStream?.getTracks().forEach((track) => track.stop());

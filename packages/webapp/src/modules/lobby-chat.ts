@@ -9,7 +9,7 @@ import {
   RefObject,
   refobject,
 } from '@mantou/gem';
-import { polling } from 'duoyun-ui/lib/utils';
+import { polling } from 'duoyun-ui/lib/timer';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 
 import { i18n } from 'src/i18n/basic';

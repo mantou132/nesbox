@@ -7,7 +7,7 @@ import { Data } from 'index';
 
 import { get8BBitGames } from '8bbit';
 import { fetchList, Item } from 'list';
-import { existGames, incudesString, normalzile, removePunctuation } from 'utils';
+import { existGames, incudesString, normalize, removePunctuation } from 'utils';
 
 import metadata2 from './metadata2.json';
 import metadata1 from './metadata1.json';
@@ -19,11 +19,11 @@ const metadata2Map = Object.fromEntries(metadata2.map((e: Data) => [e.title, e])
 
 const write = async () => writeFile(resolve(__dirname, 'roms.json'), JSON.stringify(roms, null, 2));
 
-const getData = (title: string) => metadataMap[normalzile(title)] || metadata2Map[normalzile(title)];
+const getData = (title: string) => metadataMap[normalize(title)] || metadata2Map[normalize(title)];
 
 const setRom = (item: Item, rom: string) => {
   if (item.ja) Object.assign(roms, { [getData(item.ja).title]: rom });
-  if (item.zh && !existGames.includes(normalzile(item.zh))) Object.assign(roms, { [getData(item.zh).title]: rom });
+  if (item.zh && !existGames.includes(normalize(item.zh))) Object.assign(roms, { [getData(item.zh).title]: rom });
   if (item.en) Object.assign(roms, { [getData(item.en).title]: rom });
   write();
 };

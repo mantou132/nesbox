@@ -5,14 +5,13 @@ import {
   customElement,
   createCSSSheet,
   css,
-  createStore,
   connectStore,
   history,
-  updateStore,
   QueryString,
+  useStore,
 } from '@mantou/gem';
 import { createPath } from 'duoyun-ui/elements/route';
-import { forever } from 'duoyun-ui/lib/utils';
+import { forever } from 'duoyun-ui/lib/timer';
 import { Loadbar } from 'duoyun-ui/elements/page-loadbar';
 import { Toast } from 'duoyun-ui/elements/toast';
 import { isNotNullish } from 'duoyun-ui/lib/types';
@@ -27,11 +26,7 @@ import { i18n } from 'src/i18n/basic';
 import 'src/modules/mt-nav';
 
 type MtStore = { imgUrl: string; inertNav: boolean };
-const mtAppStore = createStore<MtStore>({ imgUrl: '', inertNav: false });
-
-export const updateMtApp = (data: Partial<MtStore>) => {
-  updateStore(mtAppStore, data);
-};
+export const [mtAppStore, updateMtApp] = useStore<MtStore>({ imgUrl: '', inertNav: false });
 
 const style = createCSSSheet(css`
   :host {

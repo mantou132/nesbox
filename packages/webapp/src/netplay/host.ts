@@ -4,9 +4,9 @@
 
 import { Player } from '@mantou/nes';
 
+import { logger } from 'src/logger';
 import { globalEvents, RTCTransportType, SignalDetail, SignalType } from 'src/constants';
 import { configure } from 'src/configure';
-import { logger } from 'src/logger';
 import { sendSignal } from 'src/services/api';
 import {
   ChannelMessage,

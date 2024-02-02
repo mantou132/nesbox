@@ -1,7 +1,7 @@
-import { createStore, updateStore } from '@mantou/gem';
+import { useStore } from '@mantou/gem';
 import { isMac, getDisplayKey } from 'duoyun-ui/lib/hotkeys';
 import { Modify } from 'duoyun-ui/lib/types';
-import { createCacheStore } from 'duoyun-ui/lib/utils';
+import { useCacheStore } from 'duoyun-ui/lib/utils';
 
 import {
   dispatchGlobalEvent,
@@ -177,14 +177,14 @@ interface Configure {
 }
 
 addEventListener('focus', () => {
-  updateStore(configure, { windowHasFocus: true });
+  updateConfigureStore({ windowHasFocus: true });
 });
 
 addEventListener('blur', () => {
-  updateStore(configure, { windowHasFocus: false });
+  updateConfigureStore({ windowHasFocus: false });
 });
 
-export const [configure] = createCacheStore<Configure>(
+export const [configure, updateConfigureStore] = useCacheStore<Configure>(
   localStorageKeys.CONFIGURE_LOCAL_STORAGE_KEY,
   {
     windowHasFocus: document.hasFocus(),
@@ -201,41 +201,41 @@ export function getShortcut(command: keyof typeof defaultShortcuts, isDisplay = 
 }
 
 export const deleteUser = () => {
-  updateStore(configure, { user: undefined, profile: undefined });
+  updateConfigureStore({ user: undefined, profile: undefined });
 };
 
 export const toggleScreencastMode = () => {
-  updateStore(configure, { screencastMode: !configure.screencastMode });
+  updateConfigureStore({ screencastMode: !configure.screencastMode });
 };
 
 export const toggleFriendListState = () => {
-  updateStore(configure, { friendListState: !configure.friendListState });
+  updateConfigureStore({ friendListState: !configure.friendListState });
 };
 
 export const toggleSettingsState = () => {
-  updateStore(configure, { settingsState: !configure.settingsState });
+  updateConfigureStore({ settingsState: !configure.settingsState });
   if (!configure.settingsState) dispatchGlobalEvent(globalEvents.CLOSE_SETTINGS, null);
 };
 
 export const toggleSideNavState = (sideNavState = !configure.sideNavState) => {
-  updateStore(configure, { sideNavState });
+  updateConfigureStore({ sideNavState });
 };
 
 export const toggleSearchState = () => {
-  updateStore(configure, {
+  updateConfigureStore({
     searchState: !configure.searchState,
     searchCommand: configure.searchState ? undefined : configure.searchCommand,
   });
 };
 
 export const setSearchCommand = (command: SearchCommand | null) => {
-  updateStore(configure, { searchCommand: command || undefined, searchState: true });
+  updateConfigureStore({ searchCommand: command || undefined, searchState: true });
 };
 
 export const setNesFile = (file?: File) => {
-  updateStore(configure, { openNesFile: file });
+  updateConfigureStore({ openNesFile: file });
 };
 
-export const navStore = createStore({
+export const [navStore, updateNavStore] = useStore({
   room: false,
 });

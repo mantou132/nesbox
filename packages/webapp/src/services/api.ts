@@ -1,6 +1,5 @@
-import { updateStore } from '@mantou/gem';
 import { Toast } from 'duoyun-ui/elements/toast';
-import { debounce } from 'duoyun-ui/lib/utils';
+import { debounce } from 'duoyun-ui/lib/timer';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 
 import { documentVisible, playHintSound, playSound } from 'src/utils/common';
@@ -92,9 +91,9 @@ import {
   UpdateRoomScreenshotMutation,
   UpdateRoomScreenshotMutationVariables,
 } from 'src/generated/graphql';
-import { store, friendStore, convertGame } from 'src/store';
+import { store, updateStore, friendStore, updateFriendStore, convertGame } from 'src/store';
 import { request, subscribe } from 'src/services';
-import { configure, parseAccount, Settings } from 'src/configure';
+import { configure, updateConfigureStore, parseAccount, Settings } from 'src/configure';
 import { i18n, isCurrentLang } from 'src/i18n/basic';
 import { gotoLogin, logout } from 'src/auth';
 import { getGames } from 'src/services/guest-api';
@@ -103,7 +102,7 @@ export const enterLobby = async () => {
   const { enterLobby } = await request<EnterLobbyMutation, EnterLobbyMutationVariables>(EnterLobby, {
     input: { area: i18n.currentLanguage.split('-')[0] },
   });
-  updateStore(store, { lobbyInfo: enterLobby });
+  updateStore({ lobbyInfo: enterLobby });
 };
 
 export const leaveLobby = async () => {
@@ -112,7 +111,7 @@ export const leaveLobby = async () => {
 
 export const sendLobbyMsg = async (text: string) => {
   await request<SendLobbyMsgMutation, SendLobbyMsgMutationVariables>(SendLobbyMsg, { input: { text } });
-  updateStore(store, {
+  updateStore({
     lobbyMessage: [
       ...store.lobbyMessage,
       {
@@ -136,7 +135,7 @@ export const getGameIds = async () => {
   if (!store.gameIds?.length) await getGames();
   const { topGames, favorites, recentGames } = await request<GetGameIdsQuery, GetGameIdsQueryVariables>(GetGameIds, {});
 
-  updateStore(store, {
+  updateStore({
     favoriteIds: favorites.filter((id) => isCurrentLang(store.games[id]!)),
     topGameIds: [...new Set([...topGames, ...store.gameIds!])]
       .filter((id) => isCurrentLang(store.games[id]!))
@@ -150,8 +149,8 @@ export const createRoom = async (input: ScNewRoom) => {
   if (COMMAND === 'serve') input.private = true;
   const { createRoom } = await request<CreateRoomMutation, CreateRoomMutationVariables>(CreateRoom, { input });
   configure.user!.playing = createRoom;
-  updateStore(configure);
-  updateStore(store, {
+  updateConfigureStore();
+  updateStore({
     recentGameIds: [input.gameId, ...(store.recentGameIds || []).filter((id) => id !== input.gameId)],
   });
 };
@@ -159,7 +158,7 @@ export const createRoom = async (input: ScNewRoom) => {
 export const updateRoom = async (input: ScUpdateRoom) => {
   const { updateRoom } = await request<UpdateRoomMutation, UpdateRoomMutationVariables>(UpdateRoom, { input });
   configure.user!.playing = updateRoom;
-  updateStore(configure);
+  updateConfigureStore();
 };
 
 export const updateRoomScreenshot = async (input: ScUpdateRoomScreenshot) => {
@@ -180,8 +179,8 @@ export const enterPubRoom = async (roomId: number) => {
     input: { roomId },
   });
   configure.user!.playing = enterPubRoom;
-  updateStore(configure);
-  updateStore(store, {
+  updateConfigureStore();
+  updateStore({
     recentGameIds: [enterPubRoom.gameId, ...(store.recentGameIds || []).filter((id) => id !== enterPubRoom.gameId)],
   });
 };
@@ -189,12 +188,12 @@ export const enterPubRoom = async (roomId: number) => {
 export const leaveRoom = async () => {
   await request<LeaveRoomMutation, LeaveRoomMutationVariables>(LeaveRoom, {});
   delete configure.user!.playing;
-  updateStore(configure);
+  updateConfigureStore();
 };
 
 export const getAccount = async () => {
   const { account } = await request<GetAccountQuery, GetAccountQueryVariables>(GetAccount, {});
-  updateStore(configure, {
+  updateConfigureStore({
     user: parseAccount(account),
   });
 };
@@ -209,7 +208,7 @@ export const updateAccount = async ({
   const { updateAccount } = await request<UpdateAccountMutation, UpdateAccountMutationVariables>(UpdateAccount, {
     input: { nickname, settings: JSON.stringify(settings) },
   });
-  updateStore(configure, {
+  updateConfigureStore({
     user: parseAccount(updateAccount),
   });
 };
@@ -222,7 +221,7 @@ export const updatePassword = async (input: ScUpdatePassword) => {
 
 export const getFriends = async () => {
   const { friends, invites } = await request<GetFriendsQuery, GetFriendsQueryVariables>(GetFriends, {});
-  updateStore(friendStore, {
+  updateFriendStore({
     friendIds: friends.map((e) => {
       friendStore.friends[e.user.id] = e;
       return e.user.id;
@@ -247,13 +246,13 @@ export const acceptFriend = async (targetId: number, accept: boolean) => {
     friendStore.friendIds = friendStore.friendIds?.filter((id) => id !== targetId);
     delete friendStore.friends[targetId];
   }
-  updateStore(friendStore);
+  updateFriendStore();
 };
 
 export const deleteFriend = async (targetId: number) => {
   await acceptFriend(targetId, false);
   friendStore.messageIds[targetId]?.forEach((id) => delete friendStore.messages[id]);
-  updateStore(friendStore, {
+  updateFriendStore({
     draft: { ...friendStore.draft, [targetId]: undefined },
     messageIds: { ...friendStore.messageIds, [targetId]: undefined },
   });
@@ -268,17 +267,17 @@ export const acceptInvite = async (inviteId: number, accept: boolean) => {
   await request<AcceptInviteMutation, AcceptInviteMutationVariables>(AcceptInvite, { input: { inviteId, accept } });
   if (accept) {
     configure.user!.playing = friendStore.invites[inviteId]?.room;
-    updateStore(configure);
+    updateConfigureStore();
   }
   friendStore.inviteIds = friendStore.inviteIds?.filter((id) => id !== inviteId);
   delete friendStore.invites[inviteId];
-  updateStore(friendStore);
+  updateFriendStore();
 };
 
 export const getRecord = async (gameId: number) => {
   const { record } = await request<GetRecordQuery, GetRecordQueryVariables>(GetRecord, { gameId });
   store.record[gameId] = record;
-  updateStore(store);
+  updateStore();
 };
 
 export const createComment = async (input: ScNewComment) => {
@@ -295,7 +294,7 @@ export const createComment = async (input: ScNewComment) => {
       [configure.user!.id]: createComment,
     },
   };
-  updateStore(store);
+  updateStore();
 };
 
 export const getMessages = async (targetId: number) => {
@@ -304,7 +303,7 @@ export const getMessages = async (targetId: number) => {
     friendStore.messages[e.id] = e;
     return e.id;
   });
-  updateStore(friendStore);
+  updateFriendStore();
 };
 
 export const readMessage = debounce(async (targetId: number) => {
@@ -312,7 +311,7 @@ export const readMessage = debounce(async (targetId: number) => {
     input: { targetId },
   });
   friendStore.friends[targetId] = readMessage;
-  updateStore(friendStore);
+  updateFriendStore();
 });
 
 export const createMessage = async (targetId: number, body: string) => {
@@ -321,7 +320,7 @@ export const createMessage = async (targetId: number, body: string) => {
   });
   friendStore.messageIds[targetId] = [...(friendStore.messageIds[targetId] || []), createMessage.id];
   friendStore.messages[createMessage.id] = createMessage;
-  updateStore(friendStore);
+  updateFriendStore();
   playHintSound('sended');
 };
 
@@ -338,7 +337,7 @@ export const favoriteGame = async (gameId: number, favorite: boolean) => {
   } else {
     store.favoriteIds = store.favoriteIds?.filter((id) => id !== gameId);
   }
-  updateStore(store);
+  updateStore();
 };
 
 export const sendSignal = async (targetId: number, signal: Signal) => {
@@ -371,7 +370,7 @@ export const subscribeEvent = () => {
       } = event;
 
       if (lobbyMessage) {
-        updateStore(store, {
+        updateStore({
           lobbyMessage: [...store.lobbyMessage, lobbyMessage],
         });
       }
@@ -393,13 +392,13 @@ export const subscribeEvent = () => {
           documentVisible().then(() => readMessage(newMessage.userId));
           playHintSound('received');
         }
-        updateStore(friendStore);
+        updateFriendStore();
       }
 
       if (newGame) {
         store.games[newGame.id] = convertGame(newGame);
         if (isCurrentLang(newGame)) {
-          updateStore(store, {
+          updateStore({
             gameIds: [...(store.gameIds || []), newGame.id],
           });
         }
@@ -409,29 +408,29 @@ export const subscribeEvent = () => {
         const originRoom = store.rooms[updateRoom.id];
         if (originRoom) {
           Object.assign(originRoom, updateRoom);
-          updateStore(store);
+          updateStore();
         }
         if (configure.user?.playing?.id === updateRoom.id) {
           configure.user.playing = updateRoom;
-          updateStore(configure);
+          updateConfigureStore();
         }
       }
 
       if (deleteRoom) {
         delete store.rooms[deleteRoom];
-        updateStore(store, { roomIds: store.roomIds?.filter((id) => id !== deleteRoom) });
+        updateStore({ roomIds: store.roomIds?.filter((id) => id !== deleteRoom) });
         if (configure.user && configure.user.playing?.id === deleteRoom) {
           if (configure.user.playing.host !== configure.user.id) {
             Toast.open('warning', i18n.get('tip.room.deleted'));
           }
           delete configure.user.playing;
-          updateStore(configure);
+          updateConfigureStore();
         }
       }
 
       if (newInvite) {
         friendStore.invites[newInvite.id] = newInvite;
-        updateStore(friendStore, {
+        updateFriendStore({
           inviteIds: [...(friendStore.inviteIds || []), newInvite.id],
         });
         playSound('new_invite');
@@ -439,12 +438,12 @@ export const subscribeEvent = () => {
 
       if (deleteInvite) {
         delete friendStore.invites[deleteInvite];
-        updateStore(friendStore, { inviteIds: friendStore.inviteIds?.filter((id) => id !== deleteInvite) });
+        updateFriendStore({ inviteIds: friendStore.inviteIds?.filter((id) => id !== deleteInvite) });
       }
 
       if (applyFriend) {
         friendStore.friends[applyFriend.user.id] = applyFriend;
-        updateStore(friendStore, {
+        updateFriendStore({
           friendIds: [...new Set([...(friendStore.friendIds || []), applyFriend.user.id])],
         });
         playSound('apply_friend');
@@ -452,7 +451,7 @@ export const subscribeEvent = () => {
 
       if (acceptFriend) {
         friendStore.friends[acceptFriend.user.id] = acceptFriend;
-        updateStore(friendStore, {
+        updateFriendStore({
           friendIds: [...new Set([...(friendStore.friendIds || []), acceptFriend.user.id])],
         });
       }
@@ -460,7 +459,7 @@ export const subscribeEvent = () => {
       if (deleteFriend) {
         delete friendStore.friends[deleteFriend];
         friendStore.messageIds[deleteFriend]?.forEach((id) => delete friendStore.messages[id]);
-        updateStore(friendStore, {
+        updateFriendStore({
           friendIds: friendStore.friendIds?.filter((id) => id !== deleteFriend),
           messageIds: { ...friendStore.messageIds, [deleteFriend]: undefined },
           draft: { ...friendStore.draft, [deleteFriend]: undefined },
@@ -471,7 +470,7 @@ export const subscribeEvent = () => {
         const friend = friendStore.friends[updateUser.id];
         if (friend) {
           friendStore.friends[updateUser.id] = { ...friend, user: updateUser };
-          updateStore(friendStore);
+          updateFriendStore();
         }
       }
 
@@ -496,12 +495,12 @@ export const subscribeEvent = () => {
       // 同步 favorite 列表，例如手机同步到电视
       if (favorite && !store.favoriteIds?.includes(favorite)) {
         store.favoriteIds = [favorite, ...(store.favoriteIds || [])];
-        updateStore(store);
+        updateStore();
       }
 
       if (deleteFavorite && store.favoriteIds?.includes(deleteFavorite)) {
         store.favoriteIds = store.favoriteIds?.filter((id) => id !== deleteFavorite);
-        updateStore(store);
+        updateStore();
       }
     }
   })();

@@ -1,20 +1,10 @@
-import {
-  GemElement,
-  html,
-  adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
-  connectStore,
-  history,
-  updateStore,
-} from '@mantou/gem';
+import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, connectStore, history } from '@mantou/gem';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { commonHandle } from 'duoyun-ui/lib/hotkeys';
 import { waitLoading } from 'duoyun-ui/elements/wait';
 import { focusStyle } from 'duoyun-ui/lib/styles';
-import { locationStore, routes } from 'src/routes';
 import { createPath, RouteItem } from 'duoyun-ui/elements/route';
+import { locationStore, routes } from 'src/routes';
 
 import { paramKeys, viewTransitionName } from 'src/constants';
 import { i18n } from 'src/i18n/basic';
@@ -26,6 +16,7 @@ import {
   toggleSearchState,
   toggleSideNavState,
   navStore,
+  updateNavStore,
 } from 'src/configure';
 import { theme } from 'src/theme';
 import { createRoom, favoriteGame, leaveRoom } from 'src/services/api';
@@ -128,8 +119,8 @@ const style = createCSSSheet(css`
   }
 `);
 
-export const mountedRoom = () => updateStore(navStore, { room: true });
-export const unmountedRoom = () => updateStore(navStore, { room: false });
+export const mountedRoom = () => updateNavStore({ room: true });
+export const unmountedRoom = () => updateNavStore({ room: false });
 
 /**
  * @customElement m-nav

@@ -1,23 +1,25 @@
 import { history, html, render, styleMap } from '@mantou/gem';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
-import { Toast } from 'duoyun-ui/elements/toast';
 import { DuoyunDropAreaElement } from 'duoyun-ui/elements/drop-area';
 import { createPath } from 'duoyun-ui/elements/route';
+import { isInputElement } from 'duoyun-ui/lib/element';
 import { isMtApp, mtApp } from '@nesbox/mtapp';
+import { initApp } from 'duoyun-ui/helper/webapp';
 import { routes } from 'src/routes';
 
+import { logger } from 'src/logger';
 import { matchRoute } from 'src/utils/common';
 import { COMMAND, globalEvents, isApp, isTauriMacApp, isTauriWinApp, RELEASE } from 'src/constants';
 import { theme } from 'src/theme';
 import { configure } from 'src/configure';
-import { logger } from 'src/logger';
 import { gotoRedirectUri, isExpiredProfile, logout } from 'src/auth';
-import { GamepadBtnIndex, listener, startKeyboardSimulation } from 'src/gamepad';
+import { GamepadBtnIndex, listenerGamepad, startKeyboardSimulation } from 'src/gamepad';
 import { dropHandler } from 'src/drop';
 
+import 'duoyun-ui/helper/error';
 import 'src/modules/meta';
 
-listener();
+listenerGamepad();
 
 logger.info('MODE\t', import.meta.env.MODE);
 logger.info('RELEASE\t', RELEASE);
@@ -156,46 +158,13 @@ addEventListener(globalEvents.PRESS_HOST_BUTTON_INDEX, ({ timeStamp, detail }) =
   }
 });
 
-let unloading = false;
-addEventListener('beforeunload', () => {
-  unloading = true;
-  setTimeout(() => (unloading = false), 1000);
-});
-function printError(err: Error | ErrorEvent | DOMException) {
-  if (err instanceof DOMException && err.name === 'AbortError') {
-    return;
-  }
-  const ignoreError = [
-    // chrome
-    'ResizeObserver',
-    'Script error.',
-  ];
-  if (unloading || ignoreError.some((msg) => err.message?.startsWith(msg))) return;
-  Toast.open('error', err.message || String(err));
-}
-
-function handleRejection({ reason }: PromiseRejectionEvent) {
-  if (reason) {
-    const errors = reason.errors || reason;
-    if (Array.isArray(errors)) {
-      errors.forEach((err) => printError(err));
-    } else {
-      printError(reason.reason || reason);
-    }
-  }
-}
-
-addEventListener('error', printError);
-addEventListener('unhandledrejection', handleRejection);
-
 // https://github.com/tauri-apps/tauri/issues/2626#issuecomment-1151090395
 addEventListener(
   'keydown',
   (event) => {
     if (isTauriMacApp && event.key !== 'Tab') {
       const ele = event.composedPath()[0];
-      const isInput = ele instanceof HTMLInputElement || ele instanceof HTMLTextAreaElement;
-      if (!ele || !isInput || event.key === 'Escape') {
+      if (!ele || !isInputElement(ele as HTMLElement) || event.key === 'Escape') {
         // not system shortcut
         if (!(event.key === 'w' && (event.ctrlKey || event.metaKey))) {
           event.preventDefault();
@@ -208,28 +177,16 @@ addEventListener(
 
 addEventListener('contextmenu', (evt) => {
   const ele = evt.composedPath()[0];
-  const isInput = ele instanceof HTMLInputElement || ele instanceof HTMLTextAreaElement;
-  if (isApp && !isInput) {
+  if (isApp && !isInputElement(ele as HTMLElement)) {
     evt.preventDefault();
   }
 });
-
-if (COMMAND === 'build') {
-  navigator.serviceWorker?.register('/sw.js', { type: 'module' });
-} else {
-  navigator.serviceWorker?.getRegistration().then((reg) => reg?.unregister());
-}
 
 addEventListener('load', () => {
   logger.info('Loaded!');
 });
 
-// Installed
-matchMedia(mediaQuery.PWA).addEventListener('change', ({ matches }) => {
-  if (matches) {
-    const w = 1024;
-    const h = 640;
-    resizeTo(w, h);
-    moveTo((screen.width - w) / 2, (screen.height - h) / 2);
-  }
+initApp({
+  serviceWorkerScript: COMMAND === 'build' ? '/sw.js' : '',
+  initWindowSize: [1024, 640],
 });

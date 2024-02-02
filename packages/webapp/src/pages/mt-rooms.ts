@@ -6,10 +6,9 @@ import {
   createCSSSheet,
   css,
   connectStore,
-  createStore,
-  updateStore,
+  useStore,
 } from '@mantou/gem';
-import { polling } from 'duoyun-ui/lib/utils';
+import { polling } from 'duoyun-ui/lib/timer';
 
 import { getCDNSrc } from 'src/utils/common';
 import { store } from 'src/store';
@@ -22,7 +21,7 @@ import 'duoyun-ui/elements/empty';
 import 'duoyun-ui/elements/heading';
 import 'src/elements/rotor';
 
-const mtRoomsStore = createStore({ currentId: store.roomIds?.[0] || 0 });
+const [mtRoomsStore, updateMtRoomsStore] = useStore({ currentId: store.roomIds?.[0] || 0 });
 
 const style = createCSSSheet(css`
   :host {
@@ -57,8 +56,7 @@ export class PMtRoomsElement extends GemElement {
       ${store.roomIds?.length
         ? html`
             <nesbox-rotor
-              @change=${({ detail }: CustomEvent<number>) =>
-                updateStore(mtRoomsStore, { currentId: store.roomIds![detail] })}
+              @change=${({ detail }: CustomEvent<number>) => updateMtRoomsStore({ currentId: store.roomIds![detail] })}
               .index=${index >= 0 ? index : 0}
               .finite=${true}
               .data=${store.roomIds.map((id) => ({

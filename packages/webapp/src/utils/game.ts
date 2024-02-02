@@ -1,5 +1,6 @@
-import { debounce, once } from 'duoyun-ui/lib/utils';
+import { once } from 'duoyun-ui/lib/timer';
 import { clamp } from 'duoyun-ui/lib/number';
+import { Cache } from 'duoyun-ui/lib/cache';
 import { default as initNes, Nes, Button } from '@mantou/nes';
 
 import { VideoRefreshRate } from 'src/constants';
@@ -50,13 +51,9 @@ export function requestFrame(render: () => void, generator = VideoRefreshRate.AU
   };
 }
 
-const getRectCache = new WeakMap<HTMLElement, () => DOMRect>();
+const rectCache = new Cache<DOMRect>({ maxAge: 500, renewal: true });
 export const positionMapping = (event: PointerEvent, canvas: NesboxCanvasElement) => {
-  if (!getRectCache.has(canvas)) {
-    const fn = debounce(() => canvas.canvasRef.element!.getBoundingClientRect());
-    getRectCache.set(canvas, fn);
-  }
-  const stage = getRectCache.get(canvas)!();
+  const stage = rectCache.get('', () => canvas.canvasRef.element!.getBoundingClientRect());
   const aspectRadio = canvas.width / canvas.height;
   const width = aspectRadio > stage.width / stage.height ? stage.width : aspectRadio * stage.height;
   const halfWidth = width / 2;

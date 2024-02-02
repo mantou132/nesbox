@@ -13,7 +13,7 @@ export const errorCodeMap: Record<string, LocaleKey | undefined> = {
 };
 
 // https://github.com/grpc/grpc/blob/master/doc/statuscodes.md
-export const grapCommonErrorMap: Record<string, LocaleKey | undefined> = {
+export const grpcCommonErrorMap: Record<string, LocaleKey | undefined> = {
   2: errorCodeMap[500],
   3: errorCodeMap[400],
   4: errorCodeMap[504],

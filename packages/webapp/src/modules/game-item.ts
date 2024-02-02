@@ -11,8 +11,8 @@ import {
   connectStore,
 } from '@mantou/gem';
 import { createPath } from 'duoyun-ui/elements/route';
-import { routes } from 'src/routes';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
+import { routes } from 'src/routes';
 
 import { getCDNSrc, setViewTransitionName } from 'src/utils/common';
 import { paramKeys, viewTransitionName } from 'src/constants';

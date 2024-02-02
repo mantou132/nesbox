@@ -9,8 +9,8 @@ import {
   boolattribute,
   history,
 } from '@mantou/gem';
-import { routes } from 'src/routes';
 import { SwipeEventDetail } from 'duoyun-ui/elements/gesture';
+import { routes } from 'src/routes';
 
 import { configure, toggleSideNavState } from 'src/configure';
 import { theme } from 'src/theme';

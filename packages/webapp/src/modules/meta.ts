@@ -1,5 +1,6 @@
 import { GemElement, html, adoptedStyle, createCSSSheet, css, customElement, connectStore, history } from '@mantou/gem';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
+import { getWebManifestURL } from 'duoyun-ui/helper/webapp';
 
 import { i18n } from 'src/i18n/basic';
 import { themeStore } from 'src/theme';
@@ -32,10 +33,10 @@ export class ModuleMetaElement extends GemElement<State> {
   state: State = {};
   mounted = () => {
     addEventListener('load', async () => {
-      const { getWebManifestURL } = await import('src/webmanifest');
+      const { genWebManifest } = await import('src/webmanifest');
       this.effect(
         () => {
-          this.setState({ manifest: getWebManifestURL() });
+          this.setState({ manifest: getWebManifestURL(genWebManifest()) });
         },
         () => [i18n.currentLanguage, configure.theme],
       );

@@ -1,13 +1,13 @@
-import { createStore, updateStore } from '@mantou/gem';
+import { useStore } from '@mantou/gem';
 import { Player } from '@mantou/nes';
 
+import { logger } from 'src/logger';
 import { globalEvents, SignalDetail, SignalType } from 'src/constants';
 import { configure } from 'src/configure';
-import { logger } from 'src/logger';
 import { sendSignal } from 'src/services/api';
 import { ChannelMessage, ChannelMessageType, Ping, RoleAnswer, RoleOffer, RTCBasic, TextMsg } from 'src/netplay/common';
 
-export const pingStore = createStore<{ ping?: number }>({});
+export const [pingStore, updatePingStore] = useStore<{ ping?: number }>({});
 
 export class RTCClient extends RTCBasic {
   #host = 0;
@@ -65,7 +65,7 @@ export class RTCClient extends RTCBasic {
         const msg = JSON.parse(data) as ChannelMessage;
         switch (msg.type) {
           case ChannelMessageType.PING:
-            updateStore(pingStore, { ping: Date.now() - msg.timestamp });
+            updatePingStore({ ping: Date.now() - msg.timestamp });
             break;
           case ChannelMessageType.ROLE_ANSWER:
             this.roles = (msg as RoleAnswer).roles;
@@ -143,6 +143,6 @@ export class RTCClient extends RTCBasic {
 
     clearTimeout(this.#restartTimer);
     clearTimeout(this.#pingTimer);
-    updateStore(pingStore, { ping: undefined });
+    updatePingStore({ ping: undefined });
   };
 }
