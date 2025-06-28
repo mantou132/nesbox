@@ -1,12 +1,11 @@
-import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, property } from '@mantou/gem';
+import { adoptedStyle, css, customElement, GemElement, html, property } from '@mantou/gem';
 import { commonHandle } from 'duoyun-ui/lib/hotkeys';
 import { focusStyle } from 'duoyun-ui/lib/styles';
-
 import { theme } from 'src/theme';
 
 import 'duoyun-ui/elements/tag';
 
-const style = createCSSSheet(css`
+const style = css`
   ul {
     width: min(80vw, 20em);
     min-height: 10em;
@@ -32,11 +31,8 @@ const style = createCSSSheet(css`
     border-radius: ${theme.normalRound};
     width: 64px;
   }
-`);
+`;
 
-/**
- * @customElement nesbox-list
- */
 @customElement('nesbox-list')
 @adoptedStyle(style)
 @adoptedStyle(focusStyle)

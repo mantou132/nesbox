@@ -1,10 +1,9 @@
-import { SubscriptionClient } from 'subscriptions-transport-ws';
-
-import { errorCodeMap, grpcCommonErrorMap, graphqlErrorMap } from 'src/services/error';
+import { isExpiredProfile, logout } from 'src/auth';
 import { configure } from 'src/configure';
-import { logout, isExpiredProfile } from 'src/auth';
 import { i18n } from 'src/i18n/basic';
 import { logger } from 'src/logger';
+import { errorCodeMap, graphqlErrorMap, grpcCommonErrorMap } from 'src/services/error';
+import { SubscriptionClient } from 'subscriptions-transport-ws';
 
 const API_BASE = process.env.API_BASE || '/api';
 const ENDPOINT = '/graphql';

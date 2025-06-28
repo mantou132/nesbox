@@ -1,5 +1,4 @@
-import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, raw } from '@mantou/gem';
-
+import { adoptedStyle, createState, css, customElement, GemElement, html, mounted, raw, shadow } from '@mantou/gem';
 import { theme } from 'src/theme';
 
 import 'duoyun-ui/elements/use';
@@ -13,7 +12,7 @@ const batteryIcon = raw`
   </svg>
 `;
 
-const style = createCSSSheet(css`
+const style = css`
   :host {
     display: contents;
   }
@@ -32,31 +31,25 @@ const style = createCSSSheet(css`
     paint-order: stroke;
     stroke: currentColor;
   }
-`);
+`;
 
-type State = {
-  level: number;
-  charging: boolean;
-};
-
-/**
- * @customElement nesbox-battery
- */
 @customElement('nesbox-battery')
 @adoptedStyle(style)
-export class NesboxBatteryElement extends GemElement<State> {
-  state: State = {
+@shadow()
+export class NesboxBatteryElement extends GemElement {
+  #state = createState({
     charging: false,
     level: 1,
-  };
+  });
 
   #onChange = () => {
     navigator.getBattery().then(({ level, charging }) => {
-      this.setState({ level, charging });
+      this.#state({ level, charging });
     });
   };
 
-  mounted = () => {
+  @mounted()
+  #init = () => {
     this.#onChange();
     navigator.getBattery().then((bm) => {
       bm.addEventListener('levelchange', this.#onChange);
@@ -71,7 +64,7 @@ export class NesboxBatteryElement extends GemElement<State> {
   };
 
   render = () => {
-    const { charging, level } = this.state;
+    const { charging, level } = this.#state;
     return html`
       <style>
         dy-use {

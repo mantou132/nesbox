@@ -1,13 +1,15 @@
 import {
+  adoptedStyle,
+  attribute,
+  classMap,
+  connectStore,
+  createState,
+  css,
+  customElement,
   GemElement,
   html,
-  adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
-  classMap,
-  attribute,
-  connectStore,
+  mounted,
+  shadow,
   titleStore,
 } from '@mantou/gem';
 
@@ -21,7 +23,7 @@ const close = `<svg viewBox="0 0 10 10" fill="currentColor"><polygon points="10.
 
 export const closeListenerSet = new Set<() => void | Promise<void>>();
 
-const style = createCSSSheet(css`
+const style = css`
   :host {
     cursor: default;
     -webkit-user-select: none;
@@ -61,31 +63,21 @@ const style = createCSSSheet(css`
   .close:hover {
     background-color: #e81123;
   }
-`);
+`;
 
-type State = {
-  fullscreen: boolean;
-  maximized: boolean;
-  blur: boolean;
-};
-
-/**
- * @customElement m-titlebar
- * @attr type
- * @attr header
- */
 @customElement('m-titlebar')
 @adoptedStyle(style)
 @connectStore(titleStore)
-export class MTitlebarElement extends GemElement<State> {
+@shadow()
+export class MTitlebarElement extends GemElement {
   @attribute header: string;
   @attribute type: 'win' | 'mac';
 
-  state: State = {
+  #state = createState({
     fullscreen: false,
     maximized: false,
     blur: false,
-  };
+  });
 
   get #type() {
     return this.type || 'mac';
@@ -102,15 +94,15 @@ export class MTitlebarElement extends GemElement<State> {
   #onResize = async () => {
     const maximized = await this.#window?.isMaximized();
     // https://github.com/tauri-apps/tauri/issues/4519
-    this.setState({ maximized, fullscreen: innerWidth === screen.width && innerHeight === screen.height });
+    this.#state({ maximized, fullscreen: innerWidth === screen.width && innerHeight === screen.height });
   };
 
   #toggleMaximize = () => {
     this.#window?.toggleMaximize();
   };
 
-  constructor() {
-    super();
+  @mounted()
+  #init = () => {
     this.addEventListener('mousedown', (event) => {
       this.#window?.startDragging();
       // compat `<dy-input-capture>`
@@ -126,8 +118,8 @@ export class MTitlebarElement extends GemElement<State> {
     this.#onResize();
     this.#window?.listen('tauri://resize', this.#onResize);
 
-    this.#window?.listen('tauri://blur', () => this.setState({ blur: true }));
-    this.#window?.listen('tauri://focus', () => this.setState({ blur: false }));
+    this.#window?.listen('tauri://blur', () => this.#state({ blur: true }));
+    this.#window?.listen('tauri://focus', () => this.#state({ blur: false }));
 
     this.#window?.listen('tauri://close-requested', async () => {
       dispatchEvent(new CustomEvent('beforeunload'));
@@ -138,10 +130,10 @@ export class MTitlebarElement extends GemElement<State> {
     });
     // allow drag
     new MutationObserver(() => (this.inert = false)).observe(this, { attributeFilter: ['inert'] });
-  }
+  };
 
   render = () => {
-    if (this.state.fullscreen) return html``;
+    if (this.#state.fullscreen) return html``;
 
     return html`
       <dy-reflect>
@@ -153,23 +145,19 @@ export class MTitlebarElement extends GemElement<State> {
         </style>
       </dy-reflect>
       <div class="title">${document.title}</div>
-      ${this.#isWin
-        ? // https://codepen.io/agrimsrud/pen/WGgRPP?editors=1100
-          html`
-            <div
-              class=${classMap({ buttons: true, blur: this.state.blur })}
-              @mousedown=${(e: Event) => e.stopPropagation()}
-            >
-              <dy-use class="min" @click=${() => this.#window?.minimize()} .element=${minimize}></dy-use>
-              <dy-use
-                class="toggle"
-                @click=${() => this.#window?.toggleMaximize()}
-                .element=${this.state.maximized ? unmaximize : maximize}
-              ></dy-use>
-              <dy-use class="close" @click=${() => this.#window?.close()} .element=${close}></dy-use>
-            </div>
-          `
-        : ''}
+      <div
+        v-if=${this.#isWin}
+        class=${classMap({ buttons: true, blur: this.#state.blur })}
+        @mousedown=${(e: Event) => e.stopPropagation()}
+      >
+        <dy-use class="min" @click=${() => this.#window?.minimize()} .element=${minimize}></dy-use>
+        <dy-use
+          class="toggle"
+          @click=${() => this.#window?.toggleMaximize()}
+          .element=${this.#state.maximized ? unmaximize : maximize}
+        ></dy-use>
+        <dy-use class="close" @click=${() => this.#window?.close()} .element=${close}></dy-use>
+      </div>
     `;
   };
 }

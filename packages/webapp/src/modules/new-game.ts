@@ -1,13 +1,12 @@
-import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, connectStore } from '@mantou/gem';
-import { locale } from 'duoyun-ui/lib/locale';
+import { adoptedStyle, createState, css, customElement, GemElement, html } from '@mantou/gem';
 import { Modal } from 'duoyun-ui/elements/modal';
-
-import { getCDNSrc } from 'src/utils/common';
+import { locale } from 'duoyun-ui/lib/locale';
 import { githubRelease } from 'src/constants';
-import { i18n } from 'src/i18n/basic';
-import { theme } from 'src/theme';
 import { gameKindList, gameSeriesList } from 'src/enums';
-import { GameAttributes, store } from 'src/store';
+import { i18n } from 'src/i18n/basic';
+import { type GameAttributes, store } from 'src/store';
+import { theme } from 'src/theme';
+import { getCDNSrc } from 'src/utils/common';
 
 import 'duoyun-ui/elements/alert';
 import 'duoyun-ui/elements/link';
@@ -16,8 +15,10 @@ import 'duoyun-ui/elements/input';
 import 'duoyun-ui/elements/button';
 import 'duoyun-ui/elements/paragraph';
 
-const style = createCSSSheet(css`
-  :host {
+import { closestElement } from 'duoyun-ui/lib/element';
+
+const style = css`
+  :scope {
     display: flex;
     flex-direction: column;
     width: min(27em, 100vw);
@@ -33,7 +34,7 @@ const style = createCSSSheet(css`
     gap: 1em;
     margin-top: 1.5em;
   }
-`);
+`;
 
 type State = {
   // 别名会以 `/xxx` 添加为后缀
@@ -49,27 +50,23 @@ type State = {
   attrs: GameAttributes;
 };
 
-/**
- * @customElement m-new-game
- */
 @customElement('m-new-game')
 @adoptedStyle(style)
-@connectStore(i18n.store)
-export class MNewGameElement extends GemElement<State> {
-  state: State = {
+export class MNewGameElement extends GemElement {
+  state = createState<State>({
     title: '',
     description: '',
     step: 1,
     attrs: {},
-  };
+  });
 
   #updateDesc = () => {
     const { title, metadata } = this.state;
-    this.setState({ description: metadata?.find((e) => e.title === title)?.description || '' });
+    this.state({ description: metadata?.find((e) => e.title === title)?.description || '' });
   };
 
   #onChange = ({ detail }: CustomEvent<string>) => {
-    this.setState({ title: detail });
+    this.state({ title: detail });
     this.#updateDesc();
   };
 
@@ -84,7 +81,7 @@ export class MNewGameElement extends GemElement<State> {
     });
     const excludeGames = new Set(['马力欧兄弟/水管马力欧', '忍者神龟 街机版', 'Mighty 快打旋风', 'Super C']);
 
-    this.setState({
+    this.state({
       metadata: (
         (await (await fetch(getCDNSrc(`${githubRelease}/download/0.0.1/metadata.json`))).json()) as Exclude<
           State['metadata'],
@@ -110,14 +107,14 @@ export class MNewGameElement extends GemElement<State> {
             <dy-input
               .placeholder=${i18n.get('placeholder.adText')}
               .value=${ad_text}
-              @change=${({ detail }: CustomEvent<string>) => this.setState({ attrs: { ...attrs, ad_text: detail } })}
+              @change=${({ detail }: CustomEvent<string>) => this.state({ attrs: { ...attrs, ad_text: detail } })}
             ></dy-input>
           </dy-input-group>
           <dy-input-group>
             <dy-input
               .placeholder=${i18n.get('placeholder.adLink')}
               .value=${ad_link}
-              @change=${({ detail }: CustomEvent<string>) => this.setState({ attrs: { ...attrs, ad_link: detail } })}
+              @change=${({ detail }: CustomEvent<string>) => this.state({ attrs: { ...attrs, ad_link: detail } })}
             ></dy-input>
           </dy-input-group>
         `;
@@ -143,7 +140,7 @@ export class MNewGameElement extends GemElement<State> {
                 value: value && `game.max_player.${value}`,
                 label: value ? i18n.get('page.game.player', value) : i18n.get('global.noLimit'),
               }))}
-              @change=${({ detail }: CustomEvent<string>) => this.setState({ maxPlayer: detail })}
+              @change=${({ detail }: CustomEvent<string>) => this.state({ maxPlayer: detail })}
             ></dy-picker>
             <dy-picker
               .value=${kind ?? undefined}
@@ -152,7 +149,7 @@ export class MNewGameElement extends GemElement<State> {
                 value: e.value && `game.kind.${e.value.toLowerCase()}`,
                 label: i18n.get(e.label),
               }))}
-              @change=${({ detail }: CustomEvent<string>) => this.setState({ kind: detail })}
+              @change=${({ detail }: CustomEvent<string>) => this.state({ kind: detail })}
             ></dy-picker>
             <dy-picker
               .value=${series ?? undefined}
@@ -161,7 +158,7 @@ export class MNewGameElement extends GemElement<State> {
                 value: e.value && `game.series.${e.value.toLowerCase()}`,
                 label: i18n.get(e.label),
               }))}
-              @change=${({ detail }: CustomEvent<string>) => this.setState({ series: detail })}
+              @change=${({ detail }: CustomEvent<string>) => this.state({ series: detail })}
             ></dy-picker>
           </dy-input-group>
         `;
@@ -170,9 +167,9 @@ export class MNewGameElement extends GemElement<State> {
 
   #next = () => {
     if (this.state.step === 1) {
-      this.setState({ step: ++this.state.step });
+      this.state({ step: ++this.state.step });
     } else {
-      this.closestElement(Modal)?.ok(null);
+      closestElement(this, Modal)?.ok(null);
     }
   };
 
@@ -184,7 +181,7 @@ export class MNewGameElement extends GemElement<State> {
     return html`
       ${this.#getContent()}
       <div class="footer">
-        <dy-button color="cancel" @click=${() => this.closestElement(Modal)?.close(null)}>${locale.cancel}</dy-button>
+        <dy-button color="cancel" @click=${() => closestElement(this, Modal)?.close(null)}>${locale.cancel}</dy-button>
         <dy-button color="normal" @click=${this.#next}>${locale.nextTour}</dy-button>
       </div>
     `;

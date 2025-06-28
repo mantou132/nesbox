@@ -1,32 +1,21 @@
-import {
-  GemElement,
-  html,
-  adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
-  property,
-  styleMap,
-  connectStore,
-} from '@mantou/gem';
-import { Modal } from 'duoyun-ui/elements/modal';
+import { adoptedStyle, connectStore, css, customElement, GemElement, html, property, styleMap } from '@mantou/gem';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
-
-import { Game, store } from 'src/store';
-import { theme } from 'src/theme';
+import { Modal } from 'duoyun-ui/elements/modal';
 import { configure } from 'src/configure';
 import { i18n } from 'src/i18n/basic';
-import { createComment } from 'src/services/api';
 import { icons } from 'src/icons';
+import { createComment } from 'src/services/api';
+import { type Game, store } from 'src/store';
+import { theme } from 'src/theme';
 
-import 'duoyun-ui/elements/help-text';
 import 'duoyun-ui/elements/button';
 import 'duoyun-ui/elements/heading';
+import 'duoyun-ui/elements/help-text';
 import 'duoyun-ui/elements/input';
 import 'src/modules/comment';
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :scope {
     display: contents;
   }
   .list {
@@ -64,11 +53,8 @@ const style = createCSSSheet(css`
       gap: 1em;
     }
   }
-`);
+`;
 
-/**
- * @customElement m-comment-list
- */
 @customElement('m-comment-list')
 @connectStore(store)
 @adoptedStyle(style)
@@ -96,11 +82,15 @@ export class MCommentListElement extends GemElement {
   }
 
   get #isSelfLike() {
-    return this.#comment && this.#comment.like;
+    return this.#comment?.like;
   }
 
   get #isSelfUnLike() {
-    return this.#comment && !this.#comment.like;
+    return !this.#comment?.like;
+  }
+
+  get #selfComment() {
+    return this.#comments?.[this.#selfId];
   }
 
   #getPercentage() {
@@ -152,9 +142,7 @@ export class MCommentListElement extends GemElement {
         </dy-input-group>
       </div>
       <div class="list">
-        ${this.#comments?.[this.#selfId]
-          ? html`<m-comment class="comment" .comment=${this.#comments[this.#selfId]!}></m-comment>`
-          : ''}
+        <m-comment v-if=${!!this.#selfComment} class="comment" .comment=${this.#selfComment!}></m-comment>
         ${this.#commentIds
           ?.filter((id) => id !== this.#selfId)
           ?.map((id) =>

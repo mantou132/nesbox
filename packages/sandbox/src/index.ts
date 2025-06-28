@@ -1,25 +1,25 @@
 /// <reference types="../types" />
 /// <reference types="../env" />
 
+import { Button, type Nes as ONes, Player } from '@mantou/nes';
 import JSZip from 'jszip';
-import { Nes as ONes, Button, Player } from '@mantou/nes';
 
-import { VM } from './vm';
-import { utf8ToBase64, encodeQoiFrame, decodeQoiFrame } from './utils';
 import {
-  preload,
+  definedEnums,
   getAudioFrame,
+  getHeight,
+  getLogs,
   getState,
   getVideoFrame,
-  setState,
-  setControl,
-  reset,
   getWidth,
-  getHeight,
-  definedEnums,
-  getLogs,
+  preload,
+  reset,
+  setControl,
   setCursorMotion,
+  setState,
 } from './preload';
+import { decodeQoiFrame, encodeQoiFrame, utf8ToBase64 } from './utils';
+import { VM } from './vm';
 
 const importList = [
   definedEnums,

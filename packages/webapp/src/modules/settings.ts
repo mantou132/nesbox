@@ -1,7 +1,6 @@
-import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, connectStore } from '@mantou/gem';
-
-import { theme } from 'src/theme';
+import { adoptedStyle, createState, css, customElement, GemElement, html } from '@mantou/gem';
 import { i18n } from 'src/i18n/basic';
+import { theme } from 'src/theme';
 
 import 'duoyun-ui/elements/tabs';
 import 'src/elements/license';
@@ -12,8 +11,8 @@ import 'src/modules/video-settings';
 import 'src/modules/shortcut-settings';
 import 'src/modules/ui-settings';
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :scope {
     display: flex;
     width: min(50vw, 50em);
     height: 50vh;
@@ -40,25 +39,15 @@ const style = createCSSSheet(css`
   .tabs::part(marker) {
     display: none;
   }
-`);
+`;
 
-type State = {
-  tab: number;
-};
-
-/**
- * @customElement m-settings
- */
 @customElement('m-settings')
 @adoptedStyle(style)
-@connectStore(i18n.store)
-export class MSettingsElement extends GemElement<State> {
-  state: State = {
-    tab: 0,
-  };
+export class MSettingsElement extends GemElement {
+  #state = createState({ tab: 0 });
 
   #onChange = ({ detail }: CustomEvent<number>) => {
-    this.setState({ tab: detail });
+    this.#state({ tab: detail });
   };
 
   render = () => {
@@ -67,7 +56,7 @@ export class MSettingsElement extends GemElement<State> {
         class="tabs"
         orientation="vertical"
         @change=${this.#onChange}
-        .value=${this.state.tab}
+        .value=${this.#state.tab}
         .items=${[
           {
             label: i18n.get('settings.keybinding.title'),

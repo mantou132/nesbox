@@ -106,11 +106,13 @@ export function loadSprite(name: string | number, sprite: Sprite) {
 }
 
 export class Color extends Uint8ClampedArray {
-  constructor(r: ArrayBuffer | number | number[], g = 0, b = 0, a = 255) {
+  constructor(r: ArrayBufferLike | number | number[], g = 0, b = 0, a = 255) {
     if (typeof r === 'number') {
       super([r, g, b, a]);
     } else if ('length' in r) {
       super(r);
+    } else if (r instanceof SharedArrayBuffer) {
+      throw new TypeError('SharedArrayBuffer is not supported for Color');
     } else {
       super(r, g, b || undefined);
     }

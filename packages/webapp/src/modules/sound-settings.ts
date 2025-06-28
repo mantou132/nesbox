@@ -1,26 +1,21 @@
-import { GemElement, html, adoptedStyle, customElement, connectStore, createCSSSheet, css } from '@mantou/gem';
-
-import { playSound } from 'src/utils/common';
-import { configure, Settings } from 'src/configure';
+import { adoptedStyle, css, customElement, GemElement, html } from '@mantou/gem';
+import { configure, type Settings } from 'src/configure';
 import { i18n } from 'src/i18n/basic';
 import { gridStyle } from 'src/modules/shortcut-settings';
 import { updateAccount } from 'src/services/api';
+import { playSound } from 'src/utils/common';
 
 import 'duoyun-ui/elements/slider';
 
-export const gridStyleOverride = createCSSSheet(css`
+export const gridStyleOverride = css`
   .grid {
     grid-template-columns: 3fr 11fr;
   }
-`);
+`;
 
-/**
- * @customElement m-sound-settings
- */
 @customElement('m-sound-settings')
 @adoptedStyle(gridStyleOverride)
 @adoptedStyle(gridStyle)
-@connectStore(i18n.store)
 export class MSoundSettingsElement extends GemElement {
   #updateVolume = (name: string, value: number) => {
     updateAccount({

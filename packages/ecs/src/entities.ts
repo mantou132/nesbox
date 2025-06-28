@@ -1,6 +1,6 @@
+import type { Component } from './components';
 import { entitiesGenerator } from './utils';
-import { World } from './world';
-import { Component } from './components';
+import type { World } from './world';
 
 export abstract class Entity {
   #id: number | string = '';
@@ -84,16 +84,16 @@ export abstract class Entity {
     return this;
   }
 
-  hasComponent(constructor: typeof Component) {
-    return this.#components.has(constructor);
+  hasComponent(con: typeof Component) {
+    return this.#components.has(con);
   }
 
-  getComponent<T extends new (...args: any[]) => any>(constructor: T): InstanceType<T> | undefined {
-    return this.#components.get(constructor) as InstanceType<T> | undefined;
+  getComponent<T extends new (...args: any[]) => any>(con: T): InstanceType<T> | undefined {
+    return this.#components.get(con) as InstanceType<T> | undefined;
   }
 
-  removeComponent<T extends new (...args: any[]) => any>(constructor: T) {
-    this.#components.delete(constructor);
+  removeComponent<T extends new (...args: any[]) => any>(con: T) {
+    this.#components.delete(con);
     return this;
   }
 
@@ -118,7 +118,7 @@ export const _registeredEntities = {} as Record<string, new <T extends Entity>(.
 
 export function registerEntity() {
   // first arg must is id, rest is optional
-  return function (cls: new (id?: string | number) => any) {
+  return (cls: new (id?: string | number) => any) => {
     _registeredEntities[cls.name] = cls;
   };
 }

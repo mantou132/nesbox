@@ -1,7 +1,7 @@
 import { i18n } from 'src/i18n/basic';
-import zhCN from 'src/locales/zh-CN/tour.json';
 import enURI from 'src/locales/en/tour.json?url';
 import jaURI from 'src/locales/ja/tour.json?url';
+import zhCN from 'src/locales/zh-CN/tour.json';
 import twURI from 'src/locales/zh-TW/tour.json?url';
 
 export type Locale = typeof zhCN;

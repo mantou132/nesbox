@@ -1,27 +1,29 @@
 import {
+  addListener,
+  adoptedStyle,
+  boolattribute,
+  classMap,
+  css,
+  customElement,
+  type Emitter,
+  effect,
+  emitter,
   GemElement,
   html,
-  adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
-  property,
-  classMap,
-  styleMap,
-  repeat,
+  mounted,
   numattribute,
-  emitter,
-  Emitter,
   partMap,
-  boolattribute,
+  property,
   randomStr,
+  repeat,
+  shadow,
+  styleMap,
 } from '@mantou/gem';
-
-import { playHintSound } from 'src/utils/common';
 import { globalEvents } from 'src/constants';
 import { GamepadBtnIndex } from 'src/gamepad';
+import { mtAppStore } from 'src/mt-app';
 import { theme } from 'src/theme';
-import { updateMtApp } from 'src/mt-app';
+import { playHintSound } from 'src/utils/common';
 
 export type Item = {
   id: number | string;
@@ -31,7 +33,7 @@ export type Item = {
   detail?: () => void;
 };
 
-const style = createCSSSheet(css`
+const style = css`
   :host {
     position: relative;
     width: min(15em, 40vh);
@@ -75,13 +77,11 @@ const style = createCSSSheet(css`
     height: 100%;
     object-fit: cover;
   }
-`);
+`;
 
-/**
- * @customElement nesbox-rotor
- */
 @customElement('nesbox-rotor')
 @adoptedStyle(style)
+@shadow()
 export class NesboxRotorElement extends GemElement {
   @boolattribute inert: boolean;
   @boolattribute finite: boolean;
@@ -90,14 +90,7 @@ export class NesboxRotorElement extends GemElement {
 
   @property data?: Item[];
 
-  #canvas: HTMLCanvasElement;
-
-  constructor() {
-    super();
-    this.#canvas = document.createElement('canvas');
-    this.#canvas.width = 10;
-    this.#canvas.height = 6;
-  }
+  #canvas = new OffscreenCanvas(10, 6);
 
   #uidList = Array.from(Array(400), () => randomStr());
   #uidIndex = 200;
@@ -107,9 +100,9 @@ export class NesboxRotorElement extends GemElement {
     return (this.data.length + this.index + add) % this.data.length;
   };
 
-  #pressButton = ({ detail }: CustomEvent<GamepadBtnIndex>) => {
+  #pressButton = (evt: CustomEvent<GamepadBtnIndex>) => {
     if (this.inert) return;
-    switch (detail) {
+    switch (evt.detail) {
       case GamepadBtnIndex.Left:
         playHintSound();
         this.#uidIndex--;
@@ -126,37 +119,38 @@ export class NesboxRotorElement extends GemElement {
         break;
       case GamepadBtnIndex.A:
       case GamepadBtnIndex.B:
+        evt.stopImmediatePropagation();
         playHintSound();
         this.data?.[this.index]?.detail?.();
         break;
     }
   };
 
-  mounted = () => {
-    this.effect(() => {
-      const img = this.shadowRoot?.querySelector<HTMLImageElement>('.current img');
-      if (img) {
-        new Promise((res, rej) => {
-          if (img.complete) {
-            res(null);
-          } else {
-            img.onload = res;
-            img.onerror = rej;
-          }
+  @effect()
+  #resetImg = () => {
+    const img = this.shadowRoot?.querySelector<HTMLImageElement>('.current img');
+    if (img) {
+      new Promise((res, rej) => {
+        if (img.complete) {
+          res(null);
+        } else {
+          img.onload = res;
+          img.onerror = rej;
+        }
+      })
+        .then(async () => {
+          const ctx = this.#canvas.getContext('2d')!;
+          ctx.drawImage(img, 0, 0, this.#canvas.width, this.#canvas.height);
+          URL.revokeObjectURL(mtAppStore.imgUrl);
+          mtAppStore({ imgUrl: URL.createObjectURL(await this.#canvas.convertToBlob()) });
         })
-          .then(() => {
-            const ctx = this.#canvas.getContext('2d')!;
-            ctx.drawImage(img, 0, 0, this.#canvas.width, this.#canvas.height);
-            updateMtApp({ imgUrl: this.#canvas.toDataURL() });
-          })
-          .catch(() => 0);
-      }
-    });
+        .catch(() => 0);
+    }
+  };
 
-    addEventListener(globalEvents.PRESS_HOST_BUTTON_INDEX, this.#pressButton);
-    return () => {
-      removeEventListener(globalEvents.PRESS_HOST_BUTTON_INDEX, this.#pressButton);
-    };
+  @mounted()
+  #init = () => {
+    return addListener(window, globalEvents.PRESS_HOST_BUTTON_INDEX, this.#pressButton);
   };
 
   render = () => {
@@ -199,7 +193,7 @@ export class NesboxRotorElement extends GemElement {
                     : { left: 0, right: 0, transform: 'translate(0)' },
                 )}
               >
-                ${!offset && !this.inert ? html`<dy-heading lv="2">${item.title}</dy-heading>` : ''}
+                <dy-heading v-if=${!offset && !this.inert} lv="2">${item.title}</dy-heading>
                 <img part="img" src=${item.img} alt="Cover" crossorigin="anonymous" />
               </div>
             `

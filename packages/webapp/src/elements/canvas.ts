@@ -1,22 +1,21 @@
 import {
+  adoptedStyle,
+  attribute,
+  createRef,
+  css,
+  customElement,
+  effect,
   GemElement,
   html,
-  adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
-  RefObject,
-  refobject,
   numattribute,
-  attribute,
+  shadow,
 } from '@mantou/gem';
-import { BaseDirectory } from '@tauri-apps/api/fs';
+import type { BaseDirectory } from '@tauri-apps/api/fs';
 import { Time } from 'duoyun-ui/lib/time';
-
-import { logger } from 'src/logger';
-import { saveFile } from 'src/utils/common';
 import { VideoFilter } from 'src/constants';
+import { logger } from 'src/logger';
 import normalVert from 'src/shaders/normal.vert?raw';
+import { saveFile } from 'src/utils/common';
 
 import 'duoyun-ui/elements/reflect';
 
@@ -36,12 +35,7 @@ const getShader = (filter: VideoFilter) => {
 
 const ortho = (left: number, right: number, bottom: number, top: number): number[] => {
   // prettier-ignore
-  const m = [
-    1.0, 0.0, 0.0, 0.0,
-    0.0, 1.0, 0.0, 0.0,
-    0.0, 0.0, 1.0, 0.0,
-    0.0, 0.0, 0.0, 1.0,
-  ];
+  const m = [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0];
   m[0 * 4 + 0] = 2.0 / (right - left);
   m[1 * 4 + 1] = 2.0 / (top - bottom);
   m[3 * 4 + 0] = ((right + left) / (right - left)) * -1.0;
@@ -49,7 +43,7 @@ const ortho = (left: number, right: number, bottom: number, top: number): number
   return m;
 };
 
-const style = createCSSSheet(css`
+const style = css`
   :host {
     display: block;
     box-sizing: border-box;
@@ -59,18 +53,17 @@ const style = createCSSSheet(css`
     height: 100%;
     object-fit: contain;
   }
-`);
+`;
 
-/**
- * @customElement nesbox-canvas
- */
 @adoptedStyle(style)
 @customElement('nesbox-canvas')
+@shadow()
 export class NesboxCanvasElement extends GemElement {
   @numattribute width: number;
   @numattribute height: number;
   @attribute filter: VideoFilter;
-  @refobject canvasRef: RefObject<HTMLCanvasElement>;
+
+  canvasRef = createRef<HTMLCanvasElement>();
 
   #scale = 2;
 
@@ -92,7 +85,7 @@ export class NesboxCanvasElement extends GemElement {
     const height = this.height;
     const max_size = Math.max(width, height);
 
-    const webgl = this.canvasRef.element!.getContext('webgl2');
+    const webgl = this.canvasRef.value!.getContext('webgl2');
 
     if (!webgl) {
       logger.error('WebGL rendering context not found.');
@@ -166,24 +159,14 @@ export class NesboxCanvasElement extends GemElement {
     const vertex_buffer = webgl.createBuffer();
     webgl.bindBuffer(webgl.ARRAY_BUFFER, vertex_buffer);
     // prettier-ignore
-    const vertices = [
-      0.0, 0.0,
-      0.0, height,
-      width, 0.0,
-      width, height,
-    ];
+    const vertices = [0.0, 0.0, 0.0, height, width, 0.0, width, height];
     webgl.bufferData(webgl.ARRAY_BUFFER, new Float32Array(vertices), webgl.STATIC_DRAW);
     webgl.vertexAttribPointer(vertex_attr, 2, webgl.FLOAT, false, 0, 0);
 
     const texcoord_buffer = webgl.createBuffer();
     webgl.bindBuffer(webgl.ARRAY_BUFFER, texcoord_buffer);
     // prettier-ignore
-    const texcoords = [
-      0.0, 0.0,
-      0.0, height / width,
-      1.0, 0.0,
-      1.0, height / width,
-    ];
+    const texcoords = [0.0, 0.0, 0.0, height / width, 1.0, 0.0, 1.0, height / width];
     webgl.bufferData(webgl.ARRAY_BUFFER, new Float32Array(texcoords), webgl.STATIC_DRAW);
     webgl.vertexAttribPointer(texcoord_attr, 2, webgl.FLOAT, false, 0, 0);
 
@@ -191,10 +174,7 @@ export class NesboxCanvasElement extends GemElement {
     webgl.bindBuffer(webgl.ELEMENT_ARRAY_BUFFER, index_buffer);
     // vertices index
     // prettier-ignore
-    const indices = [
-      0, 1, 2,
-      2, 3, 1,
-    ];
+    const indices = [0, 1, 2, 2, 3, 1];
     webgl.bufferData(webgl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), webgl.STATIC_DRAW);
 
     webgl.clear(webgl.COLOR_BUFFER_BIT);
@@ -235,7 +215,7 @@ export class NesboxCanvasElement extends GemElement {
 
   #screenshot = () => {
     return new Promise<BaseDirectory | undefined>((res) => {
-      this.canvasRef.element!.toBlob(
+      this.canvasRef.value!.toBlob(
         (blob) => blob && res(saveFile(new File([blob], `Screenshot ${new Time().format()}.png`))),
         'image/png',
         1,
@@ -260,29 +240,28 @@ export class NesboxCanvasElement extends GemElement {
   captureThumbnail = () => {
     return new Promise<string>((res) => {
       this.#tasks.push(() => {
-        res(this.canvasRef.element!.toDataURL('image/png', 0.5));
+        res(this.canvasRef.value!.toDataURL('image/png', 0.5));
       });
     });
   };
 
   captureVideoTrack = () => {
-    return this.canvasRef.element!.captureStream(30).getVideoTracks()[0];
+    return this.canvasRef.value!.captureStream(30).getVideoTracks()[0];
   };
 
-  mounted = () => {
-    this.effect(async () => {
-      if (this.width) {
-        const webgl = await this.#setupWebGL();
-        if (webgl) {
-          this.#webgl = webgl;
-        }
+  @effect()
+  #resetWebGL = async () => {
+    if (this.width) {
+      const webgl = await this.#setupWebGL();
+      if (webgl) {
+        this.#webgl = webgl;
       }
-    });
+    }
   };
 
   render = () => {
     return html`
-      <canvas class="canvas" width=${this.#renderWidth} height=${this.#renderHeight} ref=${this.canvasRef.ref}></canvas>
+      <canvas ${this.canvasRef} class="canvas" width=${this.#renderWidth} height=${this.#renderHeight}></canvas>
       <dy-reflect .target=${document.body}>
         <canvas hidden id="webgl-ctx" width=${this.width} height=${this.height}></canvas>
       </dy-reflect>

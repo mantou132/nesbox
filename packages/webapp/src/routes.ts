@@ -1,10 +1,9 @@
-import { html, connect, useStore } from '@mantou/gem';
-import { GemRouteElement, RouteItem } from '@mantou/gem/elements/route';
-import { ValueOf } from 'duoyun-ui/lib/types';
+import { connect, createStore, html } from '@mantou/gem';
+import { GemRouteElement, type RouteItem } from '@mantou/gem/elements/route';
 import { isMtApp } from '@nesbox/mtapp';
-
+import type { ValueOf } from 'duoyun-ui/lib/types';
 import { paramKeys } from 'src/constants';
-import { i18n } from 'src/i18n/basic';
+import { i18n, i18nStore } from 'src/i18n/basic';
 
 // url data
 export const locationStore = GemRouteElement.createLocationStore();
@@ -130,11 +129,11 @@ const getInitRoutes = () => {
 type Routes = ReturnType<typeof getInitRoutes>;
 export type Route = ValueOf<Routes>;
 
-export const [routes, updateRoutes] = useStore(getInitRoutes() as Routes);
+export const routes = createStore(getInitRoutes() as Routes);
 
-connect(i18n.store, () => {
+connect(i18nStore, () => {
   Object.entries(getInitRoutes()).forEach(([routeName, route]) => {
     routes[routeName as keyof Routes].title = route.title;
   });
-  updateRoutes();
+  routes();
 });

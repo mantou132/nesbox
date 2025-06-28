@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
+import { exec } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { exec } from 'node:child_process';
 
 const old = ['__wbg_log_ffb63dcc9cf67297'];
 
@@ -43,7 +43,7 @@ const content = (
   })
 )
   .replace(/new Function\(.*\)/g, 'new Function("console.warn(`new Function be replaced`)")')
-  .replace('return imports;', (matchStr, i, scriptContent) => {
+  .replace('return imports;', (matchStr, _i, scriptContent) => {
     const f = old
       .map((name) => {
         const n = name.match(/(.*_)[0-9a-z]{16}/)[1];

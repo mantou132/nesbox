@@ -1,10 +1,9 @@
-import { setTours, Tour } from 'duoyun-ui/elements/coach-mark';
-
-import { getCDNSrc } from 'src/utils/common';
+import { setTours, type Tour } from 'duoyun-ui/elements/coach-mark';
+import { configure, toggleSettingsState } from 'src/configure';
 import { globalEvents } from 'src/constants';
 import { tourI18n } from 'src/i18n/tour';
-import { configure, toggleSettingsState } from 'src/configure';
 import { updateAccount } from 'src/services/api';
+import { getCDNSrc } from 'src/utils/common';
 
 const tours = [
   {
@@ -30,7 +29,7 @@ const tours = [
       maskClosable: false,
       before: () => updateAccount({ settings: { ...configure.user!.settings, tourIndex: index + 1 } }),
       skip: () => updateAccount({ settings: { ...configure.user!.settings, tourIndex: arr.length } }),
-    } as Tour),
+    }) as Tour,
 );
 
 export const openTorus = () => {

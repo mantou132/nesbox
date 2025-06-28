@@ -1,11 +1,10 @@
-import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, property } from '@mantou/gem';
-
-import { formatTime } from 'src/utils/common';
-import { LobbyMessage } from 'src/store';
+import { adoptedStyle, css, customElement, GemElement, html, property } from '@mantou/gem';
+import type { LobbyMessage } from 'src/store';
 import { theme } from 'src/theme';
+import { formatTime } from 'src/utils/common';
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :scope {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
@@ -42,18 +41,15 @@ const style = createCSSSheet(css`
     white-space: nowrap;
     text-overflow: ellipsis;
   }
-`);
+`;
 
-/**
- * @customElement m-lobby-msg
- */
 @customElement('m-lobby-msg')
 @adoptedStyle(style)
 export class MLobbyMsgElement extends GemElement {
   @property msg?: LobbyMessage;
 
   render = () => {
-    if (!this.msg) return html``;
+    if (!this.msg) return null;
 
     const { createdAt, nickname, text } = this.msg;
     return html`

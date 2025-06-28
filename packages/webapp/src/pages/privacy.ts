@@ -1,10 +1,10 @@
-import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css } from '@mantou/gem';
+import { adoptedStyle, css, customElement, GemElement, html } from '@mantou/gem';
 
 import 'duoyun-ui/elements/paragraph';
 import 'duoyun-ui/elements/heading';
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :scope {
     display: flex;
     flex-direction: column;
     height: 80vh;
@@ -13,11 +13,7 @@ const style = createCSSSheet(css`
     margin: auto;
     text-align: center;
   }
-`);
-
-/**
- * @customElement p-privacy
- */
+`;
 @customElement('p-privacy')
 @adoptedStyle(style)
 export class PPrivacyElement extends GemElement {

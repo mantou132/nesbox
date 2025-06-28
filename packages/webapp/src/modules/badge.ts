@@ -1,20 +1,10 @@
-import {
-  GemElement,
-  html,
-  adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
-  connectStore,
-  numattribute,
-} from '@mantou/gem';
-
+import { adoptedStyle, connectStore, css, customElement, GemElement, html, numattribute } from '@mantou/gem';
 import { ScFriendStatus, ScUserStatus } from 'src/generated/graphql';
 import { friendStore } from 'src/store';
 import { theme } from 'src/theme';
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :scope {
     position: absolute;
     right: 0;
     top: 0;
@@ -27,17 +17,14 @@ const style = createCSSSheet(css`
     justify-content: center;
     font-size: 0.75em;
   }
-  :host([friendid]) {
+  :scope[friendid] {
     position: static;
   }
-  :host([hidden]) {
+  :scope[hidden] {
     display: none;
   }
-`);
+`;
 
-/**
- * @customElement m-badge
- */
 @customElement('m-badge')
 @adoptedStyle(style)
 @connectStore(friendStore)

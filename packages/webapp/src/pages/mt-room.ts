@@ -1,38 +1,37 @@
 import {
-  html,
+  addListener,
   adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
-  RefObject,
-  refobject,
   connectStore,
+  createRef,
+  css,
+  customElement,
+  effect,
   history,
+  html,
+  mounted,
 } from '@mantou/gem';
+import { DuoyunWakeLockBaseElement } from 'duoyun-ui/elements/base/wake-lock';
 import { createPath, matchPath } from 'duoyun-ui/elements/route';
 import { waitLoading } from 'duoyun-ui/elements/wait';
-import { DuoyunWakeLockBaseElement } from 'duoyun-ui/elements/base/wake-lock';
-import { routes } from 'src/routes';
-
-import { playHintSound } from 'src/utils/common';
+import { configure } from 'src/configure';
 import { globalEvents, queryKeys } from 'src/constants';
 import { GamepadBtnIndex } from 'src/gamepad';
-import { store } from 'src/store';
-import { leaveRoom, updateRoomScreenshot } from 'src/services/api';
-import { configure } from 'src/configure';
-import { theme } from 'src/theme';
-import { updateMtApp } from 'src/mt-app';
-
-import type { MStageElement } from 'src/modules/stage';
 import type { MVoiceRoomElement } from 'src/modules/room-voice';
+import type { MStageElement } from 'src/modules/stage';
+import { mtAppStore } from 'src/mt-app';
+import { routes } from 'src/routes';
+import { leaveRoom, updateRoomScreenshot } from 'src/services/api';
+import { store } from 'src/store';
+import { theme } from 'src/theme';
+import { playHintSound } from 'src/utils/common';
 
 import 'duoyun-ui/elements/space';
-import 'src/modules/stage';
-import 'src/modules/room-voice';
 import 'src/elements/fps';
 import 'src/elements/ping';
+import 'src/modules/room-voice';
+import 'src/modules/stage';
 
-const style = createCSSSheet(css`
+const style = css`
   .stage {
     position: absolute;
     inset: 0;
@@ -48,35 +47,25 @@ const style = createCSSSheet(css`
     padding: 0.2em;
     border-radius: ${theme.smallRound};
   }
-`);
+`;
 
-/**
- * @customElement p-mt-room
- */
 @customElement('p-mt-room')
 @connectStore(store)
 @connectStore(configure)
 @adoptedStyle(style)
 export class PMtRoomElement extends DuoyunWakeLockBaseElement {
-  @refobject stageRef: RefObject<MStageElement>;
-  @refobject voiceRef: RefObject<MVoiceRoomElement>;
+  #stageRef = createRef<MStageElement>();
+  #voiceRef = createRef<MVoiceRoomElement>();
 
   get #playing() {
     return configure.user?.playing;
   }
 
-  constructor() {
-    super();
-    this.addEventListener('dblclick', () => {
-      waitLoading(leaveRoom());
-    });
-  }
-
   #uploadScreenshot = async () => {
-    if (!this.stageRef.element!.hostRomBuffer) return;
+    if (!this.#stageRef.value!.hostRomBuffer) return;
     updateRoomScreenshot({
       id: this.#playing!.id,
-      screenshot: await this.stageRef.element!.getThumbnail(),
+      screenshot: await this.#stageRef.value!.getThumbnail(),
     });
   };
 
@@ -89,46 +78,45 @@ export class PMtRoomElement extends DuoyunWakeLockBaseElement {
       case GamepadBtnIndex.FrontRightTop:
         playHintSound();
         // TODO: settings
-        this.voiceRef.element?.toggleVoice();
+        this.#voiceRef.value?.toggleVoice();
         break;
     }
   };
 
-  mounted = () => {
-    this.effect(
-      () => {
-        if (configure.user && !this.#playing) {
-          const roomFrom = history.getParams().query.get(queryKeys.ROOM_FROM) || '';
-          const { pathname, search } = new URL(roomFrom, location.origin);
-          const returnPath =
-            roomFrom && [routes.rooms, routes.games].some((route) => matchPath(route.pattern, pathname));
-          history.replace({ path: returnPath ? pathname : createPath(routes.games), query: search || undefined });
-        } else {
-          const timer = window.setInterval(this.#uploadScreenshot, 10000);
-          return () => {
-            clearInterval(timer);
-          };
-        }
-      },
-      () => [this.#playing],
-    );
-
-    updateMtApp({ inertNav: true });
-    addEventListener(globalEvents.PRESS_HOST_BUTTON_INDEX, this.#onPressButtonIndex);
+  @mounted()
+  #init = () => {
+    mtAppStore({ inertNav: true });
+    const handle1 = addListener(window, globalEvents.PRESS_HOST_BUTTON_INDEX, this.#onPressButtonIndex);
+    const handle = addListener(this, 'dblclick', () => waitLoading(leaveRoom()));
     return () => {
-      updateMtApp({ inertNav: false });
-      removeEventListener(globalEvents.PRESS_HOST_BUTTON_INDEX, this.#onPressButtonIndex);
+      mtAppStore({ inertNav: false });
+      handle1();
+      handle();
     };
+  };
+
+  @effect((i) => [i.#playing])
+  #updatePath = () => {
+    if (configure.user && !this.#playing) {
+      const roomFrom = history.getParams().query.get(queryKeys.ROOM_FROM) || '';
+      const { pathname, search } = new URL(roomFrom, location.origin);
+      const returnPath = roomFrom && [routes.rooms, routes.games].some((route) => matchPath(route.pattern, pathname));
+      history.replace({ path: returnPath ? pathname : createPath(routes.games), query: search || undefined });
+    } else {
+      const timer = window.setInterval(this.#uploadScreenshot, 10000);
+      return () => {
+        clearInterval(timer);
+      };
+    }
   };
 
   render = () => {
     return html`
-      <m-stage class="stage" ref=${this.stageRef.ref} .padding=${'2em 0 5em'}></m-stage>
+      <m-stage ${this.#stageRef} class="stage"  .padding=${'2em 0 5em'}></m-stage>
       <dy-space class="info">
-        ${this.#playing?.host === configure.user?.id
-          ? html`<nesbox-fps></nesbox-fps>`
-          : html`<nesbox-ping></nesbox-ping>`}
-        <m-room-voice class="icon" ref=${this.voiceRef.ref}></m-room-voice>
+        <nesbox-fps v-if=${this.#playing?.host === configure.user?.id}></nesbox-fps>
+        <nesbox-ping v-else></nesbox-ping>
+        <m-room-voice ${this.#voiceRef} class="icon" ></m-room-voice>
       </dy-space>
     `;
   };

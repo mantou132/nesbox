@@ -1,8 +1,7 @@
-import { html, adoptedStyle, customElement, createCSSSheet, css, GemElement, property } from '@mantou/gem';
-import { marked } from 'marked';
+import { adoptedStyle, css, customElement, GemElement, html, property } from '@mantou/gem';
 import { isMtApp } from '@nesbox/mtapp';
-
-import { Game } from 'src/store';
+import { marked } from 'marked';
+import type { Game } from 'src/store';
 
 import 'duoyun-ui/elements/button';
 import 'duoyun-ui/elements/unsafe';
@@ -10,14 +9,14 @@ import 'duoyun-ui/elements/use';
 import 'duoyun-ui/elements/more';
 import 'duoyun-ui/elements/empty';
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :scope {
     display: block;
     flex-grow: 1;
   }
-`);
+`;
 
-const contentCSS = css`
+const contentCSS = /*css*/ `
   p:first-of-type {
     margin-block-start: 0;
   }
@@ -31,9 +30,6 @@ const contentCSS = css`
   }
 `;
 
-/**
- * @customElement m-game-detail
- */
 @customElement('m-game-detail')
 @adoptedStyle(style)
 export class MGameDetailElement extends GemElement {

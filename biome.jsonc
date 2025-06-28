@@ -1,0 +1,107 @@
+{
+  "$schema": "https://raw.githubusercontent.com/biomejs/biome/refs/tags/%40biomejs/biome%402.0.0-beta.1/packages/%40biomejs/biome/configuration_schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "groups": [
+              ":NODE:",
+              ":BUN:",
+              ":BLANK_LINE:",
+              ":PACKAGE:",
+              ":PACKAGE_WITH_PROTOCOL:",
+              ":BLANK_LINE:",
+              ":ALIAS:",
+              ":PATH:",
+              ":URL:"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "formatter": {
+    "enabled": true,
+    "formatWithErrors": false,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineEnding": "lf",
+    "lineWidth": 120,
+    "attributePosition": "auto"
+  },
+  "html": {
+    "formatter": {
+      "enabled": true
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "jsxQuoteStyle": "double",
+      "quoteProperties": "asNeeded",
+      "trailingCommas": "all",
+      "semicolons": "always",
+      "arrowParentheses": "always",
+      "bracketSpacing": true,
+      "bracketSameLine": false,
+      "quoteStyle": "single",
+      "attributePosition": "auto"
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "correctness": {
+        "noUnusedImports": "warn",
+        "noUnusedPrivateClassMembers": "off",
+        "noUnusedVariables": "warn"
+      },
+      "style": {
+        "noNonNullAssertion": "off",
+        "useAsConstAssertion": "error"
+      },
+      "suspicious": {
+        "noAssignInExpressions": "off",
+        "noExplicitAny": "off",
+        "useGetterReturn": "off"
+      }
+    }
+  },
+  "files": { "maxSize": 10485760 },
+  "overrides": [
+    {
+      "includes": ["**/*.md"],
+      "formatter": { "lineWidth": 100 }
+    },
+    {
+      "includes": ["packages/zombie/**/*"],
+      "linter": { "rules": { "suspicious": { "noConsole": "off" } } }
+    },
+    {
+      "includes": [
+        "games/*/pkg/**/*",
+        "games/*/dist/**/*",
+        "packages/*/dist/**/*",
+        "packages/*/bin/**/*",
+        "packages/*/coverage/**/*",
+        "packages/*/extension/**/*",
+        "packages/flutter_app/ios/Runner/Assets.xcassets/**/*",
+        "deps/**/*",
+        "generated/**/*",
+        "public/**/*",
+        "target/**/*",
+        "nes-pkg/**/*"
+      ],
+      "linter": { "enabled": false },
+      "formatter": { "enabled": false },
+      "assist": { "enabled": false }
+    }
+  ]
+}

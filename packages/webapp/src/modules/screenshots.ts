@@ -1,13 +1,12 @@
-import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, property } from '@mantou/gem';
+import { adoptedStyle, css, customElement, GemElement, html, property } from '@mantou/gem';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
-
-import { getCDNSrc } from 'src/utils/common';
-import { theme } from 'src/theme';
 import { viewTransitionName } from 'src/constants';
-import { Game } from 'src/store';
+import type { Game } from 'src/store';
+import { theme } from 'src/theme';
+import { getCDNSrc } from 'src/utils/common';
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :scope {
     display: flex;
     gap: ${theme.gridGutter};
     overflow: auto;
@@ -34,17 +33,11 @@ const style = createCSSSheet(css`
       width: 100%;
     }
   }
-`);
-type State = {
-  current: number;
-};
+`;
 
-/**
- * @customElement m-screenshots
- */
 @customElement('m-screenshots')
 @adoptedStyle(style)
-export class MScreenshotsElement extends GemElement<State> {
+export class MScreenshotsElement extends GemElement {
   @property game?: Game;
 
   render = () => {

@@ -111,33 +111,37 @@ function genGlobal(options: VMOptions = {}, defaultExposeAPIs: Set<string>) {
   };
 
   const globalObject = {
-    ...Object.getOwnPropertyNames(window).reduce((p, c) => {
-      const v = options.exposeAPIs?.[c];
-      if (defaultExposeAPIs.has(c) || v === true) {
-        p[c] = window[c as keyof Window];
-      } else if (v) {
-        p[c] = mapProp(p[c], window[c as keyof Window], v);
-      } else if (Object.getOwnPropertyDescriptor(window, c)?.configurable) {
-        delete window[c as keyof Window];
-      } else {
-        p[c] = undefined;
-      }
-      return p;
-    }, {} as Record<string, any>),
+    ...Object.getOwnPropertyNames(window).reduce(
+      (p, c) => {
+        const v = options.exposeAPIs?.[c];
+        if (defaultExposeAPIs.has(c) || v === true) {
+          p[c] = window[c as keyof Window];
+        } else if (v) {
+          p[c] = mapProp(p[c], window[c as keyof Window], v);
+        } else if (Object.getOwnPropertyDescriptor(window, c)?.configurable) {
+          delete window[c as keyof Window];
+        } else {
+          p[c] = undefined;
+        }
+        return p;
+      },
+      {} as Record<string, any>,
+    ),
   } as unknown as GlobalObject;
 
   globalObject.globalThis = globalObject;
 
-  globalObject.Function = function (...args: string[]) {
+  globalObject.Function = ((...args: string[]) => {
     const sourceCode = args.pop();
-    return new Function(...args, 'with(this){' + sourceCode + '}').bind(globalObject);
-  } as any;
+    return new Function(...args, `with(this){${sourceCode}}`).bind(globalObject);
+  }) as any;
 
   let isInnerCall = false;
   Object.defineProperty(globalObject, 'eval', {
     get() {
       if (isInnerCall) {
         isInnerCall = false;
+        // biome-ignore lint/security/noGlobalEval: <vm>
         return eval;
       }
       return (sourceCode: string) => {

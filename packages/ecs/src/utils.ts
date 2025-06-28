@@ -1,5 +1,5 @@
-import type { Entity } from './entities';
 import type { Color, Font } from './assets';
+import type { Entity } from './entities';
 
 export function* entitiesGenerator(list: Entity[] | Set<Entity>): Generator<Entity> {
   for (const entity of list) {

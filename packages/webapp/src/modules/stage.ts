@@ -1,49 +1,53 @@
 import {
+  adoptedStyle,
+  attribute,
+  connectStore,
+  createRef,
+  createState,
+  css,
+  customElement,
+  effect,
   GemElement,
   html,
-  adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
-  connectStore,
-  refobject,
-  RefObject,
-  styleMap,
-  attribute,
+  memo,
+  mounted,
   state,
+  styleMap,
 } from '@mantou/gem';
-import JSZip from 'jszip';
-import { hotkeys } from 'duoyun-ui/lib/hotkeys';
+import { Button, type Nes, Player } from '@mantou/nes';
 import { changeLoading, waitLoading } from 'duoyun-ui/elements/wait';
-import { Nes, Button, Player } from '@mantou/nes';
-import { isNotNullish } from 'duoyun-ui/lib/types';
+import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { clamp } from 'duoyun-ui/lib/number';
-
-import { logger } from 'src/logger';
+import { isNotNullish } from 'duoyun-ui/lib/types';
+import JSZip from 'jszip';
+import { configure } from 'src/configure';
 import {
-  ChannelMessage,
-  ChannelMessageType,
-  KeyDownMsg,
-  KeyUpMsg,
-  PointerMoveMsg,
-  Role,
-  RoleAnswer,
-  RoleOffer,
-  TextMsg,
-} from 'src/netplay/common';
-import { RTCHost } from 'src/netplay/host';
-import { RTCClient } from 'src/netplay/client';
-import { getCDNSrc, isValidGameFile, playHintSound, progressFetch } from 'src/utils/common';
-import {
-  CustomGamepadButton,
-  globalEvents,
+  type CustomGamepadButton,
   gameStateType,
+  globalEvents,
   RTCTransportType,
   VideoFilter,
   VideoRenderMethod,
 } from 'src/constants';
-import { configure } from 'src/configure';
+import type { NesboxCanvasElement } from 'src/elements/canvas';
+import { ScGamePlatform } from 'src/generated/graphql';
+import { logger } from 'src/logger';
+import type { MRoomChatElement } from 'src/modules/room-chat';
+import { RTCClient } from 'src/netplay/client';
+import {
+  type ChannelMessage,
+  ChannelMessageType,
+  KeyDownMsg,
+  KeyUpMsg,
+  PointerMoveMsg,
+  type Role,
+  type RoleAnswer,
+  type RoleOffer,
+  type TextMsg,
+} from 'src/netplay/common';
+import { RTCHost } from 'src/netplay/host';
 import { store } from 'src/store';
+import { getCDNSrc, isValidGameFile, playHintSound, progressFetch } from 'src/utils/common';
 import {
   createGame,
   mapPointerButton,
@@ -53,24 +57,21 @@ import {
   requestFrame,
   watchDevRom,
 } from 'src/utils/game';
-import { ScGamePlatform } from 'src/generated/graphql';
 
-import type { MRoomChatElement } from 'src/modules/room-chat';
-import type { NesboxCanvasElement } from 'src/elements/canvas';
-
-import 'src/modules/room-player-list';
-import 'src/modules/room-chat';
-import 'src/modules/room-voice';
 import 'src/elements/canvas';
+import 'src/modules/room-chat';
+import 'src/modules/room-player-list';
+import 'src/modules/room-voice';
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :where(:scope) {
     position: relative;
     display: block;
     background: black;
-  }
-  :host(:where([data-playing], :state(playing))) {
-    cursor: none;
+
+    &:state(playing) {
+      cursor: none;
+    }
   }
   .canvas {
     position: absolute;
@@ -95,43 +96,30 @@ const style = createCSSSheet(css`
     width: min(38em, 100vw);
     padding-inline: 1rem;
   }
-`);
+`;
 
-type State = {
-  messages: TextMsg[];
-  roles: Partial<Record<Player, Role>>;
-  cheats: Exclude<ReturnType<typeof parseCheatCode>, undefined>[];
-  cheatKeyHandles: Record<string, (evt: KeyboardEvent) => void>;
-  combos: ReturnType<typeof parseComboCode>[];
-  comboKeyHandles: Record<string, (evt: KeyboardEvent) => void>;
-  canvasWidth: number;
-  canvasHeight: number;
-};
-
-/**
- * @customElement m-stage
- */
 @customElement('m-stage')
 @connectStore(store)
 @connectStore(configure)
 @adoptedStyle(style)
-export class MStageElement extends GemElement<State> {
-  @refobject canvasRef: RefObject<NesboxCanvasElement>;
-  @refobject audioRef: RefObject<HTMLAudioElement>;
-  @refobject chatRef: RefObject<MRoomChatElement>;
+export class MStageElement extends GemElement {
   @attribute padding: string;
   @state playing: boolean;
 
-  state: State = {
-    messages: [],
-    roles: {},
-    cheats: [],
-    cheatKeyHandles: {},
-    combos: [],
-    comboKeyHandles: {},
+  #audioRef = createRef<HTMLAudioElement>();
+  #chatRef = createRef<MRoomChatElement>();
+  #canvasRef = createRef<NesboxCanvasElement>();
+
+  #state = createState({
+    messages: [] as TextMsg[],
+    roles: {} as Partial<Record<Player, Role>>,
+    cheats: [] as Exclude<ReturnType<typeof parseCheatCode>, undefined>[],
+    cheatKeyHandles: {} as Record<string, (evt: KeyboardEvent) => void>,
+    combos: [] as ReturnType<typeof parseComboCode>[],
+    comboKeyHandles: {} as Record<string, (evt: KeyboardEvent) => void>,
     canvasWidth: 0,
     canvasHeight: 0,
-  };
+  });
 
   get #settings() {
     return configure.user?.settings;
@@ -176,7 +164,7 @@ export class MStageElement extends GemElement<State> {
     if (this.#isHost) {
       this.#setVolume();
     } else {
-      this.audioRef.element!.muted = false;
+      this.#audioRef.value!.muted = false;
     }
   };
 
@@ -190,7 +178,7 @@ export class MStageElement extends GemElement<State> {
     if (this.#isHost) {
       this.#setVolume(0);
     } else {
-      this.audioRef.element!.muted = true;
+      this.#audioRef.value!.muted = true;
     }
   };
 
@@ -217,13 +205,13 @@ export class MStageElement extends GemElement<State> {
     const readVal = (addr: number, len: number) => {
       return new Uint32Array(
         new Uint8Array(
-          Array.from({ length: len === 3 ? 4 : len }, (v, i) => {
+          Array.from({ length: len === 3 ? 4 : len }, (_v, i) => {
             return this.#gameInstance!.read_ram(addr + i);
           }),
         ).buffer,
       )[0];
     };
-    this.state.cheats.forEach((cheat) => {
+    this.#state.cheats.forEach((cheat) => {
       const { enabled, addr, type, bytes, val, len } = cheat;
       if (!enabled) return;
       const write = () => bytes.forEach((byte, i) => this.#gameInstance!.write_ram(addr + i, byte));
@@ -284,7 +272,7 @@ export class MStageElement extends GemElement<State> {
       this.#settings?.video.rtcImprove !== RTCTransportType.CLIP || frameNum % 180 === 0,
     );
     const frameLen = this.#gameInstance.frame_len();
-    this.canvasRef.element!.paint(new Uint8Array(memory.buffer, framePtr, frameLen));
+    this.#canvasRef.value!.paint(new Uint8Array(memory.buffer, framePtr, frameLen));
 
     const qoiFramePtr = this.#gameInstance.qoi_frame();
     const qoiFrameLen = this.#gameInstance.qoi_frame_len();
@@ -329,7 +317,7 @@ export class MStageElement extends GemElement<State> {
 
       const game: Nes = await createGame(filename, romBuffer, this.#sampleRate, this.#game!.maxPlayer);
 
-      this.setState({ canvasWidth: game.width(), canvasHeight: game.height() });
+      this.#state({ canvasWidth: game.width(), canvasHeight: game.height() });
       this.#gameInstance = game;
       if (this.#isHost) {
         this.hostRomBuffer = romBuffer;
@@ -352,7 +340,7 @@ export class MStageElement extends GemElement<State> {
         const framePtr = this.#gameInstance.decode_qoi(qoiBuffer);
         const frameLen = this.#gameInstance.decode_qoi_len();
         const frame = new Uint8Array(memory.buffer, framePtr, frameLen);
-        this.canvasRef.element!.paint(frame, [...part]);
+        this.#canvasRef.value!.paint(frame, [...part]);
       }
       return;
     }
@@ -362,11 +350,11 @@ export class MStageElement extends GemElement<State> {
         if (detail.userId) {
           playHintSound(detail.userId === this.#userId ? 'sended' : 'received');
         }
-        this.setState({ messages: [detail as TextMsg, ...this.state.messages] });
+        this.#state({ messages: [detail as TextMsg, ...this.#state.messages] });
         break;
       // both
-      case ChannelMessageType.ROLE_ANSWER:
-        const roleIds = new Set(Object.values(this.state.roles).map((role) => role?.userId));
+      case ChannelMessageType.ROLE_ANSWER: {
+        const roleIds = new Set(Object.values(this.#state.roles).map((role) => role?.userId));
         const newRoles = (detail as RoleAnswer).roles;
         if (
           Object.values(newRoles).some(
@@ -375,8 +363,9 @@ export class MStageElement extends GemElement<State> {
         ) {
           playHintSound('joined');
         }
-        this.setState({ roles: { ...newRoles } });
+        this.#state({ roles: { ...newRoles } });
         break;
+      }
       // host
       case ChannelMessageType.KEYDOWN:
         this.#gameInstance?.handle_button_event((detail as KeyDownMsg).player, (detail as KeyDownMsg).button, true);
@@ -386,10 +375,11 @@ export class MStageElement extends GemElement<State> {
         this.#gameInstance?.handle_button_event((detail as KeyDownMsg).player, (detail as KeyUpMsg).button, false);
         break;
       // host
-      case ChannelMessageType.POINTER_MOVE:
+      case ChannelMessageType.POINTER_MOVE: {
         const { player, x, y, dx, dy } = detail as PointerMoveMsg;
         this.#gameInstance?.handle_motion_event(player, x, y, dx, dy);
         break;
+      }
     }
   };
 
@@ -399,7 +389,7 @@ export class MStageElement extends GemElement<State> {
 
     this.#rtc.start({
       host: this.#playing!.host,
-      audio: this.audioRef.element!,
+      audio: this.#audioRef.value!,
       stream: this.#createAudioStream(),
     });
   };
@@ -450,7 +440,7 @@ export class MStageElement extends GemElement<State> {
   #onPointerMove = (event: PointerEvent) => {
     this.playing = false;
     if (!this.#gameInstance) return;
-    const [x, y, dx, dy] = positionMapping(event, this.canvasRef.element!);
+    const [x, y, dx, dy] = positionMapping(event, this.#canvasRef.value!);
     if (this.#isHost) {
       this.#gameInstance.handle_motion_event(Player.One, x, y, dx, dy);
     } else {
@@ -488,11 +478,11 @@ export class MStageElement extends GemElement<State> {
     } else {
       hotkeys({
         enter: (event: KeyboardEvent) => {
-          this.chatRef.element?.focus();
+          this.#chatRef.value?.focus();
           event.stopPropagation();
         },
-        ...this.state.cheatKeyHandles,
-        ...this.state.comboKeyHandles,
+        ...this.#state.cheatKeyHandles,
+        ...this.#state.comboKeyHandles,
       })(event);
     }
   };
@@ -547,99 +537,91 @@ export class MStageElement extends GemElement<State> {
 
   #hasMask = () => this.#getMaskFactor().every((e) => !e);
 
-  mounted = () => {
-    this.effect(
-      () => {
-        if (this.#isHost) {
-          return requestFrame(this.#loop, this.#settings?.video.refreshRate);
-        }
-      },
-      () => [this.#settings?.video.refreshRate],
-    );
+  @effect((i) => [i.#settings?.video.refreshRate])
+  #refreshRate = () => {
+    if (this.#isHost) {
+      return requestFrame(this.#loop, this.#settings?.video.refreshRate);
+    }
+  };
 
-    this.effect(
-      () => {
-        if (this.#playing) {
-          this.#rtc?.destroy();
-          this.#audioContext?.close();
-          this.#initRtc();
-        }
-      },
-      () => [this.#playing?.id],
-    );
+  @effect((i) => [i.#playing?.id])
+  #resetRTC = () => {
+    if (this.#playing) {
+      this.#rtc?.destroy();
+      this.#audioContext?.close();
+      this.#initRtc();
+    }
+  };
 
-    this.memo(
-      () => {
-        const gameId = this.#playing?.gameId;
-        const cheatSettings = this.#settings?.cheat;
-        if (!gameId || !cheatSettings) return;
-        const cheats = (cheatSettings[gameId] || []).map((cheat) => parseCheatCode(cheat)).filter(isNotNullish);
+  @memo((i) => [i.#playing?.gameId, i.#settings?.cheat])
+  #updateCheats = () => {
+    const gameId = this.#playing?.gameId;
+    const cheatSettings = this.#settings?.cheat;
+    if (!gameId || !cheatSettings) return;
+    const cheats = (cheatSettings[gameId] || []).map((cheat) => parseCheatCode(cheat)).filter(isNotNullish);
 
-        this.setState({
-          cheats,
-          cheatKeyHandles: Object.fromEntries(
-            cheats
-              .filter((cheat) => cheat.cheat.toggleKey)
-              .map((cheat) => [
-                cheat.cheat.toggleKey,
-                (evt: KeyboardEvent) => {
-                  cheat.enabled = !cheat.enabled;
-                  evt.stopPropagation();
-                },
-              ]),
-          ),
-        });
-      },
-      () => [this.#playing?.gameId, this.#settings?.cheat],
-    );
+    this.#state({
+      cheats,
+      cheatKeyHandles: Object.fromEntries(
+        cheats
+          .filter((cheat) => cheat.cheat.toggleKey)
+          .map((cheat) => [
+            cheat.cheat.toggleKey,
+            (evt: KeyboardEvent) => {
+              cheat.enabled = !cheat.enabled;
+              evt.stopPropagation();
+            },
+          ]),
+      ),
+    });
+  };
 
-    this.memo(
-      () => {
-        const gameId = this.#playing?.gameId;
-        const comboSettings = this.#settings?.combo;
-        if (!gameId || !comboSettings) return;
-        const combos = (comboSettings[gameId] || []).map((combo) => parseComboCode(combo));
+  @memo((i) => [i.#playing?.gameId, i.#settings?.cheat])
+  #updateCombos = () => {
+    const gameId = this.#playing?.gameId;
+    const comboSettings = this.#settings?.combo;
+    if (!gameId || !comboSettings) return;
+    const combos = (comboSettings[gameId] || []).map((combo) => parseComboCode(combo));
 
-        this.setState({
-          combos,
-          comboKeyHandles: Object.fromEntries(
-            combos.map((combo) => [
-              combo.combo.binding,
-              (evt: KeyboardEvent) => {
-                // only once combo
-                if (this.#currentComboMap.size) return;
-                this.#currentComboMap.set(combo, 0);
-                evt.stopPropagation();
-              },
-            ]),
-          ),
-        });
-      },
-      () => [this.#playing?.gameId, this.#settings?.cheat],
-    );
+    this.#state({
+      combos,
+      comboKeyHandles: Object.fromEntries(
+        combos.map((combo) => [
+          combo.combo.binding,
+          (evt: KeyboardEvent) => {
+            // only once combo
+            if (this.#currentComboMap.size) return;
+            this.#currentComboMap.set(combo, 0);
+            evt.stopPropagation();
+          },
+        ]),
+      ),
+    });
+  };
 
-    this.effect(
-      () => {
-        if (this.#rom) {
-          waitLoading(this.#loadRom(), {
-            transparent: true,
-            position: this.#hasMask() ? 'center' : 'start',
-          });
-        }
-      },
-      () => [this.#rom],
-    );
+  @effect((i) => [i.#rom])
+  #showLoading = () => {
+    if (this.#rom) {
+      waitLoading(this.#loadRom(), {
+        transparent: true,
+        position: this.#hasMask() ? 'center' : 'start',
+      });
+    }
+  };
 
-    this.effect(() => {
-      if (this.#hasMask()) {
-        this.#resumeAudio();
-        changeLoading({ position: 'center' });
-      } else {
-        this.#pauseAudio();
-        changeLoading({ position: 'start' });
-      }
-    }, this.#getMaskFactor);
+  @effect((i) => i.#getMaskFactor())
+  #updateAudio = () => {
+    if (this.#hasMask()) {
+      this.#resumeAudio();
+      changeLoading({ position: 'center' });
+    } else {
+      this.#pauseAudio();
+      changeLoading({ position: 'start' });
+    }
+  };
 
+  @mounted()
+  #init = () => {
     this.addEventListener('pointermove', this.#onPointerMove);
     addEventListener('keydown', this.#onKeyDown);
     this.addEventListener('pointerdown', this.#onPointerDown);
@@ -662,12 +644,12 @@ export class MStageElement extends GemElement<State> {
   };
 
   render = () => {
-    const { messages, roles, canvasWidth, canvasHeight } = this.state;
+    const { messages, roles, canvasWidth, canvasHeight } = this.#state;
 
     return html`
       <nesbox-canvas
+      ${this.#canvasRef}
         class="canvas"
-        ref=${this.canvasRef.ref}
         .width=${canvasWidth}
         .height=${canvasHeight}
         .filter=${this.#settings?.video.filter || VideoFilter.DEFAULT}
@@ -676,10 +658,10 @@ export class MStageElement extends GemElement<State> {
           imageRendering: this.#settings?.video.render || VideoRenderMethod.PIXELATED,
         })}
       ></nesbox-canvas>
-      <audio ref=${this.audioRef.ref} hidden></audio>
+      <audio ${this.#audioRef} hidden></audio>
       <m-room-chat
+      ${this.#chatRef}
         class="chat"
-        ref=${this.chatRef.ref}
         .messages=${messages}
         @pointerdown=${(evt: PointerEvent) => this.#stopPropagation(evt, true)}
         @submit=${({ detail }: CustomEvent<TextMsg>) => this.#rtc?.send(detail)}
@@ -697,18 +679,18 @@ export class MStageElement extends GemElement<State> {
   };
 
   getThumbnail = () => {
-    return this.canvasRef.element!.captureThumbnail();
+    return this.#canvasRef.value!.captureThumbnail();
   };
 
   screenshot = () => {
-    return this.canvasRef.element!.screenshot();
+    return this.#canvasRef.value!.screenshot();
   };
 
   getStream = () => {
-    const videoTrack = this.canvasRef.element!.captureVideoTrack();
+    const videoTrack = this.#canvasRef.value!.captureVideoTrack();
     const audioTrack = this.#isHost
       ? this.#audioStreamDestination!.stream.getAudioTracks()[0]
-      : (this.audioRef.element!.srcObject as MediaStream).getAudioTracks()[0];
+      : (this.#audioRef.value!.srcObject as MediaStream).getAudioTracks()[0];
     return {
       stream: new MediaStream([videoTrack, audioTrack]),
       stopStream: () => {
@@ -734,7 +716,7 @@ export class MStageElement extends GemElement<State> {
     } else {
       return {
         type: gameStateType.NORMAL,
-        buffer: state.buffer,
+        buffer: state.buffer as ArrayBuffer,
       };
     }
   };

@@ -1,5 +1,5 @@
-import { Nes as ONes, Button, Player } from '@mantou/nes';
-import { encodeQoiFrame, decodeQoiFrame } from '@mantou/nes-sandbox';
+import { Button, type Nes as ONes, Player } from '@mantou/nes';
+import { decodeQoiFrame, encodeQoiFrame } from '@mantou/nes-sandbox';
 import {
   ADDR_GAMEPAD1,
   ADDR_MOUSE_BUTTONS,
@@ -15,8 +15,8 @@ import {
   MOUSE_LEFT,
   MOUSE_RIGHT,
   PAUSE_REBOOTING,
-  WIDTH,
   Runtime,
+  WIDTH,
 } from '@mantou/nes-wasm4';
 
 function getPlayerIdx(player: Player) {

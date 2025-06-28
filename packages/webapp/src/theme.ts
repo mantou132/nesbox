@@ -1,10 +1,9 @@
-import { updateTheme as updateDuoyunTheme, darkTheme } from 'duoyun-ui/lib/theme';
-import { createTheme, getThemeStore, updateTheme } from '@mantou/gem/helper/theme';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
+import { createTheme, getThemeStore } from '@mantou/gem/helper/theme';
 import { isMtApp } from '@nesbox/mtapp';
-
+import { darkTheme, theme as duoyunTheme } from 'duoyun-ui/lib/theme';
+import { configure } from 'src/configure';
 import { i18n } from 'src/i18n/basic';
-import { configure, updateConfigureStore } from 'src/configure';
 
 export const themeNames = {
   get default() {
@@ -100,19 +99,19 @@ export const theme = createTheme({ ...defaultTheme });
 export const themeStore = getThemeStore(theme);
 
 export function changeTheme(name: ThemeName) {
-  updateConfigureStore({ theme: name });
+  configure({ theme: name });
   switch (name) {
     case 'punk':
-      updateTheme(theme, punkTheme);
+      theme(punkTheme);
       break;
     case 'retro':
-      updateTheme(theme, retroTheme);
+      theme(retroTheme);
       break;
     case 'default':
-      updateTheme(theme, defaultTheme);
+      theme(defaultTheme);
       break;
   }
-  updateDuoyunTheme(themeStore);
+  duoyunTheme(themeStore);
 }
 
 changeTheme(configure.theme);

@@ -1,34 +1,33 @@
 import {
-  GemElement,
-  html,
   adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
   connectStore,
-  refobject,
-  RefObject,
+  createRef,
+  createState,
+  css,
+  customElement,
+  effect,
+  GemElement,
   history,
+  html,
+  mounted,
 } from '@mantou/gem';
-import { locale } from 'duoyun-ui/lib/locale';
-import { Button, Nes, Player } from '@mantou/nes';
-import { hotkeys } from 'duoyun-ui/lib/hotkeys';
-import { clamp } from 'duoyun-ui/lib/number';
+import { Button, type Nes, Player } from '@mantou/nes';
 import { Modal } from 'duoyun-ui/elements/modal';
-import { createPath, RouteItem } from 'duoyun-ui/elements/route';
-import { routes } from 'src/routes';
-
+import { createPath, type RouteItem } from 'duoyun-ui/elements/route';
+import { hotkeys } from 'duoyun-ui/lib/hotkeys';
+import { locale } from 'duoyun-ui/lib/locale';
+import { clamp } from 'duoyun-ui/lib/number';
 import { configure, defaultKeybinding, setNesFile } from 'src/configure';
-import { createGame, mapPointerButton, positionMapping, requestFrame, watchDevRom } from 'src/utils/game';
-
 import type { NesboxCanvasElement } from 'src/elements/canvas';
+import { routes } from 'src/routes';
+import { createGame, mapPointerButton, positionMapping, requestFrame, watchDevRom } from 'src/utils/game';
 
 import 'duoyun-ui/elements/heading';
 import 'duoyun-ui/elements/link';
 import 'duoyun-ui/elements/button';
 import 'src/elements/canvas';
 
-const style = createCSSSheet(css`
+const style = css`
   .canvas {
     position: absolute;
     width: 100%;
@@ -49,26 +48,18 @@ const style = createCSSSheet(css`
   .nodata[hidden] {
     display: none;
   }
-`);
+`;
 
-type State = {
-  canvasWidth: number;
-  canvasHeight: number;
-};
-
-/**
- * @customElement p-emulator
- */
 @customElement('p-emulator')
 @adoptedStyle(style)
 @connectStore(configure)
-export class PEmulatorElement extends GemElement<State> {
-  @refobject canvasRef: RefObject<NesboxCanvasElement>;
+export class PEmulatorElement extends GemElement {
+  #canvasRef = createRef<NesboxCanvasElement>();
 
-  state: State = {
+  #state = createState({
     canvasWidth: 0,
     canvasHeight: 0,
-  };
+  });
 
   get #isVisible() {
     return document.visibilityState === 'visible';
@@ -128,7 +119,7 @@ export class PEmulatorElement extends GemElement<State> {
 
   #onPointerMove = (event: PointerEvent) => {
     if (!this.#game) return;
-    const [x, y, dx, dy] = positionMapping(event, this.canvasRef.element!);
+    const [x, y, dx, dy] = positionMapping(event, this.#canvasRef.value!);
     this.#game.handle_motion_event(Player.One, x, y, dx, dy);
   };
 
@@ -156,7 +147,7 @@ export class PEmulatorElement extends GemElement<State> {
     const button = this.#getGamepadButton(event);
     if (!button) return;
     this.#enableAudio();
-    const [x, y, dx, dy] = positionMapping(event, this.canvasRef.element!);
+    const [x, y, dx, dy] = positionMapping(event, this.#canvasRef.value!);
     this.#game?.handle_motion_event(Player.One, x, y, dx, dy);
     this.#game?.handle_button_event(Player.One, button.btn, true);
   };
@@ -179,7 +170,7 @@ export class PEmulatorElement extends GemElement<State> {
 
     const framePtr = this.#game.frame(false, false);
     const frameLen = this.#game.frame_len();
-    this.canvasRef.element!.paint(new Uint8Array(memory.buffer, framePtr, frameLen));
+    this.#canvasRef.value!.paint(new Uint8Array(memory.buffer, framePtr, frameLen));
 
     if (!this.#game.sound() || !this.#audioContext) return;
     const audioBuffer = this.#audioContext.createBuffer(1, this.#bufferSize, this.#sampleRate);
@@ -192,6 +183,7 @@ export class PEmulatorElement extends GemElement<State> {
     this.#nextStartTime = start + 1 / 60;
   };
 
+  @effect(() => [configure.openNesFile])
   #loadRom = async () => {
     if (!configure.openNesFile) return;
 
@@ -201,20 +193,20 @@ export class PEmulatorElement extends GemElement<State> {
       this.#sampleRate,
     );
 
-    this.setState({ canvasWidth: this.#game.width(), canvasHeight: this.#game.height() });
+    this.#state({ canvasWidth: this.#game.width(), canvasHeight: this.#game.height() });
 
     this.#nextStartTime = 0;
   };
 
-  mounted = () => {
-    this.#audioContext = new AudioContext({ sampleRate: this.#sampleRate });
-    this.effect(() => requestFrame(this.#loop));
-    this.effect(this.#loadRom, () => [configure.openNesFile]);
+  @effect()
+  #frame = () => requestFrame(this.#loop);
 
-    this.effect(
-      () => (configure.windowHasFocus ? this.#enableAudio() : this.#disableAudio()),
-      () => [configure.windowHasFocus],
-    );
+  @effect(() => [configure.windowHasFocus])
+  #updateAudio = () => (configure.windowHasFocus ? this.#enableAudio() : this.#disableAudio());
+
+  @mounted()
+  #init = () => {
+    this.#audioContext = new AudioContext({ sampleRate: this.#sampleRate });
 
     this.addEventListener('pointermove', this.#onPointerMove);
     addEventListener('keydown', this.#onKeyDown);
@@ -232,12 +224,12 @@ export class PEmulatorElement extends GemElement<State> {
   };
 
   render = () => {
-    const { canvasWidth, canvasHeight } = this.state;
+    const { canvasWidth, canvasHeight } = this.#state;
 
     return html`
       <nesbox-canvas
+        ${this.#canvasRef}
         class="canvas"
-        ref=${this.canvasRef.ref}
         .width=${canvasWidth}
         .height=${canvasHeight}
       ></nesbox-canvas>

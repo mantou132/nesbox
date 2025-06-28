@@ -1,18 +1,17 @@
-import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css } from '@mantou/gem';
+import { adoptedStyle, createState, css, customElement, GemElement, html, memo, mounted } from '@mantou/gem';
 import { ComparerType, comparer } from 'duoyun-ui/lib/utils';
-
-import { BcMsgEvent, BcMsgType, Ram } from 'src/constants';
+import { type BcMsgEvent, BcMsgType, type Ram } from 'src/constants';
 import { icons } from 'src/icons';
 import { theme } from 'src/theme';
 
-import 'duoyun-ui/elements/list';
 import 'duoyun-ui/elements/button';
 import 'duoyun-ui/elements/input';
-import 'duoyun-ui/elements/switch';
+import 'duoyun-ui/elements/list';
 import 'duoyun-ui/elements/select';
+import 'duoyun-ui/elements/switch';
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :scope {
     display: flex;
     flex-direction: column;
     height: 0;
@@ -24,6 +23,9 @@ const style = createCSSSheet(css`
     gap: 1em;
     margin-block-end: 1em;
     font-size: 0.875em;
+  }
+  .update-group dy-button {
+    width: auto;
   }
   .list {
     height: 0;
@@ -45,17 +47,7 @@ const style = createCSSSheet(css`
   .list::part(column) {
     width: 33%;
   }
-`);
-
-type State = {
-  currentAddr: Set<number>;
-  prevRam: Ram;
-  ram: Ram;
-  quickFilter: ComparerType | '';
-  valueFilter: string;
-  base: boolean;
-  dataViewType: DataViewType;
-};
+`;
 
 type Row = {
   addr: number;
@@ -70,21 +62,18 @@ enum DataViewType {
   F32 = 'f32',
 }
 
-/**
- * @customElement p-ramviewer
- */
 @customElement('p-ramviewer')
 @adoptedStyle(style)
-export class PRamviewerElement extends GemElement<State> {
-  state: State = {
-    currentAddr: new Set(),
-    prevRam: { bytes: new Uint8Array(), map: new Uint32Array() },
-    ram: { bytes: new Uint8Array(), map: new Uint32Array() },
-    quickFilter: '',
-    valueFilter: '',
+export class PRamviewerElement extends GemElement {
+  #state = createState({
+    currentAddr: new Set<number>(),
+    prevRam: { bytes: new Uint8Array(), map: new Uint32Array() } as Ram,
+    ram: { bytes: new Uint8Array(), map: new Uint32Array() } as Ram,
+    quickFilter: '' as ComparerType | '',
+    valueFilter: '' as ComparerType | '',
     base: true,
     dataViewType: DataViewType.U8,
-  };
+  });
 
   #bc = new BroadcastChannel('');
 
@@ -164,18 +153,18 @@ export class PRamviewerElement extends GemElement<State> {
 
   #snapshot = async () => {
     const newRam = await this.#getRam();
-    const { ram, base } = this.state;
-    this.setState({
+    const { ram, base } = this.#state;
+    this.#state({
       ram: newRam,
       prevRam: ram,
       currentAddr: base && this.#data.length ? new Set(this.#data.map((e) => e.addr)) : new Set(),
     });
   };
 
-  #getHexAddr = (v: number) => '0x' + v.toString(16).toLowerCase().padStart(4, '0');
+  #getHexAddr = (v: number) => `0x${v.toString(16).toLowerCase().padStart(4, '0')}`;
 
   #getData = (ram: Ram) => {
-    const { dataViewType } = this.state;
+    const { dataViewType } = this.#state;
     switch (dataViewType) {
       case DataViewType.U16:
         return new Uint16Array(ram.bytes.buffer, ram.bytes.byteOffset);
@@ -188,54 +177,51 @@ export class PRamviewerElement extends GemElement<State> {
     }
   };
 
-  mounted = () => {
+  @memo((i) => [i.#state.ram])
+  #setData = () => {
+    const { ram, prevRam } = this.#state;
+    const data = this.#getData(ram);
+    const prevData = this.#getData(prevRam);
+
+    let offsetIndex = 0;
+    let offset = ram.map[offsetIndex] || 0;
+    const getAddr = (index: number) => {
+      const byteIndex = index * data.BYTES_PER_ELEMENT;
+      const addr = byteIndex + offset;
+      if (addr > ram.map[offsetIndex + 1]) {
+        offsetIndex += 2;
+        const new_addr = ram.map[offsetIndex];
+        if (new_addr === undefined) {
+          throw new Error('ram map error');
+        }
+        offset = new_addr - byteIndex;
+        return new_addr;
+      } else {
+        return addr;
+      }
+    };
+    this.#fullData = [...data].map((v, i) => ({
+      addr: getAddr(i),
+      prev: prevData[i],
+      now: v,
+    }));
+  };
+
+  @mounted()
+  #init = () => {
     this.#snapshot();
     return () => this.#bc.close();
   };
 
-  willMount = () => {
-    this.memo(
-      () => {
-        const { ram, prevRam } = this.state;
-        const data = this.#getData(ram);
-        const prevData = this.#getData(prevRam);
-
-        let offsetIndex = 0;
-        let offset = ram.map[offsetIndex] || 0;
-        const getAddr = (index: number) => {
-          const byteIndex = index * data.BYTES_PER_ELEMENT;
-          const addr = byteIndex + offset;
-          if (addr > ram.map[offsetIndex + 1]) {
-            offsetIndex += 2;
-            const new_addr = ram.map[offsetIndex];
-            if (new_addr === undefined) {
-              throw new Error('ram map error');
-            }
-            offset = new_addr - byteIndex;
-            return new_addr;
-          } else {
-            return addr;
-          }
-        };
-        this.#fullData = [...data].map((v, i) => ({
-          addr: getAddr(i),
-          prev: prevData[i],
-          now: v,
-        }));
-      },
-      () => [this.state.ram],
-    );
-  };
-
   render = () => {
-    const { quickFilter, valueFilter, base, currentAddr, dataViewType } = this.state;
+    const { quickFilter, valueFilter, base, currentAddr, dataViewType } = this.#state;
 
     this.#data = this.#fullData
       .filter(({ now, addr }) =>
         valueFilter
           ? valueFilter.startsWith('0x')
             ? this.#getHexAddr(addr).includes(valueFilter)
-            : Number(valueFilter) == now
+            : Number(valueFilter) === now
           : true,
       )
       .filter(({ now, prev }) => (quickFilter ? comparer(now, quickFilter, prev) : true))
@@ -246,19 +232,19 @@ export class PRamviewerElement extends GemElement<State> {
         <dy-switch
           neutral="informative"
           .checked=${base}
-          @change=${({ detail }: CustomEvent<boolean>) => this.setState({ base: detail })}
+          @change=${({ detail }: CustomEvent<boolean>) => this.#state({ base: detail })}
         >
           Base
         </dy-switch>
         <dy-select
           .options=${this.#viewOptions}
           placeholder="Data View"
-          @change=${({ detail }: CustomEvent<DataViewType>) => this.setState({ dataViewType: detail })}
+          @change=${({ detail }: CustomEvent<DataViewType>) => this.#state({ dataViewType: detail })}
           .value=${dataViewType}
         ></dy-select>
       </div>
       <div class="header">
-        <dy-input-group>
+        <dy-input-group class="update-group">
           <dy-button color="neutral" @click=${this.#snapshot}>Update</dy-button>
           <dy-button
             small
@@ -267,7 +253,7 @@ export class PRamviewerElement extends GemElement<State> {
             aria-label="Clear"
             .icon=${icons.close}
             @click=${() => {
-              this.setState({
+              this.#state({
                 currentAddr: new Set(),
                 ram: { bytes: new Uint8Array(), map: new Uint32Array() },
                 prevRam: { bytes: new Uint8Array(), map: new Uint32Array() },
@@ -281,15 +267,15 @@ export class PRamviewerElement extends GemElement<State> {
         <dy-select
           .options=${this.#filterOptions}
           placeholder="Quick Filter"
-          @change=${({ detail }: CustomEvent<ComparerType>) => this.setState({ quickFilter: detail, valueFilter: '' })}
+          @change=${({ detail }: CustomEvent<ComparerType>) => this.#state({ quickFilter: detail, valueFilter: '' })}
           .value=${quickFilter}
         ></dy-select>
         <dy-input
           placeholder="Addr/Value Filter"
           clearable
           @change=${({ detail }: CustomEvent<string>) =>
-            this.setState({ valueFilter: detail.toLowerCase(), quickFilter: '' })}
-          @clear=${() => this.setState({ valueFilter: '' })}
+            this.#state({ valueFilter: detail.toLowerCase() as ComparerType, quickFilter: '' })}
+          @clear=${() => this.#state({ valueFilter: '' })}
           .value=${valueFilter}
         ></dy-input>
       </div>
@@ -300,7 +286,6 @@ export class PRamviewerElement extends GemElement<State> {
       </div>
       <dy-list
         class="list"
-        itemexportparts="column"
         .items=${this.#data}
         .renderItem=${this.#renderRow}
         .getKey=${this.#getRowKey}

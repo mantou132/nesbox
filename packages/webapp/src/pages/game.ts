@@ -1,35 +1,25 @@
-import {
-  html,
-  adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
-  connectStore,
-  numattribute,
-  GemElement,
-} from '@mantou/gem';
+import { adoptedStyle, connectStore, css, customElement, GemElement, html, mounted, numattribute } from '@mantou/gem';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
-import { formatDuration, Time } from 'duoyun-ui/lib/time';
 import { waitLoading } from 'duoyun-ui/elements/wait';
-
-import { getComments } from 'src/services/guest-api';
-import { getRecord } from 'src/services/api';
-import { store } from 'src/store';
-import { icons } from 'src/icons';
-import { theme } from 'src/theme';
-import { i18n } from 'src/i18n/basic';
-import { getGithubGames } from 'src/utils/common';
-import { githubIssue } from 'src/constants';
+import { formatDuration, Time } from 'duoyun-ui/lib/time';
 import { configure } from 'src/configure';
+import { githubIssue } from 'src/constants';
+import { i18n } from 'src/i18n/basic';
+import { icons } from 'src/icons';
+import { getRecord } from 'src/services/api';
+import { getComments } from 'src/services/guest-api';
+import { store } from 'src/store';
+import { theme } from 'src/theme';
+import { getGithubGames } from 'src/utils/common';
 
 import 'duoyun-ui/elements/action-text';
 import 'duoyun-ui/elements/divider';
-import 'src/modules/screenshots';
 import 'src/modules/comment-list';
 import 'src/modules/game-detail';
+import 'src/modules/screenshots';
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :scope {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
@@ -68,14 +58,10 @@ const style = createCSSSheet(css`
       flex-direction: column;
     }
   }
-`);
+`;
 
-/**
- * @customElement p-game
- */
 @customElement('p-game')
 @adoptedStyle(style)
-@connectStore(i18n.store)
 @connectStore(store)
 export class PGameElement extends GemElement {
   @numattribute gameId: number;
@@ -97,7 +83,8 @@ export class PGameElement extends GemElement {
     }
   };
 
-  mounted = () => {
+  @mounted()
+  #init = () => {
     getComments(this.gameId);
     if (configure.user) {
       getRecord(this.gameId);
@@ -112,16 +99,12 @@ export class PGameElement extends GemElement {
       <div class="content">
         <m-game-detail .game=${this.#game}></m-game-detail>
         <div class="aside">
-          ${record
-            ? html`
-                <dy-use class="stats-icon" .element=${icons.date}>
-                  ${i18n.get('page.game.lastPlay', new Time().relativeTimeFormat(record.lastPlayStartAt))}
-                </dy-use>
-                <dy-use class="stats-icon" .element=${icons.schedule}>
-                  ${i18n.get('page.game.totalPlay', formatDuration(record.playTotal))}
-                </dy-use>
-              `
-            : ''}
+            <dy-use v-if=${!!record} class="stats-icon" .element=${icons.date}>
+              ${i18n.get('page.game.lastPlay', new Time().relativeTimeFormat(record?.lastPlayStartAt || 0))}
+            </dy-use>
+            <dy-use v-if=${!!record} class="stats-icon" .element=${icons.schedule}>
+              ${i18n.get('page.game.totalPlay', formatDuration(record?.playTotal || 0, { precision: 'm' }))}
+            </dy-use>
           <dy-use class="stats-icon" @click=${this.#edit} .element=${icons.edit}>
             <dy-action-text>${i18n.get('page.game.update')}</dy-action-text>
           </dy-use>

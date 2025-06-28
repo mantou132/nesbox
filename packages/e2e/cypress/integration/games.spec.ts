@@ -1,4 +1,3 @@
-import type {} from 'cypress';
 import { prepare } from 'cypress/prepare';
 
 context('Start cypress test', () => {

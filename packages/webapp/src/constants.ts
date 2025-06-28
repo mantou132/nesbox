@@ -1,7 +1,6 @@
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
-import { isMtApp } from '@nesbox/mtapp';
-
 import type { Button, Player } from '@mantou/nes';
+import { isMtApp } from '@nesbox/mtapp';
 import type { ValueOf } from 'duoyun-ui/lib/types';
 import type { GamepadBtnIndex } from 'src/gamepad';
 
@@ -132,24 +131,24 @@ export const localStorageKeys = {
 };
 
 // https://developer.mozilla.org/en-US/docs/Web/CSS/image-rendering
-export const enum VideoRenderMethod {
+export enum VideoRenderMethod {
   SMOOTH = 'auto',
   PIXELATED = 'pixelated',
 }
 
-export const enum VideoFilter {
+export enum VideoFilter {
   DEFAULT = 'default',
   NTSC = 'NTSC',
   CRT = 'CRT',
 }
 
-export const enum VideoRefreshRate {
+export enum VideoRefreshRate {
   AUTO = 'auto',
   FIXED = 'fixed',
   SYNC = 'sync',
 }
 
-export const enum RTCTransportType {
+export enum RTCTransportType {
   CLIP = 'clip',
   REDUCE = 'reduce',
 }

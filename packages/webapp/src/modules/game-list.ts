@@ -1,43 +1,44 @@
 import {
-  GemElement,
-  html,
   adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
-  connectStore,
   boolattribute,
-  styleMap,
-  numattribute,
-  RefObject,
-  refobject,
+  connectStore,
+  createRef,
+  css,
+  customElement,
+  effect,
+  GemElement,
   history,
+  html,
+  memo,
+  numattribute,
+  styleMap,
 } from '@mantou/gem';
-import { isNotNullish } from 'duoyun-ui/lib/types';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
 import { isMtApp } from '@nesbox/mtapp';
-import { locationStore } from 'src/routes';
-
-import { changeQuery } from 'src/utils/common';
-import { queryKeys } from 'src/constants';
-import { store } from 'src/store';
-import { i18n } from 'src/i18n/basic';
-import { theme } from 'src/theme';
-import { gameKindList, gameSeriesList } from 'src/enums';
-import { ScGameKind, ScGameSeries } from 'src/generated/graphql';
-import { icons } from 'src/icons';
-
 import type { DuoyunListElement, PersistentState } from 'duoyun-ui/elements/list';
+import { isNotNullish } from 'duoyun-ui/lib/types';
+import { queryKeys } from 'src/constants';
+import { gameKindList, gameSeriesList } from 'src/enums';
+import { ScGameKind, type ScGameSeries } from 'src/generated/graphql';
+import { i18n } from 'src/i18n/basic';
+import { icons } from 'src/icons';
+import { locationStore } from 'src/routes';
+import { store } from 'src/store';
+import { theme } from 'src/theme';
+import { changeQuery } from 'src/utils/common';
 
-import 'duoyun-ui/elements/heading';
 import 'duoyun-ui/elements/divider';
-import 'duoyun-ui/elements/select';
-import 'duoyun-ui/elements/picker';
+import 'duoyun-ui/elements/heading';
 import 'duoyun-ui/elements/list';
+import 'duoyun-ui/elements/picker';
+import 'duoyun-ui/elements/select';
 import 'duoyun-ui/elements/use';
 import 'src/modules/game-item';
 
-const style = createCSSSheet(css`
+const style = css`
+  :scope[all] {
+    min-height: 100vh;
+  }
   dy-heading {
     margin-block: 0;
   }
@@ -64,45 +65,35 @@ const style = createCSSSheet(css`
     grid-gap: 2rem;
   }
   @media ${mediaQuery.PHONE} {
-    .list {
+    .list::part(list) {
       grid-template-columns: repeat(auto-fill, minmax(8em, 1fr));
       grid-gap: ${theme.gridGutter};
     }
   }
-`);
+`;
 
 // 只缓存 all 列表，不然串数据
 let persistentState: PersistentState | undefined;
 
-/**
- * @customElement m-game-list
- */
 @customElement('m-game-list')
 @adoptedStyle(style)
 @connectStore(store)
 @connectStore(locationStore)
 @connectStore(history.store)
-@connectStore(i18n.store)
 export class MGameListElement extends GemElement {
-  @refobject listRef: RefObject<DuoyunListElement>;
-
   @boolattribute favorite: boolean;
   @boolattribute recent: boolean;
   @boolattribute new: boolean;
   @boolattribute all: boolean;
   @numattribute length: number;
 
-  constructor() {
-    super();
-    this.memo(
-      () => {
-        this.#favSet = new Set(store.favoriteIds);
-      },
-      () => [store.favoriteIds],
-    );
-  }
+  #listRef = createRef<DuoyunListElement>();
 
   #favSet = new Set(store.favoriteIds);
+  @memo(() => [store.favoriteIds])
+  #resetFav = () => {
+    this.#favSet = new Set(store.favoriteIds);
+  };
 
   get #data() {
     if (this.new) {
@@ -145,89 +136,75 @@ export class MGameListElement extends GemElement {
   #getKey = (id: number) => id;
 
   #filteredData?: number[] = [];
-  willMount = () => {
-    this.memo(
-      () => {
-        if (this.#data === store.gameIds) {
-          this.#filteredData = this.#data?.filter((id) => {
-            const game = store.games[id];
-            if (!game) return true;
-            const kinds = this.#gameKinds
-              .map((k) =>
-                k === ScGameKind.Rts
-                  ? [k, ScGameKind.Tbs, ScGameKind.Slg, ScGameKind.Tbg]
-                  : k === ScGameKind.Other
-                  ? [k, ScGameKind.Pzg, ScGameKind.Rcg]
-                  : k,
-              )
-              .flat();
-            const series = this.#gameSeries;
-            const players = this.#gamePlayer;
-            return (
-              (!kinds.length || (game.kind && kinds.includes(game.kind))) &&
-              (!series || game.series === series) &&
-              (!players || game.maxPlayer === Number(players))
-            );
-          });
-        } else {
-          this.#filteredData = this.#data;
-        }
-      },
-      () => [
-        this.length,
-        store.topGameIds,
-        // mt app need immediately update
-        isMtApp && store.favoriteIds,
-        // filter
-        this.all ? locationStore.query.toString() : '',
-      ],
-    );
+  @memo((i) => [
+    i.length,
+    store.topGameIds,
+    // mt app need immediately update
+    isMtApp && store.favoriteIds,
+    // filter
+    i.all ? locationStore.query.toString() : '',
+  ])
+  #setFilteredData = () => {
+    if (this.#data === store.gameIds) {
+      this.#filteredData = this.#data?.filter((id) => {
+        const game = store.games[id];
+        if (!game) return true;
+        const kinds = this.#gameKinds.flatMap((k) =>
+          k === ScGameKind.Rts
+            ? [k, ScGameKind.Tbs, ScGameKind.Slg, ScGameKind.Tbg]
+            : k === ScGameKind.Other
+              ? [k, ScGameKind.Pzg, ScGameKind.Rcg]
+              : k,
+        );
+        const series = this.#gameSeries;
+        const players = this.#gamePlayer;
+        return (
+          (!kinds.length || (game.kind && kinds.includes(game.kind))) &&
+          (!series || game.series === series) &&
+          (!players || game.maxPlayer === Number(players))
+        );
+      });
+    } else {
+      this.#filteredData = this.#data;
+    }
   };
 
-  mounted = () => {
-    this.effect(
-      () => {
-        if (this.all) {
-          persistentState = this.listRef.element?.persistentState;
-        }
-      },
-      () => [history.getParams().path],
-    );
+  @effect(() => [history.getParams().path])
+  #updatePersistentState = () => {
+    if (this.all) {
+      persistentState = this.#listRef.value?.persistentState;
+    }
   };
 
   render = () => {
     if ((this.recent || this.new) && (!this.#data || this.#data.length < 4)) {
-      return html`
-        <style>
-          :host {
-            display: none;
-          }
-        </style>
-      `;
+      return null;
     }
     return html`
-      ${this.recent
-        ? html`
+      ${
+        this.recent
+          ? html`
             <div class="heading">
               <dy-heading lv="3">${i18n.get('page.games.recent')}</dy-heading>
             </div>
             <dy-divider></dy-divider>
           `
-        : this.new
-        ? html`
+          : this.new
+            ? html`
             <div class="heading">
               <dy-heading lv="3">${i18n.get('page.games.new')}</dy-heading>
             </div>
             <dy-divider></dy-divider>
           `
-        : this.favorite
-        ? ''
-        : html`
+            : this.favorite
+              ? ''
+              : html`
             <div class="heading">
               <dy-heading lv="3">${i18n.get('page.games.all')}</dy-heading>
               <span style="flex-grow: 1;"></span>
-              ${mediaQuery.isPhone
-                ? html`
+              ${
+                mediaQuery.isPhone
+                  ? html`
                     <dy-use
                       .element=${icons.tune}
                       style=${styleMap({ width: '1.5em', position: 'relative', overflow: 'hidden' })}
@@ -248,7 +225,7 @@ export class MGameListElement extends GemElement {
                       </select>
                     </dy-use>
                   `
-                : html`
+                  : html`
                     <dy-select
                       style="width: 12em;"
                       .dropdownStyle=${{ width: '12em' }}
@@ -275,13 +252,15 @@ export class MGameListElement extends GemElement {
                       }))}
                       @change=${({ detail }: CustomEvent<string>) => changeQuery(queryKeys.GAME_PLAYER, detail)}
                     ></dy-select>
-                  `}
+                  `
+              }
             </div>
             <dy-divider></dy-divider>
-          `}
+          `
+      }
       <dy-list
+        ${this.#listRef}
         class="list"
-        ref=${this.listRef.ref}
         .items=${this.#filteredData}
         .key=${store.favoriteIds}
         .infinite=${this.all}

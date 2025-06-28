@@ -1,25 +1,15 @@
-import {
-  GemElement,
-  html,
-  adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
-  connectStore,
-  useStore,
-} from '@mantou/gem';
-
+import { adoptedStyle, connectStore, createStore, css, customElement, GemElement, html, shadow } from '@mantou/gem';
 import { theme } from 'src/theme';
 
-export const fpsStyle = createCSSSheet(css`
+export const fpsStyle = css`
   :host {
     font-size: 0.875em;
     color: ${theme.describeColor};
     font-variant-numeric: tabular-nums;
   }
-`);
+`;
 
-const [store, update] = useStore({
+const store = createStore({
   min: 0,
   max: 0,
   fps: 0,
@@ -52,17 +42,15 @@ const tick = () => {
   });
   const avgFps = Math.round(sum / frames.length);
 
-  update({ fps, avgFps, min, max });
+  store({ fps, avgFps, min, max });
 
   timer = requestAnimationFrame(tick);
 };
 
-/**
- * @customElement nesbox-fps
- */
 @customElement('nesbox-fps')
 @adoptedStyle(fpsStyle)
 @connectStore(store)
+@shadow()
 export class NesboxFpsElement extends GemElement {
   static instanceSet: Set<NesboxFpsElement> = new Set();
 

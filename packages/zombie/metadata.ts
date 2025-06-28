@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs from 'node:fs';
 
 const metadata1 = require('./metadata1.json');
 const metadata2 = require('./metadata2.json');

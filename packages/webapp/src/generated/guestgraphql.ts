@@ -18,11 +18,9 @@ export type GuestMutationRoot = {
   register: ScLoginResp;
 };
 
-
 export type GuestMutationRootLoginArgs = {
   input: ScLoginReq;
 };
-
 
 export type GuestMutationRootRegisterArgs = {
   input: ScRegisterReq;
@@ -36,7 +34,6 @@ export type GuestQueryRoot = {
   rooms: Array<ScRoom>;
   topGames: Array<Scalars['Int']>;
 };
-
 
 export type GuestQueryRootCommentsArgs = {
   input: ScCommentsReq;
@@ -84,7 +81,7 @@ export enum ScGameKind {
   Spg = 'SPG',
   Stg = 'STG',
   Tbg = 'TBG',
-  Tbs = 'TBS'
+  Tbs = 'TBS',
 }
 
 export enum ScGamePlatform {
@@ -92,7 +89,7 @@ export enum ScGamePlatform {
   Nes = 'NES',
   UniversalJs = 'UNIVERSAL_JS',
   UniversalWasm = 'UNIVERSAL_WASM',
-  Wasm4 = 'WASM4'
+  Wasm4 = 'WASM4',
 }
 
 export enum ScGameSeries {
@@ -107,7 +104,7 @@ export enum ScGameSeries {
   SanGokuShi = 'SAN_GOKU_SHI',
   StreetFighter = 'STREET_FIGHTER',
   Tank = 'TANK',
-  Tmnt = 'TMNT'
+  Tmnt = 'TMNT',
 }
 
 export type ScLoginReq = {
@@ -171,51 +168,262 @@ export type ScUserBasic = {
 
 export enum ScUserStatus {
   Offline = 'OFFLINE',
-  Online = 'ONLINE'
+  Online = 'ONLINE',
 }
 
-export type ScRoomBasicPartFragment = { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number };
+export type ScRoomBasicPartFragment = {
+  __typename?: 'ScRoomBasic';
+  id: number;
+  gameId: number;
+  private: boolean;
+  host: number;
+  createdAt: number;
+  updatedAt: number;
+};
 
-export type ScAccountPartFragment = { __typename?: 'ScUser', id: number, username: string, nickname: string, settings?: string, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } };
+export type ScAccountPartFragment = {
+  __typename?: 'ScUser';
+  id: number;
+  username: string;
+  nickname: string;
+  settings?: string;
+  playing?: {
+    __typename?: 'ScRoomBasic';
+    id: number;
+    gameId: number;
+    private: boolean;
+    host: number;
+    createdAt: number;
+    updatedAt: number;
+  };
+};
 
-export type ScUserBasicPartFragment = { __typename?: 'ScUserBasic', id: number, username: string, nickname: string, status: ScUserStatus, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } };
+export type ScUserBasicPartFragment = {
+  __typename?: 'ScUserBasic';
+  id: number;
+  username: string;
+  nickname: string;
+  status: ScUserStatus;
+  playing?: {
+    __typename?: 'ScRoomBasic';
+    id: number;
+    gameId: number;
+    private: boolean;
+    host: number;
+    createdAt: number;
+    updatedAt: number;
+  };
+};
 
-export type ScRoomPartFragment = { __typename?: 'ScRoom', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number, screenshot?: string, users: Array<{ __typename?: 'ScUserBasic', id: number, username: string, nickname: string, status: ScUserStatus, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } }> };
+export type ScRoomPartFragment = {
+  __typename?: 'ScRoom';
+  id: number;
+  gameId: number;
+  private: boolean;
+  host: number;
+  createdAt: number;
+  updatedAt: number;
+  screenshot?: string;
+  users: Array<{
+    __typename?: 'ScUserBasic';
+    id: number;
+    username: string;
+    nickname: string;
+    status: ScUserStatus;
+    playing?: {
+      __typename?: 'ScRoomBasic';
+      id: number;
+      gameId: number;
+      private: boolean;
+      host: number;
+      createdAt: number;
+      updatedAt: number;
+    };
+  }>;
+};
 
-export type ScGamePartFragment = { __typename?: 'ScGame', id: number, name: string, description: string, preview: string, createdAt: number, updatedAt: number, rom: string, screenshots: Array<string>, platform?: ScGamePlatform, kind?: ScGameKind, series?: ScGameSeries, maxPlayer?: number };
+export type ScGamePartFragment = {
+  __typename?: 'ScGame';
+  id: number;
+  name: string;
+  description: string;
+  preview: string;
+  createdAt: number;
+  updatedAt: number;
+  rom: string;
+  screenshots: Array<string>;
+  platform?: ScGamePlatform;
+  kind?: ScGameKind;
+  series?: ScGameSeries;
+  maxPlayer?: number;
+};
 
-export type ScCommentPartFragment = { __typename?: 'ScComment', gameId: number, body: string, like: boolean, createdAt: number, updatedAt: number, user: { __typename?: 'ScUserBasic', id: number, username: string, nickname: string, status: ScUserStatus, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } } };
+export type ScCommentPartFragment = {
+  __typename?: 'ScComment';
+  gameId: number;
+  body: string;
+  like: boolean;
+  createdAt: number;
+  updatedAt: number;
+  user: {
+    __typename?: 'ScUserBasic';
+    id: number;
+    username: string;
+    nickname: string;
+    status: ScUserStatus;
+    playing?: {
+      __typename?: 'ScRoomBasic';
+      id: number;
+      gameId: number;
+      private: boolean;
+      host: number;
+      createdAt: number;
+      updatedAt: number;
+    };
+  };
+};
 
 export type LoginMutationVariables = Exact<{
   input: ScLoginReq;
 }>;
 
-
-export type LoginMutation = { __typename?: 'GuestMutationRoot', login: { __typename?: 'ScLoginResp', token: string, user: { __typename?: 'ScUser', id: number, username: string, nickname: string, settings?: string, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } } } };
+export type LoginMutation = {
+  __typename?: 'GuestMutationRoot';
+  login: {
+    __typename?: 'ScLoginResp';
+    token: string;
+    user: {
+      __typename?: 'ScUser';
+      id: number;
+      username: string;
+      nickname: string;
+      settings?: string;
+      playing?: {
+        __typename?: 'ScRoomBasic';
+        id: number;
+        gameId: number;
+        private: boolean;
+        host: number;
+        createdAt: number;
+        updatedAt: number;
+      };
+    };
+  };
+};
 
 export type RegisterMutationVariables = Exact<{
   input: ScRegisterReq;
 }>;
 
+export type RegisterMutation = {
+  __typename?: 'GuestMutationRoot';
+  register: {
+    __typename?: 'ScLoginResp';
+    token: string;
+    user: {
+      __typename?: 'ScUser';
+      id: number;
+      username: string;
+      nickname: string;
+      settings?: string;
+      playing?: {
+        __typename?: 'ScRoomBasic';
+        id: number;
+        gameId: number;
+        private: boolean;
+        host: number;
+        createdAt: number;
+        updatedAt: number;
+      };
+    };
+  };
+};
 
-export type RegisterMutation = { __typename?: 'GuestMutationRoot', register: { __typename?: 'ScLoginResp', token: string, user: { __typename?: 'ScUser', id: number, username: string, nickname: string, settings?: string, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } } } };
+export type GetGamesQueryVariables = Exact<{ [key: string]: never }>;
 
-export type GetGamesQueryVariables = Exact<{ [key: string]: never; }>;
+export type GetGamesQuery = {
+  __typename?: 'GuestQueryRoot';
+  topGames: Array<number>;
+  games: Array<{
+    __typename?: 'ScGame';
+    id: number;
+    name: string;
+    description: string;
+    preview: string;
+    createdAt: number;
+    updatedAt: number;
+    rom: string;
+    screenshots: Array<string>;
+    platform?: ScGamePlatform;
+    kind?: ScGameKind;
+    series?: ScGameSeries;
+    maxPlayer?: number;
+  }>;
+};
 
+export type GetRoomsQueryVariables = Exact<{ [key: string]: never }>;
 
-export type GetGamesQuery = { __typename?: 'GuestQueryRoot', topGames: Array<number>, games: Array<{ __typename?: 'ScGame', id: number, name: string, description: string, preview: string, createdAt: number, updatedAt: number, rom: string, screenshots: Array<string>, platform?: ScGamePlatform, kind?: ScGameKind, series?: ScGameSeries, maxPlayer?: number }> };
-
-export type GetRoomsQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetRoomsQuery = { __typename?: 'GuestQueryRoot', rooms: Array<{ __typename?: 'ScRoom', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number, screenshot?: string, users: Array<{ __typename?: 'ScUserBasic', id: number, username: string, nickname: string, status: ScUserStatus, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } }> }> };
+export type GetRoomsQuery = {
+  __typename?: 'GuestQueryRoot';
+  rooms: Array<{
+    __typename?: 'ScRoom';
+    id: number;
+    gameId: number;
+    private: boolean;
+    host: number;
+    createdAt: number;
+    updatedAt: number;
+    screenshot?: string;
+    users: Array<{
+      __typename?: 'ScUserBasic';
+      id: number;
+      username: string;
+      nickname: string;
+      status: ScUserStatus;
+      playing?: {
+        __typename?: 'ScRoomBasic';
+        id: number;
+        gameId: number;
+        private: boolean;
+        host: number;
+        createdAt: number;
+        updatedAt: number;
+      };
+    }>;
+  }>;
+};
 
 export type GetCommentsQueryVariables = Exact<{
   gameId: Scalars['Int'];
 }>;
 
-
-export type GetCommentsQuery = { __typename?: 'GuestQueryRoot', comments: Array<{ __typename?: 'ScComment', gameId: number, body: string, like: boolean, createdAt: number, updatedAt: number, user: { __typename?: 'ScUserBasic', id: number, username: string, nickname: string, status: ScUserStatus, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } } }> };
+export type GetCommentsQuery = {
+  __typename?: 'GuestQueryRoot';
+  comments: Array<{
+    __typename?: 'ScComment';
+    gameId: number;
+    body: string;
+    like: boolean;
+    createdAt: number;
+    updatedAt: number;
+    user: {
+      __typename?: 'ScUserBasic';
+      id: number;
+      username: string;
+      nickname: string;
+      status: ScUserStatus;
+      playing?: {
+        __typename?: 'ScRoomBasic';
+        id: number;
+        gameId: number;
+        private: boolean;
+        host: number;
+        createdAt: number;
+        updatedAt: number;
+      };
+    };
+  }>;
+};
 
 export const ScRoomBasicPart = `
     fragment ScRoomBasicPart on ScRoomBasic {

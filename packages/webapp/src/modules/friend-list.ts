@@ -1,13 +1,11 @@
-import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, connectStore } from '@mantou/gem';
-import { Modal } from 'duoyun-ui/elements/modal';
-
-import { icons } from 'src/icons';
-import { friendStore } from 'src/store';
-import { i18n } from 'src/i18n/basic';
-import { applyFriend } from 'src/services/api';
-import { theme } from 'src/theme';
-
+import { adoptedStyle, connectStore, css, customElement, GemElement, html } from '@mantou/gem';
 import type { DuoyunInputElement } from 'duoyun-ui/elements/input';
+import { Modal } from 'duoyun-ui/elements/modal';
+import { i18n } from 'src/i18n/basic';
+import { icons } from 'src/icons';
+import { applyFriend } from 'src/services/api';
+import { friendStore } from 'src/store';
+import { theme } from 'src/theme';
 
 import 'duoyun-ui/elements/button';
 import 'duoyun-ui/elements/result';
@@ -15,8 +13,8 @@ import 'duoyun-ui/elements/input';
 import 'src/modules/friend-item';
 import 'src/modules/invite-item';
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :scope {
     height: 100%;
     box-sizing: border-box;
     background-color: ${theme.backgroundColor};
@@ -38,11 +36,8 @@ const style = createCSSSheet(css`
     gap: 1em;
     padding: 1em;
   }
-`);
+`;
 
-/**
- * @customElement m-friend-list
- */
 @customElement('m-friend-list')
 @adoptedStyle(style)
 @connectStore(friendStore)
@@ -71,22 +66,26 @@ export class MFriendListElement extends GemElement {
   render = () => {
     return html`
       <div class="list">
-        ${friendStore.inviteIds?.length
-          ? friendStore.inviteIds?.map(
-              (id) => html`<m-invite-item .invite=${friendStore.invites[id]!}></m-invite-item>`,
-            )
-          : ''}
-        ${!friendStore.friendIds?.length
-          ? html`
+        ${
+          friendStore.inviteIds?.length
+            ? friendStore.inviteIds?.map(
+                (id) => html`<m-invite-item .invite=${friendStore.invites[id]!}></m-invite-item>`,
+              )
+            : ''
+        }
+        ${
+          !friendStore.friendIds?.length
+            ? html`
               <dy-result
                 style="width: 100%; height: 100%"
                 .illustrator=${icons.person}
                 .header=${i18n.get('global.noData')}
               ></dy-result>
             `
-          : friendStore.friendIds?.map(
-              (id) => html`<m-friend-item .friend=${friendStore.friends[id]!}></m-friend-item>`,
-            )}
+            : friendStore.friendIds?.map(
+                (id) => html`<m-friend-item .friend=${friendStore.friends[id]!}></m-friend-item>`,
+              )
+        }
       </div>
       <div class="actions">
         <dy-button

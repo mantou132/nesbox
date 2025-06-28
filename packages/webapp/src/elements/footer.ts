@@ -1,17 +1,15 @@
-import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css } from '@mantou/gem';
+import { adoptedStyle, css, customElement, GemElement, html } from '@mantou/gem';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
-import { routes } from 'src/routes';
-
-import { githubUrl } from 'src/constants';
-import { theme } from 'src/theme';
-
 import type { RouteItem } from 'duoyun-ui/elements/route';
+import { githubUrl } from 'src/constants';
+import { routes } from 'src/routes';
+import { theme } from 'src/theme';
 
 import 'duoyun-ui/elements/link';
 import 'duoyun-ui/elements/divider';
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :scope {
     display: block;
     text-align: center;
     padding: calc(3 * ${theme.gridGutter});
@@ -38,16 +36,13 @@ const style = createCSSSheet(css`
   }
 
   @media ${mediaQuery.PHONE} {
-    :host {
+    :scope {
       padding-block: calc(3 * ${theme.gridGutter});
       padding-inline: ${theme.gridGutter};
     }
   }
-`);
+`;
 
-/**
- * @customElement m-footer
- */
 @customElement('m-footer')
 @adoptedStyle(style)
 export class MFooterElement extends GemElement {

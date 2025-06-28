@@ -1,8 +1,8 @@
-import { Script } from 'vm';
+import { Script } from 'node:vm';
 
 import { JSDOM } from 'jsdom';
 
-import { agentFetch } from 'agent';
+import { agentFetch } from './agent';
 
 export async function fetchImage(search: string) {
   const text = await agentFetch(

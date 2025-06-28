@@ -1,38 +1,39 @@
 import {
-  GemElement,
-  html,
   adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
-  property,
-  globalemitter,
-  Emitter,
   boolattribute,
   connectStore,
+  css,
+  customElement,
+  type Emitter,
+  GemElement,
+  globalemitter,
+  html,
+  mounted,
+  property,
   styleMap,
 } from '@mantou/gem';
+import { Player } from '@mantou/nes';
+import { ContextMenu } from 'duoyun-ui/elements/contextmenu';
 import { commonHandle } from 'duoyun-ui/lib/hotkeys';
 import { focusStyle } from 'duoyun-ui/lib/styles';
-import { ContextMenu } from 'duoyun-ui/elements/contextmenu';
 import { isNotBoolean } from 'duoyun-ui/lib/types';
-import { Player } from '@mantou/nes';
-
-import { Role, RoleOffer } from 'src/netplay/common';
-import { getAvatar, getCDNSrc } from 'src/utils/common';
-import { theme } from 'src/theme';
 import { configure } from 'src/configure';
-import { icons } from 'src/icons';
 import { i18n } from 'src/i18n/basic';
+import { icons } from 'src/icons';
 import { voiceStore } from 'src/modules/room-voice';
+import { type Role, RoleOffer } from 'src/netplay/common';
 import { applyFriend } from 'src/services/api';
 import { friendStore } from 'src/store';
+import { theme } from 'src/theme';
+import { getAvatar, getCDNSrc } from 'src/utils/common';
 
 import 'duoyun-ui/elements/avatar';
 import 'duoyun-ui/elements/use';
 
-const style = createCSSSheet(css`
-  :host {
+import { createDecoratorTheme } from '@mantou/gem/helper/theme';
+
+const style = css`
+  :scope {
     display: flex;
     gap: 1em;
     font-size: 0.875em;
@@ -40,11 +41,8 @@ const style = createCSSSheet(css`
     flex-wrap: wrap;
     justify-content: space-evenly;
   }
-`);
+`;
 
-/**
- * @customElement m-room-player-list
- */
 @customElement('m-room-player-list')
 @adoptedStyle(style)
 export class MRoomPlayerListElement extends GemElement {
@@ -67,8 +65,10 @@ export class MRoomPlayerListElement extends GemElement {
   };
 }
 
-const itemStyle = createCSSSheet(css`
-  :host {
+const elementTheme = createDecoratorTheme({ borderColor: '' });
+
+const itemStyle = css`
+  :scope {
     position: relative;
     display: flex;
     gap: 0.5em;
@@ -79,6 +79,7 @@ const itemStyle = createCSSSheet(css`
     box-sizing: border-box;
     flex-shrink: 0;
     border-radius: ${theme.smallRound};
+    border: 1px solid ${elementTheme.borderColor}
   }
   .volume {
     position: absolute;
@@ -88,7 +89,7 @@ const itemStyle = createCSSSheet(css`
     transform: rotate(-30deg);
     transition: all 0.3s;
   }
-  :host(:hover) {
+  :scope:hover {
     background-color: ${theme.hoverBackgroundColor};
   }
   * {
@@ -120,15 +121,11 @@ const itemStyle = createCSSSheet(css`
   .icon {
     width: 1.5em;
   }
-`);
+`;
 
-/**
- * @customElement m-room-player-item
- */
 @customElement('m-room-player-item')
 @adoptedStyle(itemStyle)
 @adoptedStyle(focusStyle)
-@connectStore(i18n.store)
 @connectStore(voiceStore)
 export class MRoomPlayerItemElement extends GemElement {
   @property playerRole: Role;
@@ -139,11 +136,11 @@ export class MRoomPlayerItemElement extends GemElement {
   @globalemitter kickout: Emitter<number>;
   @globalemitter disableplayer: Emitter<Player>;
 
-  constructor() {
-    super();
+  @mounted()
+  #init = () => {
     this.addEventListener('click', this.#onClick);
     this.addEventListener('keydown', commonHandle);
-  }
+  };
 
   get #isSelf() {
     return this.playerRole?.userId === configure.user?.id;
@@ -216,10 +213,10 @@ export class MRoomPlayerItemElement extends GemElement {
         username: this.#isDisabledSlot
           ? html`<dy-use class="icon" .element=${icons.notAllowed}></dy-use>`
           : this.#isHostRole
-          ? html`<dy-use class="icon" .element=${icons.loading}></dy-use>`
-          : this.#isJoinable
-          ? html`<dy-use class="icon" tabindex="0" .element=${icons.received}></dy-use>`
-          : i18n.get('page.room.emptyRole'),
+            ? html`<dy-use class="icon" .element=${icons.loading}></dy-use>`
+            : this.#isJoinable
+              ? html`<dy-use class="icon" tabindex="0" .element=${icons.received}></dy-use>`
+              : i18n.get('page.room.emptyRole'),
       };
     } else {
       return {
@@ -229,15 +226,13 @@ export class MRoomPlayerItemElement extends GemElement {
     }
   };
 
+  @elementTheme()
+  #theme = () => ({ borderColor: this.#isSelf ? theme.noticeColor : theme.borderColor });
+
   render = () => {
     const { avatar, username } = this.#getRenderData();
 
     return html`
-      <style>
-        :host {
-          border: 1px solid ${this.#isSelf ? theme.noticeColor : theme.borderColor};
-        }
-      </style>
       <dy-use
         class="volume"
         style=${styleMap({

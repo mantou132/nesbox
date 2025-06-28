@@ -1,16 +1,15 @@
-import { writeFile } from 'fs/promises';
-import { resolve } from 'path';
-import { readFileSync } from 'fs';
+import { readFileSync } from 'node:fs';
+import { writeFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
 
 import * as puppeteer from 'puppeteer';
-import { Data } from 'index';
 
-import { get8BBitGames } from '8bbit';
-import { fetchList, Item } from 'list';
-import { existGames, incudesString, normalize, removePunctuation } from 'utils';
-
-import metadata2 from './metadata2.json';
+import { get8BBitGames } from './8bbit';
+import type { Data } from './index';
+import { fetchList, type Item } from './list';
 import metadata1 from './metadata1.json';
+import metadata2 from './metadata2.json';
+import { existGames, incudesString, normalize, removePunctuation } from './utils';
 
 const roms = JSON.parse(readFileSync('./roms.json', { encoding: 'utf-8' }));
 
@@ -115,7 +114,7 @@ const rejectRequestPattern: string[] = [
   await browser.close();
 })();
 
-process.on('SIGINT', async function () {
+process.on('SIGINT', async () => {
   await write();
   process.exit();
 });

@@ -1,34 +1,22 @@
-import {
-  GemElement,
-  html,
-  adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
-  property,
-  boolattribute,
-  history,
-  connectStore,
-} from '@mantou/gem';
-import { createPath } from 'duoyun-ui/elements/route';
+import { adoptedStyle, boolattribute, css, customElement, GemElement, history, html, property } from '@mantou/gem';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
-import { routes } from 'src/routes';
-
-import { getCDNSrc, setViewTransitionName } from 'src/utils/common';
+import { createPath } from 'duoyun-ui/elements/route';
 import { paramKeys, viewTransitionName } from 'src/constants';
-import { icons } from 'src/icons';
-import { Game } from 'src/store';
-import { createRoom, favoriteGame } from 'src/services/api';
 import { i18n } from 'src/i18n/basic';
+import { icons } from 'src/icons';
+import { routes } from 'src/routes';
+import { createRoom, favoriteGame } from 'src/services/api';
+import type { Game } from 'src/store';
 import { theme } from 'src/theme';
+import { getCDNSrc, setViewTransitionName } from 'src/utils/common';
 
 import 'duoyun-ui/elements/use';
 import 'duoyun-ui/elements/button';
 import 'duoyun-ui/elements/space';
 import 'duoyun-ui/elements/modal';
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :scope {
     position: relative;
     display: block;
   }
@@ -40,7 +28,7 @@ const style = createCSSSheet(css`
   .actions dy-button {
     box-shadow: 0 0.1em 0.5em rgba(0, 0, 0, 0.3);
   }
-  :host(:not(:hover):not(:focus)) .play {
+  :scope:not(:hover):not(:focus) .play {
     opacity: 0;
   }
   .cover {
@@ -61,18 +49,14 @@ const style = createCSSSheet(css`
     white-space: nowrap;
   }
   @media (hover) {
-    :host(:hover) .cover {
+    :scope:hover .cover {
       opacity: 0.7;
     }
   }
-`);
+`;
 
-/**
- * @customElement m-game-item
- */
 @customElement('m-game-item')
 @adoptedStyle(style)
-@connectStore(i18n.store)
 export class MGameItemElement extends GemElement {
   @boolattribute favorited: boolean;
 

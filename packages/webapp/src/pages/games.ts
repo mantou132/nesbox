@@ -1,27 +1,27 @@
 import {
-  html,
   adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
   connectStore,
-  history,
-  styleMap,
+  createState,
+  css,
+  customElement,
   GemElement,
+  history,
+  html,
+  mounted,
+  styleMap,
 } from '@mantou/gem';
-import { createPath } from 'duoyun-ui/elements/route';
-import { HexColor, hslToRgb, parseHexColor, rgbToHexColor, rgbToHsl } from 'duoyun-ui/lib/color';
-import { marked } from 'marked';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
+import { createPath } from 'duoyun-ui/elements/route';
+import { type HexColor, hslToRgb, parseHexColor, rgbToHexColor, rgbToHsl } from 'duoyun-ui/lib/color';
 import { isNotNullish } from 'duoyun-ui/lib/types';
-import { routes } from 'src/routes';
-
-import { fontLoading, getCDNSrc, setViewTransitionName } from 'src/utils/common';
+import { marked } from 'marked';
 import { paramKeys, pixelFont, viewTransitionName } from 'src/constants';
-import { store } from 'src/store';
-import { createRoom } from 'src/services/api';
-import { theme, themeStore } from 'src/theme';
 import { i18n } from 'src/i18n/basic';
+import { routes } from 'src/routes';
+import { createRoom } from 'src/services/api';
+import { store } from 'src/store';
+import { theme, themeStore } from 'src/theme';
+import { fontLoading, getCDNSrc, setViewTransitionName } from 'src/utils/common';
 
 import 'duoyun-ui/elements/carousel';
 import 'duoyun-ui/elements/link';
@@ -30,8 +30,8 @@ import 'src/modules/game-list';
 
 const domParser = new DOMParser();
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :scope {
     display: flex;
     flex-direction: column;
     gap: 2rem;
@@ -64,6 +64,9 @@ const style = createCSSSheet(css`
     }
     .top::part(img) {
       --mask-range: 50%;
+      --m: linear-gradient(to right top, transparent, black var(--mask-range));
+      -webkit-mask-image: var(--m);
+      mask-image: var(--m);
       inset: 0;
       width: 100%;
       max-width: none;
@@ -102,25 +105,16 @@ const style = createCSSSheet(css`
   .add dy-use {
     width: 3em;
   }
-`);
+`;
 
-type State = {
-  background: string;
-  backgroundImage: string;
-};
-
-/**
- * @customElement p-games
- */
 @customElement('p-games')
 @adoptedStyle(style)
-@connectStore(i18n.store)
 @connectStore(store)
-export class PGamesElement extends GemElement<State> {
-  state: State = {
+export class PGamesElement extends GemElement {
+  #state = createState({
     background: 'transparent',
     backgroundImage: 'none',
-  };
+  });
 
   #canvas = document.createElement('canvas');
 
@@ -157,7 +151,7 @@ export class PGamesElement extends GemElement<State> {
     if (mediaQuery.isPhone) return;
     const [hux] = rgbToHsl(parseHexColor(themeStore.primaryColor as HexColor));
     const blockRange = 0.4;
-    this.setState({
+    this.#state({
       background: rgbToHexColor(
         hslToRgb([(hux + blockRange / 2 + ((index * 2) % length) * ((1 - blockRange) / length)) % 1, 0.17, 0.53]),
       ),
@@ -166,12 +160,13 @@ export class PGamesElement extends GemElement<State> {
     const dataUrl = await this.#getBackgroundImageUrl(
       [game?.platform, game?.series, game?.name].filter(isNotNullish).join(' ').toUpperCase(),
     );
-    this.setState({
+    this.#state({
       backgroundImage: `url(${dataUrl})`,
     });
   };
 
-  mounted = () => {
+  @mounted()
+  #init = () => {
     this.#media.onchange = this.update;
   };
 
@@ -196,7 +191,7 @@ export class PGamesElement extends GemElement<State> {
     return html`
       <dy-carousel
         class="top"
-        style=${styleMap({ backgroundColor: this.state.background, backgroundImage: this.state.backgroundImage })}
+        style=${styleMap({ backgroundColor: this.#state.background, backgroundImage: this.#state.backgroundImage })}
         .items=${topData}
         .interval=${7000}
         @change=${({ detail }: CustomEvent<number>) => this.#onTopChange(detail, topData?.length)}

@@ -1,0 +1,60 @@
+// Folder-specific settings
+//
+// For a full list of overridable settings, and general information on folder-specific settings,
+// see the documentation: https://zed.dev/docs/configuring-zed#settings-files
+{
+  "auto_install_extension": {
+    "biome": true,
+    "emmet": true,
+    "toml": true,
+    "html": true,
+    "gem": true
+  },
+  "tab_size": 2,
+  "formatter": {
+    "language_server": {
+      "name": "biome"
+    }
+  },
+  "code_actions_on_format": {
+    "source.fixAll.biome": true,
+    "source.organizeImports.biome": true
+  },
+  "language_servers": [
+    "vtsls",
+    "!typescript-language-server",
+    // use biome
+    "!prettier",
+    "!eslint",
+    "..."
+  ],
+  "lsp": {
+    "vtsls": {
+      "settings": {
+        "typescript": {
+          "tsdk": "node_modules/typescript/lib",
+          "preferences": {
+            "importModuleSpecifier": "non-relative"
+          }
+        }
+      }
+    },
+    "rust-analyzer": {
+      "initialization_options": {
+        "check": {
+          "command": "clippy"
+        }
+      }
+    }
+  },
+  "languages": {
+    "Rust": {
+      "tab_size": 4,
+      "formatter": {
+        "language_server": {
+          "name": "rust-analyzer"
+        }
+      }
+    }
+  }
+}

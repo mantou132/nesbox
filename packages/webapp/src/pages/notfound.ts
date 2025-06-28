@@ -1,16 +1,13 @@
-import { GemElement, html, customElement, connectStore } from '@mantou/gem';
-import { routes } from 'src/routes';
-
+import { customElement, GemElement, html } from '@mantou/gem';
+import type { RouteItem } from '@mantou/gem/elements/route';
 import { i18n } from 'src/i18n/basic';
 import notfound from 'src/images/notfound.svg?raw';
+import { routes } from 'src/routes';
 
-import type { RouteItem } from '@mantou/gem/elements/route';
-
-import 'duoyun-ui/elements/result';
 import 'duoyun-ui/elements/link';
+import 'duoyun-ui/elements/result';
 
 @customElement('p-notfound')
-@connectStore(i18n.store)
 export class PageNotfoundElement extends GemElement {
   render = () => {
     return html`

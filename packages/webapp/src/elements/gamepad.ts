@@ -1,23 +1,22 @@
 import {
+  adoptedStyle,
+  classMap,
+  css,
+  customElement,
+  type Emitter,
+  emitter,
   GemElement,
   html,
-  adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
   property,
-  emitter,
-  Emitter,
-  classMap,
+  shadow,
 } from '@mantou/gem';
-
 import gamepadImg from 'src/images/gamepad2.svg?raw';
 import { theme } from 'src/theme';
 
 import 'duoyun-ui/elements/shortcut-record';
 import 'duoyun-ui/elements/use';
 
-const style = createCSSSheet(css`
+const style = css`
   :host {
     display: block;
     width: 100%;
@@ -101,7 +100,7 @@ const style = createCSSSheet(css`
     top: 47.5%;
     left: 50%;
   }
-`);
+`;
 
 export type GamePadValue = {
   Up: string;
@@ -119,11 +118,9 @@ export type GamePadValue = {
   Reset: string;
 };
 
-/**
- * @customElement nesbox-gamepad
- */
 @customElement('nesbox-gamepad')
 @adoptedStyle(style)
+@shadow()
 export class NesboxGamepadElement extends GemElement {
   @property value?: GamePadValue;
 
@@ -136,31 +133,28 @@ export class NesboxGamepadElement extends GemElement {
   render = () => {
     return html`
       <dy-use class="img" .element=${gamepadImg}></dy-use>
-      ${this.value
-        ? Object.entries(this.value).map(([name, value]) =>
-            value
-              ? html`
-                  <dy-shortcut-record
-                    class=${classMap({ key: true, [name.toLowerCase()]: true })}
-                    .value=${[value]}
-                    @change=${(evt: CustomEvent<string[]>) => {
-                      evt.stopPropagation();
-                      const key = this.#getJoypadKey(evt.detail);
-                      if (key) {
-                        this.change({ ...this.value!, [name]: key });
-                      }
-                    }}
-                  ></dy-shortcut-record>
-                `
-              : html`
-                  <style>
-                    .img::part(${name.toLowerCase()}) {
-                      display: none;
-                    }
-                  </style>
-                `,
-          )
-        : ''}
+      ${Object.entries(this.value || {}).map(
+        ([name, value]) =>
+          html`
+            <dy-shortcut-record
+              v-if=${!!value}
+              class=${classMap({ key: true, [name.toLowerCase()]: true })}
+              .value=${[value]}
+              @change=${(evt: CustomEvent<string[]>) => {
+                evt.stopPropagation();
+                const key = this.#getJoypadKey(evt.detail);
+                if (key) {
+                  this.change({ ...this.value!, [name]: key });
+                }
+              }}
+            ></dy-shortcut-record>
+            <style v-else>
+              .img::part(${name.toLowerCase()}) {
+                display: none;
+              }
+            </style>
+          `,
+      )}
     `;
   };
 }

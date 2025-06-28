@@ -6,17 +6,17 @@
   "scss.validate": false,
   "typescript.preferences.importModuleSpecifier": "non-relative",
   "typescript.tsdk": "node_modules/typescript/lib",
-  "eslint.validate": ["typescript", "typescriptreact"],
   "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "[xml]": {
-    "editor.defaultFormatter": null
+  "editor.defaultFormatter": "biomejs.biome",
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.organizeImports": "always"
   },
   "[typescript]": {
-    "editor.formatOnSave": false
+    "editor.defaultFormatter": "biomejs.biome"
   },
-  "editor.codeActionsOnSave": {
-    "source.fixAll": "explicit"
+  "[xml]": {
+    "editor.defaultFormatter": null
   },
   "[rust]": {
     "editor.tabSize": 4,
@@ -26,6 +26,8 @@
   "[dart]": {
     "editor.rulers": [120]
   },
+  "eslint.enable": false,
+  "prettier.enable": false,
   "files.eol": "\n",
   "i18n-ally.enabledFrameworks": ["custom"],
   "i18n-ally.localesPaths": ["packages/webapp/src/locales"],

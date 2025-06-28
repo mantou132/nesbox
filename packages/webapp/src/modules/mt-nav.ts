@@ -1,25 +1,24 @@
 import {
-  GemElement,
-  connectStore,
-  html,
+  addListener,
   adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
   boolattribute,
+  connectStore,
+  css,
+  customElement,
+  GemElement,
+  html,
+  mounted,
   QueryString,
 } from '@mantou/gem';
-import { createPath } from 'duoyun-ui/elements/route';
-import { routes } from 'src/routes';
-
-import { getAvatar, playHintSound } from 'src/utils/common';
-import { globalEvents, queryKeys } from 'src/constants';
-import { configure } from 'src/configure';
-import { theme } from 'src/theme';
-import { i18n } from 'src/i18n/basic';
-import { GamepadBtnIndex } from 'src/gamepad';
-
 import type { DuoyunActiveLinkElement } from 'duoyun-ui/elements/link';
+import { createPath } from 'duoyun-ui/elements/route';
+import { configure } from 'src/configure';
+import { globalEvents, queryKeys } from 'src/constants';
+import { GamepadBtnIndex } from 'src/gamepad';
+import { i18n } from 'src/i18n/basic';
+import { routes } from 'src/routes';
+import { theme } from 'src/theme';
+import { getAvatar, playHintSound } from 'src/utils/common';
 
 import 'duoyun-ui/elements/avatar';
 import 'duoyun-ui/elements/link';
@@ -27,8 +26,8 @@ import 'src/elements/battery';
 import 'src/elements/net';
 import 'src/elements/time';
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :scope {
     position: relative;
     display: flex;
     place-items: center;
@@ -57,7 +56,7 @@ const style = createCSSSheet(css`
     gap: 2vw;
     transition: all 0.3s ${theme.timingFunction};
   }
-  :host([inert]) .links {
+  :scope[inert] .links {
     opacity: 0;
   }
   .link {
@@ -65,7 +64,7 @@ const style = createCSSSheet(css`
     opacity: 0.5;
     outline: none;
   }
-  .link:where(:state(active), [data-active]) {
+  .link:state(active) {
     opacity: 1;
   }
   .status {
@@ -73,15 +72,11 @@ const style = createCSSSheet(css`
     place-items: center;
     gap: 0.5em;
   }
-`);
+`;
 
-/**
- * @customElement m-mt-nav
- */
 @customElement('m-mt-nav')
 @adoptedStyle(style)
 @connectStore(configure)
-@connectStore(i18n.store)
 export class MMtNavElement extends GemElement {
   @boolattribute inert: boolean;
 
@@ -90,7 +85,7 @@ export class MMtNavElement extends GemElement {
       { path: createPath(routes.games), text: i18n.get('page.favorites.title') },
       {
         path: createPath(routes.games),
-        query: new QueryString({ [queryKeys.RECENT_GAMES]: 1 }).toString(),
+        query: new QueryString({ [queryKeys.RECENT_GAMES]: '1' }).toString(),
         text: i18n.get('page.games.recent'),
       },
       { path: createPath(routes.rooms), text: i18n.get('page.rooms.title') },
@@ -99,7 +94,7 @@ export class MMtNavElement extends GemElement {
 
   #onPressButtonIndex = ({ detail }: CustomEvent<GamepadBtnIndex>) => {
     if (this.inert) return;
-    const links = [...(this.shadowRoot?.querySelectorAll<DuoyunActiveLinkElement>('dy-active-link') || [])];
+    const links = [...(this.querySelectorAll<DuoyunActiveLinkElement>('dy-active-link') || [])];
     const index = links.findIndex((e) => e.active);
     switch (detail) {
       case GamepadBtnIndex.FrontLeftBottom:
@@ -113,12 +108,8 @@ export class MMtNavElement extends GemElement {
     }
   };
 
-  mounted = () => {
-    addEventListener(globalEvents.PRESS_HOST_BUTTON_INDEX, this.#onPressButtonIndex);
-    return () => {
-      removeEventListener(globalEvents.PRESS_HOST_BUTTON_INDEX, this.#onPressButtonIndex);
-    };
-  };
+  @mounted()
+  #init = () => addListener(window, globalEvents.PRESS_HOST_BUTTON_INDEX, this.#onPressButtonIndex);
 
   render = () => {
     return html`

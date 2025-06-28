@@ -1,21 +1,16 @@
-import { GemElement, html, adoptedStyle, customElement, connectStore } from '@mantou/gem';
+import { adoptedStyle, connectStore, customElement, GemElement, html } from '@mantou/gem';
 import { waitLoading } from 'duoyun-ui/elements/wait';
-
+import { configure, type Settings } from 'src/configure';
 import { i18n, langNames } from 'src/i18n/basic';
 import { gridStyle } from 'src/modules/shortcut-settings';
-import { changeTheme, ThemeName, themeNames } from 'src/theme';
-import { configure, Settings } from 'src/configure';
 import { updateAccount } from 'src/services/api';
+import { changeTheme, type ThemeName, themeNames } from 'src/theme';
 
 import 'duoyun-ui/elements/select';
 import 'duoyun-ui/elements/switch';
 
-/**
- * @customElement m-ui-settings
- */
 @customElement('m-ui-settings')
 @adoptedStyle(gridStyle)
-@connectStore(i18n.store)
 @connectStore(configure)
 export class MUiSettingsElement extends GemElement {
   #updateVideoSetting = async (name: keyof Settings['ui'], value: Settings['ui'][keyof Settings['ui']]) => {
@@ -51,8 +46,9 @@ export class MUiSettingsElement extends GemElement {
           }))}
           @change=${({ detail }: CustomEvent<ThemeName>) => changeTheme(detail)}
         ></dy-select>
-        ${window.__TAURI__ && location.hostname !== 'localhost'
-          ? html`
+        ${
+          window.__TAURI__ && location.hostname !== 'localhost'
+            ? html`
               <div>${i18n.get('settings.ui.branch')}</div>
               <dy-select
                 .value=${location.origin.includes('dev') ? 'dev' : 'master'}
@@ -63,16 +59,19 @@ export class MUiSettingsElement extends GemElement {
                   })}
               ></dy-select>
             `
-          : ''}
-        ${'startViewTransition' in document
-          ? html`
+            : ''
+        }
+        ${
+          'startViewTransition' in document
+            ? html`
               <div>${i18n.get('settings.ui.transition')}</div>
               <dy-switch
                 .checked=${!!configure.user?.settings.ui.viewTransition}
                 @change=${({ detail }: CustomEvent<boolean>) => this.#updateVideoSetting('viewTransition', detail)}
               ></dy-switch>
             `
-          : ''}
+            : ''
+        }
       </div>
     `;
   };

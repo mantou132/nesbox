@@ -1,6 +1,5 @@
-import { render, html } from '@mantou/gem';
+import { html, render } from '@mantou/gem';
 import { theme } from 'duoyun-ui/lib/theme';
-
 import { routes } from 'src/routes';
 
 import 'duoyun-ui/elements/route';
@@ -62,7 +61,7 @@ render(
     </nav>
     <div class="main-container">
       <main class="main" aria-label="Content">
-        <dy-route .routes=${routes}></dy-route>
+        <dy-light-route .routes=${routes}></dy-light-route>
       </main>
     </div>
   `,

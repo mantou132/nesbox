@@ -3,7 +3,7 @@
   "name": "root",
   "version": "0.0.1",
   "scripts": {
-    "lint": "lerna exec --ignore @mantou/nes -- tsc --noEmit && eslint . --ext .ts,.js",
+    "lint": "biome check --write && lerna exec --ignore @mantou/nes -- tsc --noEmit",
     "release": "lerna version",
     "build:nes": "wasm-pack build --out-dir ../nes-pkg --target web --scope mantou packages/nes",
     "publish:nes": "./scripts/nes-pkg.mjs",
@@ -11,26 +11,20 @@
     "prepare": "husky install"
   },
   "devDependencies": {
-    "@types/node": "^18.14.2",
-    "@typescript-eslint/eslint-plugin": "^5.53.0",
-    "@typescript-eslint/parser": "^5.53.0",
-    "eslint": "^8.35.0",
-    "eslint-config-prettier": "^8.6.0",
-    "eslint-import-resolver-typescript": "^3.5.3",
-    "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-prettier": "^4.2.1",
+    "@biomejs/biome": "^2.0.5",
+    "@types/node": "^22.13.10",
     "husky": "^8.0.3",
-    "lerna": "^6.5.1",
-    "lint-staged": "^13.1.2",
-    "prettier": "^2.8.4",
-    "prettier-plugin-glsl": "^0.0.10",
-    "typescript": "^4.9.5"
+    "lerna": "^8.0.0",
+    "lint-staged": "^15.1.0",
+    "typescript": "^5.8.3",
+    "wasm-pack": "^0.13.1"
   },
   "lint-staged": {
-    "*.ts": "eslint --fix"
+    "*.ts": "biome check --write"
   },
   "workspaces": [
     "games/*",
     "packages/*"
-  ]
+  ],
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

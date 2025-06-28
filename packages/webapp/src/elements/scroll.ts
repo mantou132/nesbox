@@ -1,20 +1,17 @@
-import { createCSSSheet, customElement, css, adoptedStyle } from '@mantou/gem';
+import { addListener, adoptedStyle, css, customElement, mounted, shadow } from '@mantou/gem';
 import { DuoyunScrollBaseElement } from 'duoyun-ui/elements/base/scroll';
-
 import { globalEvents } from 'src/constants';
 import { GamepadBtnIndex } from 'src/gamepad';
 
-const style = createCSSSheet(css`
+const style = css`
   :host {
     scroll-behavior: smooth;
   }
-`);
+`;
 
-/**
- * @customElement nesbox-scroll
- */
 @customElement('nesbox-scroll')
 @adoptedStyle(style)
+@shadow()
 export class NesboxScrollElement extends DuoyunScrollBaseElement {
   #pressButton = (evt: CustomEvent<GamepadBtnIndex>) => {
     switch (evt.detail) {
@@ -26,10 +23,7 @@ export class NesboxScrollElement extends DuoyunScrollBaseElement {
         break;
     }
   };
-  mounted = () => {
-    addEventListener(globalEvents.PRESS_HOST_BUTTON_INDEX, this.#pressButton);
-    return () => {
-      removeEventListener(globalEvents.PRESS_HOST_BUTTON_INDEX, this.#pressButton);
-    };
-  };
+
+  @mounted()
+  #init = () => addListener(window, globalEvents.PRESS_HOST_BUTTON_INDEX, this.#pressButton);
 }

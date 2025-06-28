@@ -1,29 +1,28 @@
 import {
-  GemElement,
-  html,
   adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
-  connectStore,
   boolattribute,
+  connectStore,
+  css,
+  customElement,
+  effect,
+  GemElement,
   history,
+  html,
 } from '@mantou/gem';
-import { SwipeEventDetail } from 'duoyun-ui/elements/gesture';
-import { routes } from 'src/routes';
-
-import { configure, toggleSideNavState } from 'src/configure';
-import { theme } from 'src/theme';
-import { i18n } from 'src/i18n/basic';
+import type { SwipeEventDetail } from 'duoyun-ui/elements/gesture';
 import { gotoLogin, logout } from 'src/auth';
+import { configure, toggleSideNavState } from 'src/configure';
+import { i18n } from 'src/i18n/basic';
+import { routes } from 'src/routes';
+import { theme } from 'src/theme';
 import { getAvatar } from 'src/utils/common';
 
-import 'duoyun-ui/elements/side-navigation';
 import 'duoyun-ui/elements/action-text';
+import 'duoyun-ui/elements/side-navigation';
 import 'duoyun-ui/elements/space';
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :scope {
     position: absolute;
     display: flex;
     justify-content: space-between;
@@ -37,7 +36,7 @@ const style = createCSSSheet(css`
     transform-origin: left center;
     z-index: 2;
   }
-  :host([open]) {
+  :scope[open] {
     transform: translateX(5vw) scale(0.9);
   }
   .nav {
@@ -52,11 +51,8 @@ const style = createCSSSheet(css`
   .nav * {
     font-size: ${1 / 0.9}em;
   }
-`);
+`;
 
-/**
- * @customElement m-side-nav
- */
 @customElement('m-side-nav')
 @adoptedStyle(style)
 @connectStore(configure)
@@ -73,12 +69,8 @@ export class MSideNavElement extends GemElement {
     }
   };
 
-  mounted = () => {
-    this.effect(
-      () => toggleSideNavState(false),
-      () => [history.getParams().path],
-    );
-  };
+  @effect(() => [history.getParams().path])
+  #setSideNavState = () => toggleSideNavState(false);
 
   render = () => {
     this.open = !!configure.sideNavState;
@@ -96,16 +88,13 @@ export class MSideNavElement extends GemElement {
           .items=${[routes.games, routes.favorites].filter((e) => !!e.getContent)}
         ></dy-side-navigation>
         <span style="flex-grow: 1"></span>
-        ${configure.user
-          ? html`
-              <dy-space @click=${logout}>
-                <dy-avatar size="small" src=${getAvatar(configure.user?.username)}></dy-avatar>
-                <dy-action-text color=${theme.negativeColor}>
-                  ${i18n.get('menu.account.logout', configure.user?.username || '')}
-                </dy-action-text>
-              </dy-space>
-            `
-          : html`<dy-action-text @click=${gotoLogin}>${i18n.get('menu.account.login')}</dy-action-text>`}
+        <dy-space v-if=${!!configure.user} @click=${logout}>
+          <dy-avatar size="small" src=${getAvatar(configure.user?.username)}></dy-avatar>
+          <dy-action-text color=${theme.negativeColor}>
+            ${i18n.get('menu.account.logout', configure.user?.username || '')}
+          </dy-action-text>
+        </dy-space>
+        <dy-action-text v-else @click=${gotoLogin}>${i18n.get('menu.account.login')}</dy-action-text>
       </dy-gesture>
       <dy-gesture @swipe=${this.#onSwipe} @click=${() => toggleSideNavState(false)} style="flex-grow: 1;"></dy-gesture>
     `;

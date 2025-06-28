@@ -1,16 +1,16 @@
 import 'dotenv/config';
-import { writeFile } from 'fs/promises';
-import { resolve } from 'path';
-import { readFileSync } from 'fs';
-import { execSync } from 'child_process';
+import { execSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
+import { writeFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
 
 import { Octokit } from '@octokit/core';
-import { Data } from 'index';
 
+import issues from './github.json';
+import type { Data } from './index';
 import originMetadata1 from './metadata1.json';
 import originMetadata2 from './metadata2.json';
 import originMetadata3 from './metadata3.json';
-import issues from './github.json';
 
 const roms = JSON.parse(readFileSync('./roms.json', { encoding: 'utf-8' }));
 

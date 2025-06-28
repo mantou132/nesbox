@@ -1,29 +1,28 @@
 import {
-  SelectComponent,
-  World,
   AudioComponent,
-  PositionComponent,
-  TextAreaComponent,
-  RenderOnceComponent,
   hitRect,
+  PositionComponent,
+  RenderOnceComponent,
+  SelectComponent,
+  TextAreaComponent,
+  type World,
 } from '@mantou/ecs';
-import { AnimateWrapEntity, FailedEntity, PieceEntity } from 'src/entities';
 import { NewPieceComponent, PieceComponent } from 'src/components';
 import {
-  SCENE,
-  ENTITY,
-  MODE,
-  WorldData,
-  MIN_UPDATE_FRAME,
-  MAX_UPDATE_FRAME,
   ADD_SPEED_SCORE,
+  ENTITY,
+  HEIGHT,
+  MAX_UPDATE_FRAME,
+  MIN_UPDATE_FRAME,
+  MODE,
+  SCENE,
+  SIDE_WIDTH,
   SOUND,
   UPDATE_X_DELAY,
-  HEIGHT,
   WIDTH,
-  SIDE_WIDTH,
+  type WorldData,
 } from 'src/constants';
-
+import { AnimateWrapEntity, FailedEntity, PieceEntity } from 'src/entities';
 import { getSceneAndData } from 'src/scenes';
 
 const Player = nesbox.players;

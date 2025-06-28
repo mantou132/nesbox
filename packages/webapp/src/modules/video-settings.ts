@@ -1,23 +1,18 @@
-import { GemElement, html, adoptedStyle, customElement, connectStore } from '@mantou/gem';
-
+import { adoptedStyle, connectStore, customElement, GemElement, html } from '@mantou/gem';
+import { configure, type Settings } from 'src/configure';
 import { RTCTransportType, VideoFilter, VideoRefreshRate, VideoRenderMethod } from 'src/constants';
-import { configure, Settings } from 'src/configure';
-import { gridStyle } from 'src/modules/shortcut-settings';
-import { updateAccount } from 'src/services/api';
 import { i18n } from 'src/i18n/basic';
 import { icons } from 'src/icons';
+import { gridStyle } from 'src/modules/shortcut-settings';
+import { updateAccount } from 'src/services/api';
 
 import 'duoyun-ui/elements/select';
 import 'duoyun-ui/elements/use';
 import 'duoyun-ui/elements/tooltip';
 
-/**
- * @customElement m-video-settings
- */
 @customElement('m-video-settings')
 @adoptedStyle(gridStyle)
 @connectStore(configure)
-@connectStore(i18n.store)
 export class MVideoSettingsElement extends GemElement {
   #updateVideoSetting = async (name: keyof Settings['video'], value: Settings['video'][keyof Settings['video']]) => {
     await updateAccount({

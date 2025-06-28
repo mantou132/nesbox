@@ -1,27 +1,26 @@
 import {
+  adoptedStyle,
+  boolattribute,
+  css,
+  customElement,
   GemElement,
   html,
-  adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
   property,
+  shadow,
   state,
-  boolattribute,
 } from '@mantou/gem';
-
-import { formatTime } from 'src/utils/common';
 import { configure } from 'src/configure';
-import { Message } from 'src/store';
+import type { Message } from 'src/store';
 import { theme } from 'src/theme';
+import { formatTime } from 'src/utils/common';
 
-const style = createCSSSheet(css`
+const style = css`
   :host {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
   }
-  :host(:where(:state(self), [data-self])) {
+  :host(:state(self)) {
     align-items: flex-end;
   }
   .body {
@@ -32,7 +31,7 @@ const style = createCSSSheet(css`
     background-color: ${theme.noticeColor};
     border-radius: ${theme.smallRound};
   }
-  :host(:where(:state(self), [data-self])) .body {
+  :host(:state(self)) .body {
     background-color: ${theme.describeColor};
   }
   :host([last]) {
@@ -48,7 +47,7 @@ const style = createCSSSheet(css`
     left: 0;
     border-inline-color: ${theme.noticeColor} transparent;
   }
-  :host(:is(:state(self), [data-self])) .body::after {
+  :host(:state(self)) .body::after {
     left: auto;
     right: 0;
     border-inline-color: transparent ${theme.describeColor};
@@ -60,13 +59,12 @@ const style = createCSSSheet(css`
     text-align: center;
     margin-block: 1em;
   }
-`);
+`;
 
-/**
- * @customElement m-msg
- */
 @customElement('m-msg')
 @adoptedStyle(style)
+// Firefox bug: https://bugzilla.mozilla.org/show_bug.cgi?id=1914099
+@shadow()
 export class MMsgElement extends GemElement {
   @property msg?: Message;
 
@@ -81,7 +79,7 @@ export class MMsgElement extends GemElement {
     this.self = this.msg?.userId === configure.user?.id;
 
     return html`
-      ${this.time ? html`<div class="time">${formatTime(this.msg.createdAt)}</div>` : ''}
+      <div v-if=${this.time} class="time">${formatTime(this.msg.createdAt)}</div>
       <div class="body">
         <div>${this.msg.body}</div>
       </div>

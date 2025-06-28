@@ -1,46 +1,43 @@
 import {
-  GemElement,
-  html,
   adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
   connectStore,
-  styleMap,
-  raw,
-  RefObject,
-  refobject,
+  createRef,
+  createState,
+  css,
+  customElement,
+  GemElement,
   history,
+  html,
+  raw,
+  styleMap,
 } from '@mantou/gem';
-import { locale } from 'duoyun-ui/lib/locale';
-import { isIncludesString } from 'duoyun-ui/lib/utils';
-import { isNotNullish } from 'duoyun-ui/lib/types';
-import { getDisplayKey, hotkeys, isMac } from 'duoyun-ui/lib/hotkeys';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
-import { createPath } from 'duoyun-ui/elements/route';
-import { routes } from 'src/routes';
-
-import { getCDNSrc, getTempText, matchRoute } from 'src/utils/common';
-import { friendStore, store, toggleFriendChatState } from 'src/store';
-import { theme } from 'src/theme';
-import { i18n } from 'src/i18n/basic';
-import { icons } from 'src/icons';
-import { configure, getShortcut, SearchCommand, setSearchCommand, toggleSearchState } from 'src/configure';
-import { createInvite, createRoom, enterPubRoom, updateRoom } from 'src/services/api';
-import { paramKeys } from 'src/constants';
-
 import type { DuoyunInputElement } from 'duoyun-ui/elements/input';
 import type { DuoyunOptionsElement, Option } from 'duoyun-ui/elements/options';
+import { createPath } from 'duoyun-ui/elements/route';
+import { getDisplayKey, hotkeys, isMac } from 'duoyun-ui/lib/hotkeys';
+import { locale } from 'duoyun-ui/lib/locale';
+import { isNotNullish } from 'duoyun-ui/lib/types';
+import { isIncludesString } from 'duoyun-ui/lib/utils';
+import { configure, getShortcut, SearchCommand, setSearchCommand, toggleSearchState } from 'src/configure';
+import { paramKeys } from 'src/constants';
+import { i18n } from 'src/i18n/basic';
+import { icons } from 'src/icons';
+import { routes } from 'src/routes';
+import { createInvite, createRoom, enterPubRoom, updateRoom } from 'src/services/api';
+import { friendStore, store, toggleFriendChatState } from 'src/store';
+import { theme } from 'src/theme';
+import { getCDNSrc, getTempText, matchRoute } from 'src/utils/common';
 
-import 'duoyun-ui/elements/input';
-import 'duoyun-ui/elements/options';
 import 'duoyun-ui/elements/alert';
+import 'duoyun-ui/elements/input';
 import 'duoyun-ui/elements/list';
-import 'duoyun-ui/elements/space';
+import 'duoyun-ui/elements/options';
 import 'duoyun-ui/elements/paragraph';
+import 'duoyun-ui/elements/space';
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :scope {
     border-radius: ${theme.normalRound};
     overflow: hidden;
     display: flex;
@@ -49,7 +46,7 @@ const style = createCSSSheet(css`
     height: 70vh;
     font-size: 1.125em;
   }
-  .header {
+  .input-wrap {
     background-color: ${theme.backgroundColor};
     padding: 0.6em;
   }
@@ -79,30 +76,21 @@ const style = createCSSSheet(css`
   .options::-webkit-scrollbar {
     width: 0;
   }
-`);
+`;
 
-type State = {
-  search: string;
-  result: Option[];
-};
-
-/**
- * @customElement m-search
- */
 @customElement('m-search')
 @adoptedStyle(style)
 @connectStore(store)
-@connectStore(i18n.store)
 @connectStore(friendStore)
 @connectStore(configure)
-export class MSearchElement extends GemElement<State> {
-  @refobject options: RefObject<DuoyunOptionsElement>;
-  @refobject input: RefObject<DuoyunInputElement>;
+export class MSearchElement extends GemElement {
+  #options = createRef<DuoyunOptionsElement>();
+  #input = createRef<DuoyunInputElement>();
 
-  state: State = {
+  #state = createState({
     search: '',
-    result: [],
-  };
+    result: [] as Option[],
+  });
 
   get #isRooms() {
     return matchRoute(routes.rooms);
@@ -119,11 +107,11 @@ export class MSearchElement extends GemElement<State> {
     if (command) {
       if (!configure.user?.playing && command === SearchCommand.SELECT_GAME) return;
       setSearchCommand(command);
-      this.setState({ search: '' });
+      this.#state({ search: '' });
     } else {
-      this.setState({ search: detail });
+      this.#state({ search: detail });
     }
-    this.setState({ result: this.#genOptions() });
+    this.#state({ result: this.#genOptions() });
   };
 
   #getItemHotKey = (index: number) => [isMac ? 'command' : 'ctrl', String(index + 1)];
@@ -133,18 +121,18 @@ export class MSearchElement extends GemElement<State> {
       Array.from(Array(9), (_, index) => [
         this.#getItemHotKey(index).join('+'),
         (evt: KeyboardEvent) => {
-          this.options.element?.shadowRoot?.querySelectorAll<HTMLElement>('[tabindex]')[index]?.click();
+          this.#options.value?.shadowRoot?.querySelectorAll<HTMLElement>('[tabindex]')[index]?.click();
           evt.preventDefault();
         },
       ]),
     ),
-    [[getShortcut('OPEN_HELP'), getShortcut('OPEN_SEARCH')].join(',')]: () => this.input.element?.focus(),
+    [[getShortcut('OPEN_HELP'), getShortcut('OPEN_SEARCH')].join(',')]: () => this.#input.value?.focus(),
   });
 
   #onKeydownInput = (evt: KeyboardEvent) => {
     hotkeys({
       // Safari bug: https://github.com/mantou132/gem/issues/66
-      backspace: () => !this.state.search && setSearchCommand(null),
+      backspace: () => !this.#state.search && setSearchCommand(null),
       [[getShortcut('OPEN_HELP'), getShortcut('OPEN_SEARCH')].join(',')]: (evt) => evt.preventDefault(),
     })(evt);
   };
@@ -165,7 +153,7 @@ export class MSearchElement extends GemElement<State> {
 
   #pinyin: typeof import('pinyin').pinyin | undefined = undefined;
   #matchSearch = (str: string) => {
-    const { search } = this.state;
+    const { search } = this.#state;
     if (!search) return true;
 
     const pyList = this.#pinyin?.(str, {
@@ -194,7 +182,7 @@ export class MSearchElement extends GemElement<State> {
               label: html`
                 <dy-space>
                   <span>${game.name}</span>
-                  ${favorites.has(id) ? html`<dy-use style="width:1em" .element=${icons.favorited}></dy-use>` : ''}
+                  <dy-use v-if=${favorites.has(id)} style="width:1em" .element=${icons.favorited}></dy-use>
                 </dy-space>
               `,
               tagIcon: icons.received,
@@ -301,7 +289,7 @@ export class MSearchElement extends GemElement<State> {
   };
 
   #genOptions = (): Option[] => {
-    const { search } = this.state;
+    const { search } = this.#state;
 
     if (configure.searchCommand === SearchCommand.SELECT_GAME) {
       return this.#genGameOptions();
@@ -339,7 +327,7 @@ export class MSearchElement extends GemElement<State> {
     if (i18n.currentLanguage.startsWith('zh-')) {
       import('pinyin').then(({ default: pinyin }) => {
         this.#pinyin = pinyin;
-        this.setState({ result: this.#genOptions() });
+        this.#state({ result: this.#genOptions() });
       });
     }
 
@@ -347,7 +335,7 @@ export class MSearchElement extends GemElement<State> {
   };
 
   render = () => {
-    const { search, result } = this.state;
+    const { search, result } = this.#state;
 
     if (configure.searchCommand !== SearchCommand.HELP && !mediaQuery.isPhone) {
       result.forEach((option, index) => {
@@ -366,9 +354,9 @@ export class MSearchElement extends GemElement<State> {
     }
 
     return html`
-      <div class="header">
+      <div class="input-wrap">
         <dy-input
-          ref=${this.input.ref}
+          ${this.#input}
           class="input"
           autofocus
           .value=${search}
@@ -380,31 +368,28 @@ export class MSearchElement extends GemElement<State> {
               configure.searchCommand === SearchCommand.HELP
                 ? 'tooltip.docs.help'
                 : configure.searchCommand === SearchCommand.SELECT_GAME
-                ? 'tooltip.game.change'
-                : this.#isRooms
-                ? 'placeholder.roomSearch'
-                : configure.user?.playing
-                ? 'placeholder.searchPlaying'
-                : 'placeholder.search',
+                  ? 'tooltip.game.change'
+                  : this.#isRooms
+                    ? 'placeholder.roomSearch'
+                    : configure.user?.playing
+                      ? 'placeholder.searchPlaying'
+                      : 'placeholder.search',
               configure.searchCommand === SearchCommand.HELP
                 ? getShortcut('OPEN_SEARCH', true)
                 : configure.searchCommand === SearchCommand.SELECT_GAME
-                ? ''
-                : getShortcut('OPEN_SEARCH', true),
+                  ? ''
+                  : getShortcut('OPEN_SEARCH', true),
             ),
           )}
         ></dy-input>
       </div>
       <div class="result">
-        ${search || configure.searchCommand === SearchCommand.SELECT_GAME
-          ? html`
-              <dy-options
-                class="options"
-                ref=${this.options.ref}
-                .options=${result.length ? result : [{ label: locale.noData }]}
-              ></dy-options>
-            `
-          : ''}
+        <dy-options
+          v-if=${!!search || configure.searchCommand === SearchCommand.SELECT_GAME}
+          ${this.#options}
+          class="options"
+          .options=${result.length ? result : [{ label: locale.noData }]}
+        ></dy-options>
         <div class="placeholder" @click=${toggleSearchState}></div>
       </div>
     `;

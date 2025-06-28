@@ -1,42 +1,47 @@
-import { GemElement, html, customElement, classMap, createCSSSheet, css, adoptedStyle, property } from '@mantou/gem';
+import {
+  adoptedStyle,
+  classMap,
+  createState,
+  css,
+  customElement,
+  GemElement,
+  html,
+  property,
+  unmounted,
+} from '@mantou/gem';
 import { Time } from 'duoyun-ui/lib/time';
-
-import { icons } from 'src/icons';
-import { saveFile } from 'src/utils/common';
-import { theme } from 'src/theme';
 import { i18n } from 'src/i18n/basic';
-
+import { icons } from 'src/icons';
 import type { MStageElement } from 'src/modules/stage';
+import { theme } from 'src/theme';
+import { saveFile } from 'src/utils/common';
 
 import 'duoyun-ui/elements/use';
 import 'src/elements/tooltip';
 
-const style = createCSSSheet(css`
+const style = css`
   .recording {
     color: ${theme.negativeColor};
   }
-`);
+`;
 
 type State = {
   recorder?: MediaRecorder;
   stopStream?: () => void;
 };
 
-/**
- * @customElement m-room-recorder
- */
 @customElement('m-room-recorder')
 @adoptedStyle(style)
-export class MRoomRecorderElement extends GemElement<State> {
+export class MRoomRecorderElement extends GemElement {
   @property getStream: MStageElement['getStream'];
 
-  state: State = {};
+  #state = createState<State>({});
 
   #onClick = () => {
-    if (this.state.recorder) {
-      this.state.recorder.stop();
-      this.state.stopStream?.();
-      this.setState({ recorder: undefined });
+    if (this.#state.recorder) {
+      this.#state.recorder.stop();
+      this.#state.stopStream?.();
+      this.#state({ recorder: undefined });
     } else {
       const { stream, stopStream } = this.getStream();
       const recorder = new MediaRecorder(stream);
@@ -44,20 +49,21 @@ export class MRoomRecorderElement extends GemElement<State> {
       recorder.ondataavailable = ({ data }) => {
         saveFile(new File([data], `Record ${new Time().format()}.webm`));
       };
-      this.setState({ recorder, stopStream });
+      this.#state({ recorder, stopStream });
     }
   };
 
-  unmounted = () => {
-    if (this.state.recorder) {
-      this.state.recorder.ondataavailable = null;
-      this.state.recorder.stop();
-      this.state.stopStream?.();
+  @unmounted()
+  #clear = () => {
+    if (this.#state.recorder) {
+      this.#state.recorder.ondataavailable = null;
+      this.#state.recorder.stop();
+      this.#state.stopStream?.();
     }
   };
 
   render = () => {
-    const { recorder } = this.state;
+    const { recorder } = this.#state;
     return html`
       <nesbox-tooltip
         .content=${recorder ? i18n.get('tooltip.game.stopRecord') : i18n.get('tooltip.game.startRecord')}

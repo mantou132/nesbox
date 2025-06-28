@@ -1,9 +1,9 @@
 /// <reference types="./types" />
 
-import { Nes as ONes, Button, Player } from '@mantou/nes';
-import { encodeQoiFrame, decodeQoiFrame } from '@mantou/nes-sandbox';
 import init from '@mantou/fbneo/fbneo-arcade';
 import wasmURL from '@mantou/fbneo/fbneo-arcade.wasm?url';
+import type { Button, Nes as ONes, Player } from '@mantou/nes';
+import { decodeQoiFrame, encodeQoiFrame } from '@mantou/nes-sandbox';
 
 import { Controllers } from './input';
 
@@ -31,7 +31,7 @@ export class Arcade implements ONes {
   #sound = false;
   #currentDeQoiLen = 0;
   #currentQoiFrameLen = 0;
-  #audioArray = new Int16Array();
+  #audioArray: Int16Array = new Int16Array();
   #controllers = new Controllers();
   #statePath = '';
 
@@ -91,7 +91,7 @@ export class Arcade implements ONes {
           if (path === 'fbneo-arcade.wasm') return wasmURL;
           return prefix + path;
         },
-        setRomProps: (w, h, rotateGame, flipped, vidImageDepth, _nBurnFPS, _aspectX, _aspectY) => {
+        setRomProps: (w, h, _rotateGame, _flipped, vidImageDepth, _nBurnFPS, _aspectX, _aspectY) => {
           this.#width = w;
           this.#height = h;
           this.#vidBits = vidImageDepth;
@@ -146,7 +146,7 @@ export class Arcade implements ONes {
     // https://github.com/mantou132/FBNeo/blob/nesbox/src/burner/sdl/run.cpp#L109
     this.#statePath = `/libsdl/fbneo/states/${name}.fs.all`;
     this.#fbneo.FS.mkdir('roms');
-    this.#fbneo.FS.writeFile('roms/' + name + '.zip', bytes);
+    this.#fbneo.FS.writeFile(`roms/${name}.zip`, bytes);
     this.#fbneo.start();
 
     await romReady;

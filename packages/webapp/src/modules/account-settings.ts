@@ -1,56 +1,35 @@
-import {
-  GemElement,
-  html,
-  adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
-  connectStore,
-  refobject,
-  RefObject,
-} from '@mantou/gem';
-import { throttle } from 'duoyun-ui/lib/timer';
-import { locale } from 'duoyun-ui/lib/locale';
-import { Toast } from 'duoyun-ui/elements/toast';
-
-import { configure } from 'src/configure';
-import { updateAccount, updatePassword } from 'src/services/api';
-import { i18n } from 'src/i18n/basic';
-
+import { adoptedStyle, connectStore, createRef, createState, css, customElement, GemElement, html } from '@mantou/gem';
 import type { DuoyunFormElement } from 'duoyun-ui/elements/form';
+import { Toast } from 'duoyun-ui/elements/toast';
+import { locale } from 'duoyun-ui/lib/locale';
+import { throttle } from 'duoyun-ui/lib/timer';
+import { configure } from 'src/configure';
+import { i18n } from 'src/i18n/basic';
+import { updateAccount, updatePassword } from 'src/services/api';
 
 import 'duoyun-ui/elements/form';
 import 'duoyun-ui/elements/heading';
 
-const style = createCSSSheet(css`
+const style = css`
   .form {
     width: min(20em, 100%);
   }
   .heading {
     margin-block: 3em 1em;
   }
-`);
+`;
 
-type State = {
-  oldpassword: string;
-  password: string;
-  renewpassword: string;
-};
-
-/**
- * @customElement m-account-settings
- */
 @customElement('m-account-settings')
 @adoptedStyle(style)
 @connectStore(configure)
-export class MAccountSettingsElement extends GemElement<State> {
-  @refobject formRef: RefObject<DuoyunFormElement>;
+export class MAccountSettingsElement extends GemElement {
+  #formRef = createRef<DuoyunFormElement>();
 
-  state: State = {
+  #state = createState({
     oldpassword: '',
     password: '',
     renewpassword: '',
-  };
+  });
 
   #throttleUpdateAccount = throttle(updateAccount);
 
@@ -60,12 +39,12 @@ export class MAccountSettingsElement extends GemElement<State> {
   };
 
   #onChangePassword = async () => {
-    if (!(await this.formRef.element?.valid())) return;
+    if (!(await this.#formRef.value?.valid())) return;
     await updatePassword({
-      oldpassword: this.state.oldpassword,
-      password: this.state.password,
+      oldpassword: this.#state.oldpassword,
+      password: this.#state.password,
     });
-    this.setState({ oldpassword: '', password: '', renewpassword: '' });
+    this.#state({ oldpassword: '', password: '', renewpassword: '' });
     Toast.open('success', i18n.get('tip.settings.passwordChanged'));
   };
 
@@ -80,22 +59,22 @@ export class MAccountSettingsElement extends GemElement<State> {
         ></dy-form-item>
       </dy-form>
       <dy-form
+        ${this.#formRef}
         class="form"
-        ref=${this.formRef.ref}
-        @change=${({ detail }: CustomEvent<State>) => this.setState(detail)}
+        @change=${({ detail }: CustomEvent) => this.#state(detail)}
       >
         <dy-heading class="heading" lv="4">${i18n.get('settings.account.password')}</dy-heading>
         <dy-form-item
           label=${i18n.get('settings.account.oldpassword')}
           type="password"
           name="oldpassword"
-          .value=${this.state.oldpassword}
+          .value=${this.#state.oldpassword}
         ></dy-form-item>
         <dy-form-item
           label=${i18n.get('settings.account.newpassword')}
           type="password"
           name="password"
-          .value=${this.state.password}
+          .value=${this.#state.password}
         ></dy-form-item>
         <dy-form-item
           label=${i18n.get('settings.account.renewpassword')}
@@ -104,13 +83,13 @@ export class MAccountSettingsElement extends GemElement<State> {
           .rules=${[
             {
               validator: () => {
-                if (this.state.password !== this.state.renewpassword) {
+                if (this.#state.password !== this.#state.renewpassword) {
                   throw new Error(i18n.get('tip.settings.renewPasswordNotMatch'));
                 }
               },
             },
           ]}
-          .value=${this.state.renewpassword}
+          .value=${this.#state.renewpassword}
         ></dy-form-item>
         <dy-button @click=${this.#onChangePassword}>${locale.ok}</dy-button>
       </dy-form>

@@ -1,4 +1,4 @@
-import { Button, Player } from '@mantou/nes';
+import type { Button, Player } from '@mantou/nes';
 
 type Cursor = { x: number; y: number; dx: number; dy: number };
 
@@ -40,5 +40,3 @@ declare global {
     };
   }
 }
-
-export {};

@@ -1,15 +1,14 @@
-import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, property } from '@mantou/gem';
-
-import { friendStore, Invite, store } from 'src/store';
-import { theme } from 'src/theme';
+import { adoptedStyle, css, customElement, GemElement, html, property } from '@mantou/gem';
+import { toggleFriendListState } from 'src/configure';
+import { ScUserStatus } from 'src/generated/graphql';
+import { i18n } from 'src/i18n/basic';
 import { icons } from 'src/icons';
 import { acceptInvite } from 'src/services/api';
-import { toggleFriendListState } from 'src/configure';
-import { i18n } from 'src/i18n/basic';
-import { ScUserStatus } from 'src/generated/graphql';
+import { friendStore, type Invite, store } from 'src/store';
+import { theme } from 'src/theme';
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :scope {
     display: block;
     border: 1px solid ${theme.informativeColor};
     padding: 1em 0.5em 1em 1em;
@@ -32,7 +31,7 @@ const style = createCSSSheet(css`
     padding: 0.2em;
     opacity: 0.7;
   }
-  .action:where(:state(active), [data-active], :hover, :focus) {
+  .action:where(:state(active), :hover, :focus) {
     opacity: 1;
   }
   .invite-tip {
@@ -43,11 +42,8 @@ const style = createCSSSheet(css`
     text-overflow: ellipsis;
     overflow: hidden;
   }
-`);
+`;
 
-/**
- * @customElement m-invite-item
- */
 @customElement('m-invite-item')
 @adoptedStyle(style)
 export class MInviteItemElement extends GemElement {
@@ -68,13 +64,7 @@ export class MInviteItemElement extends GemElement {
   render = () => {
     const friend = friendStore.friends[this.invite.userId];
     if (friend?.user.status === ScUserStatus.Offline) {
-      return html`
-        <style>
-          :host {
-            display: none !important;
-          }
-        </style>
-      `;
+      return null;
     }
     return html`
       <div class="title">${store.games[this.invite.room.gameId]?.name || ''}</div>

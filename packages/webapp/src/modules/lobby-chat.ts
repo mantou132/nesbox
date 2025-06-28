@@ -1,29 +1,29 @@
 import {
+  adoptedStyle,
+  connectStore,
+  createRef,
+  createState,
+  css,
+  customElement,
+  effect,
   GemElement,
   html,
-  adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
-  connectStore,
-  RefObject,
-  refobject,
+  shadow,
+  unmounted,
 } from '@mantou/gem';
-import { polling } from 'duoyun-ui/lib/timer';
+import type { DuoyunInputElement } from 'duoyun-ui/elements/input';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
-
+import { polling } from 'duoyun-ui/lib/timer';
 import { i18n } from 'src/i18n/basic';
+import { icons } from 'src/icons';
 import { enterLobby, leaveLobby, sendLobbyMsg } from 'src/services/api';
 import { store } from 'src/store';
-import { icons } from 'src/icons';
-
-import type { DuoyunInputElement } from 'duoyun-ui/elements/input';
 
 import 'duoyun-ui/elements/input';
-import 'src/modules/lobby-msg';
 import 'src/elements/scroll';
+import 'src/modules/lobby-msg';
 
-const style = createCSSSheet(css`
+const style = css`
   :host {
     display: flex;
     flex-direction: column;
@@ -40,88 +40,73 @@ const style = createCSSSheet(css`
   .input {
     width: 100%;
   }
-`);
+`;
 
-type State = {
-  input: string;
-  start: boolean;
-};
-
-/**
- * @customElement m-lobby-chat
- */
 @customElement('m-lobby-chat')
 @adoptedStyle(style)
 @connectStore(store)
-@connectStore(i18n.store)
-export class MLobbyChatElement extends GemElement<State> {
-  @refobject messageRef: RefObject<HTMLElement>;
-  @refobject inputRef: RefObject<DuoyunInputElement>;
-
-  state: State = {
+@shadow()
+export class MLobbyChatElement extends GemElement {
+  #state = createState({
     input: '',
     start: false,
-  };
+  });
+
+  #messageRef = createRef<HTMLElement>();
+  #inputRef = createRef<DuoyunInputElement>();
 
   #onChange = ({ detail }: CustomEvent<string>) => {
-    this.setState({ input: detail });
+    this.#state({ input: detail });
   };
 
   #onKeydown = hotkeys({
     enter: async () => {
-      await sendLobbyMsg(this.state.input);
-      this.setState({ input: '' });
-      this.inputRef.element?.blur();
+      await sendLobbyMsg(this.#state.input);
+      this.#state({ input: '' });
+      this.#inputRef.value?.blur();
     },
   });
 
-  mounted = () => {
-    this.effect(
-      () => polling(enterLobby, 13_000),
-      () => [i18n.currentLanguage],
-    );
+  @effect(() => [i18n.currentLanguage])
+  #enter = () => polling(enterLobby, 13_000);
 
-    this.effect(
-      () => {
-        this.messageRef.element?.scrollTo(0, 10000);
-      },
-      () => [store.lobbyMessage],
-    );
+  @effect(() => [store.lobbyMessage])
+  #scroll = () => this.#messageRef.value?.scrollTo(0, 10000);
 
-    return () => {
-      leaveLobby();
-    };
-  };
+  @unmounted()
+  #clear = leaveLobby;
 
   render = () => {
     const { lobbyMessage, lobbyInfo } = store;
     return html`
-      <nesbox-scroll ref=${this.messageRef.ref} class="list">
+      <nesbox-scroll ${this.#messageRef} class="list">
         ${lobbyMessage.map((msg) => html`<m-lobby-msg .msg=${msg}></m-lobby-msg>`)}
       </nesbox-scroll>
-      ${this.state.start
-        ? html`
+      ${
+        this.#state.start
+          ? html`
             <dy-input
-              ref=${this.inputRef.ref}
+              ${this.#inputRef}
               autofocus
               class="input"
-              .value=${this.state.input}
+              .value=${this.#state.input}
               .placeholder=${i18n.get('placeholder.message')}
-              @blur=${() => this.setState({ start: false })}
+              @blur=${() => this.#state({ start: false })}
               @change=${this.#onChange}
               @keydown=${this.#onKeydown}
             ></dy-input>
           `
-        : html`
+          : html`
             <dy-button
               title=${`Online ${lobbyInfo?.onlineUserCount}`}
               color="cancel"
               .icon=${icons.chat}
-              @click=${() => this.setState({ start: true })}
+              @click=${() => this.#state({ start: true })}
             >
               ${i18n.get('page.rooms.currentUser', String(lobbyInfo?.lobbyUserCount || 1))}
             </dy-button>
-          `}
+          `
+      }
     `;
   };
 }

@@ -1,8 +1,8 @@
-import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css } from '@mantou/gem';
+import { adoptedStyle, createState, css, customElement, effect, GemElement, html } from '@mantou/gem';
 import { theme } from 'duoyun-ui/lib/theme';
-import { getInputItemType, getInputItemValue, normalizeFilename, saveFile } from 'src/utils';
-import QOI from 'qoijs';
 import JSZip from 'jszip';
+import QOI from 'qoijs';
+import { getInputItemType, getInputItemValue, normalizeFilename, saveFile } from 'src/utils';
 
 import 'duoyun-ui/elements/file-picker';
 import 'duoyun-ui/elements/form';
@@ -10,8 +10,8 @@ import 'duoyun-ui/elements/input';
 import 'duoyun-ui/elements/button';
 import 'duoyun-ui/elements/drop-area';
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :scope {
     display: flex;
     flex-direction: column;
     gap: 1em;
@@ -30,45 +30,35 @@ const style = createCSSSheet(css`
   dy-form-item {
     text-transform: capitalize;
   }
-`);
+`;
 
-type State = {
-  files: File[];
+const initState = {
+  files: [] as File[],
   args: {
-    width: number;
-    height: number;
-    qoi: boolean;
-  };
-  result: string;
+    width: 16,
+    height: 16,
+    qoi: true,
+  },
+  result: '',
 };
 
-/**
- * @customElement p-image
- */
 @customElement('p-image')
 @adoptedStyle(style)
-export class PImageElement extends GemElement<State> {
-  state: State = {
-    files: [],
-    args: {
-      width: 16,
-      height: 16,
-      qoi: true,
-    },
-    result: '',
-  };
+export class PImageElement extends GemElement {
+  #state = createState(initState);
 
   #canvas = new OffscreenCanvas(0, 0);
 
   #weakMap = new WeakMap<File, Map<string, Uint8ClampedArray>>();
 
   #onChange = async (evt: CustomEvent<File[]>) => {
-    this.setState({ files: evt.detail });
+    this.#state({ files: evt.detail });
     evt.stopPropagation();
   };
 
+  @effect((i) => [i.#state.files, i.#state.args])
   #regenerateResult = async () => {
-    const { files, args } = this.state;
+    const { files, args } = this.#state;
     const arg = JSON.stringify(args);
     const ctx = this.#canvas.getContext('2d')!;
 
@@ -104,32 +94,32 @@ export class PImageElement extends GemElement<State> {
       }),
     );
 
-    this.setState({
+    this.#state({
       result:
         files.reduce((p, c) => {
-          return p + `import ${normalizeFilename(c.name)}Buf from 'assets/${normalizeFilename(c.name)}.data';\n`;
+          return `${p}import ${normalizeFilename(c.name)}Buf from 'assets/${normalizeFilename(c.name)}.data';\n`;
         }, '') +
         files.reduce((p, c) => {
           const value = args.qoi
             ? `new Uint8ClampedArray(QOI.decode(${normalizeFilename(c.name)}Buf).data.buffer)`
             : `new Uint8ClampedArray(${normalizeFilename(c.name)}Buf.buffer)`;
-          return p + `export const ${normalizeFilename(c.name)} = ${value};` + `\n`;
+          return `${p}export const ${normalizeFilename(c.name)} = ${value};\n`;
         }, '\n'),
     });
   };
 
-  #onArgChange = (evt: CustomEvent<{ name: keyof State['args']; value: string }>) => {
-    const { args } = this.state;
+  #onArgChange = (evt: CustomEvent<{ name: keyof (typeof initState)['args']; value: string }>) => {
+    const { args } = this.#state;
     const { name, value } = evt.detail;
-    this.setState({ args: { ...args, [name]: getInputItemValue(args[name], value) } });
+    this.#state({ args: { ...args, [name]: getInputItemValue(args[name], value) } });
   };
 
   #onDropChange = (evt: CustomEvent<File[]>) => {
-    this.setState({ files: [...this.state.files, ...evt.detail] });
+    this.#state({ files: [...this.#state.files, ...evt.detail] });
   };
 
   #onDownload = async () => {
-    const { files, args } = this.state;
+    const { files, args } = this.#state;
     const arg = JSON.stringify(args);
     const zip = new JSZip();
     files.forEach((file) => {
@@ -140,15 +130,8 @@ export class PImageElement extends GemElement<State> {
     saveFile(new File([content], 'assets.zip'));
   };
 
-  mounted = () => {
-    this.effect(
-      () => this.#regenerateResult,
-      () => [this.state.files, this.state.args],
-    );
-  };
-
   render = () => {
-    const { files, args, result } = this.state;
+    const { files, args, result } = this.#state;
     return html`
       <dy-drop-area class="input" accept="image/*" @change=${this.#onDropChange}>
         <dy-file-picker .multiple=${true} .type=${'image'} .value=${files} @change=${this.#onChange}></dy-file-picker>

@@ -1,23 +1,21 @@
 import {
+  adoptedStyle,
+  connectStore,
+  createState,
+  css,
+  customElement,
   GemElement,
   html,
-  adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
-  connectStore,
   numattribute,
 } from '@mantou/gem';
+import type { Columns } from 'duoyun-ui/elements/table';
 import { Toast } from 'duoyun-ui/elements/toast';
-
-import { Cheat, configure } from 'src/configure';
+import { type Cheat, configure } from 'src/configure';
+import { i18n } from 'src/i18n/basic';
 import { icons } from 'src/icons';
 import { updateAccount } from 'src/services/api';
-import { i18n } from 'src/i18n/basic';
 import { theme } from 'src/theme';
 import { parseCheatCode } from 'src/utils/game';
-
-import type { Columns } from 'duoyun-ui/elements/table';
 
 import 'duoyun-ui/elements/table';
 import 'duoyun-ui/elements/input';
@@ -26,8 +24,8 @@ import 'duoyun-ui/elements/switch';
 import 'duoyun-ui/elements/shortcut-record';
 import 'duoyun-ui/elements/button';
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :scope {
     display: block;
   }
   .list {
@@ -48,23 +46,15 @@ const style = createCSSSheet(css`
   .list::part(icon):hover {
     opacity: 1;
   }
-`);
+`;
 
-type State = {
-  newCheat?: Cheat;
-};
-
-/**
- * @customElement m-cheat-settings
- */
 @customElement('m-cheat-settings')
 @adoptedStyle(style)
 @connectStore(configure)
-@connectStore(i18n.store)
-export class MCheatSettingsElement extends GemElement<State> {
+export class MCheatSettingsElement extends GemElement {
   @numattribute gameId: number;
 
-  state: State = {};
+  #state = createState({ newCheat: undefined as Cheat | undefined });
 
   get #data() {
     return configure.user?.settings.cheat[this.gameId] || [];
@@ -75,7 +65,7 @@ export class MCheatSettingsElement extends GemElement<State> {
   }
 
   #onChangeNewCheat = (detail: Partial<Cheat>) => {
-    this.setState({ newCheat: Object.assign(this.state.newCheat!, detail) });
+    this.#state({ newCheat: Object.assign(this.#state.newCheat!, detail) });
   };
 
   #onChangeSettings = (data: Cheat[]) => {
@@ -91,7 +81,7 @@ export class MCheatSettingsElement extends GemElement<State> {
   };
 
   #addNewCheat = () => {
-    this.setState({ newCheat: { code: '', comment: '', enabled: true, toggleKey: '' } });
+    this.#state({ newCheat: { code: '', comment: '', enabled: true, toggleKey: '' } });
   };
 
   #addData = async (data: Cheat) => {
@@ -99,15 +89,15 @@ export class MCheatSettingsElement extends GemElement<State> {
       Toast.open('error', i18n.get('tip.cheat.exist'));
     } else if (parseCheatCode(data)) {
       await this.#onChangeSettings([...this.#cheatSettings, data]);
-      this.setState({ newCheat: undefined });
+      this.#state({ newCheat: undefined });
     } else {
       Toast.open('error', i18n.get('tip.cheat.formatErr'));
     }
   };
 
   #removeData = (data: Cheat) => {
-    if (data === this.state.newCheat) {
-      this.setState({ newCheat: undefined });
+    if (data === this.#state.newCheat) {
+      this.#state({ newCheat: undefined });
     } else {
       this.#onChangeSettings(this.#cheatSettings.filter((e) => e !== data));
     }
@@ -115,7 +105,7 @@ export class MCheatSettingsElement extends GemElement<State> {
 
   #changeToggleKey = (data: Cheat, detail: string[]) => {
     const key = detail.length > 1 || detail[0].length > 1 ? undefined : detail[0];
-    if (data === this.state.newCheat) {
+    if (data === this.#state.newCheat) {
       this.#onChangeNewCheat({ toggleKey: key });
     } else {
       this.#onChangeSettings(
@@ -125,7 +115,7 @@ export class MCheatSettingsElement extends GemElement<State> {
   };
 
   #toggle = (data: Cheat) => {
-    if (data === this.state.newCheat) {
+    if (data === this.#state.newCheat) {
       this.#onChangeNewCheat({ enabled: !data.enabled });
     } else {
       this.#onChangeSettings(
@@ -141,7 +131,7 @@ export class MCheatSettingsElement extends GemElement<State> {
         title: i18n.get('settings.cheat.code'),
         dataIndex: 'code',
         render: (data) =>
-          data === this.state.newCheat
+          data === this.#state.newCheat
             ? html`
                 <dy-input
                   style="width: 100%"
@@ -155,7 +145,7 @@ export class MCheatSettingsElement extends GemElement<State> {
         title: i18n.get('settings.cheat.comment'),
         dataIndex: 'comment',
         render: (data) =>
-          data === this.state.newCheat
+          data === this.#state.newCheat
             ? html`
                 <dy-input
                   style="width: 100%"
@@ -201,7 +191,7 @@ export class MCheatSettingsElement extends GemElement<State> {
             <dy-space>
               <dy-use
                 part="icon"
-                ?hidden=${data !== this.state.newCheat}
+                ?hidden=${data !== this.#state.newCheat}
                 @click=${() => this.#addData(data)}
                 .element=${icons.check}
               ></dy-use>
@@ -214,11 +204,11 @@ export class MCheatSettingsElement extends GemElement<State> {
     return html`
       <dy-table
         class="list"
-        .data=${this.state.newCheat ? [...data, this.state.newCheat] : data}
+        .data=${this.#state.newCheat ? [...data, this.#state.newCheat] : data}
         .columns=${columns}
         .noData=${' '}
       ></dy-table>
-      <dy-button ?disabled=${!!this.state.newCheat} type="reverse" .icon=${icons.add} @click=${this.#addNewCheat}>
+      <dy-button ?disabled=${!!this.#state.newCheat} type="reverse" .icon=${icons.add} @click=${this.#addNewCheat}>
         ${i18n.get('settings.cheat.add')}
       </dy-button>
     `;

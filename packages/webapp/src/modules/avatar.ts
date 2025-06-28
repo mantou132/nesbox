@@ -1,19 +1,17 @@
-import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, connectStore } from '@mantou/gem';
+import { adoptedStyle, aria, connectStore, css, customElement, GemElement, html, mounted } from '@mantou/gem';
 import { ContextMenu } from 'duoyun-ui/elements/contextmenu';
+import { Modal } from 'duoyun-ui/elements/modal';
 import { waitLoading } from 'duoyun-ui/elements/wait';
 import { commonHandle } from 'duoyun-ui/lib/hotkeys';
-import { Modal } from 'duoyun-ui/elements/modal';
-import { routes } from 'src/routes';
-
-import { getAvatar } from 'src/utils/common';
-import { githubIssue } from 'src/constants';
-import { configure, getShortcut, toggleScreencastMode, toggleSettingsState } from 'src/configure';
 import { logout } from 'src/auth';
-import { changeTheme, theme, ThemeName, themeNames } from 'src/theme';
+import { configure, getShortcut, toggleScreencastMode, toggleSettingsState } from 'src/configure';
+import { githubIssue } from 'src/constants';
 import { i18n, langNames } from 'src/i18n/basic';
 import { icons } from 'src/icons';
-
 import type { MNewGameElement } from 'src/modules/new-game';
+import { routes } from 'src/routes';
+import { changeTheme, type ThemeName, theme, themeNames } from 'src/theme';
+import { getAvatar } from 'src/utils/common';
 
 import 'duoyun-ui/elements/coach-mark';
 import 'duoyun-ui/elements/route';
@@ -21,8 +19,8 @@ import 'duoyun-ui/elements/avatar';
 import 'duoyun-ui/elements/options';
 import 'src/modules/new-game';
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :where(:scope) {
     position: relative;
     aspect-ratio: 1;
     cursor: pointer;
@@ -37,22 +35,18 @@ const style = createCSSSheet(css`
     box-sizing: border-box;
     border: 2px solid ${theme.textColor};
   }
-`);
+`;
 
-/**
- * @customElement m-avatar
- */
 @customElement('m-avatar')
 @adoptedStyle(style)
 @connectStore(configure)
-@connectStore(i18n.store)
+@aria({ focusable: true })
 export class MAvatarElement extends GemElement {
-  constructor() {
-    super();
+  @mounted()
+  #init = () => {
     this.addEventListener('click', this.#onClick);
-    this.tabIndex = 0;
     this.addEventListener('keydown', commonHandle);
-  }
+  };
 
   #addGame = async () => {
     const newGameElement = await Modal.open<MNewGameElement>({
@@ -156,14 +150,14 @@ export class MAvatarElement extends GemElement {
   render = () => {
     return html`
       <dy-avatar class="avatar" src=${getAvatar(configure.user?.username)}></dy-avatar>
-      <dy-route
+      <dy-light-route
         .routes=${[
           {
             pattern: routes.room.pattern,
             content: html`<dy-coach-mark index="0"></dy-coach-mark>`,
           },
         ]}
-      ></dy-route>
+      ></dy-light-route>
     `;
   };
 }

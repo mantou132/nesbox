@@ -1,4 +1,4 @@
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 
 import { defineConfig } from 'vite';
 
@@ -17,6 +17,9 @@ const config = async () => {
       outDir: resolve(process.cwd(), 'dist'),
       emptyOutDir: false,
       sourcemap: true,
+    },
+    esbuild: {
+      target: 'es2022',
     },
     server: {
       host: '0.0.0.0',

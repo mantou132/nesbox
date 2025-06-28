@@ -1,6 +1,7 @@
 import { JSDOM } from 'jsdom';
 
-import { agentFetch } from 'agent';
+import { agentFetch } from './agent';
+
 // eslint-disable-next-line no-console
 const log = console.log;
 

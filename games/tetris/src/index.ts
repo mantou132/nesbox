@@ -1,10 +1,9 @@
-import { World, loadFont, loadAudio, loadSprite, decodeFontBuf } from '@mantou/ecs';
-import { HEIGHT, WIDTH, SCENE, WorldData, SOUND, SPRITE, BORDER_COLOR } from 'src/constants';
-import QOI from 'qoijs';
-
-import soundBytes from 'assets/game_over.data';
-import courierNewBuf from 'assets/courierNew.data';
+import { decodeFontBuf, loadAudio, loadFont, loadSprite, World } from '@mantou/ecs';
 import arialBlackBuf from 'assets/arialBlack.data';
+import courierNewBuf from 'assets/courierNew.data';
+import soundBytes from 'assets/game_over.data';
+import QOI from 'qoijs';
+import { BORDER_COLOR, HEIGHT, SCENE, SOUND, SPRITE, WIDTH, type WorldData } from 'src/constants';
 import { getSceneAndData } from 'src/scenes';
 import { commonSystem, modeSelectSystem, moveSystem, pauseSystem, scoreSystem } from 'src/systems';
 

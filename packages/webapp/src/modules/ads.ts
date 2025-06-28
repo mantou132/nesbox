@@ -1,15 +1,14 @@
-import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, property } from '@mantou/gem';
-
-import { GameAttributes } from 'src/store';
-import { theme } from 'src/theme';
+import { adoptedStyle, css, customElement, GemElement, html, property } from '@mantou/gem';
 import { icons } from 'src/icons';
+import type { GameAttributes } from 'src/store';
+import { theme } from 'src/theme';
 
 import 'duoyun-ui/elements/link';
 import 'duoyun-ui/elements/tag';
 import 'duoyun-ui/elements/use';
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :scope {
     display: block;
   }
   .text-ad {
@@ -30,7 +29,7 @@ const style = createCSSSheet(css`
   .icon {
     width: 1em;
   }
-`);
+`;
 
 const getLink = (src = '') => {
   try {
@@ -42,9 +41,6 @@ const getLink = (src = '') => {
   }
 };
 
-/**
- * @customElement m-ads
- */
 @customElement('m-ads')
 @adoptedStyle(style)
 export class MAdsElement extends GemElement {
@@ -54,16 +50,12 @@ export class MAdsElement extends GemElement {
     const { ad_link, ad_text } = this.attrs || {};
     const link = getLink(ad_link);
 
-    if (link) {
-      return html`
-        <dy-link class="text-ad" href=${link}>
+    return html`
+        <dy-link v-if=${!!link} class="text-ad" href=${link}>
           <dy-tag small>AD</dy-tag>
           <span class="link">${ad_text || ad_link}</span>
           <dy-use class="icon" .element=${icons.openNewWindow}></dy-use>
         </dy-link>
       `;
-    }
-
-    return html``;
   };
 }

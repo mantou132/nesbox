@@ -1,14 +1,13 @@
-import { writeFile } from 'fs/promises';
-import { resolve } from 'path';
+import { writeFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
 
-import { fetchList, Item } from 'list';
-import { Game, get8BBitGames } from '8bbit';
-import { fetchImage } from 'image';
-import { fetchEnDes, fetchJaDes, fetchZhDes } from 'description';
-import { existGames, incudesString, normalize, removePunctuation } from 'utils';
-
-import metadata2 from './metadata2.json';
+import { type Game, get8BBitGames } from './8bbit';
+import { fetchEnDes, fetchJaDes, fetchZhDes } from './description';
+import { fetchImage } from './image';
+import { fetchList, type Item } from './list';
 import metadata1 from './metadata1.json';
+import metadata2 from './metadata2.json';
+import { existGames, incudesString, normalize, removePunctuation } from './utils';
 
 export type Data = {
   title: string;
@@ -33,8 +32,8 @@ const appendData = async (lang: keyof Item, item: Item, game: Game) => {
         lang === 'ja'
           ? (await fetchJaDes(item[lang])) || ''
           : lang === 'zh'
-          ? (await fetchZhDes(item[lang])) || ''
-          : (await fetchEnDes(item[lang])) || game.wiki
+            ? (await fetchZhDes(item[lang])) || ''
+            : (await fetchEnDes(item[lang])) || game.wiki
       ).slice(0, 3000);
 
       const screenshots = (await fetchImage(item[lang])).slice(0, 10);
@@ -87,7 +86,7 @@ async function main() {
 
 main();
 
-process.on('SIGINT', async function () {
+process.on('SIGINT', async () => {
   await write();
   process.exit();
 });

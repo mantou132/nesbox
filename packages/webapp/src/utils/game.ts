@@ -1,13 +1,11 @@
-import { once } from 'duoyun-ui/lib/timer';
-import { clamp } from 'duoyun-ui/lib/number';
+import { Button, default as initNes, Nes } from '@mantou/nes';
 import { Cache } from 'duoyun-ui/lib/cache';
-import { default as initNes, Nes, Button } from '@mantou/nes';
-
-import { VideoRefreshRate } from 'src/constants';
-import { logger } from 'src/logger';
-
+import { clamp } from 'duoyun-ui/lib/number';
+import { once } from 'duoyun-ui/lib/timer';
 import type { Cheat, Combo } from 'src/configure';
+import { COMMAND, VideoRefreshRate } from 'src/constants';
 import type { NesboxCanvasElement } from 'src/elements/canvas';
+import { logger } from 'src/logger';
 
 export function requestFrame(render: () => void, generator = VideoRefreshRate.AUTO) {
   const duration = 1000 / 60;
@@ -53,7 +51,7 @@ export function requestFrame(render: () => void, generator = VideoRefreshRate.AU
 
 const rectCache = new Cache<DOMRect>({ maxAge: 500, renewal: true });
 export const positionMapping = (event: PointerEvent, canvas: NesboxCanvasElement) => {
-  const stage = rectCache.get('', () => canvas.canvasRef.element!.getBoundingClientRect());
+  const stage = rectCache.get('', () => canvas.canvasRef.value!.getBoundingClientRect());
   const aspectRadio = canvas.width / canvas.height;
   const width = aspectRadio > stage.width / stage.height ? stage.width : aspectRadio * stage.height;
   const halfWidth = width / 2;
@@ -86,7 +84,7 @@ export function mapPointerButton(event: PointerEvent) {
 }
 
 const getDevRomFile = once(async function getDevRomFile() {
-  if (process.env.NODE_ENV === 'development') {
+  if (COMMAND === 'serve') {
     try {
       const origin = 'http://localhost:8000';
       const filenames = ['index_bg.wasm', 'index.js', 'index.wasm4.wasm', 'ffightub.zip', 'alienar.zip'];
@@ -212,14 +210,11 @@ export function parseComboCode(combo: Combo) {
     combo,
     enabled: combo.enabled,
     // jk*4-*4-j*4
-    frames: combo.code
-      .split('-')
-      .map((str) => {
-        const arr = str.split('*');
-        const keys = [...arr[0]];
-        const repeat = parseInt(arr[1]) || 1;
-        return new Array<string[]>(repeat).fill(keys);
-      })
-      .flat(),
+    frames: combo.code.split('-').flatMap((str) => {
+      const arr = str.split('*');
+      const keys = [...arr[0]];
+      const repeat = parseInt(arr[1]) || 1;
+      return new Array<string[]>(repeat).fill(keys);
+    }),
   };
 }

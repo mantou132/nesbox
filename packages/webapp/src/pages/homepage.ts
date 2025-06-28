@@ -1,22 +1,21 @@
-import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, raw, connectStore } from '@mantou/gem';
-import { isMac } from 'duoyun-ui/lib/hotkeys';
+import { adoptedStyle, css, customElement, GemElement, html, mounted, raw } from '@mantou/gem';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
+import type { RouteItem } from 'duoyun-ui/elements/route';
 import { Toast } from 'duoyun-ui/elements/toast';
-import { RouteItem } from 'duoyun-ui/elements/route';
 import { waitLoading } from 'duoyun-ui/elements/wait';
-import { routes } from 'src/routes';
-
-import { homepageI18n } from 'src/i18n/homepage';
-import { fontLoading, getCDNSrc, getCorSrc } from 'src/utils/common';
+import { isMac } from 'duoyun-ui/lib/hotkeys';
 import { githubRelease, pixelFont } from 'src/constants';
-import { theme } from 'src/theme';
-import leftSvg from 'src/images/homepage/left.svg';
-import rightSvg from 'src/images/homepage/right.svg';
+import { i18n, langNames } from 'src/i18n/basic';
+import { homepageI18n } from 'src/i18n/homepage';
 import bottomSvg from 'src/images/homepage/bottom.svg';
 import feature1Svg from 'src/images/homepage/feature1.svg';
 import feature2Svg from 'src/images/homepage/feature2.svg';
 import feature3Svg from 'src/images/homepage/feature3.svg';
-import { i18n, langNames } from 'src/i18n/basic';
+import leftSvg from 'src/images/homepage/left.svg';
+import rightSvg from 'src/images/homepage/right.svg';
+import { routes } from 'src/routes';
+import { theme } from 'src/theme';
+import { fontLoading, getCDNSrc, getCorSrc } from 'src/utils/common';
 
 import 'duoyun-ui/elements/button';
 import 'duoyun-ui/elements/paragraph';
@@ -32,8 +31,8 @@ const downloadSvg = raw`
   </svg>
 `;
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :scope {
     display: block;
     height: 100vh;
     height: 100dvh;
@@ -213,14 +212,10 @@ const style = createCSSSheet(css`
       width: auto;
     }
   }
-`);
+`;
 
-/**
- * @customElement p-homepage
- */
 @customElement('p-homepage')
 @adoptedStyle(style)
-@connectStore(homepageI18n.store)
 export class PHomepageElement extends GemElement {
   #download = async () => {
     if (navigator.userAgent.includes('Android')) {
@@ -250,7 +245,8 @@ export class PHomepageElement extends GemElement {
     this.update();
   };
 
-  mounted = () => {
+  @mounted()
+  #init = () => {
     fontLoading(pixelFont);
   };
 

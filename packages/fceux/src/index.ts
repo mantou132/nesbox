@@ -1,9 +1,9 @@
-import { Nes as ONes, Button, Player } from '@mantou/nes';
-import { encodeQoiFrame, decodeQoiFrame } from '@mantou/nes-sandbox';
-import init, { FceuxModule } from '@mantou/fceux';
+import init, { type FceuxModule } from '@mantou/fceux';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import wasmURL from '@mantou/fceux/fceux.wasm?url';
+import type { Button, Nes as ONes, Player } from '@mantou/nes';
+import { decodeQoiFrame, encodeQoiFrame } from '@mantou/nes-sandbox';
 
 import { Controllers } from './input';
 

@@ -1,7 +1,6 @@
-import { Button, Player } from '@mantou/nes';
-
-import { LocaleKey } from 'src/i18n/basic';
+import { type Button, Player } from '@mantou/nes';
 import { configure } from 'src/configure';
+import type { LocaleKey } from 'src/i18n/basic';
 
 export enum ChannelMessageType {
   CHAT_TEXT,

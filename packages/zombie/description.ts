@@ -1,6 +1,6 @@
 import { JSDOM } from 'jsdom';
 
-import { agentFetch } from 'agent';
+import { agentFetch } from './agent';
 
 async function fetchSearchLink(search: string, site: string) {
   const text = await agentFetch(

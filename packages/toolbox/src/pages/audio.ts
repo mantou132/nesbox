@@ -1,10 +1,10 @@
-import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css } from '@mantou/gem';
-import { theme } from 'duoyun-ui/lib/theme';
+import { adoptedStyle, createState, css, customElement, effect, GemElement, html } from '@mantou/gem';
 import { utf8ToB64 } from 'duoyun-ui/lib/encode';
+import { theme } from 'duoyun-ui/lib/theme';
 import { throttle } from 'duoyun-ui/lib/timer';
-import { getInputItemType, getInputItemValue, normalizeFilename, sampleToChart, saveFile } from 'src/utils';
-import QOI from 'qoijs';
 import JSZip from 'jszip';
+import QOI from 'qoijs';
+import { getInputItemType, getInputItemValue, normalizeFilename, sampleToChart, saveFile } from 'src/utils';
 
 import 'duoyun-ui/elements/drop-area';
 import 'duoyun-ui/elements/file-picker';
@@ -14,8 +14,8 @@ import 'duoyun-ui/elements/action-text';
 import 'duoyun-ui/elements/chart-zoom';
 import 'duoyun-ui/elements/button';
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :scope {
     display: flex;
     flex-direction: column;
     gap: 1em;
@@ -42,38 +42,26 @@ const style = createCSSSheet(css`
   dy-action-text {
     order: 1;
   }
-`);
+`;
 
-type State = {
-  files: File[];
-  charts: number[][][];
+const initState = {
+  files: [] as File[],
+  charts: [] as number[][][],
   args: {
-    sampleRate: number;
-    qoi: boolean;
-    ranges: Record<string, number[]>;
-  };
-  result: string;
+    sampleRate: 44100,
+    qoi: true,
+    ranges: {} as Record<string, number[]>,
+  },
+  result: '',
 };
 
-/**
- * @customElement p-audio
- */
 @customElement('p-audio')
 @adoptedStyle(style)
-export class PAudioElement extends GemElement<State> {
-  state: State = {
-    files: [],
-    charts: [],
-    args: {
-      sampleRate: 44100,
-      qoi: true,
-      ranges: {},
-    },
-    result: '',
-  };
+export class PAudioElement extends GemElement {
+  #state = createState(initState);
 
   #onChange = async (evt: CustomEvent<File[]>) => {
-    this.setState({ files: evt.detail });
+    this.#state({ files: evt.detail });
     evt.stopPropagation();
   };
 
@@ -81,9 +69,12 @@ export class PAudioElement extends GemElement<State> {
     File,
     Map<string, { data: Uint8Array | Float32Array; origin: Float32Array; chart: number[][] }>
   >();
+
   #audioContext: AudioContext;
+
+  @effect((i) => [i.#state.files, i.#state.args])
   #regenerateResult = throttle(async () => {
-    const { files, args } = this.state;
+    const { files, args } = this.#state;
     const arg = JSON.stringify(args);
     this.#audioContext = new AudioContext({ sampleRate: args.sampleRate });
 
@@ -121,23 +112,23 @@ export class PAudioElement extends GemElement<State> {
       }),
     );
 
-    this.setState({
+    this.#state({
       charts,
       result:
         files.reduce((p, c) => {
-          return p + `import ${normalizeFilename(c.name)}Buf from 'assets/${normalizeFilename(c.name)}.data';\n`;
+          return `${p}import ${normalizeFilename(c.name)}Buf from 'assets/${normalizeFilename(c.name)}.data';\n`;
         }, '') +
         files.reduce((p, c) => {
           const value = args.qoi
             ? `new Float32Array(QOI.decode(${normalizeFilename(c.name)}Buf).data.buffer)`
             : `new Float32Array(${normalizeFilename(c.name)}Buf.buffer)`;
-          return p + `export const ${normalizeFilename(c.name)} = ${value};` + `\n`;
+          return `${p}export const ${normalizeFilename(c.name)} = ${value};\n`;
         }, '\n'),
     });
   });
 
   #onDownload = async () => {
-    const { files, args } = this.state;
+    const { files, args } = this.#state;
     const arg = JSON.stringify(args);
     const zip = new JSZip();
     files.forEach((file) => {
@@ -151,22 +142,22 @@ export class PAudioElement extends GemElement<State> {
     saveFile(new File([content], 'assets.zip'));
   };
 
-  #onArgChange = (evt: CustomEvent<{ name: keyof State['args']; value: string }>) => {
-    const { args } = this.state;
+  #onArgChange = (evt: CustomEvent<{ name: keyof (typeof initState)['args']; value: string }>) => {
+    const { args } = this.#state;
     const { name, value } = evt.detail;
-    this.setState({ args: { ...args, [name]: getInputItemValue(args[name], value) } });
+    this.#state({ args: { ...args, [name]: getInputItemValue(args[name], value) } });
   };
 
   #onDropChange = (evt: CustomEvent<File[]>) => {
-    this.setState({ files: [...this.state.files, ...evt.detail] });
+    this.#state({ files: [...this.#state.files, ...evt.detail] });
   };
 
   #onRangeChange = (name: string, evt: CustomEvent<number[]>) => {
-    this.setState({
+    this.#state({
       args: {
-        ...this.state.args,
+        ...this.#state.args,
         ranges: {
-          ...this.state.args.ranges,
+          ...this.#state.args.ranges,
           [name]: evt.detail,
         },
       },
@@ -174,7 +165,7 @@ export class PAudioElement extends GemElement<State> {
   };
 
   #onPlay = (file: File) => {
-    const arg = JSON.stringify(this.state.args);
+    const arg = JSON.stringify(this.#state.args);
     const { origin } = this.#weakMap.get(file)!.get(arg)!;
     const node = this.#audioContext.createBufferSource();
     const buffer = this.#audioContext.createBuffer(1, origin.length, this.#audioContext.sampleRate);
@@ -184,15 +175,8 @@ export class PAudioElement extends GemElement<State> {
     node.start();
   };
 
-  mounted = () => {
-    this.effect(
-      () => this.#regenerateResult,
-      () => [this.state.files, this.state.args],
-    );
-  };
-
   render = () => {
-    const { files, args, result, charts } = this.state;
+    const { files, args, result, charts } = this.#state;
 
     return html`
       <dy-drop-area class="input" accept="audio/*" @change=${this.#onDropChange}>
@@ -227,7 +211,7 @@ export class PAudioElement extends GemElement<State> {
       </dy-drop-area>
       <dy-form @itemchange=${this.#onArgChange} .inline=${true}>
         ${Object.entries(args).map(([k, v]) =>
-          k == 'ranges'
+          k === 'ranges'
             ? ''
             : html`
                 <dy-form-item

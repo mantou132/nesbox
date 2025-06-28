@@ -1,7 +1,7 @@
 import 'dotenv/config';
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 
-import { Plugin, ResolvedConfig, defineConfig } from 'vite';
+import { defineConfig, type Plugin, type ResolvedConfig } from 'vite';
 
 const config = async ({ command }: any) => {
   return defineConfig({
@@ -18,6 +18,9 @@ const config = async ({ command }: any) => {
       outDir: resolve(process.cwd(), 'dist'),
       emptyOutDir: false,
       sourcemap: true,
+    },
+    esbuild: {
+      target: 'es2022',
     },
     plugins: [VitePluginPrefetchAll()],
     define: {
@@ -46,7 +49,7 @@ function VitePluginPrefetchAll(): Plugin {
 
       return Object.values(ctx.bundle)
         .filter((bundle) => !bundle.fileName.endsWith('.map'))
-        .map((bundle) => `${viteConfig.server.base ?? ''}/${bundle.fileName}`)
+        .map((bundle) => `${viteConfig.base}${bundle.fileName}`)
         .map((href) => ({
           tag: 'link',
           attrs: { rel: 'prefetch', href },

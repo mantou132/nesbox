@@ -1,35 +1,35 @@
 import {
-  GemElement,
-  html,
   adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
   connectStore,
+  createStore,
+  css,
+  customElement,
+  effect,
+  GemElement,
   history,
+  html,
+  mounted,
   QueryString,
-  useStore,
 } from '@mantou/gem';
-import { createPath } from 'duoyun-ui/elements/route';
-import { forever } from 'duoyun-ui/lib/timer';
 import { Loadbar } from 'duoyun-ui/elements/page-loadbar';
+import { createPath } from 'duoyun-ui/elements/route';
 import { Toast } from 'duoyun-ui/elements/toast';
+import { forever } from 'duoyun-ui/lib/timer';
 import { isNotNullish } from 'duoyun-ui/lib/types';
-import { locationStore, routes } from 'src/routes';
-
+import { configure } from 'src/configure';
 import { paramKeys, queryKeys } from 'src/constants';
+import { i18n } from 'src/i18n/basic';
+import { locationStore, routes } from 'src/routes';
 import { getAccount, getFriends, getGameIds, subscribeEvent } from 'src/services/api';
 import { getGames } from 'src/services/guest-api';
-import { configure } from 'src/configure';
-import { i18n } from 'src/i18n/basic';
 
 import 'src/modules/mt-nav';
 
 type MtStore = { imgUrl: string; inertNav: boolean };
-export const [mtAppStore, updateMtApp] = useStore<MtStore>({ imgUrl: '', inertNav: false });
+export const mtAppStore = createStore<MtStore>({ imgUrl: '', inertNav: false });
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :scope {
     display: grid;
     grid-template:
       'nav' auto
@@ -50,11 +50,11 @@ const style = createCSSSheet(css`
   m-mt-nav {
     grid-area: nav;
   }
-`);
+  dy-light-route {
+    display: contents;
+  }
+`;
 
-/**
- * @customElement mt-app-root
- */
 @customElement('mt-app-root')
 @adoptedStyle(style)
 @connectStore(mtAppStore)
@@ -68,6 +68,7 @@ export class MTAppRootElement extends GemElement {
     Loadbar.end();
   };
 
+  @effect(() => [configure.user?.playing?.id])
   #enterRoom = () => {
     const rid = configure.user?.playing?.id;
     if (rid) {
@@ -87,16 +88,14 @@ export class MTAppRootElement extends GemElement {
       Toast.open('warning', 'Please connect the gamepad');
     }
   };
+  @effect(() => [i18n.currentLanguage])
+  #refresh = () => {
+    getGames();
+    getGameIds();
+  };
 
-  mounted = () => {
-    this.effect(this.#enterRoom, () => [configure.user?.playing?.id]);
-    this.effect(
-      () => {
-        getGames();
-        getGameIds();
-      },
-      () => [i18n.currentLanguage],
-    );
+  @mounted()
+  #init = () => {
     forever(getAccount);
     forever(getFriends);
     const subscription = subscribeEvent();
@@ -111,12 +110,12 @@ export class MTAppRootElement extends GemElement {
     return html`
       <img class="bg" src=${mtAppStore.imgUrl} />
       <m-mt-nav ?inert=${mtAppStore.inertNav}></m-mt-nav>
-      <dy-route
+      <dy-light-route
         @loading=${this.#onLoading}
         @routechange=${this.#onChange}
         .routes=${routes}
         .locationStore=${locationStore}
-      ></dy-route>
+      ></dy-light-route>
     `;
   };
 }

@@ -1,20 +1,18 @@
-import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css } from '@mantou/gem';
-import { theme } from 'duoyun-ui/lib/theme';
-import { getCorSrc, getInputItemType, getInputItemValue, normalizeFilename, saveFile } from 'src/utils';
-import QOI from 'qoijs';
-import { Font, encodeFont } from '@mantou/ecs';
-import { sleep } from 'duoyun-ui/lib/timer';
-
+import { encodeFont, type Font } from '@mantou/ecs';
+import { adoptedStyle, createState, css, customElement, effect, GemElement, html } from '@mantou/gem';
 import type { DuoyunFormItemElement } from 'duoyun-ui/elements/form';
-import type { DuoyunSelectElement } from 'duoyun-ui/elements/select';
+import { theme } from 'duoyun-ui/lib/theme';
+import { sleep } from 'duoyun-ui/lib/timer';
+import QOI from 'qoijs';
+import { getCorSrc, getInputItemType, getInputItemValue, normalizeFilename, saveFile } from 'src/utils';
 
 import 'duoyun-ui/elements/select';
 import 'duoyun-ui/elements/input';
 import 'duoyun-ui/elements/form';
 import 'duoyun-ui/elements/button';
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :scope {
     display: flex;
     flex-direction: column;
     gap: 1em;
@@ -40,56 +38,42 @@ const style = createCSSSheet(css`
   dy-form-item {
     text-transform: capitalize;
   }
-`);
+`;
 
-type State = {
-  localFonts: string[];
-  webFonts: string[];
-  input: string;
-  result: string;
-  previews: HTMLCanvasElement[];
+const buildInFonts = ['Sans-Serif', 'Serif'];
+
+const initState = {
+  localFonts: [] as string[],
+  webFonts: [] as string[],
+  input: `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#&'()+,-./0123456789:;<=>?@[]_{}~‐ `,
+  result: '',
+  previews: [] as HTMLCanvasElement[],
   args: {
-    currentFont: string;
-    fontSize: number;
-    qoi: boolean;
-  };
+    currentFont: buildInFonts[0],
+    fontSize: 10,
+    qoi: true,
+  },
 };
 
-/**
- * @customElement p-font
- */
 @customElement('p-font')
 @adoptedStyle(style)
-export class PFontElement extends GemElement<State> {
-  #buildInFonts = ['Sans-Serif', 'Serif'];
-
-  state: State = {
-    localFonts: [],
-    webFonts: [],
-    input: `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#&'()+,-./0123456789:;<=>?@[]_{}~‐ `,
-    result: '',
-    previews: [],
-    args: {
-      currentFont: this.#buildInFonts[0],
-      fontSize: 10,
-      qoi: true,
-    },
-  };
+export class PFontElement extends GemElement {
+  #state = createState(initState);
 
   #loadLocalFonts = async () => {
-    if ('queryLocalFonts' in window && !this.state.localFonts.length) {
+    if ('queryLocalFonts' in window && !this.#state.localFonts.length) {
       const fonts: Set<string> = new Set();
       // Chromium is implemented as a Promise
       const iterable = await window.queryLocalFonts();
       for (const font of iterable) {
         fonts.add(font.family);
       }
-      this.setState({ localFonts: [...fonts] });
+      this.#state({ localFonts: [...fonts] });
     }
   };
 
   #onInputChange = (evt: CustomEvent<string>) => {
-    this.setState({ input: evt.detail });
+    this.#state({ input: evt.detail });
   };
 
   #onPaste = async (evt: ClipboardEvent) => {
@@ -106,18 +90,18 @@ export class PFontElement extends GemElement<State> {
     await sleep(0);
     const font = await new FontFace(name, `url(${url})`).load();
     document.fonts.add(font);
-    this.setState({ webFonts: [...new Set([...this.state.webFonts, name])] });
-    target.shadowRoot?.querySelector<DuoyunSelectElement>('dy-select')?.setState?.({ search: name });
+    this.#state({ webFonts: [...new Set([...this.#state.webFonts, name])] });
+    target.shadowRoot?.querySelector<any>('dy-select')?.setSearch?.(name);
   };
 
-  #onArgChange = (evt: CustomEvent<{ name: keyof State['args']; value: string }>) => {
-    const { args } = this.state;
+  #onArgChange = (evt: CustomEvent<{ name: keyof (typeof initState)['args']; value: string }>) => {
+    const { args } = this.#state;
     const { name, value } = evt.detail;
-    this.setState({ args: { ...args, [name]: getInputItemValue(args[name], value) } });
+    this.#state({ args: { ...args, [name]: getInputItemValue(args[name], value) } });
   };
 
   #getFont = (str: string) => {
-    if (this.#buildInFonts.includes(str)) {
+    if (buildInFonts.includes(str)) {
       return str;
     }
     return `'${str}'`;
@@ -125,8 +109,10 @@ export class PFontElement extends GemElement<State> {
 
   #canvas = new OffscreenCanvas(0, 0);
   #resultData = new Map<string, Map<string, { width: number; data: Uint8ClampedArray }>>();
+
+  @effect((i) => [i.#state.input, i.#state.args])
   #regenerateResult = async () => {
-    const { input, args } = this.state;
+    const { input, args } = this.#state;
     const arg = JSON.stringify(args);
     const ctx = this.#canvas.getContext('2d', { willReadFrequently: true })!;
 
@@ -148,7 +134,7 @@ export class PFontElement extends GemElement<State> {
       }
       return map.get(char)!;
     });
-    this.setState({
+    this.#state({
       previews: charData.slice(0, 15).map(({ width, data }) => {
         const canvas = document.createElement('canvas');
         canvas.width = width;
@@ -167,7 +153,7 @@ export class PFontElement extends GemElement<State> {
   };
 
   #onDownload = async () => {
-    const { args, input } = this.state;
+    const { args, input } = this.#state;
     const arg = JSON.stringify(args);
     const map = this.#resultData.get(arg)!;
     const chars = new Set([...input]);
@@ -199,16 +185,8 @@ export class PFontElement extends GemElement<State> {
     );
   };
 
-  mounted = () => {
-    this.#regenerateResult();
-    this.effect(
-      () => this.#regenerateResult,
-      () => [this.state.input, this.state.args],
-    );
-  };
-
   render = () => {
-    const { localFonts, input, args, result, previews, webFonts } = this.state;
+    const { localFonts, input, args, result, previews, webFonts } = this.#state;
     return html`
       <dy-input class="input" type="textarea" .value=${input} @change=${this.#onInputChange}></dy-input>
       <dy-form @itemchange=${this.#onArgChange} .inline=${true}>
@@ -220,7 +198,7 @@ export class PFontElement extends GemElement<State> {
           @click=${this.#loadLocalFonts}
           @paste=${this.#onPaste}
           .value=${args.currentFont}
-          .options=${[...new Set([...this.#buildInFonts, ...webFonts, ...localFonts])].map((e) => ({
+          .options=${[...new Set([...buildInFonts, ...webFonts, ...localFonts])].map((e) => ({
             value: e,
             label: html`<div style="font-family: ${e}">${e}</div>`,
           }))}

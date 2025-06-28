@@ -1,5 +1,5 @@
 import { html } from '@mantou/gem';
-import { RouteItem } from '@mantou/gem/elements/route';
+import type { RouteItem } from '@mantou/gem/elements/route';
 
 import 'src/pages/image';
 import 'src/pages/font';

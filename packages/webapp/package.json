@@ -12,14 +12,14 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@mantou/gem": "^1.7.9",
+    "@mantou/gem": "^2.2.1",
     "@mantou/nes": "^1.0.14",
     "@mantou/nes-sandbox": "^0.0.13",
     "@nesbox/arcade": "^0.0.1",
     "@nesbox/fceux": "^0.0.1",
     "@nesbox/mtapp": "^0.0.1",
     "@nesbox/wasm4": "^0.0.1",
-    "duoyun-ui": "^1.1.9",
+    "duoyun-ui": "^2.2.1",
     "front-matter": "^4.0.2",
     "graphql": "^16.2.0",
     "jszip": "^3.10.0",
@@ -39,6 +39,6 @@
     "@types/marked": "^4.0.3",
     "dotenv": "^16.0.1",
     "network-information-types": "^0.1.1",
-    "vite": "^4.2.1"
+    "vite": "^6.3.5"
   }
 }

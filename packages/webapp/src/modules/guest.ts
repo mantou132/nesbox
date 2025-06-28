@@ -1,20 +1,18 @@
-import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, connectStore } from '@mantou/gem';
-import { icons } from 'duoyun-ui/lib/icons';
-import { commonHandle } from 'duoyun-ui/lib/hotkeys';
+import { adoptedStyle, connectStore, css, customElement, GemElement, html } from '@mantou/gem';
+import type { GemUseElement } from '@mantou/gem/elements/use';
 import { ContextMenu } from 'duoyun-ui/elements/contextmenu';
 import { waitLoading } from 'duoyun-ui/elements/wait';
+import { commonHandle } from 'duoyun-ui/lib/hotkeys';
+import { icons } from 'duoyun-ui/lib/icons';
 import { focusStyle } from 'duoyun-ui/lib/styles';
-
-import { i18n, langNames } from 'src/i18n/basic';
-import { ThemeName, themeNames, changeTheme, theme } from 'src/theme';
 import { configure, toggleScreencastMode } from 'src/configure';
-
-import type { GemUseElement } from '@mantou/gem/elements/use';
+import { i18n, langNames } from 'src/i18n/basic';
+import { changeTheme, type ThemeName, theme, themeNames } from 'src/theme';
 
 import 'duoyun-ui/elements/input-capture';
 import 'duoyun-ui/elements/use';
 
-const style = createCSSSheet(css`
+const style = css`
   .menu {
     position: absolute;
     inset-inline-end: 1em;
@@ -23,14 +21,11 @@ const style = createCSSSheet(css`
     padding: 4px;
     border-radius: ${theme.normalRound};
   }
-  .menu:where(:hover, :state(active), [data-active]) {
+  .menu:where(:hover, :state(active)) {
     background-color: ${theme.hoverBackgroundColor};
   }
-`);
+`;
 
-/**
- * @customElement m-guest
- */
 @customElement('m-guest')
 @adoptedStyle(style)
 @adoptedStyle(focusStyle)
@@ -79,7 +74,7 @@ export class ModuleGuestElement extends GemElement {
         @keydown=${commonHandle}
         .element=${icons.more}
       ></dy-use>
-      ${configure.screencastMode ? html`<dy-input-capture></dy-input-capture>` : ''}
+      <dy-input-capture v-if=${!!configure.screencastMode}></dy-input-capture>
     `;
   };
 }

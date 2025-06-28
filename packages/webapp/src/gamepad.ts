@@ -1,8 +1,7 @@
-import { isNotNullish } from 'duoyun-ui/lib/types';
 import { Button, Player } from '@mantou/nes';
 import { Toast } from 'duoyun-ui/elements/toast';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
-
+import { isNotNullish } from 'duoyun-ui/lib/types';
 import { dispatchGlobalEvent, globalEvents } from 'src/constants';
 
 // https://w3c.github.io/gamepad/#remapping
@@ -104,7 +103,7 @@ export const listenerGamepad = () => {
     readGamepad();
   } else {
     addEventListener('gamepadconnected', () => {
-      Toast.open('default', 'Gamepad connected!');
+      Toast.open('info', 'Gamepad connected!');
       readGamepad();
     });
   }

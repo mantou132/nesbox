@@ -1,32 +1,32 @@
 import {
+  adoptedStyle,
+  connectStore,
+  createRef,
+  css,
+  customElement,
+  effect,
   GemElement,
   html,
-  adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
-  connectStore,
-  refobject,
-  RefObject,
+  memo,
+  shadow,
 } from '@mantou/gem';
+import { commonAnimationOptions, fadeOut } from 'duoyun-ui/lib/animations';
 import { hotkeys } from 'duoyun-ui/lib/hotkeys';
-import { fadeOut, commonAnimationOptions } from 'duoyun-ui/lib/animations';
-
-import { changeFriendChatDraft, friendStore, toggleFriendChatState } from 'src/store';
-import { createMessage, getMessages, readMessage } from 'src/services/api';
-import { icons } from 'src/icons';
-import { theme } from 'src/theme';
 import { ScUserStatus } from 'src/generated/graphql';
 import { i18n } from 'src/i18n/basic';
+import { icons } from 'src/icons';
+import { createMessage, getMessages, readMessage } from 'src/services/api';
+import { changeFriendChatDraft, friendStore, toggleFriendChatState } from 'src/store';
+import { theme } from 'src/theme';
 
-import 'duoyun-ui/elements/use';
-import 'duoyun-ui/elements/result';
 import 'duoyun-ui/elements/action-text';
-import 'duoyun-ui/elements/status-light';
 import 'duoyun-ui/elements/input';
+import 'duoyun-ui/elements/result';
+import 'duoyun-ui/elements/status-light';
+import 'duoyun-ui/elements/use';
 import 'src/modules/msg';
 
-const style = createCSSSheet(css`
+const style = css`
   :host {
     position: fixed;
     z-index: ${theme.popupZIndex};
@@ -86,17 +86,14 @@ const style = createCSSSheet(css`
     flex-shrink: 0;
     border-radius: ${theme.smallRound};
   }
-`);
+`;
 
-/**
- * @customElement m-chat
- */
 @customElement('m-chat')
 @adoptedStyle(style)
-@connectStore(i18n.store)
+@shadow()
 @connectStore(friendStore)
 export class MChatElement extends GemElement {
-  @refobject messageRef: RefObject<HTMLElement>;
+  #messageRef = createRef<HTMLElement>();
 
   get #friend() {
     if (friendStore.friendChatState) {
@@ -127,45 +124,28 @@ export class MChatElement extends GemElement {
     })(evt);
   };
 
-  willMount() {
-    this.memo(
-      () => (this.inert = !friendStore.friendChatState),
-      () => [friendStore.friendChatState],
-    );
-  }
+  @memo(() => [friendStore.friendChatState])
+  #initInert = () => (this.inert = !friendStore.friendChatState);
 
-  mounted = () => {
-    this.effect(
-      async () => {
-        if (friendStore.friendChatState) {
-          await getMessages(friendStore.friendChatState);
-          // 保证用户看到信息后才清除未读
-          friendStore.friendChatState && readMessage(friendStore.friendChatState);
-        } else {
-          await this.animate(fadeOut, commonAnimationOptions).finished;
-          this.inert = false;
-          this.update();
-        }
-      },
-      () => [friendStore.friendChatState],
-    );
-    this.effect(
-      () => this.messageRef.element?.scrollTo(0, 10000),
-      () => [friendStore.messageIds[friendStore.friendChatState || 0]],
-    );
+  @effect(() => [friendStore.friendChatState])
+  #readMsg = async () => {
+    if (friendStore.friendChatState) {
+      await getMessages(friendStore.friendChatState);
+      // 保证用户看到信息后才清除未读
+      friendStore.friendChatState && readMessage(friendStore.friendChatState);
+    } else {
+      await this.animate(fadeOut, commonAnimationOptions).finished;
+      this.inert = false;
+      this.update();
+    }
   };
 
+  @effect(() => [friendStore.messageIds[friendStore.friendChatState || 0]])
+  #scroll = () => this.#messageRef.value?.scrollTo(0, 10000);
+
   render = () => {
+    if (!friendStore.friendChatState) return null;
     if (this.inert) return undefined;
-    if (!friendStore.friendChatState) {
-      return html`
-        <style>
-          :host {
-            display: none !important;
-          }
-        </style>
-      `;
-    }
 
     return html`
       <div class="header">
@@ -175,7 +155,7 @@ export class MChatElement extends GemElement {
         <span style="flex-grow: 1"></span>
         <dy-use class="close" .element=${icons.close} @click=${() => toggleFriendChatState()}></dy-use>
       </div>
-      <div ref=${this.messageRef.ref} class="list">
+      <div ${this.#messageRef} class="list">
         ${friendStore.messageIds[friendStore.friendChatState]?.map(
           (
             id,

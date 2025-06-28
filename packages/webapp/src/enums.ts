@@ -1,8 +1,7 @@
+import type { ElementOf } from 'duoyun-ui/lib/types';
 import { convertToMap } from 'duoyun-ui/lib/utils';
-import { ElementOf } from 'duoyun-ui/lib/types';
-
-import { LocaleKey } from 'src/i18n/basic';
 import { ScGameKind, ScGameSeries } from 'src/generated/graphql';
+import type { LocaleKey } from 'src/i18n/basic';
 
 export const gameKindList: { value: ScGameKind | ''; label: LocaleKey }[] = [
   {

@@ -2,7 +2,7 @@
 
 import { JSDOM } from 'jsdom';
 
-import result from '8bbit.json';
+import result from './8bbit.json';
 
 export type Game = { title: string; cover: string; wiki: string; view: number; playurl: string };
 
@@ -18,7 +18,7 @@ const parseView = (str: string) => {
 
 export async function get8BBitGames() {
   return Object.values(result)
-    .map((page) => {
+    .flatMap((page) => {
       const { window } = new JSDOM(page);
       return [...window.document.querySelectorAll('article')].map<Game>((article) => ({
         title: article.querySelector('h1 a')!.getAttribute('title') || '',
@@ -31,6 +31,5 @@ export async function get8BBitGames() {
         ).href,
       }));
     })
-    .flat()
     .sort((a, b) => b.view - a.view);
 }

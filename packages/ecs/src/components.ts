@@ -1,6 +1,7 @@
-import { audios, Color, COLOR_BLACK, FontType } from './assets';
+import type { FontType } from './assets';
+import { audios, COLOR_BLACK, type Color } from './assets';
 import { hitRect } from './utils';
-import { World } from './world';
+import type { World } from './world';
 
 export abstract class Component {
   toJSON() {
@@ -15,7 +16,7 @@ export const _registeredComponents = {} as Record<string, new <T extends Compone
 
 export function registerComponent() {
   // arg must is optional
-  return function (cls: new () => any) {
+  return (cls: new () => any) => {
     _registeredComponents[cls.name] = cls;
   };
 }
@@ -169,7 +170,7 @@ export class SelectComponent extends Component {
     if (position) {
       const index = this.#optionRects.findIndex(([x, y, w, h]) => hitRect(position.x, position.y, x, y, w, h));
       if (index > -1) {
-        if (this.selected != index) {
+        if (this.selected !== index) {
           this.selected = index;
           return { enter: true, hover: true };
         } else {

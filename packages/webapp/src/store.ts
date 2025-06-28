@@ -1,19 +1,18 @@
-import frontmatter from 'front-matter';
-import { ElementOf } from 'duoyun-ui/lib/types';
-import { useCacheStore } from 'duoyun-ui/lib/utils';
-import { sleep } from 'duoyun-ui/lib/timer';
 import { commonAnimationOptions } from 'duoyun-ui/lib/animations';
-
+import { sleep } from 'duoyun-ui/lib/timer';
+import type { ElementOf } from 'duoyun-ui/lib/types';
+import { createCacheStore } from 'duoyun-ui/lib/utils';
+import frontmatter from 'front-matter';
+import { configure } from 'src/configure';
 import { localStorageKeys } from 'src/constants';
-import {
+import type {
+  EnterLobbyMutation,
+  EventSubscription,
   GetFriendsQuery,
   GetMessagesQuery,
-  EventSubscription,
-  EnterLobbyMutation,
   GetRecordQuery,
 } from 'src/generated/graphql';
-import { GetCommentsQuery, GetGamesQuery, GetRoomsQuery } from 'src/generated/guestgraphql';
-import { configure } from 'src/configure';
+import type { GetCommentsQuery, GetGamesQuery, GetRoomsQuery } from 'src/generated/guestgraphql';
 
 export type GameAttributes = {
   ad_text?: string;
@@ -56,7 +55,7 @@ interface Store {
   lobbyMessage: LobbyMessage[];
 }
 
-export const [store, updateStore] = useCacheStore<Store>(
+export const { store } = createCacheStore<Store>(
   localStorageKeys.STORE_LOCAL_STORAGE_KEY,
   {
     games: {},
@@ -73,7 +72,7 @@ export const [store, updateStore] = useCacheStore<Store>(
 );
 
 export function clearLobbyMessage() {
-  updateStore({ lobbyMessage: [] });
+  store({ lobbyMessage: [] });
 }
 
 interface FriendStore {
@@ -88,7 +87,7 @@ interface FriendStore {
   friendChatState?: number;
 }
 
-export const [friendStore, updateFriendStore] = useCacheStore<FriendStore>(
+export const { store: friendStore } = createCacheStore<FriendStore>(
   localStorageKeys.FRIEND_CHAT_STORAGE_KEY,
   {
     draft: {},
@@ -104,17 +103,17 @@ export const [friendStore, updateFriendStore] = useCacheStore<FriendStore>(
 );
 
 export function changeFriendChatDraft(friendId: number, body?: string) {
-  updateFriendStore({ draft: { ...friendStore.draft, [friendId]: body } });
+  friendStore({ draft: { ...friendStore.draft, [friendId]: body } });
 }
 
 export const toggleFriendChatState = async (id?: number) => {
   if (id && id === friendStore.friendChatState) {
     // re-focus on friend chat
-    updateFriendStore({ friendChatState: undefined });
+    friendStore({ friendChatState: undefined });
   }
   // wait close animation
   await sleep(Number(commonAnimationOptions.duration));
-  updateFriendStore({
+  friendStore({
     recentFriendChat: id || friendStore.friendChatState || friendStore.recentFriendChat,
     friendChatState: id,
   });

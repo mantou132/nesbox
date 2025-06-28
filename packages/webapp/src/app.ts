@@ -1,55 +1,55 @@
 import {
-  GemElement,
-  customElement,
-  html,
-  connectStore,
-  css,
-  createCSSSheet,
+  addListener,
   adoptedStyle,
-  history,
-  styleMap,
-  refobject,
-  RefObject,
-  QueryString,
   classMap,
+  connectStore,
+  createRef,
+  css,
+  customElement,
+  effect,
+  GemElement,
+  history,
+  html,
+  mounted,
+  QueryString,
+  styleMap,
 } from '@mantou/gem';
-import { hotkeys } from 'duoyun-ui/lib/hotkeys';
-import { Loadbar } from 'duoyun-ui/elements/page-loadbar';
 import { createPath } from '@mantou/gem/elements/route';
-import { DuoyunRouteElement } from 'duoyun-ui/elements/route';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
-import { routes, locationStore } from 'src/routes';
-
-import { preventDefault } from 'src/utils/common';
-import { paramKeys, queryKeys, viewTransitionName } from 'src/constants';
+import { Loadbar } from 'duoyun-ui/elements/page-loadbar';
+import type { DuoyunRouteElement } from 'duoyun-ui/elements/route';
+import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import {
   configure,
   getShortcut,
-  toggleFriendListState,
+  SearchCommand,
   setSearchCommand,
+  toggleFriendListState,
   toggleSearchState,
   toggleSettingsState,
-  SearchCommand,
 } from 'src/configure';
+import { paramKeys, queryKeys, viewTransitionName } from 'src/constants';
+import { ScFriendStatus } from 'src/generated/graphql';
+import { i18n } from 'src/i18n/basic';
+import { locationStore, routes } from 'src/routes';
 import { enterPubRoom, getAccount, getFriends, getGameIds, subscribeEvent } from 'src/services/api';
 import { getGames } from 'src/services/guest-api';
-import { i18n } from 'src/i18n/basic';
 import { clearLobbyMessage, friendStore, toggleFriendChatState } from 'src/store';
-import { ScFriendStatus } from 'src/generated/graphql';
 import { theme } from 'src/theme';
+import { preventDefault } from 'src/utils/common';
 
-import 'duoyun-ui/elements/input-capture';
 import 'duoyun-ui/elements/drawer';
+import 'duoyun-ui/elements/input-capture';
 import 'duoyun-ui/elements/modal';
+import 'src/modules/chat';
+import 'src/modules/friend-list';
+import 'src/modules/nav';
+import 'src/modules/search';
 import 'src/modules/settings';
 import 'src/modules/side-nav';
-import 'src/modules/search';
-import 'src/modules/friend-list';
-import 'src/modules/chat';
-import 'src/modules/nav';
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :scope {
     display: contents;
   }
   .app {
@@ -80,31 +80,27 @@ const style = createCSSSheet(css`
   .content::-webkit-scrollbar {
     width: 0;
   }
-`);
+`;
 
-/**
- * @customElement app-root
- */
 @customElement('app-root')
 @connectStore(configure)
 @adoptedStyle(style)
-@connectStore(i18n.store)
 @connectStore(history.store)
 export class AppRootElement extends GemElement {
-  @refobject contentRef: RefObject<HTMLDivElement>;
-  @refobject routeRef: RefObject<DuoyunRouteElement>;
+  contentRef = createRef<HTMLDivElement>();
+
+  #routeRef = createRef<DuoyunRouteElement>();
+  #scrollPosition = new Map<string, number>();
 
   get #joinRoom() {
     return Number(history.getParams().query.get(queryKeys.JOIN_ROOM));
   }
 
-  #scrollPosition = new Map<string, number>();
-
   #onLoading = () => {
     Loadbar.start();
-    const { currentRoute, currentParams } = this.routeRef.element!;
+    const { currentRoute, currentParams } = this.#routeRef.value!;
     if (currentRoute) {
-      const scrollTop = this.contentRef.element?.scrollTop || 0;
+      const scrollTop = this.contentRef.value?.scrollTop || 0;
       this.#scrollPosition.set(createPath(currentRoute, { params: currentParams }), scrollTop > 360 ? scrollTop : 0);
     }
   };
@@ -113,7 +109,7 @@ export class AppRootElement extends GemElement {
     Loadbar.end();
     // await render
     await Promise.resolve();
-    this.contentRef.element?.scrollTo(0, this.#scrollPosition.get(locationStore.path) || 0);
+    this.contentRef.value?.scrollTo(0, this.#scrollPosition.get(locationStore.path) || 0);
   };
 
   #openUnReadMessage = () => {
@@ -148,6 +144,7 @@ export class AppRootElement extends GemElement {
 
   #stopPropagation = (e: DragEvent) => e.stopPropagation();
 
+  @effect(() => [configure.user?.playing?.id])
   #enterRoom = () => {
     const rid = configure.user?.playing?.id;
     if (rid) {
@@ -161,62 +158,52 @@ export class AppRootElement extends GemElement {
     }
   };
 
-  mounted = () => {
+  @mounted()
+  #init = () => {
     if (this.#joinRoom) {
       history.replace({ ...history.getParams(), query: '' });
       enterPubRoom(this.#joinRoom);
     }
+    return addListener(document, 'keydown', this.#globalShortcut);
+  };
 
-    this.effect(this.#enterRoom, () => [configure.user?.playing?.id]);
-    this.effect(
-      (_, prev) => {
-        this.#scrollPosition.clear();
-        this.contentRef.element?.scrollTo(0, 0);
-        clearLobbyMessage();
-        getGames();
-        if (prev && configure.user) {
-          getGameIds();
-        }
-      },
-      () => [i18n.currentLanguage],
-    );
-    this.effect(
-      () => {
-        if (configure.user) {
-          getGameIds();
-          getAccount();
-          getFriends();
-          const subscription = subscribeEvent();
-          return () => {
-            subscription.return?.();
-          };
-        }
-      },
-      () => [configure.user?.id],
-    );
-    addEventListener('keydown', this.#globalShortcut);
-    return () => {
-      removeEventListener('keydown', this.#globalShortcut);
-    };
+  @effect(() => [i18n.currentLanguage])
+  #resetPosition = (_: any, prev: any) => {
+    this.#scrollPosition.clear();
+    this.contentRef.value?.scrollTo(0, 0);
+    clearLobbyMessage();
+    getGames();
+    if (prev && configure.user) {
+      getGameIds();
+    }
+  };
+
+  @effect(() => [configure.user?.id])
+  #refresh = () => {
+    if (configure.user) {
+      getGameIds();
+      getAccount();
+      getFriends();
+      const subscription = subscribeEvent();
+      return () => subscription.return?.();
+    }
   };
 
   render = () => {
     return html`
-      ${mediaQuery.isPhone ? html`<m-side-nav ?open=${configure.sideNavState}></m-side-nav>` : ''}
+      <m-side-nav v-if=${mediaQuery.isPhone} ?open=${configure.sideNavState}></m-side-nav>
       <div class=${classMap({ app: true, out: !!configure.sideNavState })}>
         <m-nav></m-nav>
-        <div tabindex="-1" class="content" ?inert=${configure.sideNavState} ref=${this.contentRef.ref}>
+        <div ${this.contentRef} tabindex="-1" class="content" ?inert=${configure.sideNavState} >
           <main style="display: contents">
-            <dy-route
-              ref=${this.routeRef.ref}
+            <dy-light-route
+              ${this.#routeRef}
               @loading=${this.#onLoading}
               @routechange=${this.#onChange}
               .routes=${routes}
               .locationStore=${locationStore}
               .transition=${!!configure.user?.settings.ui.viewTransition && !mediaQuery.isPhone}
-            >
-              <div style="height: 100vh"></div>
-            </dy-route>
+            ></dy-light-route>
             <div style="height: 3em"></div>
           </main>
         </div>
@@ -225,10 +212,10 @@ export class AppRootElement extends GemElement {
       <m-chat></m-chat>
 
       <dy-drawer
-        customize
-        .open=${!!configure.friendListState}
         @close=${toggleFriendListState}
-        .body=${html`<m-friend-list style=${styleMap({ width: '15em' })}></m-friend-list>`}
+        .customize=${true}
+        .open=${!!configure.friendListState}
+        .bodySlot=${html`<m-friend-list style=${styleMap({ width: '15em' })}></m-friend-list>`}
       >
       </dy-drawer>
 
@@ -243,15 +230,15 @@ export class AppRootElement extends GemElement {
       </dy-modal>
 
       <dy-modal
-        customize
         @close=${toggleSearchState}
+        .customize=${true}
         .maskClosable=${true}
         .open=${!!configure.searchState}
-        .body=${html`<m-search></m-search>`}
+        .bodySlot=${html`<m-search></m-search>`}
       >
       </dy-modal>
 
-      ${configure.screencastMode ? html`<dy-input-capture></dy-input-capture>` : ''}
+      <dy-input-capture v-if=${!!configure.screencastMode}></dy-input-capture>
     `;
   };
 }

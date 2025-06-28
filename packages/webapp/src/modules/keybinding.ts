@@ -1,17 +1,15 @@
-import { GemElement, html, customElement, connectStore, css, createCSSSheet, adoptedStyle } from '@mantou/gem';
+import { adoptedStyle, connectStore, css, customElement, GemElement, html } from '@mantou/gem';
 import { Toast } from 'duoyun-ui/elements/toast';
-
-import { configure, defaultKeybinding, Settings } from 'src/configure';
-import { updateAccount } from 'src/services/api';
-import { i18n } from 'src/i18n/basic';
-
+import { configure, defaultKeybinding, type Settings } from 'src/configure';
 import type { GamePadValue } from 'src/elements/gamepad';
+import { i18n } from 'src/i18n/basic';
+import { updateAccount } from 'src/services/api';
 
 import 'duoyun-ui/elements/shortcut-record';
 import 'duoyun-ui/elements/button';
 import 'src/elements/gamepad';
 
-const style = createCSSSheet(css`
+const style = css`
   .header {
     display: flex;
     gap: 1em;
@@ -20,13 +18,9 @@ const style = createCSSSheet(css`
   dy-heading {
     margin: 0;
   }
-`);
+`;
 
-/**
- * @customElement m-keybinding
- */
 @customElement('m-keybinding')
-@connectStore(i18n.store)
 @adoptedStyle(style)
 @connectStore(configure)
 export class MKeybindingElement extends GemElement {
@@ -44,7 +38,7 @@ export class MKeybindingElement extends GemElement {
   };
 
   render = () => {
-    if (!configure.user) return html``;
+    if (!configure.user) return null;
     const { keybinding } = configure.user.settings;
 
     return html`

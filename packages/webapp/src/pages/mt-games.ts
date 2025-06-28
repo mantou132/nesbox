@@ -1,43 +1,41 @@
 import {
+  addListener,
+  adoptedStyle,
+  connectStore,
+  createStore,
+  css,
+  customElement,
+  effect,
   GemElement,
   html,
-  adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
-  connectStore,
-  state,
+  mounted,
   repeat,
-  useStore,
+  state,
 } from '@mantou/gem';
 import { formatDuration, Time } from 'duoyun-ui/lib/time';
-import { locationStore } from 'src/routes';
-
-import { getCDNSrc, playHintSound } from 'src/utils/common';
 import { globalEvents, queryKeys } from 'src/constants';
-import { store } from 'src/store';
-import { theme } from 'src/theme';
-import { createRoom, getRecord } from 'src/services/api';
-import { getComments } from 'src/services/guest-api';
 import { GamepadBtnIndex } from 'src/gamepad';
-import { updateMtApp } from 'src/mt-app';
 import { i18n } from 'src/i18n/basic';
 import { icons } from 'src/icons';
+import { mtAppStore } from 'src/mt-app';
+import { locationStore } from 'src/routes';
+import { createRoom, getRecord } from 'src/services/api';
+import { getComments } from 'src/services/guest-api';
+import { store } from 'src/store';
+import { theme } from 'src/theme';
+import { getCDNSrc, playHintSound } from 'src/utils/common';
 
 import 'duoyun-ui/elements/divider';
 import 'duoyun-ui/elements/empty';
 import 'duoyun-ui/elements/heading';
-import 'src/modules/game-detail';
 import 'src/elements/rotor';
 import 'src/elements/scroll';
+import 'src/modules/game-detail';
 
-const [mtGamesStore, updateMtGamesStore] = useStore({ currentIndex: 0, focusId: 0 });
-const setMtGamesStore = (obj: Partial<typeof mtGamesStore>) => {
-  queueMicrotask(() => updateMtGamesStore(obj));
-};
+const mtGamesStore = createStore({ currentIndex: 0, focusId: 0 });
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :scope {
     min-height: 0;
     display: flex;
     gap: calc(2 * ${theme.gridGutter});
@@ -53,17 +51,18 @@ const style = createCSSSheet(css`
     height: 100%;
     transition: all 0.3s ${theme.timingFunction};
   }
-  :host(:where([data-detail], :state(detail))) {
+  :scope:state(detail) {
     --size: min(calc(100vh - 10em), 20em, 28vw);
-  }
-  :host(:where([data-detail], :state(detail))) .rotor {
-    height: var(--size);
-  }
-  :host(:where([data-detail], :state(detail))) nesbox-rotor {
-    width: var(--size);
-  }
-  :host(:where([data-detail], :state(detail))) nesbox-rotor::part(other) {
-    opacity: 0;
+
+    .rotor {
+      height: var(--size);
+    }
+    nesbox-rotor {
+      width: var(--size);
+    }
+    nesbox-rotor::part(other) {
+      opacity: 0;
+    }
   }
   .info,
   .stats {
@@ -100,11 +99,8 @@ const style = createCSSSheet(css`
   .info :first-child {
     margin-block-start: 0;
   }
-`);
+`;
 
-/**
- * @customElement p-mt-games
- */
 @customElement('p-mt-games')
 @adoptedStyle(style)
 @connectStore(store)
@@ -120,7 +116,7 @@ export class PMtGamesElement extends GemElement {
   }
 
   #onDetail = (gameId: number) => {
-    setMtGamesStore({ focusId: gameId });
+    mtGamesStore({ focusId: gameId });
     getComments(gameId);
     getRecord(gameId);
   };
@@ -131,38 +127,37 @@ export class PMtGamesElement extends GemElement {
       case GamepadBtnIndex.FrontLeftTop:
       case GamepadBtnIndex.A:
       case GamepadBtnIndex.B:
-        if (mtGamesStore.focusId) {
-          playHintSound();
-          setMtGamesStore({ focusId: 0 });
-        }
+        playHintSound();
+        mtGamesStore({ focusId: 0 });
         break;
     }
   };
 
   #queryWatching = false;
-  mounted = () => {
-    this.effect(
-      (args) => {
-        if (this.#queryWatching || args![0]) {
-          setMtGamesStore({ focusId: 0, currentIndex: 0 });
-        } else {
-          this.#queryWatching = true;
-        }
-      },
-      () => [locationStore.query.get(queryKeys.RECENT_GAMES)],
-    );
+  @effect(() => [locationStore.query.get(queryKeys.RECENT_GAMES)])
+  #updateWatching = (args: [string | null]) => {
+    if (this.#queryWatching || args![0]) {
+      mtGamesStore({ focusId: 0, currentIndex: 0 });
+    } else {
+      this.#queryWatching = true;
+    }
+  };
 
-    this.effect(() => {
-      updateMtApp({ inertNav: !!mtGamesStore.focusId });
-    });
+  @effect()
+  #updateNav = () => {
+    mtAppStore({ inertNav: !!mtGamesStore.focusId });
+  };
 
-    this.addEventListener('dblclick', () => setMtGamesStore({ focusId: 0 }));
+  @mounted()
+  #init = () => {
+    console.log('parent');
+    this.addEventListener('dblclick', () => mtGamesStore({ focusId: 0 }));
+    const removeHandle = addListener(window, globalEvents.PRESS_HOST_BUTTON_INDEX, this.#pressButton);
 
-    addEventListener(globalEvents.PRESS_HOST_BUTTON_INDEX, this.#pressButton);
     return () => {
-      removeEventListener(globalEvents.PRESS_HOST_BUTTON_INDEX, this.#pressButton);
-      updateMtApp({ inertNav: false });
-      setMtGamesStore({ focusId: 0 });
+      removeHandle();
+      mtAppStore({ inertNav: false });
+      mtGamesStore({ focusId: 0 });
     };
   };
 
@@ -174,15 +169,16 @@ export class PMtGamesElement extends GemElement {
 
     return html`
       <div class="rotor">
-        ${this.#data?.length
-          ? html`${repeat(
-              [locationStore.query.toString()],
-              (key) => key,
-              () => html`
+        ${
+          this.#data?.length
+            ? html`${repeat(
+                [locationStore.query.toString()],
+                (key) => key,
+                () => html`
                 <nesbox-rotor
                   ?inert=${!!mtGamesStore.focusId}
                   .finite=${this.#data!.length < 3}
-                  @change=${({ detail }: CustomEvent<number>) => setMtGamesStore({ currentIndex: detail })}
+                  @change=${({ detail }: CustomEvent<number>) => mtGamesStore({ currentIndex: detail })}
                   .index=${Math.min(mtGamesStore.currentIndex, this.#data!.length - 1)}
                   .data=${this.#data!.map((id) => ({
                     id,
@@ -193,30 +189,23 @@ export class PMtGamesElement extends GemElement {
                   }))}
                 ></nesbox-rotor>
               `,
-            )}`
-          : html`<dy-heading><dy-empty></dy-empty></dy-heading>`}
-        ${mtGamesStore.focusId && record
-          ? html`
-              <div class="stats">
-                <dy-use class="stats-icon" .element=${icons.date}>
-                  ${i18n.get('page.game.lastPlay', new Time().relativeTimeFormat(record.lastPlayStartAt))}
-                </dy-use>
-                <dy-use class="stats-icon" .element=${icons.schedule}>
-                  ${i18n.get('page.game.totalPlay', formatDuration(record.playTotal))}
-                </dy-use>
-              </div>
-            `
-          : ''}
+              )}`
+            : html`<dy-heading><dy-empty></dy-empty></dy-heading>`
+        }
+        <div v-if=${!!mtGamesStore.focusId && !!record} class="stats">
+          <dy-use class="stats-icon" .element=${icons.date}>
+            ${i18n.get('page.game.lastPlay', new Time().relativeTimeFormat(record?.lastPlayStartAt || 0))}
+          </dy-use>
+          <dy-use class="stats-icon" .element=${icons.schedule}>
+            ${i18n.get('page.game.totalPlay', formatDuration(record?.playTotal || 0, { precision: 'm' }))}
+          </dy-use>
+        </div>
       </div>
-      ${mtGamesStore.focusId && game
-        ? html`
-            <nesbox-scroll class="info">
-              <dy-heading lv="1">${game.name}</dy-heading>
-              <dy-divider></dy-divider>
-              <m-game-detail .game=${game}></m-game-detail>
-            </nesbox-scroll>
-          `
-        : ''}
+      <nesbox-scroll v-if=${!!mtGamesStore.focusId && !!game} class="info">
+        <dy-heading lv="1">${game?.name}</dy-heading>
+        <dy-divider></dy-divider>
+        <m-game-detail .game=${game}></m-game-detail>
+      </nesbox-scroll>
     `;
   };
 }

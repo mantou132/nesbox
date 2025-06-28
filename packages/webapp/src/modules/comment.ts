@@ -1,24 +1,17 @@
-import {
-  GemElement,
-  html,
-  adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
-  property,
-  connectStore,
-} from '@mantou/gem';
+import { adoptedStyle, css, customElement, GemElement, html, property } from '@mantou/gem';
+import { createDecoratorTheme } from '@mantou/gem/helper/theme';
 import { Time } from 'duoyun-ui/lib/time';
-
-import { Comment } from 'src/store';
-import { theme } from 'src/theme';
 import { configure } from 'src/configure';
 import { i18n } from 'src/i18n/basic';
+import type { Comment } from 'src/store';
+import { theme } from 'src/theme';
 
 import 'duoyun-ui/elements/help-text';
 
-const style = createCSSSheet(css`
-  :host {
+const elementTheme = createDecoratorTheme({ backgroundImg: '' });
+
+const style = css`
+  :scope {
     display: flex;
     flex-direction: column;
     gap: 0.5em;
@@ -27,6 +20,7 @@ const style = createCSSSheet(css`
     padding: 1em;
     border-radius: ${theme.normalRound};
     background-color: ${theme.hoverBackgroundColor};
+    background-image: ${elementTheme.backgroundImg};
   }
   .header {
     display: flex;
@@ -46,14 +40,10 @@ const style = createCSSSheet(css`
     opacity: 0.5;
     font-style: italic;
   }
-`);
+`;
 
-/**
- * @customElement m-comment
- */
 @customElement('m-comment')
 @adoptedStyle(style)
-@connectStore(i18n.store)
 export class MCommentElement extends GemElement {
   @property comment: Comment;
 
@@ -61,15 +51,15 @@ export class MCommentElement extends GemElement {
     return this.comment.user.id === configure?.user?.id;
   }
 
+  @elementTheme()
+  #theme = () => ({
+    backgroundImg: !this.comment.like
+      ? `linear-gradient(to left bottom, ${theme.negativeColor} -300%, transparent)`
+      : 'none',
+  });
+
   render = () => {
     return html`
-      <style>
-        :host {
-          background-image: ${!this.comment.like
-            ? `linear-gradient(to left bottom, ${theme.negativeColor} -300%, transparent)`
-            : 'none'};
-        }
-      </style>
       <dy-help-text class="header">
         [${new Time().relativeTimeFormat(this.comment.updatedAt)}]
         ${i18n.get(
@@ -78,9 +68,11 @@ export class MCommentElement extends GemElement {
         )}
         <span style="flex-grow: 1"></span>
       </dy-help-text>
-      ${this.comment.body
-        ? html`<div class="body">${this.comment.body}</div>`
-        : html`<div class="body none">${i18n.get('page.game.emptyComment')}</div>`}
+      ${
+        this.comment.body
+          ? html`<div class="body">${this.comment.body}</div>`
+          : html`<div class="body none">${i18n.get('page.game.emptyComment')}</div>`
+      }
     `;
   };
 }

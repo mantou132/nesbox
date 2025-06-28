@@ -37,96 +37,77 @@ export type MutationRoot = {
   voiceMsg: Scalars['String'];
 };
 
-
 export type MutationRootAcceptFriendArgs = {
   input: ScUpdateFriend;
 };
-
 
 export type MutationRootAcceptInviteArgs = {
   input: ScUpdateInvite;
 };
 
-
 export type MutationRootApplyFriendArgs = {
   input: ScNewFriend;
 };
-
 
 export type MutationRootCreateCommentArgs = {
   input: ScNewComment;
 };
 
-
 export type MutationRootCreateGameArgs = {
   input: ScNewGame;
 };
-
 
 export type MutationRootCreateInviteArgs = {
   input: ScNewInvite;
 };
 
-
 export type MutationRootCreateMessageArgs = {
   input: ScNewMessage;
 };
-
 
 export type MutationRootCreateRoomArgs = {
   input: ScNewRoom;
 };
 
-
 export type MutationRootEnterLobbyArgs = {
   input: ScEnterLobbyReq;
 };
-
 
 export type MutationRootEnterPubRoomArgs = {
   input: ScUpdatePlaying;
 };
 
-
 export type MutationRootFavoriteGameArgs = {
   input: ScNewFavorite;
 };
-
 
 export type MutationRootLobbyMsgArgs = {
   input: ScNewLobbyMessage;
 };
 
-
 export type MutationRootReadMessageArgs = {
   input: ScReadMessage;
 };
-
 
 export type MutationRootSignalingArgs = {
   input: ScNewSignal;
 };
 
-
 export type MutationRootUpdateAccountArgs = {
   input: ScUpdateUser;
 };
-
 
 export type MutationRootUpdatePasswordArgs = {
   input: ScUpdatePassword;
 };
 
-
 export type MutationRootUpdateRoomArgs = {
   input: ScUpdateRoom;
 };
 
-
 export type MutationRootUpdateRoomScreenshotArgs = {
   input: ScUpdateRoomScreenshot;
 };
-
 
 export type MutationRootVoiceMsgArgs = {
   input: ScVoiceMsgReq;
@@ -147,16 +128,13 @@ export type QueryRoot = {
   topGames: Array<Scalars['Int']>;
 };
 
-
 export type QueryRootCommentsArgs = {
   input: ScCommentsReq;
 };
 
-
 export type QueryRootMessagesArgs = {
   input: ScMessagesReq;
 };
-
 
 export type QueryRootRecordArgs = {
   input: ScRecordReq;
@@ -191,7 +169,7 @@ export type ScFriend = {
 export enum ScFriendStatus {
   Accept = 'ACCEPT',
   Deny = 'DENY',
-  Pending = 'PENDING'
+  Pending = 'PENDING',
 }
 
 export type ScGame = {
@@ -222,7 +200,7 @@ export enum ScGameKind {
   Spg = 'SPG',
   Stg = 'STG',
   Tbg = 'TBG',
-  Tbs = 'TBS'
+  Tbs = 'TBS',
 }
 
 export enum ScGamePlatform {
@@ -230,7 +208,7 @@ export enum ScGamePlatform {
   Nes = 'NES',
   UniversalJs = 'UNIVERSAL_JS',
   UniversalWasm = 'UNIVERSAL_WASM',
-  Wasm4 = 'WASM4'
+  Wasm4 = 'WASM4',
 }
 
 export enum ScGameSeries {
@@ -245,7 +223,7 @@ export enum ScGameSeries {
   SanGokuShi = 'SAN_GOKU_SHI',
   StreetFighter = 'STREET_FIGHTER',
   Tank = 'TANK',
-  Tmnt = 'TMNT'
+  Tmnt = 'TMNT',
 }
 
 export type ScInvite = {
@@ -460,13 +438,13 @@ export type ScUserBasic = {
 
 export enum ScUserStatus {
   Offline = 'OFFLINE',
-  Online = 'ONLINE'
+  Online = 'ONLINE',
 }
 
 export enum ScVoiceMsgKind {
   Answer = 'ANSWER',
   Ice = 'ICE',
-  Offer = 'OFFER'
+  Offer = 'OFFER',
 }
 
 export type ScVoiceMsgReq = {
@@ -485,199 +463,683 @@ export type Subscription = {
   event: ScNotifyMessage;
 };
 
-export type ScRoomBasicPartFragment = { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number };
+export type ScRoomBasicPartFragment = {
+  __typename?: 'ScRoomBasic';
+  id: number;
+  gameId: number;
+  private: boolean;
+  host: number;
+  createdAt: number;
+  updatedAt: number;
+};
 
-export type ScAccountPartFragment = { __typename?: 'ScUser', id: number, username: string, nickname: string, settings?: string, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } };
+export type ScAccountPartFragment = {
+  __typename?: 'ScUser';
+  id: number;
+  username: string;
+  nickname: string;
+  settings?: string;
+  playing?: {
+    __typename?: 'ScRoomBasic';
+    id: number;
+    gameId: number;
+    private: boolean;
+    host: number;
+    createdAt: number;
+    updatedAt: number;
+  };
+};
 
-export type ScUserBasicPartFragment = { __typename?: 'ScUserBasic', id: number, username: string, nickname: string, status: ScUserStatus, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } };
+export type ScUserBasicPartFragment = {
+  __typename?: 'ScUserBasic';
+  id: number;
+  username: string;
+  nickname: string;
+  status: ScUserStatus;
+  playing?: {
+    __typename?: 'ScRoomBasic';
+    id: number;
+    gameId: number;
+    private: boolean;
+    host: number;
+    createdAt: number;
+    updatedAt: number;
+  };
+};
 
-export type ScRoomPartFragment = { __typename?: 'ScRoom', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number, screenshot?: string, users: Array<{ __typename?: 'ScUserBasic', id: number, username: string, nickname: string, status: ScUserStatus, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } }> };
+export type ScRoomPartFragment = {
+  __typename?: 'ScRoom';
+  id: number;
+  gameId: number;
+  private: boolean;
+  host: number;
+  createdAt: number;
+  updatedAt: number;
+  screenshot?: string;
+  users: Array<{
+    __typename?: 'ScUserBasic';
+    id: number;
+    username: string;
+    nickname: string;
+    status: ScUserStatus;
+    playing?: {
+      __typename?: 'ScRoomBasic';
+      id: number;
+      gameId: number;
+      private: boolean;
+      host: number;
+      createdAt: number;
+      updatedAt: number;
+    };
+  }>;
+};
 
-export type ScGamePartFragment = { __typename?: 'ScGame', id: number, name: string, description: string, preview: string, createdAt: number, updatedAt: number, rom: string, screenshots: Array<string>, platform?: ScGamePlatform, kind?: ScGameKind, series?: ScGameSeries, maxPlayer?: number };
+export type ScGamePartFragment = {
+  __typename?: 'ScGame';
+  id: number;
+  name: string;
+  description: string;
+  preview: string;
+  createdAt: number;
+  updatedAt: number;
+  rom: string;
+  screenshots: Array<string>;
+  platform?: ScGamePlatform;
+  kind?: ScGameKind;
+  series?: ScGameSeries;
+  maxPlayer?: number;
+};
 
-export type ScCommentPartFragment = { __typename?: 'ScComment', gameId: number, body: string, like: boolean, createdAt: number, updatedAt: number, user: { __typename?: 'ScUserBasic', id: number, username: string, nickname: string, status: ScUserStatus, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } } };
+export type ScCommentPartFragment = {
+  __typename?: 'ScComment';
+  gameId: number;
+  body: string;
+  like: boolean;
+  createdAt: number;
+  updatedAt: number;
+  user: {
+    __typename?: 'ScUserBasic';
+    id: number;
+    username: string;
+    nickname: string;
+    status: ScUserStatus;
+    playing?: {
+      __typename?: 'ScRoomBasic';
+      id: number;
+      gameId: number;
+      private: boolean;
+      host: number;
+      createdAt: number;
+      updatedAt: number;
+    };
+  };
+};
 
-export type ScMessagePartFragment = { __typename?: 'ScMessage', id: number, body: string, targetId: number, userId: number, createdAt: number, updatedAt: number };
+export type ScMessagePartFragment = {
+  __typename?: 'ScMessage';
+  id: number;
+  body: string;
+  targetId: number;
+  userId: number;
+  createdAt: number;
+  updatedAt: number;
+};
 
-export type ScLobbyMessagePartFragment = { __typename?: 'ScLobbyMessage', createdAt: number, userId: number, username: string, nickname: string, text: string };
+export type ScLobbyMessagePartFragment = {
+  __typename?: 'ScLobbyMessage';
+  createdAt: number;
+  userId: number;
+  username: string;
+  nickname: string;
+  text: string;
+};
 
-export type ScLobbyInfoPartFragment = { __typename?: 'ScLobbyInfo', lobbyUserCount: number, onlineUserCount: number };
+export type ScLobbyInfoPartFragment = { __typename?: 'ScLobbyInfo'; lobbyUserCount: number; onlineUserCount: number };
 
-export type ScInvitePartFragment = { __typename?: 'ScInvite', id: number, targetId: number, userId: number, createdAt: number, updatedAt: number, room: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } };
+export type ScInvitePartFragment = {
+  __typename?: 'ScInvite';
+  id: number;
+  targetId: number;
+  userId: number;
+  createdAt: number;
+  updatedAt: number;
+  room: {
+    __typename?: 'ScRoomBasic';
+    id: number;
+    gameId: number;
+    private: boolean;
+    host: number;
+    createdAt: number;
+    updatedAt: number;
+  };
+};
 
-export type ScRecordPartFragment = { __typename?: 'ScRecord', playTotal: number, lastPlayStartAt: number, lastPlayEndAt?: number };
+export type ScRecordPartFragment = {
+  __typename?: 'ScRecord';
+  playTotal: number;
+  lastPlayStartAt: number;
+  lastPlayEndAt?: number;
+};
 
-export type ScFriendPartFragment = { __typename?: 'ScFriend', createdAt: number, status: ScFriendStatus, unreadMessageCount: number, user: { __typename?: 'ScUserBasic', id: number, username: string, nickname: string, status: ScUserStatus, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } } };
+export type ScFriendPartFragment = {
+  __typename?: 'ScFriend';
+  createdAt: number;
+  status: ScFriendStatus;
+  unreadMessageCount: number;
+  user: {
+    __typename?: 'ScUserBasic';
+    id: number;
+    username: string;
+    nickname: string;
+    status: ScUserStatus;
+    playing?: {
+      __typename?: 'ScRoomBasic';
+      id: number;
+      gameId: number;
+      private: boolean;
+      host: number;
+      createdAt: number;
+      updatedAt: number;
+    };
+  };
+};
 
-export type GetGameIdsQueryVariables = Exact<{ [key: string]: never; }>;
+export type GetGameIdsQueryVariables = Exact<{ [key: string]: never }>;
 
-
-export type GetGameIdsQuery = { __typename?: 'QueryRoot', topGames: Array<number>, favorites: Array<number>, recentGames: Array<number> };
+export type GetGameIdsQuery = {
+  __typename?: 'QueryRoot';
+  topGames: Array<number>;
+  favorites: Array<number>;
+  recentGames: Array<number>;
+};
 
 export type GetRecordQueryVariables = Exact<{
   gameId: Scalars['Int'];
 }>;
 
+export type GetRecordQuery = {
+  __typename?: 'QueryRoot';
+  record?: { __typename?: 'ScRecord'; playTotal: number; lastPlayStartAt: number; lastPlayEndAt?: number };
+};
 
-export type GetRecordQuery = { __typename?: 'QueryRoot', record?: { __typename?: 'ScRecord', playTotal: number, lastPlayStartAt: number, lastPlayEndAt?: number } };
+export type GetFriendsQueryVariables = Exact<{ [key: string]: never }>;
 
-export type GetFriendsQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetFriendsQuery = { __typename?: 'QueryRoot', friends: Array<{ __typename?: 'ScFriend', createdAt: number, status: ScFriendStatus, unreadMessageCount: number, user: { __typename?: 'ScUserBasic', id: number, username: string, nickname: string, status: ScUserStatus, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } } }>, invites: Array<{ __typename?: 'ScInvite', id: number, targetId: number, userId: number, createdAt: number, updatedAt: number, room: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } }> };
+export type GetFriendsQuery = {
+  __typename?: 'QueryRoot';
+  friends: Array<{
+    __typename?: 'ScFriend';
+    createdAt: number;
+    status: ScFriendStatus;
+    unreadMessageCount: number;
+    user: {
+      __typename?: 'ScUserBasic';
+      id: number;
+      username: string;
+      nickname: string;
+      status: ScUserStatus;
+      playing?: {
+        __typename?: 'ScRoomBasic';
+        id: number;
+        gameId: number;
+        private: boolean;
+        host: number;
+        createdAt: number;
+        updatedAt: number;
+      };
+    };
+  }>;
+  invites: Array<{
+    __typename?: 'ScInvite';
+    id: number;
+    targetId: number;
+    userId: number;
+    createdAt: number;
+    updatedAt: number;
+    room: {
+      __typename?: 'ScRoomBasic';
+      id: number;
+      gameId: number;
+      private: boolean;
+      host: number;
+      createdAt: number;
+      updatedAt: number;
+    };
+  }>;
+};
 
 export type GetMessagesQueryVariables = Exact<{
   input: ScMessagesReq;
 }>;
 
+export type GetMessagesQuery = {
+  __typename?: 'QueryRoot';
+  messages: Array<{
+    __typename?: 'ScMessage';
+    id: number;
+    body: string;
+    targetId: number;
+    userId: number;
+    createdAt: number;
+    updatedAt: number;
+  }>;
+};
 
-export type GetMessagesQuery = { __typename?: 'QueryRoot', messages: Array<{ __typename?: 'ScMessage', id: number, body: string, targetId: number, userId: number, createdAt: number, updatedAt: number }> };
+export type GetAccountQueryVariables = Exact<{ [key: string]: never }>;
 
-export type GetAccountQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetAccountQuery = { __typename?: 'QueryRoot', account: { __typename?: 'ScUser', id: number, username: string, nickname: string, settings?: string, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } } };
+export type GetAccountQuery = {
+  __typename?: 'QueryRoot';
+  account: {
+    __typename?: 'ScUser';
+    id: number;
+    username: string;
+    nickname: string;
+    settings?: string;
+    playing?: {
+      __typename?: 'ScRoomBasic';
+      id: number;
+      gameId: number;
+      private: boolean;
+      host: number;
+      createdAt: number;
+      updatedAt: number;
+    };
+  };
+};
 
 export type EnterLobbyMutationVariables = Exact<{
   input: ScEnterLobbyReq;
 }>;
 
+export type EnterLobbyMutation = {
+  __typename?: 'MutationRoot';
+  enterLobby: { __typename?: 'ScLobbyInfo'; lobbyUserCount: number; onlineUserCount: number };
+};
 
-export type EnterLobbyMutation = { __typename?: 'MutationRoot', enterLobby: { __typename?: 'ScLobbyInfo', lobbyUserCount: number, onlineUserCount: number } };
+export type LeaveLobbyMutationVariables = Exact<{ [key: string]: never }>;
 
-export type LeaveLobbyMutationVariables = Exact<{ [key: string]: never; }>;
-
-
-export type LeaveLobbyMutation = { __typename?: 'MutationRoot', leaveLobby: string };
+export type LeaveLobbyMutation = { __typename?: 'MutationRoot'; leaveLobby: string };
 
 export type SendLobbyMsgMutationVariables = Exact<{
   input: ScNewLobbyMessage;
 }>;
 
-
-export type SendLobbyMsgMutation = { __typename?: 'MutationRoot', lobbyMsg: string };
+export type SendLobbyMsgMutation = { __typename?: 'MutationRoot'; lobbyMsg: string };
 
 export type SendVoiceMsgMutationVariables = Exact<{
   input: ScVoiceMsgReq;
 }>;
 
-
-export type SendVoiceMsgMutation = { __typename?: 'MutationRoot', voiceMsg: string };
+export type SendVoiceMsgMutation = { __typename?: 'MutationRoot'; voiceMsg: string };
 
 export type SendSignalMutationVariables = Exact<{
   input: ScNewSignal;
 }>;
 
-
-export type SendSignalMutation = { __typename?: 'MutationRoot', signaling: string };
+export type SendSignalMutation = { __typename?: 'MutationRoot'; signaling: string };
 
 export type UpdateAccountMutationVariables = Exact<{
   input: ScUpdateUser;
 }>;
 
-
-export type UpdateAccountMutation = { __typename?: 'MutationRoot', updateAccount: { __typename?: 'ScUser', id: number, username: string, nickname: string, settings?: string, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } } };
+export type UpdateAccountMutation = {
+  __typename?: 'MutationRoot';
+  updateAccount: {
+    __typename?: 'ScUser';
+    id: number;
+    username: string;
+    nickname: string;
+    settings?: string;
+    playing?: {
+      __typename?: 'ScRoomBasic';
+      id: number;
+      gameId: number;
+      private: boolean;
+      host: number;
+      createdAt: number;
+      updatedAt: number;
+    };
+  };
+};
 
 export type UpdatePasswordMutationVariables = Exact<{
   input: ScUpdatePassword;
 }>;
 
-
-export type UpdatePasswordMutation = { __typename?: 'MutationRoot', updatePassword: { __typename?: 'ScUser', id: number, username: string, nickname: string, settings?: string, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } } };
+export type UpdatePasswordMutation = {
+  __typename?: 'MutationRoot';
+  updatePassword: {
+    __typename?: 'ScUser';
+    id: number;
+    username: string;
+    nickname: string;
+    settings?: string;
+    playing?: {
+      __typename?: 'ScRoomBasic';
+      id: number;
+      gameId: number;
+      private: boolean;
+      host: number;
+      createdAt: number;
+      updatedAt: number;
+    };
+  };
+};
 
 export type CreateCommentMutationVariables = Exact<{
   input: ScNewComment;
 }>;
 
-
-export type CreateCommentMutation = { __typename?: 'MutationRoot', createComment: { __typename?: 'ScComment', gameId: number, body: string, like: boolean, createdAt: number, updatedAt: number, user: { __typename?: 'ScUserBasic', id: number, username: string, nickname: string, status: ScUserStatus, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } } } };
+export type CreateCommentMutation = {
+  __typename?: 'MutationRoot';
+  createComment: {
+    __typename?: 'ScComment';
+    gameId: number;
+    body: string;
+    like: boolean;
+    createdAt: number;
+    updatedAt: number;
+    user: {
+      __typename?: 'ScUserBasic';
+      id: number;
+      username: string;
+      nickname: string;
+      status: ScUserStatus;
+      playing?: {
+        __typename?: 'ScRoomBasic';
+        id: number;
+        gameId: number;
+        private: boolean;
+        host: number;
+        createdAt: number;
+        updatedAt: number;
+      };
+    };
+  };
+};
 
 export type CreateMessageMutationVariables = Exact<{
   input: ScNewMessage;
 }>;
 
-
-export type CreateMessageMutation = { __typename?: 'MutationRoot', createMessage: { __typename?: 'ScMessage', id: number, body: string, targetId: number, userId: number, createdAt: number, updatedAt: number } };
+export type CreateMessageMutation = {
+  __typename?: 'MutationRoot';
+  createMessage: {
+    __typename?: 'ScMessage';
+    id: number;
+    body: string;
+    targetId: number;
+    userId: number;
+    createdAt: number;
+    updatedAt: number;
+  };
+};
 
 export type ReadMessageMutationVariables = Exact<{
   input: ScReadMessage;
 }>;
 
-
-export type ReadMessageMutation = { __typename?: 'MutationRoot', readMessage: { __typename?: 'ScFriend', createdAt: number, status: ScFriendStatus, unreadMessageCount: number, user: { __typename?: 'ScUserBasic', id: number, username: string, nickname: string, status: ScUserStatus, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } } } };
+export type ReadMessageMutation = {
+  __typename?: 'MutationRoot';
+  readMessage: {
+    __typename?: 'ScFriend';
+    createdAt: number;
+    status: ScFriendStatus;
+    unreadMessageCount: number;
+    user: {
+      __typename?: 'ScUserBasic';
+      id: number;
+      username: string;
+      nickname: string;
+      status: ScUserStatus;
+      playing?: {
+        __typename?: 'ScRoomBasic';
+        id: number;
+        gameId: number;
+        private: boolean;
+        host: number;
+        createdAt: number;
+        updatedAt: number;
+      };
+    };
+  };
+};
 
 export type FavoriteGameMutationVariables = Exact<{
   input: ScNewFavorite;
 }>;
 
-
-export type FavoriteGameMutation = { __typename?: 'MutationRoot', favoriteGame: string };
+export type FavoriteGameMutation = { __typename?: 'MutationRoot'; favoriteGame: string };
 
 export type ApplyFriendMutationVariables = Exact<{
   input: ScNewFriend;
 }>;
 
-
-export type ApplyFriendMutation = { __typename?: 'MutationRoot', applyFriend: string };
+export type ApplyFriendMutation = { __typename?: 'MutationRoot'; applyFriend: string };
 
 export type AcceptFriendMutationVariables = Exact<{
   input: ScUpdateFriend;
 }>;
 
-
-export type AcceptFriendMutation = { __typename?: 'MutationRoot', acceptFriend: string };
+export type AcceptFriendMutation = { __typename?: 'MutationRoot'; acceptFriend: string };
 
 export type CreateInviteMutationVariables = Exact<{
   input: ScNewInvite;
 }>;
 
-
-export type CreateInviteMutation = { __typename?: 'MutationRoot', createInvite: string };
+export type CreateInviteMutation = { __typename?: 'MutationRoot'; createInvite: string };
 
 export type AcceptInviteMutationVariables = Exact<{
   input: ScUpdateInvite;
 }>;
 
-
-export type AcceptInviteMutation = { __typename?: 'MutationRoot', acceptInvite: string };
+export type AcceptInviteMutation = { __typename?: 'MutationRoot'; acceptInvite: string };
 
 export type CreateRoomMutationVariables = Exact<{
   input: ScNewRoom;
 }>;
 
-
-export type CreateRoomMutation = { __typename?: 'MutationRoot', createRoom: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } };
+export type CreateRoomMutation = {
+  __typename?: 'MutationRoot';
+  createRoom: {
+    __typename?: 'ScRoomBasic';
+    id: number;
+    gameId: number;
+    private: boolean;
+    host: number;
+    createdAt: number;
+    updatedAt: number;
+  };
+};
 
 export type UpdateRoomMutationVariables = Exact<{
   input: ScUpdateRoom;
 }>;
 
-
-export type UpdateRoomMutation = { __typename?: 'MutationRoot', updateRoom: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } };
+export type UpdateRoomMutation = {
+  __typename?: 'MutationRoot';
+  updateRoom: {
+    __typename?: 'ScRoomBasic';
+    id: number;
+    gameId: number;
+    private: boolean;
+    host: number;
+    createdAt: number;
+    updatedAt: number;
+  };
+};
 
 export type UpdateRoomScreenshotMutationVariables = Exact<{
   input: ScUpdateRoomScreenshot;
 }>;
 
-
-export type UpdateRoomScreenshotMutation = { __typename?: 'MutationRoot', updateRoomScreenshot: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } };
+export type UpdateRoomScreenshotMutation = {
+  __typename?: 'MutationRoot';
+  updateRoomScreenshot: {
+    __typename?: 'ScRoomBasic';
+    id: number;
+    gameId: number;
+    private: boolean;
+    host: number;
+    createdAt: number;
+    updatedAt: number;
+  };
+};
 
 export type EnterPubRoomMutationVariables = Exact<{
   input: ScUpdatePlaying;
 }>;
 
+export type EnterPubRoomMutation = {
+  __typename?: 'MutationRoot';
+  enterPubRoom: {
+    __typename?: 'ScRoomBasic';
+    id: number;
+    gameId: number;
+    private: boolean;
+    host: number;
+    createdAt: number;
+    updatedAt: number;
+  };
+};
 
-export type EnterPubRoomMutation = { __typename?: 'MutationRoot', enterPubRoom: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } };
+export type LeaveRoomMutationVariables = Exact<{ [key: string]: never }>;
 
-export type LeaveRoomMutationVariables = Exact<{ [key: string]: never; }>;
+export type LeaveRoomMutation = { __typename?: 'MutationRoot'; leaveRoom: string };
 
+export type EventSubscriptionVariables = Exact<{ [key: string]: never }>;
 
-export type LeaveRoomMutation = { __typename?: 'MutationRoot', leaveRoom: string };
-
-export type EventSubscriptionVariables = Exact<{ [key: string]: never; }>;
-
-
-export type EventSubscription = { __typename?: 'Subscription', event: { __typename?: 'ScNotifyMessage', deleteRoom?: number, deleteInvite?: number, deleteFriend?: number, login?: boolean, favorite?: number, deleteFavorite?: number, newMessage?: { __typename?: 'ScMessage', id: number, body: string, targetId: number, userId: number, createdAt: number, updatedAt: number }, lobbyMessage?: { __typename?: 'ScLobbyMessage', createdAt: number, userId: number, username: string, nickname: string, text: string }, newGame?: { __typename?: 'ScGame', id: number, name: string, description: string, preview: string, createdAt: number, updatedAt: number, rom: string, screenshots: Array<string>, platform?: ScGamePlatform, kind?: ScGameKind, series?: ScGameSeries, maxPlayer?: number }, updateRoom?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number }, newInvite?: { __typename?: 'ScInvite', id: number, targetId: number, userId: number, createdAt: number, updatedAt: number, room: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } }, applyFriend?: { __typename?: 'ScFriend', createdAt: number, status: ScFriendStatus, unreadMessageCount: number, user: { __typename?: 'ScUserBasic', id: number, username: string, nickname: string, status: ScUserStatus, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } } }, acceptFriend?: { __typename?: 'ScFriend', createdAt: number, status: ScFriendStatus, unreadMessageCount: number, user: { __typename?: 'ScUserBasic', id: number, username: string, nickname: string, status: ScUserStatus, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } } }, updateUser?: { __typename?: 'ScUserBasic', id: number, username: string, nickname: string, status: ScUserStatus, playing?: { __typename?: 'ScRoomBasic', id: number, gameId: number, private: boolean, host: number, createdAt: number, updatedAt: number } }, sendSignal?: { __typename?: 'ScSignal', userId: number, json: string }, voiceSignal?: { __typename?: 'ScVoiceSignal', roomId: number, json: string } } };
+export type EventSubscription = {
+  __typename?: 'Subscription';
+  event: {
+    __typename?: 'ScNotifyMessage';
+    deleteRoom?: number;
+    deleteInvite?: number;
+    deleteFriend?: number;
+    login?: boolean;
+    favorite?: number;
+    deleteFavorite?: number;
+    newMessage?: {
+      __typename?: 'ScMessage';
+      id: number;
+      body: string;
+      targetId: number;
+      userId: number;
+      createdAt: number;
+      updatedAt: number;
+    };
+    lobbyMessage?: {
+      __typename?: 'ScLobbyMessage';
+      createdAt: number;
+      userId: number;
+      username: string;
+      nickname: string;
+      text: string;
+    };
+    newGame?: {
+      __typename?: 'ScGame';
+      id: number;
+      name: string;
+      description: string;
+      preview: string;
+      createdAt: number;
+      updatedAt: number;
+      rom: string;
+      screenshots: Array<string>;
+      platform?: ScGamePlatform;
+      kind?: ScGameKind;
+      series?: ScGameSeries;
+      maxPlayer?: number;
+    };
+    updateRoom?: {
+      __typename?: 'ScRoomBasic';
+      id: number;
+      gameId: number;
+      private: boolean;
+      host: number;
+      createdAt: number;
+      updatedAt: number;
+    };
+    newInvite?: {
+      __typename?: 'ScInvite';
+      id: number;
+      targetId: number;
+      userId: number;
+      createdAt: number;
+      updatedAt: number;
+      room: {
+        __typename?: 'ScRoomBasic';
+        id: number;
+        gameId: number;
+        private: boolean;
+        host: number;
+        createdAt: number;
+        updatedAt: number;
+      };
+    };
+    applyFriend?: {
+      __typename?: 'ScFriend';
+      createdAt: number;
+      status: ScFriendStatus;
+      unreadMessageCount: number;
+      user: {
+        __typename?: 'ScUserBasic';
+        id: number;
+        username: string;
+        nickname: string;
+        status: ScUserStatus;
+        playing?: {
+          __typename?: 'ScRoomBasic';
+          id: number;
+          gameId: number;
+          private: boolean;
+          host: number;
+          createdAt: number;
+          updatedAt: number;
+        };
+      };
+    };
+    acceptFriend?: {
+      __typename?: 'ScFriend';
+      createdAt: number;
+      status: ScFriendStatus;
+      unreadMessageCount: number;
+      user: {
+        __typename?: 'ScUserBasic';
+        id: number;
+        username: string;
+        nickname: string;
+        status: ScUserStatus;
+        playing?: {
+          __typename?: 'ScRoomBasic';
+          id: number;
+          gameId: number;
+          private: boolean;
+          host: number;
+          createdAt: number;
+          updatedAt: number;
+        };
+      };
+    };
+    updateUser?: {
+      __typename?: 'ScUserBasic';
+      id: number;
+      username: string;
+      nickname: string;
+      status: ScUserStatus;
+      playing?: {
+        __typename?: 'ScRoomBasic';
+        id: number;
+        gameId: number;
+        private: boolean;
+        host: number;
+        createdAt: number;
+        updatedAt: number;
+      };
+    };
+    sendSignal?: { __typename?: 'ScSignal'; userId: number; json: string };
+    voiceSignal?: { __typename?: 'ScVoiceSignal'; roomId: number; json: string };
+  };
+};
 
 export const ScRoomBasicPart = `
     fragment ScRoomBasicPart on ScRoomBasic {

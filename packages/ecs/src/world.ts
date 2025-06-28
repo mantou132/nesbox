@@ -1,17 +1,18 @@
+import type { FontType } from './assets';
+import { COLOR_BLACK, Color, fonts, sprites } from './assets';
 import {
+  _registeredComponents,
+  AnimateComponent,
   AudioComponent,
   MaterialComponent,
   PositionComponent,
-  _registeredComponents,
+  RenderOnceComponent,
   SelectComponent,
   SizeComponent,
   TextAreaComponent,
-  RenderOnceComponent,
-  AnimateComponent,
 } from './components';
-import { Entity, _registeredEntities } from './entities';
-import { Color, COLOR_BLACK, fonts, FontType, sprites } from './assets';
-import { getLines, mixColor, entitiesGenerator } from './utils';
+import { _registeredEntities, type Entity } from './entities';
+import { entitiesGenerator, getLines, mixColor } from './utils';
 
 export class World<CustomData = any> {
   #entities = new Set<Entity>();

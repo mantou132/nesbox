@@ -21,11 +21,11 @@ sw.addEventListener('install', () => {
   });
 });
 
-sw.addEventListener('push', function (event) {
+sw.addEventListener('push', (event) => {
   let payload = {};
   try {
     payload = event.data.json();
-  } catch (e) {
+  } catch {
     payload = { title: event.data.text() };
   }
   event.waitUntil(
@@ -38,7 +38,7 @@ sw.addEventListener('push', function (event) {
   );
 });
 
-sw.addEventListener('notificationclick', function (event) {
+sw.addEventListener('notificationclick', (event) => {
   if (event.notification.data?.url) {
     sw.clients.openWindow(event.notification.data.url);
   }
@@ -53,7 +53,7 @@ function handleShareTarget(event) {
   event.respondWith(
     (async () => {
       const formData = await event.request.formData();
-      const file = formData.get('file');
+      const _file = formData.get('file');
       // TODO: add to caches -> client open emulator
       return Response.redirect('/', 303);
     })(),
@@ -77,7 +77,7 @@ sw.addEventListener('fetch', (event) => {
   const getCache = () => caches.match(request, { ignoreSearch: request.mode === 'navigate' });
 
   event.respondWith(
-    (async function () {
+    (async () => {
       const response = await event.preloadResponse;
       if (response) return response;
 

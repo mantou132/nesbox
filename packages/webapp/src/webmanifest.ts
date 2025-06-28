@@ -1,11 +1,10 @@
-import { routes } from 'src/routes';
-
 import { COMMAND } from 'src/constants';
 import { i18n } from 'src/i18n/basic';
+import { routes } from 'src/routes';
 
 export function genWebManifest() {
   return {
-    id: 'com.nesbox' + (COMMAND === 'serve' ? '.dev' : ''),
+    id: `com.nesbox${COMMAND === 'serve' ? '.dev' : ''}`,
     name: i18n.get('global.title') + (COMMAND === 'serve' ? '(DEV)' : ''),
     short_name: i18n.get('global.title'),
     categories: ['entertainment', 'games'],

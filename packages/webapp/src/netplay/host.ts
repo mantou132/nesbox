@@ -3,23 +3,22 @@
  */
 
 import { Player } from '@mantou/nes';
-
-import { logger } from 'src/logger';
-import { globalEvents, RTCTransportType, SignalDetail, SignalType } from 'src/constants';
 import { configure } from 'src/configure';
-import { sendSignal } from 'src/services/api';
+import { globalEvents, RTCTransportType, type SignalDetail, SignalType } from 'src/constants';
+import { logger } from 'src/logger';
 import {
-  ChannelMessage,
+  type ChannelMessage,
   ChannelMessageType,
-  KeyDownMsg,
-  Ping,
-  PointerMoveMsg,
-  Role,
+  type KeyDownMsg,
+  type Ping,
+  type PointerMoveMsg,
+  type Role,
   RoleAnswer,
   RoleOffer,
   RTCBasic,
   TextMsg,
 } from 'src/netplay/common';
+import { sendSignal } from 'src/services/api';
 
 export class RTCHost extends RTCBasic {
   #setRoles = (userId: number, msg: RoleOffer) => {

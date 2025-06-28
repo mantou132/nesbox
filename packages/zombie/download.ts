@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs from 'node:fs';
 
 const download = require('download');
 
@@ -42,7 +42,7 @@ metadata.reduce(async (p, data, index) => {
         await download(rom, dist, {
           filename: `rom.zip`,
         });
-      } catch (err) {
+      } catch {
         console.log('zip fail:', data.title);
       }
     }

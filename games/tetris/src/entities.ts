@@ -1,17 +1,25 @@
 import {
+  AnimateComponent,
+  BasicEntity,
+  COLOR_WHITE,
+  Color,
   Entity,
   MaterialComponent,
   PositionComponent,
-  SizeComponent,
-  BasicEntity,
-  TextAreaComponent,
-  Color,
-  COLOR_WHITE,
   registerEntity,
-  AnimateComponent,
+  SizeComponent,
+  TextAreaComponent,
 } from '@mantou/ecs';
 import { NewPieceComponent, PieceComponent } from 'src/components';
-import { BORDER_COLOR, HEIGHT, STAGE_BACKGROUND_COLOR, WIDTH, SCORE_COLOR, WorldData, SPRITE } from 'src/constants';
+import {
+  BORDER_COLOR,
+  HEIGHT,
+  SCORE_COLOR,
+  SPRITE,
+  STAGE_BACKGROUND_COLOR,
+  WIDTH,
+  type WorldData,
+} from 'src/constants';
 
 const colors = [
   new Color(88, 114, 255),

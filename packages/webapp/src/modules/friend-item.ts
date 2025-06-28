@@ -1,34 +1,38 @@
-import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, property } from '@mantou/gem';
+import { adoptedStyle, aria, css, customElement, GemElement, html, mounted, property } from '@mantou/gem';
 import { ContextMenu } from 'duoyun-ui/elements/contextmenu';
 import { commonHandle } from 'duoyun-ui/lib/hotkeys';
-
-import { getAvatar } from 'src/utils/common';
-import { Friend, store, toggleFriendChatState } from 'src/store';
-import { theme } from 'src/theme';
-import { ScUserStatus, ScFriendStatus } from 'src/generated/graphql';
+import { configure, toggleFriendListState } from 'src/configure';
+import { ScFriendStatus, ScUserStatus } from 'src/generated/graphql';
+import { i18n } from 'src/i18n/basic';
 import { icons } from 'src/icons';
 import { acceptFriend, createInvite, deleteFriend } from 'src/services/api';
-import { configure, toggleFriendListState } from 'src/configure';
-import { i18n } from 'src/i18n/basic';
+import { type Friend, store, toggleFriendChatState } from 'src/store';
+import { theme } from 'src/theme';
+import { getAvatar } from 'src/utils/common';
 
 import 'duoyun-ui/elements/avatar';
 import 'duoyun-ui/elements/help-text';
 import 'duoyun-ui/elements/use';
 import 'src/modules/badge';
 
-const style = createCSSSheet(css`
-  :host {
+import { createDecoratorTheme } from '@mantou/gem/helper/theme';
+
+const elementTheme = createDecoratorTheme({ order: 0, opacity: 0 });
+
+const style = css`
+  :scope {
     cursor: default;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     padding: 0.5em;
     gap: 0.5em;
+    order: ${elementTheme.order}
   }
-  :host(:where(:state(active), [data-active], :hover, :focus)) {
+  :scope:where(:state(active), :hover, :focus) {
     background-color: ${theme.lightBackgroundColor};
   }
-  :host .action:where(:state(active), [data-active], :hover, :focus) {
+  :scope .action:where(:state(active), :hover, :focus) {
     background-color: ${theme.hoverBackgroundColor};
   }
   .avatar {
@@ -44,6 +48,10 @@ const style = createCSSSheet(css`
     flex-grow: 1;
     caret-color: currentColor;
   }
+  .content,
+  .actions {
+    opacity: ${elementTheme.opacity};
+  }
   .nickname,
   .playing {
     display: block;
@@ -56,17 +64,15 @@ const style = createCSSSheet(css`
     width: 1.2em;
     padding: 0.2em;
   }
-  :host(:hover) .action,
-  .action:where(:state(active), [data-active], :hover) {
+  :scope:hover .action,
+  .action:where(:state(active), :hover) {
     display: inline-flex;
   }
-`);
+`;
 
-/**
- * @customElement m-friend-item
- */
 @customElement('m-friend-item')
 @adoptedStyle(style)
+@aria({ focusable: true })
 export class MFriendItemElement extends GemElement {
   @property friend: Friend;
 
@@ -78,12 +84,17 @@ export class MFriendItemElement extends GemElement {
     return this.friend.status === ScFriendStatus.Accept;
   }
 
-  constructor() {
-    super();
+  @mounted()
+  #init = () => {
     this.addEventListener('click', this.#onClick);
-    this.tabIndex = 0;
     this.addEventListener('keydown', commonHandle);
-  }
+  };
+
+  @elementTheme()
+  #theme = () => ({
+    opacity: this.#isOnline ? 1 : 0.4,
+    order: !this.#isFriend ? 0 : this.#isOnline ? 1 : 2,
+  });
 
   #deleteFriend = async (id: number, activeElement: HTMLElement) => {
     await ContextMenu.confirm(i18n.get('page.friend.deleteConfirm'), { activeElement, width: '16em', danger: true });
@@ -128,15 +139,6 @@ export class MFriendItemElement extends GemElement {
     const { username, nickname, playing, id } = this.friend.user;
 
     return html`
-      <style>
-        .content,
-        .actions {
-          opacity: ${this.#isOnline ? 1 : 0.4};
-        }
-        :host {
-          order: ${!this.#isFriend ? 0 : this.#isOnline ? 1 : 2};
-        }
-      </style>
       <dy-avatar
         class="avatar"
         status=${this.#isOnline ? 'positive' : 'default'}
@@ -145,17 +147,20 @@ export class MFriendItemElement extends GemElement {
       <div class="content">
         <div class="nickname">${nickname}</div>
         <dy-help-text class="playing" status=${this.#isOnline && playing ? 'positive' : 'default'}>
-          ${!this.#isOnline || !this.#isFriend
-            ? ''
-            : playing
-            ? i18n.get('page.friend.playing', store.games[playing.gameId]?.name || '')
-            : i18n.get('page.friend.notPlaying')}
+          ${
+            !this.#isOnline || !this.#isFriend
+              ? ''
+              : playing
+                ? i18n.get('page.friend.playing', store.games[playing.gameId]?.name || '')
+                : i18n.get('page.friend.notPlaying')
+          }
         </dy-help-text>
       </div>
       <m-badge .friendid=${id}></m-badge>
-      ${this.#isFriend
-        ? html`<dy-use class="action" .element=${icons.more} @click=${this.#onMoreMenu}></dy-use>`
-        : html`
+      ${
+        this.#isFriend
+          ? html`<dy-use class="action" .element=${icons.more} @click=${this.#onMoreMenu}></dy-use>`
+          : html`
             <dy-use
               class="action"
               .element=${icons.check}
@@ -166,7 +171,8 @@ export class MFriendItemElement extends GemElement {
               .element=${icons.close}
               @click=${(e: Event) => this.#onAcceptFriend(e, false)}
             ></dy-use>
-          `}
+          `
+      }
     `;
   };
 }

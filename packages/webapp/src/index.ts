@@ -1,20 +1,19 @@
 import { history, html, render, styleMap } from '@mantou/gem';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
+import { isMtApp, mtApp } from '@nesbox/mtapp';
 import { DuoyunDropAreaElement } from 'duoyun-ui/elements/drop-area';
 import { createPath } from 'duoyun-ui/elements/route';
-import { isInputElement } from 'duoyun-ui/lib/element';
-import { isMtApp, mtApp } from '@nesbox/mtapp';
 import { initApp } from 'duoyun-ui/helper/webapp';
-import { routes } from 'src/routes';
-
-import { logger } from 'src/logger';
-import { matchRoute } from 'src/utils/common';
-import { COMMAND, globalEvents, isApp, isTauriMacApp, isTauriWinApp, RELEASE } from 'src/constants';
-import { theme } from 'src/theme';
-import { configure } from 'src/configure';
+import { isInputElement } from 'duoyun-ui/lib/element';
 import { gotoRedirectUri, isExpiredProfile, logout } from 'src/auth';
-import { GamepadBtnIndex, listenerGamepad, startKeyboardSimulation } from 'src/gamepad';
+import { configure } from 'src/configure';
+import { COMMAND, globalEvents, isApp, isTauriMacApp, isTauriWinApp, RELEASE } from 'src/constants';
 import { dropHandler } from 'src/drop';
+import { GamepadBtnIndex, listenerGamepad, startKeyboardSimulation } from 'src/gamepad';
+import { logger } from 'src/logger';
+import { routes } from 'src/routes';
+import { theme } from 'src/theme';
+import { matchRoute } from 'src/utils/common';
 
 import 'duoyun-ui/helper/error';
 import 'src/modules/meta';
@@ -93,6 +92,9 @@ render(
         flex-direction: column;
         flex-grow: 1;
       }
+      dy-light-route {
+        display: contents;
+      }
       @media ${mediaQuery.DESKTOP} {
         body {
           font-size: 1.1rem;
@@ -105,18 +107,15 @@ render(
       }
     </style>
     <m-meta></m-meta>
-    ${isTauriWinApp || isTauriMacApp
-      ? html`
-          <m-titlebar
-            style=${styleMap({ background: theme.titleBarColor })}
-            type=${isTauriWinApp ? 'win' : 'mac'}
-          ></m-titlebar>
-        `
-      : ''}
+    <m-titlebar
+      v-if=${isTauriWinApp || isTauriMacApp}
+      style=${styleMap({ background: theme.titleBarColor })}
+      type=${isTauriWinApp ? 'win' : 'mac'}
+    ></m-titlebar>
     <dy-drop-area
       @change=${(evt: CustomEvent<File[]>) => evt.target instanceof DuoyunDropAreaElement && dropHandler(evt.detail)}
     >
-      <dy-route
+      <dy-light-route
         .routes=${[
           routes.login,
           routes.register,
@@ -137,8 +136,7 @@ render(
             },
           },
         ]}
-      >
-      </dy-route>
+      ></dy-light-route>
     </dy-drop-area>
   `,
   document.body,

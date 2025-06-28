@@ -1,22 +1,21 @@
-import { html, adoptedStyle, customElement, createCSSSheet, css, connectStore, GemElement } from '@mantou/gem';
-import { polling } from 'duoyun-ui/lib/timer';
+import { adoptedStyle, connectStore, css, customElement, effect, GemElement, html } from '@mantou/gem';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
-
-import { getRooms } from 'src/services/guest-api';
-import { store } from 'src/store';
+import { polling } from 'duoyun-ui/lib/timer';
+import { configure } from 'src/configure';
 import { i18n } from 'src/i18n/basic';
 import { icons } from 'src/icons';
+import { getRooms } from 'src/services/guest-api';
+import { store } from 'src/store';
 import { theme } from 'src/theme';
-import { configure } from 'src/configure';
 
-import 'duoyun-ui/elements/result';
 import 'duoyun-ui/elements/loading';
+import 'duoyun-ui/elements/result';
 import 'src/modules/game-list';
-import 'src/modules/room-list';
 import 'src/modules/lobby-chat';
+import 'src/modules/room-list';
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :scope {
     display: block;
     min-height: 100vh;
     padding-inline: ${theme.gridGutter};
@@ -27,34 +26,26 @@ const style = createCSSSheet(css`
     right: ${theme.gridGutter};
     bottom: ${theme.gridGutter};
   }
-`);
+`;
 
 @customElement('p-rooms')
 @adoptedStyle(style)
 @connectStore(store)
-@connectStore(i18n.store)
 export class PRoomsElement extends GemElement {
-  mounted = () => {
-    this.effect(
-      () => polling(getRooms, 7_000),
-      () => [i18n.currentLanguage],
-    );
-  };
+  @effect(() => [i18n.currentLanguage])
+  #init = () => polling(getRooms, 7_000);
 
   render = () => {
     return html`
-      ${!store.roomIds
-        ? html`<dy-loading></dy-loading>`
-        : store.roomIds.length === 0
-        ? html`
-            <dy-result
-              style="height: 60vh"
-              .illustrator=${icons.empty}
-              .header=${i18n.get('global.noData')}
-            ></dy-result>
-          `
-        : html`<m-room-list></m-room-list>`}
-      ${!mediaQuery.isPhone && configure.user ? html`<m-lobby-chat class="chat"></m-lobby-chat>` : ''}
+      <dy-loading v-if=${!store.roomIds}></dy-loading>
+      <dy-result
+        v-if=${store.roomIds?.length === 0}
+        style="height: 60vh"
+        .illustrator=${icons.empty}
+        .header=${i18n.get('global.noData')}
+      ></dy-result>
+      <m-room-list v-else></m-room-list>
+      <m-lobby-chat v-if=${!mediaQuery.isPhone && !!configure.user} class="chat"></m-lobby-chat>
     `;
   };
 }

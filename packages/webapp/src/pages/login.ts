@@ -1,31 +1,29 @@
 import {
-  GemElement,
-  html,
+  addListener,
   adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
-  refobject,
-  RefObject,
-  connectStore,
   boolattribute,
+  createRef,
+  createState,
+  css,
+  customElement,
+  GemElement,
   history,
+  html,
+  mounted,
 } from '@mantou/gem';
-import { createPath } from 'duoyun-ui/elements/route';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
-import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { isMtApp } from '@nesbox/mtapp';
-import { routes } from 'src/routes';
-
-import { getCDNSrc } from 'src/utils/common';
-import { theme } from 'src/theme';
-import { icons } from 'src/icons';
-import { gotoRedirectUri, isExpiredProfile } from 'src/auth';
-import { i18n } from 'src/i18n/basic';
-import { login, register } from 'src/services/guest-api';
-import { configure } from 'src/configure';
-
 import type { DuoyunFormElement } from 'duoyun-ui/elements/form';
+import { createPath } from 'duoyun-ui/elements/route';
+import { hotkeys } from 'duoyun-ui/lib/hotkeys';
+import { gotoRedirectUri, isExpiredProfile } from 'src/auth';
+import { configure } from 'src/configure';
+import { i18n } from 'src/i18n/basic';
+import { icons } from 'src/icons';
+import { routes } from 'src/routes';
+import { login, register } from 'src/services/guest-api';
+import { theme } from 'src/theme';
+import { getCDNSrc } from 'src/utils/common';
 
 import 'duoyun-ui/elements/form';
 import 'duoyun-ui/elements/link';
@@ -39,8 +37,8 @@ const bgUrl = getCDNSrc(
   'https://cdn.dribbble.com/users/870476/screenshots/10244007/media/ba3b0d812068691f20b835e7381284b1.jpg',
 );
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :scope {
     position: relative;
     height: 0;
     flex-grow: 1;
@@ -116,7 +114,7 @@ const style = createCSSSheet(css`
     font-size: 1em;
   }
   @media ${mediaQuery.PHONE} {
-    :host {
+    :scope {
       background: none;
     }
     .bg-copyright,
@@ -134,28 +132,20 @@ const style = createCSSSheet(css`
       font-size: 1.15em;
     }
   }
-`);
+`;
 
-type State = {
-  username: string;
-  password: string;
-  loading: boolean;
-};
-/**
- * @customElement p-login
- */
 @customElement('p-login')
 @adoptedStyle(style)
-@connectStore(i18n.store)
-export class PLoginElement extends GemElement<State> {
-  @refobject formRef: RefObject<DuoyunFormElement>;
+export class PLoginElement extends GemElement {
   @boolattribute register: boolean;
 
-  state: State = {
+  #formRef = createRef<DuoyunFormElement>();
+
+  #state = createState({
     username: '',
     password: '',
     loading: false,
-  };
+  });
 
   #goto = () => {
     if (this.register) {
@@ -165,16 +155,16 @@ export class PLoginElement extends GemElement<State> {
     }
   };
 
-  #onChange = (evt: CustomEvent<State>) => this.setState({ ...evt.detail });
+  #onChange = (evt: CustomEvent) => this.#state({ ...evt.detail });
 
   #onKeyDown = hotkeys({
     enter: async () => {
-      const { username, password } = this.state;
-      const { element } = this.formRef;
+      const { username, password } = this.#state;
+      const { value } = this.#formRef;
       if (!username) {
-        element?.elements.username?.focus();
+        value?.elements.username?.focus();
       } else if (!password) {
-        element?.elements.password?.focus();
+        value?.elements.password?.focus();
       } else {
         (this.shadowRoot?.activeElement as any)?.blur?.();
         try {
@@ -183,7 +173,7 @@ export class PLoginElement extends GemElement<State> {
           if (isMtApp) {
             setTimeout(() => {
               // re-enter
-              this.setState({ username: '', password: '' });
+              this.#state({ username: '', password: '' });
             }, 1000);
           }
           throw err;
@@ -193,34 +183,32 @@ export class PLoginElement extends GemElement<State> {
   });
 
   #onSubmit = async () => {
-    if (this.state.loading) return;
+    if (this.#state.loading) return;
     try {
-      this.setState({ loading: true });
-      if (!(await this.formRef.element!.valid())) return;
-      const { username, password } = this.state;
+      this.#state({ loading: true });
+      if (!(await this.#formRef.value!.valid())) return;
+      const { username, password } = this.#state;
       if (this.register) {
         await register({ username, password });
       } else {
         await login({ username, password, disableSso: mediaQuery.isPhone });
       }
     } finally {
-      this.setState({ loading: false });
+      this.#state({ loading: false });
     }
     gotoRedirectUri();
   };
 
-  mounted = () => {
+  @mounted()
+  #init = () => {
     if (configure.profile && !isExpiredProfile(configure.profile)) {
       gotoRedirectUri();
     }
-    addEventListener('keydown', this.#onKeyDown);
-    return () => {
-      removeEventListener('keydown', this.#onKeyDown);
-    };
+    return addListener(document, 'keydown', this.#onKeyDown);
   };
 
   render = () => {
-    const { username, password, loading } = this.state;
+    const { username, password, loading } = this.#state;
     return html`
       <div class="bg-copyright">
         <nesbox-tooltip .content=${i18n.get('tooltip.login.imgCopyright')}>
@@ -238,7 +226,7 @@ export class PLoginElement extends GemElement<State> {
       </div>
       <div class="content">
         <dy-heading lv="1" class="header">${this.register ? routes.register.title : routes.login.title}</dy-heading>
-        <dy-form class="form" ref=${this.formRef.ref} @change=${this.#onChange}>
+        <dy-form  ${this.#formRef} class="form"  @change=${this.#onChange}>
           <dy-form-item
             name="username"
             required

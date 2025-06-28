@@ -1,44 +1,42 @@
 import {
-  html,
   adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
   connectStore,
+  createRef,
+  css,
+  customElement,
+  effect,
   history,
-  refobject,
-  RefObject,
+  html,
+  mounted,
   QueryString,
 } from '@mantou/gem';
-import { createPath, matchPath } from 'duoyun-ui/elements/route';
-import { hotkeys } from 'duoyun-ui/lib/hotkeys';
+import { mediaQuery } from '@mantou/gem/helper/mediaquery';
+import { DuoyunWakeLockBaseElement } from 'duoyun-ui/elements/base/wake-lock';
 import { ContextMenu } from 'duoyun-ui/elements/contextmenu';
+import type { DuoyunInputElement } from 'duoyun-ui/elements/input';
 import { Modal } from 'duoyun-ui/elements/modal';
-import { DuoyunInputElement } from 'duoyun-ui/elements/input';
-import { isNotBoolean } from 'duoyun-ui/lib/types';
+import { createPath, matchPath } from 'duoyun-ui/elements/route';
 import { Toast } from 'duoyun-ui/elements/toast';
 import { hash } from 'duoyun-ui/lib/encode';
-import { Time } from 'duoyun-ui/lib/time';
-import { getStringFromTemplate } from 'duoyun-ui/lib/utils';
-import { once } from 'duoyun-ui/lib/timer';
-import { mediaQuery } from '@mantou/gem/helper/mediaquery';
+import { hotkeys } from 'duoyun-ui/lib/hotkeys';
 import { locale } from 'duoyun-ui/lib/locale';
-import { DuoyunWakeLockBaseElement } from 'duoyun-ui/elements/base/wake-lock';
-import { routes } from 'src/routes';
-
-import { preventDefault } from 'src/utils/common';
-import { BcMsgEvent, BcMsgType, queryKeys } from 'src/constants';
+import { Time } from 'duoyun-ui/lib/time';
+import { once } from 'duoyun-ui/lib/timer';
+import { isNotBoolean } from 'duoyun-ui/lib/types';
+import { getStringFromTemplate } from 'duoyun-ui/lib/utils';
 import { configure, getShortcut } from 'src/configure';
-import { friendStore, store } from 'src/store';
-import { i18n } from 'src/i18n/basic';
-import { createInvite, updateRoomScreenshot } from 'src/services/api';
+import { type BcMsgEvent, BcMsgType, queryKeys } from 'src/constants';
 import { closeListenerSet } from 'src/elements/titlebar';
-import { logger } from 'src/logger';
 import { ScUserStatus } from 'src/generated/graphql';
-import { theme } from 'src/theme';
+import { i18n } from 'src/i18n/basic';
+import { logger } from 'src/logger';
 import { mountedRoom, unmountedRoom } from 'src/modules/nav';
-
 import type { MStageElement } from 'src/modules/stage';
+import { routes } from 'src/routes';
+import { createInvite, updateRoomScreenshot } from 'src/services/api';
+import { friendStore, store } from 'src/store';
+import { theme } from 'src/theme';
+import { preventDefault } from 'src/utils/common';
 
 import 'duoyun-ui/elements/coach-mark';
 import 'duoyun-ui/elements/space';
@@ -53,7 +51,7 @@ import 'src/elements/list';
 import 'src/elements/fps';
 import 'src/elements/ping';
 
-const style = createCSSSheet(css`
+const style = css`
   .stage {
     position: absolute;
     inset: 0;
@@ -84,18 +82,14 @@ const style = createCSSSheet(css`
   .icon:hover {
     background: ${theme.lightBackgroundColor};
   }
-`);
+`;
 
-/**
- * @customElement p-room
- */
 @customElement('p-room')
 @connectStore(store)
 @connectStore(configure)
 @adoptedStyle(style)
-@connectStore(i18n.store)
 export class PRoomElement extends DuoyunWakeLockBaseElement {
-  @refobject stageRef: RefObject<MStageElement>;
+  #stageRef = createRef<MStageElement>();
 
   get #playing() {
     return configure.user?.playing;
@@ -146,7 +140,7 @@ export class PRoomElement extends DuoyunWakeLockBaseElement {
           text: i18n.get('menu.game.share'),
           handle: () => {
             const url = `${location.origin}${createPath(routes.games)}${new QueryString({
-              [queryKeys.JOIN_ROOM]: this.#playing!.id,
+              [queryKeys.JOIN_ROOM]: String(this.#playing!.id),
             })}`;
             navigator.share
               ? navigator
@@ -171,12 +165,12 @@ export class PRoomElement extends DuoyunWakeLockBaseElement {
           tag: getShortcut('SCREENSHOT', true),
         },
         this.#isHost && {
-          text: i18n.get('menu.game.stateSave') + ' (Local)',
+          text: `${i18n.get('menu.game.stateSave')} (Local)`,
           handle: this.#save,
           tag: getShortcut('SAVE_GAME_STATE', true),
         },
         this.#isHost && {
-          text: i18n.get('menu.game.loadState') + ' (Local)',
+          text: `${i18n.get('menu.game.loadState')} (Local)`,
           handle: this.#load,
           tag: getShortcut('LOAD_GAME_STATE', true),
         },
@@ -206,12 +200,12 @@ export class PRoomElement extends DuoyunWakeLockBaseElement {
 
   #save = async (auto = false) => {
     try {
-      if (!this.stageRef.element!.hostRomBuffer) return;
-      const state = await this.stageRef.element!.getState();
+      if (!this.#stageRef.value!.hostRomBuffer) return;
+      const state = await this.#stageRef.value!.getState();
       if (!state) return;
-      const thumbnail = await this.stageRef.element!.getThumbnail();
+      const thumbnail = await this.#stageRef.value!.getThumbnail();
       const cache = await caches.open(this.#getCachesName(auto));
-      const key = await hash(this.stageRef.element!.hostRomBuffer);
+      const key = await hash(this.#stageRef.value!.hostRomBuffer);
       await cache.put(
         `/${key}?${new URLSearchParams({
           type: state.type,
@@ -239,8 +233,8 @@ export class PRoomElement extends DuoyunWakeLockBaseElement {
   };
 
   #load = async () => {
-    if (!this.stageRef.element!.hostRomBuffer) return;
-    const key = await hash(this.stageRef.element!.hostRomBuffer);
+    if (!this.#stageRef.value!.hostRomBuffer) return;
+    const key = await hash(this.#stageRef.value!.hostRomBuffer);
     const cache = await caches.open(this.#getCachesName(false));
     const reqList = [...(await cache.keys(`/${key}`, { ignoreSearch: true }))].splice(0, 10);
     const autoCache = await caches.open(this.#getCachesName(true));
@@ -250,7 +244,7 @@ export class PRoomElement extends DuoyunWakeLockBaseElement {
       reqList.unshift(autoCacheReq);
     }
     if (reqList.length === 0) {
-      Toast.open('default', i18n.get('tip.game.stateMissing'));
+      Toast.open('info', i18n.get('tip.game.stateMissing'));
     } else {
       const getQuery = (url: string, { searchParams } = new URL(url)) => ({
         type: searchParams.get('type') || '',
@@ -273,7 +267,7 @@ export class PRoomElement extends DuoyunWakeLockBaseElement {
                 onClick: async (evt: PointerEvent) => {
                   const res = await (req === autoCacheReq ? autoCache : cache).match(req);
                   if (!res) return;
-                  this.stageRef.element!.loadState({ type, ptr, buffer: await res.arrayBuffer() });
+                  this.#stageRef.value!.loadState({ type, ptr, buffer: await res.arrayBuffer() });
                   Toast.open('success', i18n.get('tip.game.stateLoad', time.format()));
                   evt.target?.dispatchEvent(new CustomEvent('close', { composed: true }));
                 },
@@ -290,15 +284,15 @@ export class PRoomElement extends DuoyunWakeLockBaseElement {
   };
 
   #uploadScreenshot = async () => {
-    if (!this.stageRef.element!.hostRomBuffer) return;
+    if (!this.#stageRef.value!.hostRomBuffer) return;
     updateRoomScreenshot({
       id: this.#playing!.id,
-      screenshot: await this.stageRef.element!.getThumbnail(),
+      screenshot: await this.#stageRef.value!.getThumbnail(),
     });
   };
 
   #saveScreenshot = async () => {
-    if (await this.stageRef.element!.screenshot()) {
+    if (await this.#stageRef.value!.screenshot()) {
       Toast.open('success', i18n.get('tip.game.screenshotSaved'));
     }
   };
@@ -366,7 +360,7 @@ export class PRoomElement extends DuoyunWakeLockBaseElement {
   #onMessage = ({ data, target }: MessageEvent<BcMsgEvent>) => {
     switch (data.type) {
       case BcMsgType.RAM_REQ: {
-        const res: BcMsgEvent = { id: data.id, type: BcMsgType.RAM_RES, data: this.stageRef.element!.getRam() };
+        const res: BcMsgEvent = { id: data.id, type: BcMsgType.RAM_RES, data: this.#stageRef.value!.getRam() };
         (target as BroadcastChannel).postMessage(res);
         break;
       }
@@ -379,29 +373,28 @@ export class PRoomElement extends DuoyunWakeLockBaseElement {
     openTorus();
   });
 
-  mounted = () => {
-    this.effect(
-      () => {
-        if (configure.user && !this.#playing) {
-          this.#autoSave();
-          ContextMenu.close();
-          const roomFrom = history.getParams().query.get(queryKeys.ROOM_FROM) || '';
-          const returnPath = [routes.favorites, routes.rooms, routes.game].some((route) =>
-            matchPath(route.pattern, roomFrom),
-          );
-          history.replace({ path: returnPath ? roomFrom : createPath(routes.games) });
-        } else {
-          if (!mediaQuery.isPhone) this.#openTours();
-          const timer = window.setInterval(this.#uploadScreenshot, 10000);
-          return () => {
-            clearInterval(timer);
-            this.#ramViewer?.close();
-          };
-        }
-      },
-      () => [this.#playing],
-    );
+  @effect((i) => [i.#playing])
+  #updatePath = () => {
+    if (configure.user && !this.#playing) {
+      this.#autoSave();
+      ContextMenu.close();
+      const roomFrom = history.getParams().query.get(queryKeys.ROOM_FROM) || '';
+      const returnPath = [routes.favorites, routes.rooms, routes.game].some((route) =>
+        matchPath(route.pattern, roomFrom),
+      );
+      history.replace({ path: returnPath ? roomFrom : createPath(routes.games) });
+    } else {
+      if (!mediaQuery.isPhone) this.#openTours();
+      const timer = window.setInterval(this.#uploadScreenshot, 10000);
+      return () => {
+        clearInterval(timer);
+        this.#ramViewer?.close();
+      };
+    }
+  };
 
+  @mounted()
+  #init = () => {
     const bc = window.BroadcastChannel && new BroadcastChannel('');
     bc?.addEventListener('message', this.#onMessage);
 
@@ -419,14 +412,14 @@ export class PRoomElement extends DuoyunWakeLockBaseElement {
   render = () => {
     return html`
       <m-stage
+      ${this.#stageRef}
         class="stage"
-        ref=${this.stageRef.ref}
         @contextmenu=${this.#onContextMenu}
         .padding=${'1em 0 5em'}
       ></m-stage>
       <dy-space class="info">
         ${this.#isHost ? html`<nesbox-fps></nesbox-fps>` : html`<nesbox-ping></nesbox-ping>`}
-        <m-room-recorder class="icon" .getStream=${() => this.stageRef.element!.getStream()}></m-room-recorder>
+        <m-room-recorder class="icon" .getStream=${() => this.#stageRef.value!.getStream()}></m-room-recorder>
         <m-room-voice class="icon"></m-room-voice>
       </dy-space>
       <m-ads class="ads" .attrs=${this.#game?.attributes}></m-ads>

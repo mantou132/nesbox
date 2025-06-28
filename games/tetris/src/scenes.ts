@@ -1,28 +1,28 @@
 import {
-  SizeComponent,
+  BasicEntity,
+  COLOR_GRAY,
+  COLOR_WHITE,
   MaterialComponent,
   PositionComponent,
-  SelectComponent,
-  TextAreaComponent,
-  BasicEntity,
-  Scene,
-  COLOR_WHITE,
-  COLOR_GRAY,
   RenderOnceComponent,
+  Scene,
+  SelectComponent,
+  SizeComponent,
+  TextAreaComponent,
 } from '@mantou/ecs';
-import { PieceEntity } from 'src/entities';
 import {
-  HEIGHT,
-  WIDTH,
-  SCENE,
-  ENTITY,
-  MODE,
-  SIDE_WIDTH,
   BACKGROUND_COLOR,
-  STAGE_BACKGROUND_COLOR,
-  SCORE_COLOR,
+  ENTITY,
   getWorldData,
+  HEIGHT,
+  MODE,
+  SCENE,
+  SCORE_COLOR,
+  SIDE_WIDTH,
+  STAGE_BACKGROUND_COLOR,
+  WIDTH,
 } from 'src/constants';
+import { PieceEntity } from 'src/entities';
 
 export function getSceneAndData(label: SCENE) {
   const scene = new Scene(label);

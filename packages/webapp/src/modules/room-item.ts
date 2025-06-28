@@ -1,15 +1,14 @@
-import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, property } from '@mantou/gem';
-
-import { getCDNSrc } from 'src/utils/common';
-import { Room, store } from 'src/store';
-import { theme } from 'src/theme';
+import { adoptedStyle, css, customElement, GemElement, html, property } from '@mantou/gem';
 import { icons } from 'src/icons';
+import { type Room, store } from 'src/store';
+import { theme } from 'src/theme';
+import { getCDNSrc } from 'src/utils/common';
 
 import 'duoyun-ui/elements/heading';
 import 'duoyun-ui/elements/use';
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :scope {
     cursor: pointer;
     display: flex;
     flex-direction: column;
@@ -17,7 +16,7 @@ const style = createCSSSheet(css`
     border-radius: ${theme.normalRound};
     overflow: hidden;
   }
-  :host(:hover) {
+  :scope:hover {
     background-color: ${theme.lightBackgroundColor};
   }
   .cover {
@@ -59,11 +58,8 @@ const style = createCSSSheet(css`
     flex-grow: 1;
     padding-inline-end: 1em;
   }
-`);
+`;
 
-/**
- * @customElement m-room-item
- */
 @customElement('m-room-item')
 @adoptedStyle(style)
 export class MRoomItemElement extends GemElement {

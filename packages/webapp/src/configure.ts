@@ -1,8 +1,7 @@
-import { useStore } from '@mantou/gem';
-import { isMac, getDisplayKey } from 'duoyun-ui/lib/hotkeys';
-import { Modify } from 'duoyun-ui/lib/types';
-import { useCacheStore } from 'duoyun-ui/lib/utils';
-
+import { createStore } from '@mantou/gem';
+import { getDisplayKey, isMac } from 'duoyun-ui/lib/hotkeys';
+import type { Modify } from 'duoyun-ui/lib/types';
+import { createCacheStore } from 'duoyun-ui/lib/utils';
 import {
   dispatchGlobalEvent,
   globalEvents,
@@ -12,9 +11,8 @@ import {
   VideoRefreshRate,
   VideoRenderMethod,
 } from 'src/constants';
-import { LoginMutation } from 'src/generated/guestgraphql';
-import { GetAccountQuery } from 'src/generated/graphql';
-
+import type { GetAccountQuery } from 'src/generated/graphql';
+import type { LoginMutation } from 'src/generated/guestgraphql';
 import type { ThemeName } from 'src/theme';
 
 export const defaultKeybinding = {
@@ -177,14 +175,14 @@ interface Configure {
 }
 
 addEventListener('focus', () => {
-  updateConfigureStore({ windowHasFocus: true });
+  configure({ windowHasFocus: true });
 });
 
 addEventListener('blur', () => {
-  updateConfigureStore({ windowHasFocus: false });
+  configure({ windowHasFocus: false });
 });
 
-export const [configure, updateConfigureStore] = useCacheStore<Configure>(
+export const { store: configure } = createCacheStore<Configure>(
   localStorageKeys.CONFIGURE_LOCAL_STORAGE_KEY,
   {
     windowHasFocus: document.hasFocus(),
@@ -201,41 +199,41 @@ export function getShortcut(command: keyof typeof defaultShortcuts, isDisplay = 
 }
 
 export const deleteUser = () => {
-  updateConfigureStore({ user: undefined, profile: undefined });
+  configure({ user: undefined, profile: undefined });
 };
 
 export const toggleScreencastMode = () => {
-  updateConfigureStore({ screencastMode: !configure.screencastMode });
+  configure({ screencastMode: !configure.screencastMode });
 };
 
 export const toggleFriendListState = () => {
-  updateConfigureStore({ friendListState: !configure.friendListState });
+  configure({ friendListState: !configure.friendListState });
 };
 
 export const toggleSettingsState = () => {
-  updateConfigureStore({ settingsState: !configure.settingsState });
+  configure({ settingsState: !configure.settingsState });
   if (!configure.settingsState) dispatchGlobalEvent(globalEvents.CLOSE_SETTINGS, null);
 };
 
 export const toggleSideNavState = (sideNavState = !configure.sideNavState) => {
-  updateConfigureStore({ sideNavState });
+  configure({ sideNavState });
 };
 
 export const toggleSearchState = () => {
-  updateConfigureStore({
+  configure({
     searchState: !configure.searchState,
     searchCommand: configure.searchState ? undefined : configure.searchCommand,
   });
 };
 
 export const setSearchCommand = (command: SearchCommand | null) => {
-  updateConfigureStore({ searchCommand: command || undefined, searchState: true });
+  configure({ searchCommand: command || undefined, searchState: true });
 };
 
 export const setNesFile = (file?: File) => {
-  updateConfigureStore({ openNesFile: file });
+  configure({ openNesFile: file });
 };
 
-export const [navStore, updateNavStore] = useStore({
+export const navStore = createStore({
   room: false,
 });

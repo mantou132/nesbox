@@ -1,48 +1,53 @@
-import { GemElement, html, adoptedStyle, customElement, createCSSSheet, css, connectStore, history } from '@mantou/gem';
+import { adoptedStyle, connectStore, css, customElement, GemElement, history, html } from '@mantou/gem';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
-import { commonHandle } from 'duoyun-ui/lib/hotkeys';
+import { createPath, type RouteItem } from 'duoyun-ui/elements/route';
 import { waitLoading } from 'duoyun-ui/elements/wait';
+import { commonHandle } from 'duoyun-ui/lib/hotkeys';
 import { focusStyle } from 'duoyun-ui/lib/styles';
-import { createPath, RouteItem } from 'duoyun-ui/elements/route';
-import { locationStore, routes } from 'src/routes';
-
-import { paramKeys, viewTransitionName } from 'src/constants';
-import { i18n } from 'src/i18n/basic';
+import { AppRootElement } from 'src/app';
+import { gotoLogin } from 'src/auth';
 import {
   configure,
+  navStore,
   SearchCommand,
   setSearchCommand,
   toggleFriendListState,
   toggleSearchState,
   toggleSideNavState,
-  navStore,
-  updateNavStore,
 } from 'src/configure';
-import { theme } from 'src/theme';
+import { paramKeys, viewTransitionName } from 'src/constants';
+import { i18n } from 'src/i18n/basic';
+import { icons } from 'src/icons';
+import { locationStore, routes } from 'src/routes';
 import { createRoom, favoriteGame, leaveRoom } from 'src/services/api';
 import { store } from 'src/store';
-import { icons } from 'src/icons';
-import { AppRootElement } from 'src/app';
-import { gotoLogin } from 'src/auth';
+import { theme } from 'src/theme';
 import { matchRoute } from 'src/utils/common';
 
-import 'duoyun-ui/elements/link';
-import 'duoyun-ui/elements/use';
 import 'duoyun-ui/elements/action-text';
 import 'duoyun-ui/elements/button';
-import 'src/elements/tooltip';
+import 'duoyun-ui/elements/link';
+import 'duoyun-ui/elements/use';
 import 'src/elements/nav-link';
+import 'src/elements/tooltip';
 import 'src/modules/avatar';
 import 'src/modules/badge';
 
-const style = createCSSSheet(css`
-  :host {
+import { createDecoratorTheme } from '@mantou/gem/helper/theme';
+import { closestElement } from 'duoyun-ui/lib/element';
+
+const elementTheme = createDecoratorTheme({ backgroundColor: '', backgroundImg: '' });
+
+const style = css`
+  :scope {
     position: relative;
     z-index: 1;
     display: flex;
     view-transition-name: ${viewTransitionName.HEADER};
     box-shadow: ${theme.titleBarColor} 0px 1px 0px;
     --height: 3em;
+    background-color: ${elementTheme.backgroundColor};
+    background-image: ${elementTheme.backgroundImg};
   }
   .nav {
     width: 100%;
@@ -68,7 +73,7 @@ const style = createCSSSheet(css`
     margin: auto;
     border-radius: ${theme.normalRound};
   }
-  .link:where(:state(match), [data-match])::after {
+  .link:state(match)::after {
     background: currentColor;
   }
   .title {
@@ -95,7 +100,7 @@ const style = createCSSSheet(css`
     background-color: ${theme.hoverBackgroundColor};
   }
   @media ${mediaQuery.PHONE} {
-    :host {
+    :scope {
       --height: 2.5em;
     }
     .nav {
@@ -105,33 +110,25 @@ const style = createCSSSheet(css`
     .icon {
       border-radius: 100%;
     }
-    .link:not(:where(:state(match), [data-match])) {
-      display: none;
-    }
-    .link:where(:state(match), [data-match])::after {
-      display: none;
-    }
+    .link:not(:state(match)),
+    .link:state(match)::after,
     .play,
     .group,
     .avatar {
       display: none;
     }
   }
-`);
+`;
 
-export const mountedRoom = () => updateNavStore({ room: true });
-export const unmountedRoom = () => updateNavStore({ room: false });
+export const mountedRoom = () => navStore({ room: true });
+export const unmountedRoom = () => navStore({ room: false });
 
-/**
- * @customElement m-nav
- */
 @customElement('m-nav')
 @adoptedStyle(style)
 @adoptedStyle(focusStyle)
 @connectStore(navStore)
 @connectStore(store)
 @connectStore(locationStore)
-@connectStore(i18n.store)
 @connectStore(configure)
 export class MNavElement extends GemElement {
   get #gamePageParams() {
@@ -159,7 +156,7 @@ export class MNavElement extends GemElement {
 
   #goTop = (event: MouseEvent) => {
     event.preventDefault();
-    this.closestElement(AppRootElement)?.contentRef.element?.scrollTo({
+    closestElement(this, AppRootElement)?.contentRef.value?.scrollTo({
       left: 0,
       top: 0,
       behavior: 'smooth',
@@ -189,9 +186,10 @@ export class MNavElement extends GemElement {
           @click=${() => waitLoading(leaveRoom())}
         ></dy-use>
       </nesbox-tooltip>
-      ${playing?.host !== configure.user?.id
-        ? html`<div class="title">${store.games[gameId]?.name}</div>`
-        : html`
+      ${
+        playing?.host !== configure.user?.id
+          ? html`<div class="title">${store.games[gameId]?.name}</div>`
+          : html`
             <nesbox-tooltip .position=${'bottom'} .content=${i18n.get('tooltip.game.change')}>
               <dy-action-text
                 class="title"
@@ -202,7 +200,8 @@ export class MNavElement extends GemElement {
                 ${store.games[gameId]?.name}
               </dy-action-text>
             </nesbox-tooltip>
-          `}
+          `
+      }
       ${this.#renderFavoriteBtn(gameId)}
     `;
   };
@@ -279,29 +278,30 @@ export class MNavElement extends GemElement {
     `;
   };
 
+  @elementTheme()
+  #theme = () => ({
+    backgroundImg: navStore.room ? `linear-gradient(${theme.lightBackgroundColor} -60%, transparent)` : 'none',
+    backgroundColor: navStore.room ? 'black' : theme.backgroundColor,
+  });
+
   render = () => {
     return html`
-      <style>
-        :host {
-          background-color: ${navStore.room ? 'black' : theme.backgroundColor};
-          background-image: ${navStore.room
-            ? `linear-gradient(${theme.lightBackgroundColor} -60%, transparent)`
-            : 'none'};
-        }
-      </style>
       <nav class="nav">
-        ${this.#gamePageParams
-          ? this.#renderGameTitle()
-          : this.#roomPageParams
-          ? this.#renderRoomTitle()
-          : mediaQuery.isPhone
-          ? this.#renderNavMenu()
-          : this.#renderLinks()}
+        ${
+          this.#gamePageParams
+            ? this.#renderGameTitle()
+            : this.#roomPageParams
+              ? this.#renderRoomTitle()
+              : mediaQuery.isPhone
+                ? this.#renderNavMenu()
+                : this.#renderLinks()
+        }
         <span class="space" @dblclick=${this.#goTop}></span>
-        ${!configure.user
-          ? html`<dy-action-text @click=${gotoLogin} data-cy="login">${i18n.get('menu.account.login')}</dy-action-text>`
-          : this.#gamePageParams
-          ? html`
+        ${
+          !configure.user
+            ? html`<dy-action-text @click=${gotoLogin} data-cy="login">${i18n.get('menu.account.login')}</dy-action-text>`
+            : this.#gamePageParams
+              ? html`
               <dy-use
                 class="icon"
                 tabindex="0"
@@ -310,9 +310,10 @@ export class MNavElement extends GemElement {
                 .element=${icons.share}
                 @click=${this.#share}
               ></dy-use>
-              ${mediaQuery.isPhone
-                ? this.#renderFavoriteBtn(this.#gameId)
-                : html`
+              ${
+                mediaQuery.isPhone
+                  ? this.#renderFavoriteBtn(this.#gameId)
+                  : html`
                     <dy-button
                       data-cy="start"
                       class="play"
@@ -320,9 +321,11 @@ export class MNavElement extends GemElement {
                     >
                       ${i18n.get('page.game.start')}
                     </dy-button>
-                  `}
+                  `
+              }
             `
-          : this.#renderMenu()}
+              : this.#renderMenu()
+        }
       </nav>
     `;
   };

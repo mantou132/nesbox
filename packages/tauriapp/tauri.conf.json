@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/dev/tooling/cli/schema.json",
+  "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/refs/heads/1.x/tooling/cli/schema.json",
   "build": {
     "withGlobalTauri": true,
     "beforeBuildCommand": "",

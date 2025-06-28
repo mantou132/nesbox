@@ -1,35 +1,35 @@
 import {
+  addListener,
+  adoptedStyle,
+  classMap,
+  createRef,
+  createState,
+  css,
+  customElement,
+  type Emitter,
+  effect,
+  emitter,
   GemElement,
   html,
-  adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
+  mounted,
   property,
-  emitter,
-  Emitter,
-  refobject,
-  RefObject,
-  connectStore,
   repeat,
-  classMap,
+  shadow,
 } from '@mantou/gem';
-import { hotkeys } from 'duoyun-ui/lib/hotkeys';
-import { sleep } from 'duoyun-ui/lib/timer';
-import { Time } from 'duoyun-ui/lib/time';
-
-import { SysMsg, TextMsg } from 'src/netplay/common';
-import { i18n } from 'src/i18n/basic';
-import { theme } from 'src/theme';
-import { configure, getShortcut } from 'src/configure';
-import { icons } from 'src/icons';
-
 import type { DuoyunInputElement } from 'duoyun-ui/elements/input';
+import { hotkeys } from 'duoyun-ui/lib/hotkeys';
+import { Time } from 'duoyun-ui/lib/time';
+import { sleep } from 'duoyun-ui/lib/timer';
+import { configure, getShortcut } from 'src/configure';
+import { i18n } from 'src/i18n/basic';
+import { icons } from 'src/icons';
+import { type SysMsg, TextMsg } from 'src/netplay/common';
+import { theme } from 'src/theme';
 
-import 'duoyun-ui/elements/input';
 import 'duoyun-ui/elements/button';
+import 'duoyun-ui/elements/input';
 
-const style = createCSSSheet(css`
+const style = css`
   :host {
     flex-grow: 1;
     display: flex;
@@ -64,49 +64,41 @@ const style = createCSSSheet(css`
     flex-shrink: 0;
     border-radius: ${theme.smallRound};
   }
-`);
+`;
 
-type State = {
-  input: string;
-  silent: boolean;
-  speechTimer: number;
-};
-
-/**
- * @customElement m-room-chat
- */
 @customElement('m-room-chat')
 @adoptedStyle(style)
-@connectStore(i18n.store)
-export class MRoomChatElement extends GemElement<State> {
+@shadow()
+export class MRoomChatElement extends GemElement {
   @property messages: TextMsg[];
   @emitter submit: Emitter<TextMsg>;
-  @refobject inputRef: RefObject<DuoyunInputElement>;
-  @refobject messageRef: RefObject<HTMLElement>;
 
-  state: State = {
+  #inputRef = createRef<DuoyunInputElement>();
+  #messageRef = createRef<HTMLElement>();
+
+  #state = createState({
     input: '',
     silent: true,
     speechTimer: 0,
-  };
+  });
 
   #stopPropagation = (event: Event) => event.stopPropagation();
 
   #onChange = ({ detail }: CustomEvent<string>) => {
-    this.setState({ input: detail });
+    this.#state({ input: detail });
   };
 
   #onSubmit = (evt: KeyboardEvent) => {
     evt.preventDefault();
-    this.state.input && this.submit(new TextMsg(this.state.input));
-    this.setState({ input: '', silent: true });
+    this.#state.input && this.submit(new TextMsg(this.#state.input));
+    this.#state({ input: '', silent: true });
   };
 
   #onEsc = () => {
-    if (this.state.input) {
-      this.setState({ input: '' });
+    if (this.#state.input) {
+      this.#state({ input: '' });
     } else {
-      this.inputRef.element?.blur();
+      this.#inputRef.value?.blur();
       this.update();
     }
   };
@@ -124,7 +116,7 @@ export class MRoomChatElement extends GemElement<State> {
     if (!configure.user || !SpeechRecognition) return;
     hotkeys({
       [getShortcut('ROOM_SPEECH')]: async () => {
-        const originInput = this.state.input;
+        const originInput = this.#state.input;
         const recognition = new SpeechRecognition();
         recognition.lang = document.documentElement.lang;
         recognition.continuous = false;
@@ -132,19 +124,19 @@ export class MRoomChatElement extends GemElement<State> {
         recognition.maxAlternatives = 1;
 
         const getTimer = () => {
-          clearTimeout(this.state.speechTimer);
+          clearTimeout(this.#state.speechTimer);
           return window.setTimeout(() => {
             recognition.stop();
-            if (this.state.speechTimer) {
-              this.setState({ speechTimer: 0, silent: true, input: originInput });
+            if (this.#state.speechTimer) {
+              this.#state({ speechTimer: 0, silent: true, input: originInput });
             }
           }, 3000);
         };
-        this.setState({ silent: false, speechTimer: getTimer() });
+        this.#state({ silent: false, speechTimer: getTimer() });
 
         recognition.addEventListener('result', ({ results }) => {
-          if (this.state.speechTimer) {
-            this.setState({ input: results[0].item(0).transcript, speechTimer: getTimer() });
+          if (this.#state.speechTimer) {
+            this.#state({ input: results[0].item(0).transcript, speechTimer: getTimer() });
           }
         });
         recognition.start();
@@ -153,50 +145,40 @@ export class MRoomChatElement extends GemElement<State> {
   };
 
   focus = async () => {
-    this.setState({ silent: false, speechTimer: 0 });
-    await Promise.resolve();
-    this.inputRef.element?.focus();
+    this.#state({ silent: false, speechTimer: 0 });
+    await new Promise((res) => setTimeout(res));
+    this.#inputRef.value?.focus();
   };
 
-  mounted = () => {
-    this.addEventListener('mouseover', () => {
-      this.setState({ silent: false });
-    });
+  @effect((i) => [i.messages])
+  #scroll = () => this.#messageRef.value?.scrollTo(0, 10000);
 
-    this.effect(
-      () => {
-        this.messageRef.element?.scrollTo(0, 10000);
-      },
-      () => [this.messages],
-    );
+  @effect((i) => [i.#state.silent])
+  #resetFocus = () => this.#inputRef.value?.blur();
 
-    this.effect(
-      () => this.inputRef.element?.blur(),
-      () => [this.state.silent],
-    );
+  #timer = 0;
+  @effect()
+  #resetTimeout = () => {
+    clearTimeout(this.#timer);
+    this.#timer = window.setTimeout(async () => {
+      const activeElement = this.shadowRoot?.activeElement;
+      if (activeElement) {
+        await new Promise((res) => activeElement.addEventListener('blur', res, { once: true }));
+        await sleep(3000);
+      }
+      this.#state({ silent: true });
+    }, 3000);
+  };
 
-    let timer = 0;
-    this.effect(() => {
-      clearTimeout(timer);
-      timer = window.setTimeout(async () => {
-        const activeElement = this.shadowRoot?.activeElement;
-        if (activeElement) {
-          await new Promise((res) => activeElement.addEventListener('blur', res, { once: true }));
-          await sleep(3000);
-        }
-        this.setState({ silent: true });
-      }, 3000);
-    });
-
-    addEventListener('keydown', this.#onGlobalKeyDown);
-    return () => {
-      removeEventListener('keydown', this.#onGlobalKeyDown);
-    };
+  @mounted()
+  #init = () => {
+    this.addEventListener('mouseover', () => this.#state({ silent: false }));
+    return addListener(document, 'keydown', this.#onGlobalKeyDown);
   };
 
   render = () => {
     return html`
-      <div ref=${this.messageRef.ref} class=${classMap({ message: true, silent: this.state.silent })}>
+      <div ${this.#messageRef} class=${classMap({ message: true, silent: this.#state.silent })}>
         ${repeat(
           this.messages,
           ({ timestamp }) => timestamp,
@@ -212,20 +194,17 @@ export class MRoomChatElement extends GemElement<State> {
           `,
         )}
       </div>
-      ${this.state.silent
-        ? ''
-        : html`
-            <dy-input
-              ref=${this.inputRef.ref}
-              class=${classMap({ input: true })}
-              .icon=${this.state.speechTimer ? icons.loading : undefined}
-              placeholder=${this.state.speechTimer ? 'Speech Recognition' : i18n.get('placeholder.message')}
-              @keydown=${this.#onKeyDown}
-              @keyup=${this.#stopPropagation}
-              @change=${this.#onChange}
-              .value=${this.state.input}
-            ></dy-input>
-          `}
+      <dy-input
+        ${this.#inputRef}
+        v-if=${!this.#state.silent}
+        class=${classMap({ input: true })}
+        .icon=${this.#state.speechTimer ? icons.loading : undefined}
+        placeholder=${this.#state.speechTimer ? 'Speech Recognition' : i18n.get('placeholder.message')}
+        @keydown=${this.#onKeyDown}
+        @keyup=${this.#stopPropagation}
+        @change=${this.#onChange}
+        .value=${this.#state.input}
+      ></dy-input>
     `;
   };
 }

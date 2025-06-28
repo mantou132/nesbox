@@ -16,7 +16,7 @@ export function findDiffIndex(old: Uint8ClampedArray, arr: Uint8ClampedArray, re
         break;
       }
       const i = index;
-      if (old[i] != arr[i] || old[i + 1] != arr[i + 1] || old[i + 2] != arr[i + 2]) {
+      if (old[i] !== arr[i] || old[i + 1] !== arr[i + 1] || old[i + 2] !== arr[i + 2]) {
         break;
       }
       if (reverse) {
@@ -75,6 +75,10 @@ export function encodeQoiFrame(
   }
 }
 
-export function decodeQoiFrame(buffer: ArrayBuffer, byteOffset?: number, byteLength?: number): { data: Uint8Array } {
+export function decodeQoiFrame(
+  buffer: ArrayBufferLike,
+  byteOffset?: number,
+  byteLength?: number,
+): { data: Uint8Array } {
   return QOI.decode(buffer, byteOffset, byteLength);
 }

@@ -1,22 +1,20 @@
 import {
+  adoptedStyle,
+  connectStore,
+  createState,
+  css,
+  customElement,
   GemElement,
   html,
-  adoptedStyle,
-  customElement,
-  createCSSSheet,
-  css,
-  connectStore,
   numattribute,
 } from '@mantou/gem';
+import type { Columns } from 'duoyun-ui/elements/table';
 import { Toast } from 'duoyun-ui/elements/toast';
-
-import { Combo, configure } from 'src/configure';
+import { type Combo, configure } from 'src/configure';
+import { i18n } from 'src/i18n/basic';
 import { icons } from 'src/icons';
 import { updateAccount } from 'src/services/api';
-import { i18n } from 'src/i18n/basic';
 import { theme } from 'src/theme';
-
-import type { Columns } from 'duoyun-ui/elements/table';
 
 import 'duoyun-ui/elements/table';
 import 'duoyun-ui/elements/input';
@@ -25,8 +23,8 @@ import 'duoyun-ui/elements/switch';
 import 'duoyun-ui/elements/shortcut-record';
 import 'duoyun-ui/elements/button';
 
-const style = createCSSSheet(css`
-  :host {
+const style = css`
+  :scope {
     display: block;
   }
   .list {
@@ -47,23 +45,15 @@ const style = createCSSSheet(css`
   .list::part(icon):hover {
     opacity: 1;
   }
-`);
+`;
 
-type State = {
-  newCombo?: Combo;
-};
-
-/**
- * @customElement m-combo-settings
- */
 @customElement('m-combo-settings')
 @adoptedStyle(style)
 @connectStore(configure)
-@connectStore(i18n.store)
-export class MComboSettingsElement extends GemElement<State> {
+export class MComboSettingsElement extends GemElement {
   @numattribute gameId: number;
 
-  state: State = {};
+  #state = createState({ newCombo: undefined as Combo | undefined });
 
   get #data() {
     return configure.user?.settings.combo[this.gameId] || [];
@@ -74,7 +64,7 @@ export class MComboSettingsElement extends GemElement<State> {
   }
 
   #onChangeNewCombo = (detail: Partial<Combo>) => {
-    this.setState({ newCombo: Object.assign(this.state.newCombo!, detail) });
+    this.#state({ newCombo: Object.assign(this.#state.newCombo!, detail) });
   };
 
   #onChangeSettings = (data: Combo[]) => {
@@ -90,7 +80,7 @@ export class MComboSettingsElement extends GemElement<State> {
   };
 
   #addNewCheat = () => {
-    this.setState({ newCombo: { code: '', comment: '', enabled: true, binding: '' } });
+    this.#state({ newCombo: { code: '', comment: '', enabled: true, binding: '' } });
   };
 
   #addData = async (data: Combo) => {
@@ -98,13 +88,13 @@ export class MComboSettingsElement extends GemElement<State> {
       Toast.open('error', i18n.get('tip.cheat.exist'));
     } else {
       await this.#onChangeSettings([...this.#comboSettings, data]);
-      this.setState({ newCombo: undefined });
+      this.#state({ newCombo: undefined });
     }
   };
 
   #removeData = (data: Combo) => {
-    if (data === this.state.newCombo) {
-      this.setState({ newCombo: undefined });
+    if (data === this.#state.newCombo) {
+      this.#state({ newCombo: undefined });
     } else {
       this.#onChangeSettings(this.#comboSettings.filter((e) => e !== data));
     }
@@ -112,7 +102,7 @@ export class MComboSettingsElement extends GemElement<State> {
 
   #changeToggleKey = (data: Combo, detail: string[]) => {
     const key = detail.length > 1 || detail[0].length > 1 ? undefined : detail[0];
-    if (data === this.state.newCombo) {
+    if (data === this.#state.newCombo) {
       this.#onChangeNewCombo({ binding: key });
     } else {
       this.#onChangeSettings(
@@ -122,7 +112,7 @@ export class MComboSettingsElement extends GemElement<State> {
   };
 
   #toggle = (data: Combo) => {
-    if (data === this.state.newCombo) {
+    if (data === this.#state.newCombo) {
       this.#onChangeNewCombo({ enabled: !data.enabled });
     } else {
       this.#onChangeSettings(
@@ -138,7 +128,7 @@ export class MComboSettingsElement extends GemElement<State> {
         title: i18n.get('settings.combo.code'),
         dataIndex: 'code',
         render: (data) =>
-          data === this.state.newCombo
+          data === this.#state.newCombo
             ? html`
                 <dy-input
                   style="width: 100%"
@@ -152,7 +142,7 @@ export class MComboSettingsElement extends GemElement<State> {
         title: i18n.get('settings.cheat.comment'),
         dataIndex: 'comment',
         render: (data) =>
-          data === this.state.newCombo
+          data === this.#state.newCombo
             ? html`
                 <dy-input
                   style="width: 100%"
@@ -198,7 +188,7 @@ export class MComboSettingsElement extends GemElement<State> {
             <dy-space>
               <dy-use
                 part="icon"
-                ?hidden=${data !== this.state.newCombo}
+                ?hidden=${data !== this.#state.newCombo}
                 @click=${() => this.#addData(data)}
                 .element=${icons.check}
               ></dy-use>
@@ -211,11 +201,11 @@ export class MComboSettingsElement extends GemElement<State> {
     return html`
       <dy-table
         class="list"
-        .data=${this.state.newCombo ? [...data, this.state.newCombo] : data}
+        .data=${this.#state.newCombo ? [...data, this.#state.newCombo] : data}
         .columns=${columns}
         .noData=${' '}
       ></dy-table>
-      <dy-button ?disabled=${!!this.state.newCombo} type="reverse" .icon=${icons.add} @click=${this.#addNewCheat}>
+      <dy-button ?disabled=${!!this.#state.newCombo} type="reverse" .icon=${icons.add} @click=${this.#addNewCheat}>
         ${i18n.get('settings.cheat.add')}
       </dy-button>
     `;
