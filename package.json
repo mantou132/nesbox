@@ -8,6 +8,7 @@
     "build:nes": "wasm-pack build --out-dir ../nes-pkg --target web --scope mantou packages/nes",
     "publish:nes": "./scripts/nes-pkg.mjs",
     "publish:nes:test": "./scripts/nes-pkg.mjs --test",
+    "preinstall": "yarn build:nes",
     "prepare": "husky install"
   },
   "devDependencies": {
@@ -17,7 +18,7 @@
     "lerna": "^8.0.0",
     "lint-staged": "^15.1.0",
     "typescript": "^5.8.3",
-    "wasm-pack": "^0.13.1"
+    "wasm-pack": "^0.14.0"
   },
   "lint-staged": {
     "*.ts": "biome check --write"

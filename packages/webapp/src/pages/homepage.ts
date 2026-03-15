@@ -111,7 +111,7 @@ const style = css`
     display: inline-flex;
     align-items: center;
     gap: 0.5em;
-    font-family: '${pixelFont.family}', sans-serif;
+    font-family: ${pixelFont.family}, sans-serif;
   }
   .logo img {
     height: 2.5em;

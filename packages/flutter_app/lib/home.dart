@@ -1,15 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_app/webpage.dart';
+import 'package:flutter_app/config.dart';
 import 'package:flutter_app/eventbus.dart';
 import 'package:flutter_app/utils.dart';
-import 'package:flutter_app/config.dart';
+import 'package:flutter_app/webpage.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 var battery = Battery();
 
@@ -167,9 +168,11 @@ class HomeState extends State<Home> {
           switch (msg['data']) {
             case 'click':
               SystemSound.play(SystemSoundType.click);
+              _sendMessage(msg['id'], true);
               break;
             case 'alert':
               SystemSound.play(SystemSoundType.alert);
+              _sendMessage(msg['id'], true);
               break;
           }
           break;
@@ -205,6 +208,7 @@ class HomeState extends State<Home> {
 
     return WillPopScope(
         onWillPop: _onWillPop,
+        // TODO: 需要聚焦 WebView，否则在 Android 上无法弹出输入法
         child: WebViewWidget(
           controller: _controller,
         ));

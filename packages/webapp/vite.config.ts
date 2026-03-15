@@ -29,6 +29,7 @@ const config = async ({ command }: any) => {
       'process.env.API_BASE': JSON.stringify(process.env.API_BASE),
     },
     server: {
+      allowedHosts: true,
       host: '0.0.0.0',
       port: 3003,
     },

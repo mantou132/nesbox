@@ -1373,10 +1373,10 @@
   resolved "https://registry.yarnpkg.com/@mantou/fceux/-/fceux-0.0.5.tgz#a974a886273e47bbb49bad047a9ed0f3bccccd63"
   integrity sha512-DuupPEP5I+eC6ZjtXQXbamyAnCeb+0NvJ+tFH4YQj7kJyz4pEPV7mEpzcWLQnGYsAdnvLiePlSISCZ9cFgBRxQ==
 
-"@mantou/gem@^2.2.1":
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/@mantou/gem/-/gem-2.2.1.tgz#331fed2f219ab51450df68661b50157adfafe874"
-  integrity sha512-GuIYolDawQSvsGQqpVJT+hXWRFayFC3rbiKeXf/+2NBEIPC6qbxnvvpZ3HnMNYYeFH7AaHYiNyqgK6MVAIxrxA==
+"@mantou/gem@^2.2.2":
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/@mantou/gem/-/gem-2.2.2.tgz#fb64f0663db7a275b23a6f70540d4f39d28250a9"
+  integrity sha512-Sacm3NSwgNQY4rgWnduDT3qKNhP0WBc798PRqGofja+F1yFXbgMsTvclUTQah3PTgWbFbOj5mBHdkoo7hM6Eiw==
 
 "@mantou/nes-sandbox@^0.0.8":
   version "0.0.8"
@@ -2796,10 +2796,10 @@ binary-extensions@^2.0.0:
   resolved "https://registry.yarnpkg.com/binary-extensions/-/binary-extensions-2.3.0.tgz#f6e14a97858d327252200242d4ccfe522c445522"
   integrity sha512-Ceh+7ox5qe7LJuLHoY0feh3pHuUDHAcRUeyL2VYghZwfpkNIy/+8Ocg0a3UuSoYzavmylwuLWQOf3hl0jjMMIw==
 
-binary-install@^1.0.1:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/binary-install/-/binary-install-1.1.0.tgz#61195349acabf5a043f3805b03f96e506cc96d6e"
-  integrity sha512-rkwNGW+3aQVSZoD0/o3mfPN6Yxh3Id0R/xzTVBVVpGNlVz8EGwusksxRlbk/A5iKTZt9zkMn3qIqmAt3vpfbzg==
+binary-install@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/binary-install/-/binary-install-1.1.2.tgz#06f059e5475e2a208d65ead8cb523d7845a83038"
+  integrity sha512-ZS2cqFHPZOy4wLxvzqfQvDjCOifn+7uCPqNmYRIBM/03+yllON+4fNnsD0VJdW0p97y+E+dTRNPStWNqMBq+9g==
   dependencies:
     axios "^0.26.1"
     rimraf "^3.0.2"
@@ -8802,12 +8802,12 @@ walk-up-path@^3.0.1:
   resolved "https://registry.yarnpkg.com/walk-up-path/-/walk-up-path-3.0.1.tgz#c8d78d5375b4966c717eb17ada73dbd41490e886"
   integrity sha512-9YlCL/ynK3CTlrSRrDxZvUauLzAswPCrsaCgilqFevUYpeEW0/3ScEjaa3kbW/T0ghhkEr7mv+fpjqn1Y1YuTA==
 
-wasm-pack@^0.13.1:
-  version "0.13.1"
-  resolved "https://registry.yarnpkg.com/wasm-pack/-/wasm-pack-0.13.1.tgz#345701522420ad74a5b584f1bdaf6db8c264cb54"
-  integrity sha512-P9exD4YkjpDbw68xUhF3MDm/CC/3eTmmthyG5bHJ56kalxOTewOunxTke4SyF8MTXV6jUtNjXggPgrGmMtczGg==
+wasm-pack@^0.14.0:
+  version "0.14.0"
+  resolved "https://registry.yarnpkg.com/wasm-pack/-/wasm-pack-0.14.0.tgz#ef9d1328a6fd708686883c505873d763d462ee02"
+  integrity sha512-7uKj+483b6ETTnuWHK3zKNB3Ca3M159tPZ5shyXxI4j7i9Lk82rL2ck/L6E9O5VMWk9JgowdtTBOSfWmGBRFtw==
   dependencies:
-    binary-install "^1.0.1"
+    binary-install "^1.1.2"
 
 wcwidth@^1.0.0, wcwidth@^1.0.1:
   version "1.0.1"

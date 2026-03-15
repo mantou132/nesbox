@@ -126,7 +126,7 @@ export class PGamesElement extends GemElement {
 
   #getBackgroundImageUrl = async (text: string) => {
     await fontLoading(pixelFont);
-    const font = `bold 10px '${pixelFont.family}', sans-serif`;
+    const font = `bold 10px ${pixelFont.family}, sans-serif`;
     const ctx = this.#canvas.getContext('2d')!;
     const paddingInline = 16;
     const paddingBlock = 8;

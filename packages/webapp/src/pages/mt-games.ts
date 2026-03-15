@@ -150,7 +150,6 @@ export class PMtGamesElement extends GemElement {
 
   @mounted()
   #init = () => {
-    console.log('parent');
     this.addEventListener('dblclick', () => mtGamesStore({ focusId: 0 }));
     const removeHandle = addListener(window, globalEvents.PRESS_HOST_BUTTON_INDEX, this.#pressButton);
 
