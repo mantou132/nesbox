@@ -98,10 +98,15 @@ packages
 - Rust
 - Flutter
 
-拉取代码：
+准备依赖：
 
-```
+```bash
+# 拉取代码
 git clone --recurse-submodules https://github.com/mantou132/nesbox.git
+# 生成 WASM 包
+yarn build:nes
+# 安装其他依赖
+yarn
 ```
 
 #### 调试 API
@@ -111,7 +116,6 @@ git clone --recurse-submodules https://github.com/mantou132/nesbox.git
 #### 调试 Web
 
 ```bash
-yarn
 yarn --cwd packages/webapp start
 ```
 
@@ -125,7 +129,7 @@ yarn --cwd packages/webapp start
 
 #### 调试 NES 模拟器
 
-```
+```bash
 cargo watch -w packages/nes -w deps/tetanes -s "yarn run build:nes"
 ```
 

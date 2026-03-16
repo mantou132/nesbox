@@ -8,7 +8,6 @@
     "build:nes": "wasm-pack build --out-dir ../nes-pkg --target web --scope mantou packages/nes",
     "publish:nes": "./scripts/nes-pkg.mjs",
     "publish:nes:test": "./scripts/nes-pkg.mjs --test",
-    "preinstall": "yarn build:nes",
     "prepare": "husky install"
   },
   "devDependencies": {
