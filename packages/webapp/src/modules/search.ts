@@ -8,6 +8,7 @@ import {
   GemElement,
   history,
   html,
+  mounted,
   styleMap,
 } from '@mantou/gem';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
@@ -175,36 +176,39 @@ export class MSearchElement extends GemElement {
 
   #genGameOptions = (): Option[] => {
     const favorites = new Set(store.favoriteIds);
-    const genGameItem = (id: number) => {
-      const game = store.games[id];
-      if (!game || !this.#matchSearch(game.name)) return;
-      return {
-        icon: icons.game,
-        label: html`
+    return (
+      store.gameIds
+        ?.map((id) => {
+          const game = store.games[id];
+          if (!game || !this.#matchSearch(game.name)) return;
+          return {
+            icon: icons.game,
+            label: html`
             <dy-space>
               <span>${game.name}</span>
               <dy-use v-if=${favorites.has(id)} style="width:1em" .element=${icons.favorited}></dy-use>
             </dy-space>
           `,
-        tagIcon: icons.received,
-        onClick: async () => {
-          if (mediaQuery.isPhone) {
-            history.push({ path: createPath(routes.game, { params: { [paramKeys.GAME_ID]: String(game.id) } }) });
-          } else if (this.#playing) {
-            updateRoom({
-              id: this.#playing.id,
-              private: this.#playing.private,
-              host: this.#playing.host,
-              gameId: game.id,
-            });
-          } else {
-            createRoom({ gameId: game.id, private: false });
-          }
-          toggleSearchState();
-        },
-      };
-    };
-    return store.gameIds?.map(genGameItem).filter(isNotNullish) || [];
+            tagIcon: icons.received,
+            onClick: async () => {
+              if (mediaQuery.isPhone) {
+                history.push({ path: createPath(routes.game, { params: { [paramKeys.GAME_ID]: String(game.id) } }) });
+              } else if (this.#playing) {
+                updateRoom({
+                  id: this.#playing.id,
+                  private: this.#playing.private,
+                  host: this.#playing.host,
+                  gameId: game.id,
+                });
+              } else {
+                createRoom({ gameId: game.id, private: false });
+              }
+              toggleSearchState();
+            },
+          };
+        })
+        .filter(isNotNullish) || []
+    );
   };
 
   #genHelpOptions = (): Option[] => {
@@ -317,7 +321,8 @@ export class MSearchElement extends GemElement {
     }
   };
 
-  mounted = () => {
+  @mounted()
+  #init = () => {
     import('src/i18n/help').then(({ helpI18n }) => {
       const resources = helpI18n.resources[helpI18n.currentLanguage] || {};
       this.#helpMessages = Object.values(resources);

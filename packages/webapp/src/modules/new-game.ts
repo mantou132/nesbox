@@ -1,4 +1,4 @@
-import { adoptedStyle, createState, css, customElement, GemElement, html } from '@mantou/gem';
+import { adoptedStyle, createState, css, customElement, GemElement, html, mounted } from '@mantou/gem';
 import { Modal } from 'duoyun-ui/elements/modal';
 import { locale } from 'duoyun-ui/lib/locale';
 import { githubRelease } from 'src/constants';
@@ -173,7 +173,8 @@ export class MNewGameElement extends GemElement {
     }
   };
 
-  mounted = () => {
+  @mounted()
+  #init = () => {
     this.#fetchMetadata();
   };
 

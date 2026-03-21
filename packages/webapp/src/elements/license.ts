@@ -1,4 +1,4 @@
-import { adoptedStyle, connectStore, createStore, css, customElement, GemElement, html } from '@mantou/gem';
+import { adoptedStyle, connectStore, createStore, css, customElement, GemElement, html, mounted } from '@mantou/gem';
 import { getCorSrc } from 'src/utils/common';
 
 import 'duoyun-ui/elements/loading';
@@ -15,8 +15,10 @@ const style = css`
 @connectStore(store)
 @adoptedStyle(style)
 export class NesboxLicenseElement extends GemElement {
-  mounted = () => {
-    fetch(getCorSrc('https://raw.githubusercontent.com/mantou132/nesbox/dev/LICENSE'))
+  @mounted()
+  #init = () => {
+    const url = getCorSrc('https://raw.githubusercontent.com/mantou132/nesbox/dev/LICENSE');
+    fetch(url)
       .then((res) => res.text())
       .then((license) => {
         store({
