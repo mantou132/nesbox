@@ -2,5 +2,6 @@
   "extends": "@nesbox/config/tsconfig",
   "compilerOptions": {
     "baseUrl": "./"
-  }
+  },
+  "exclude": ["cf"]
 }

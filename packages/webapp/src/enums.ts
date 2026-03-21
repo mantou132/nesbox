@@ -1,6 +1,6 @@
 import type { ElementOf } from 'duoyun-ui/lib/types';
 import { convertToMap } from 'duoyun-ui/lib/utils';
-import { ScGameKind, ScGameSeries, ScGamePlatform } from 'src/generated/graphql';
+import { ScGameKind, ScGamePlatform, ScGameSeries } from 'src/generated/graphql';
 import type { LocaleKey } from 'src/i18n/basic';
 
 export const gameKindList: { value: ScGameKind | ''; label: LocaleKey }[] = [
@@ -101,7 +101,6 @@ export const gameSeriesMap = convertToMap<ElementOf<typeof gameSeriesList>, Loca
   'label',
 );
 
-
 export const gamePlatformList: { value: ScGamePlatform | ''; label: LocaleKey }[] = [
   {
     value: '',
@@ -128,3 +127,9 @@ export const gamePlatformList: { value: ScGamePlatform | ''; label: LocaleKey }[
     label: 'enum.gamePlatform.wasm4',
   },
 ];
+
+export const gamePlatformMap = convertToMap<ElementOf<typeof gamePlatformList>, LocaleKey>(
+  gamePlatformList,
+  'value',
+  'label',
+);

@@ -9,6 +9,9 @@
     "preview": "vite preview",
     "test": "cypress open",
     "start": "vite serve",
+    "cf:deploy": "wrangler deploy",
+    "cf:dev": "wrangler dev",
+    "cf:typegen": "wrangler types cf/worker.d.ts",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
