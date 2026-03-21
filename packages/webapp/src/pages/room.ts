@@ -36,7 +36,6 @@ import { routes } from 'src/routes';
 import { createInvite, updateRoomScreenshot } from 'src/services/api';
 import { friendStore, store } from 'src/store';
 import { theme } from 'src/theme';
-import { preventDefault } from 'src/utils/common';
 
 import 'duoyun-ui/elements/coach-mark';
 import 'duoyun-ui/elements/space';
@@ -349,11 +348,11 @@ export class PRoomElement extends DuoyunWakeLockBaseElement {
 
   #onKeyDown = (event: KeyboardEvent) => {
     hotkeys({
-      [getShortcut('SCREENSHOT')]: preventDefault(this.#saveScreenshot),
-      [getShortcut('SAVE_GAME_STATE')]: preventDefault(this.#save),
-      [getShortcut('LOAD_GAME_STATE')]: preventDefault(this.#load),
-      [getShortcut('OPEN_RAM_VIEWER')]: preventDefault(this.#openRamViewer),
-      [getShortcut('OPEN_CHEAT_SETTINGS')]: preventDefault(this.#openCheatModal),
+      [getShortcut('SCREENSHOT')]: this.#saveScreenshot,
+      [getShortcut('SAVE_GAME_STATE')]: () => this.#save(),
+      [getShortcut('LOAD_GAME_STATE')]: this.#load,
+      [getShortcut('OPEN_RAM_VIEWER')]: this.#openRamViewer,
+      [getShortcut('OPEN_CHEAT_SETTINGS')]: this.#openCheatModal,
     })(event);
   };
 

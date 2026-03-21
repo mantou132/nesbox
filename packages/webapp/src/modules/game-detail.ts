@@ -50,7 +50,7 @@ export class MGameDetailElement extends GemElement {
 
     return html`
       <dy-more .maxheight=${isMtApp ? 'Infinity' : ''}>
-        <dy-unsafe .content=${doc.body.innerHTML} .contentcss=${contentCSS}></dy-unsafe>
+        <dy-unsafe .html=${doc.body.innerHTML} .styles=${contentCSS}></dy-unsafe>
       </dy-more>
     `;
   };

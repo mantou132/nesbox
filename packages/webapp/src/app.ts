@@ -36,7 +36,6 @@ import { enterPubRoom, getAccount, getFriends, getGameIds, subscribeEvent } from
 import { getGames } from 'src/services/guest-api';
 import { clearLobbyMessage, friendStore, toggleFriendChatState } from 'src/store';
 import { theme } from 'src/theme';
-import { preventDefault } from 'src/utils/common';
 
 import 'duoyun-ui/elements/drawer';
 import 'duoyun-ui/elements/input-capture';
@@ -129,16 +128,16 @@ export class AppRootElement extends GemElement {
 
   #globalShortcut = (evt: KeyboardEvent) => {
     hotkeys({
-      [getShortcut('OPEN_SEARCH')]: preventDefault(toggleSearchState),
-      [getShortcut('OPEN_HELP')]: preventDefault(() => setSearchCommand(SearchCommand.HELP)),
-      [getShortcut('OPEN_SETTINGS')]: preventDefault(() => {
+      [getShortcut('OPEN_SEARCH')]: toggleSearchState,
+      [getShortcut('OPEN_HELP')]: () => setSearchCommand(SearchCommand.HELP),
+      [getShortcut('OPEN_SETTINGS')]: () => {
         if (friendStore.friendChatState) {
           toggleFriendChatState();
         } else {
           toggleSettingsState();
         }
-      }),
-      [getShortcut('QUICK_REPLY')]: preventDefault(this.#openUnReadMessage),
+      },
+      [getShortcut('QUICK_REPLY')]: this.#openUnReadMessage,
     })(evt);
   };
 

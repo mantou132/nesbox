@@ -125,13 +125,6 @@ export function changeQuery(
   history.replace({ ...p, query });
 }
 
-export const preventDefault = (fn: () => void) => {
-  return (event: KeyboardEvent) => {
-    event.preventDefault();
-    fn();
-  };
-};
-
 export const fontLoading = async (font: FontFace) => {
   if (document.fonts.has(font)) return;
   document.fonts.add(await font.load());

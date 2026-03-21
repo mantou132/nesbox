@@ -88,8 +88,7 @@ export class MRoomChatElement extends GemElement {
     this.#state({ input: detail });
   };
 
-  #onSubmit = (evt: KeyboardEvent) => {
-    evt.preventDefault();
+  #onSubmit = () => {
     this.#state.input && this.submit(new TextMsg(this.#state.input));
     this.#state({ input: '', silent: true });
   };

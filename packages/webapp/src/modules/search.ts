@@ -8,7 +8,6 @@ import {
   GemElement,
   history,
   html,
-  raw,
   styleMap,
 } from '@mantou/gem';
 import { mediaQuery } from '@mantou/gem/helper/mediaquery';
@@ -120,9 +119,10 @@ export class MSearchElement extends GemElement {
     ...Object.fromEntries(
       Array.from(Array(9), (_, index) => [
         this.#getItemHotKey(index).join('+'),
-        (evt: KeyboardEvent) => {
-          this.#options.value?.shadowRoot?.querySelectorAll<HTMLElement>('[tabindex]')[index]?.click();
-          evt.preventDefault();
+        () => {
+          const container = this.#options.value?.shadowRoot;
+          const item = container?.querySelectorAll<HTMLElement>('[tabindex]')[index];
+          item?.click();
         },
       ]),
     ),
@@ -130,18 +130,21 @@ export class MSearchElement extends GemElement {
   });
 
   #onKeydownInput = (evt: KeyboardEvent) => {
-    hotkeys({
-      // Safari bug: https://github.com/mantou132/gem/issues/66
-      backspace: () => !this.#state.search && setSearchCommand(null),
-      [[getShortcut('OPEN_HELP'), getShortcut('OPEN_SEARCH')].join(',')]: (evt) => evt.preventDefault(),
-    })(evt);
+    hotkeys(
+      {
+        // Safari bug: https://github.com/mantou132/gem/issues/66
+        backspace: () => !this.#state.search && setSearchCommand(null),
+        [[getShortcut('OPEN_HELP'), getShortcut('OPEN_SEARCH')].join(',')]: (evt) => evt.preventDefault(),
+      },
+      { preventDefault: false },
+    )(evt);
   };
 
   #getSearchCommandIcon = (command?: SearchCommand) => {
     if (!command) return;
-    return raw`
+    return /* html */ `
       <svg viewBox="0 0 24 24">
-        <text 
+        <text
           fill='currentColor'
           x="50%"
           y="50%"
@@ -172,40 +175,36 @@ export class MSearchElement extends GemElement {
 
   #genGameOptions = (): Option[] => {
     const favorites = new Set(store.favoriteIds);
-    return (
-      store.gameIds
-        ?.map((id) => {
-          const game = store.games[id];
-          if (game && this.#matchSearch(game.name)) {
-            return {
-              icon: icons.game,
-              label: html`
-                <dy-space>
-                  <span>${game.name}</span>
-                  <dy-use v-if=${favorites.has(id)} style="width:1em" .element=${icons.favorited}></dy-use>
-                </dy-space>
-              `,
-              tagIcon: icons.received,
-              onClick: async () => {
-                if (mediaQuery.isPhone) {
-                  history.push({ path: createPath(routes.game, { params: { [paramKeys.GAME_ID]: String(game.id) } }) });
-                } else if (this.#playing) {
-                  updateRoom({
-                    id: this.#playing.id,
-                    private: this.#playing.private,
-                    host: this.#playing.host,
-                    gameId: game.id,
-                  });
-                } else {
-                  createRoom({ gameId: game.id, private: false });
-                }
-                toggleSearchState();
-              },
-            };
+    const genGameItem = (id: number) => {
+      const game = store.games[id];
+      if (!game || !this.#matchSearch(game.name)) return;
+      return {
+        icon: icons.game,
+        label: html`
+            <dy-space>
+              <span>${game.name}</span>
+              <dy-use v-if=${favorites.has(id)} style="width:1em" .element=${icons.favorited}></dy-use>
+            </dy-space>
+          `,
+        tagIcon: icons.received,
+        onClick: async () => {
+          if (mediaQuery.isPhone) {
+            history.push({ path: createPath(routes.game, { params: { [paramKeys.GAME_ID]: String(game.id) } }) });
+          } else if (this.#playing) {
+            updateRoom({
+              id: this.#playing.id,
+              private: this.#playing.private,
+              host: this.#playing.host,
+              gameId: game.id,
+            });
+          } else {
+            createRoom({ gameId: game.id, private: false });
           }
-        })
-        .filter(isNotNullish) || []
-    );
+          toggleSearchState();
+        },
+      };
+    };
+    return store.gameIds?.map(genGameItem).filter(isNotNullish) || [];
   };
 
   #genHelpOptions = (): Option[] => {
@@ -269,7 +268,7 @@ export class MSearchElement extends GemElement {
             return {
               label: html`
                 <dy-list-item
-                  .data=${{
+                  .item=${{
                     title: game.name,
                     description: hostNickname,
                     avatar: room.screenshot || getCDNSrc(game.preview),
