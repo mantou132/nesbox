@@ -70,7 +70,7 @@ pub struct GithubPayload {
 }
 
 impl GithubPayload {
-    pub fn is_owner(self: &Self) -> bool {
+    pub fn is_owner(&self) -> bool {
         self.sender.login == self.repository.owner.login
     }
 }
@@ -98,37 +98,26 @@ pub fn get_sc_game(payload: &GithubPayload) -> (String, ScNewGame) {
             _ => (),
         }
     }
+    let mut labels = payload.issue.labels.iter();
     let game = ScNewGame {
         name: payload.issue.title.clone(),
         description: payload.issue.body.clone(),
         preview,
         rom,
         screenshots,
-        kind: payload
-            .issue
-            .labels
-            .iter()
+        kind: labels
             .find(|label| label.name.starts_with("game.kind."))
             .and_then(|label| label.name.split_terminator(".").last())
             .and_then(|s| ScGameKind::from_str(s).ok()),
-        max_player: payload
-            .issue
-            .labels
-            .iter()
+        max_player: labels
             .find(|label| label.name.starts_with("game.max_player."))
             .and_then(|label| label.name.split_terminator(".").last())
             .and_then(|s| s.parse::<i32>().ok()),
-        platform: payload
-            .issue
-            .labels
-            .iter()
+        platform: labels
             .find(|label| label.name.starts_with("game.platform."))
             .and_then(|label| label.name.split_terminator(".").last())
             .and_then(|s| ScGamePlatform::from_str(s).ok()),
-        series: payload
-            .issue
-            .labels
-            .iter()
+        series: labels
             .find(|label| label.name.starts_with("game.series."))
             .and_then(|label| label.name.split_terminator(".").last())
             .and_then(|s| ScGameSeries::from_str(s).ok()),
@@ -153,8 +142,8 @@ mod tests {
             action: "closed".into(),
             issue: GithubIssue {
                 labels: vec![
-                    GithubLabel {name: "game.kind.act".into()}, 
-                    GithubLabel {name: "game.max_player.1".into()}, 
+                    GithubLabel {name: "game.kind.act".into()},
+                    GithubLabel {name: "game.max_player.1".into()},
                     GithubLabel {name: "game.platform.nes".into()},
                     GithubLabel {name: "game.series.tmnt".into()},
                 ],

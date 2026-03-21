@@ -2,6 +2,7 @@ use chrono::Utc;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use juniper::{FieldResult, GraphQLEnum, GraphQLInputObject, GraphQLObject};
+use serde::Serialize;
 use std::str::FromStr;
 use std::string::ToString;
 use strum::{Display, EnumString};
@@ -9,7 +10,7 @@ use strum::{Display, EnumString};
 use crate::db::models::{Game, NewGame};
 use crate::db::schema::games;
 
-#[derive(GraphQLEnum, Debug, Clone, Display, EnumString, PartialEq)]
+#[derive(GraphQLEnum, Debug, Clone, Display, EnumString, PartialEq, Serialize)]
 #[strum(serialize_all = "snake_case")]
 pub enum ScGamePlatform {
     Arcade,
@@ -20,7 +21,7 @@ pub enum ScGamePlatform {
 }
 
 // https://zh.wikipedia.org/wiki/%E7%94%B5%E5%AD%90%E6%B8%B8%E6%88%8F%E7%B1%BB%E5%9E%8B#%E9%A1%9E%E5%9E%8B%E7%B8%AE%E5%AF%AB
-#[derive(GraphQLEnum, Debug, Clone, Display, EnumString, PartialEq)]
+#[derive(GraphQLEnum, Debug, Clone, Display, EnumString, PartialEq, Serialize)]
 #[strum(serialize_all = "snake_case")]
 pub enum ScGameKind {
     // 动作，闯关冒险
@@ -49,7 +50,7 @@ pub enum ScGameKind {
     Other,
 }
 
-#[derive(GraphQLEnum, Debug, Clone, Display, EnumString, PartialEq)]
+#[derive(GraphQLEnum, Debug, Clone, Display, EnumString, PartialEq, Serialize)]
 #[strum(serialize_all = "snake_case")]
 pub enum ScGameSeries {
     Tmnt,
@@ -82,7 +83,7 @@ pub struct ScGame {
     max_player: Option<i32>,
 }
 
-#[derive(GraphQLInputObject, Debug, PartialEq)]
+#[derive(GraphQLInputObject, Debug, PartialEq, Serialize)]
 pub struct ScNewGame {
     pub name: String,
     pub description: String,

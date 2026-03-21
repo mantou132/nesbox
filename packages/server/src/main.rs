@@ -67,7 +67,7 @@ async fn main() -> io::Result<()> {
             rooms.truncate(100);
             rooms.iter().for_each(|room| {
                 if let Err(err) = leave_room_and_notify(room.host) {
-                    if err.extensions().to_owned() == Error::username_not_playing() {
+                    if *err.extensions() == Error::username_not_playing() {
                         delete_room(&conn, room.id);
                     } else {
                         log::error!("{:?}", err);

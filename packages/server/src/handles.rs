@@ -5,6 +5,7 @@ use juniper::{
 };
 use juniper_actix::subscriptions::subscriptions_handler;
 use juniper_graphql_ws::ConnectionConfig;
+use reqwest::Client;
 use std::time::Duration;
 
 use crate::{
@@ -128,6 +129,11 @@ pub async fn webhook(
             match get_game_from_name(&conn, &old_name) {
                 Some(game) => {
                     update_game(&conn, game.id, &sc_game).ok();
+                    let _ = Client::new()
+                        .post("https://nesbox-vec.709922234.workers.dev")
+                        .json(&sc_game)
+                        .send()
+                        .await;
                 }
                 None => {
                     if closed {

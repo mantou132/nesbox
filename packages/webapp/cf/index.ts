@@ -47,8 +47,11 @@ async function transformGame(ai: Ai<AiModels>, games: GetGamesQuery['games']) {
       metadata: game,
     };
   });
-  const embeddingList = await embedding(ai, gameInfoList.map((item) => item.info));
-  return gameInfoList.map((item, index) => ({...item, values: embeddingList[index]}))
+  const embeddingList = await embedding(
+    ai,
+    gameInfoList.map((item) => item.info),
+  );
+  return gameInfoList.map((item, index) => ({ ...item, values: embeddingList[index] }));
 }
 
 export default {
@@ -83,8 +86,11 @@ export default {
     }
 
     if (url.pathname === '/update') {
-      const game = Object.fromEntries(params.entries());
-      await env.GAMES_SEARCH.upsert(await transformGame(env.AI, [game as any]));
+      await env.GAMES_SEARCH.upsert(
+        await transformGame(env.AI, [
+          req.method === 'POST' ? await req.json() : (Object.fromEntries(params.entries()) as any),
+        ]),
+      );
       return new Response('Complete');
     }
 
