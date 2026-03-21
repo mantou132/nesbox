@@ -99,7 +99,7 @@ pub fn get_outdated_rooms(conn: &PgConnection) -> Vec<ScRoomBasic> {
         .load::<Room>(conn)
         .unwrap()
         .iter()
-        .map(|room| convert_to_sc_room_basic(&room))
+        .map(convert_to_sc_room_basic)
         .filter(|room| !has_user(room.host))
         .collect()
 }
@@ -115,7 +115,7 @@ pub fn get_rooms(conn: &PgConnection) -> Vec<ScRoom> {
         .unwrap()
         .iter()
         .map(|room| convert_to_sc_room(conn, room))
-        .filter(|room| room.users.len() > 0)
+        .filter(|room| !room.users.is_empty())
         .collect()
 }
 

@@ -104,7 +104,7 @@ impl Nes {
     }
 
     pub fn clock_frame(&mut self) -> u32 {
-        self.control_deck.clock_frame().expect("valid clock");
+        let _ = self.control_deck.clock_frame().expect("valid clock");
         if self.sound {
             let samples = self.control_deck.audio_samples();
             self.audio.consume(samples, true, 0.02);
@@ -164,7 +164,7 @@ impl Nes {
     }
 
     pub fn load_state(&mut self, state: &[u8]) {
-        if let Ok(cpu) = deserialize(&state) {
+        if let Ok(cpu) = deserialize(state) {
             self.control_deck.load_cpu(cpu);
         }
     }

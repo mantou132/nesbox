@@ -131,7 +131,9 @@ export const sendVoiceMsg = async (kind: ScVoiceMsgKind, payload: RTCSessionDesc
 };
 
 export const getGameIds = async () => {
-  if (!store.gameIds?.length) await getGames();
+  if (!store.gameIds?.length || store.gameIds?.find((id) => !store.games[id])) {
+    await getGames();
+  }
   const { topGames, favorites, recentGames } = await request<GetGameIdsQuery, GetGameIdsQueryVariables>(GetGameIds, {});
 
   store({

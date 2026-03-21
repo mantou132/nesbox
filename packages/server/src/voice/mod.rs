@@ -243,7 +243,7 @@ pub async fn create_rtc(
                                 }
                             }
 
-                            if room.len() == 0 {
+                            if room.is_empty() {
                                 mutex.remove(&room_id);
                             }
                         }

@@ -51,7 +51,7 @@ pub fn get_messages(conn: &PgConnection, uid: i32, tid: i32) -> Vec<ScMessage> {
         .load::<Message>(conn)
         .unwrap()
         .iter()
-        .map(|message| convert_to_sc_message(message))
+        .map(convert_to_sc_message)
         .collect()
 }
 

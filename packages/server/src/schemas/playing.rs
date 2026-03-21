@@ -43,7 +43,7 @@ pub fn create_playing(conn: &PgConnection, uid: i32, rid: i32) -> FieldResult<i3
     diesel::insert_into(playing::table)
         .values(&new_playing)
         .execute(conn)
-        .map(|_| rid as i32)
+        .map(|_| rid)
         .map_err(|err| err.into())
 }
 

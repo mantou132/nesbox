@@ -63,7 +63,7 @@ pub fn create_comment(conn: &PgConnection, uid: i32, req: &ScNewComment) -> Fiel
         .filter(game_id.eq(req.game_id))
         .get_results::<Comment>(conn)?;
 
-    if c.len() != 0 {
+    if !c.is_empty() {
         return update_comment(conn, uid, req);
     }
 

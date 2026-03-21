@@ -70,7 +70,7 @@ impl PixelsResource {
         }
 
         let color = color_option.unwrap_or(&self.default_color);
-        if blend == true && color.3 != 0xff {
+        if blend && color.3 != 0xff {
             let c = &[color.0, color.1, color.2, color.3];
             for y in y_min..y_max {
                 for x in x_min..x_max {

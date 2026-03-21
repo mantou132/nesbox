@@ -52,7 +52,7 @@ pub fn get_invites(conn: &PgConnection, uid: i32) -> Vec<ScInvite> {
         .load::<Invite>(conn)
         .unwrap()
         .iter()
-        .map(|invite| convert_to_sc_invite(conn, &invite))
+        .map(|invite| convert_to_sc_invite(conn, invite))
         .collect()
 }
 
@@ -65,7 +65,7 @@ pub fn get_invites_with(conn: &PgConnection, uid: i32) -> Vec<ScInvite> {
         .load::<Invite>(conn)
         .unwrap()
         .iter()
-        .map(|invite| convert_to_sc_invite(conn, &invite))
+        .map(|invite| convert_to_sc_invite(conn, invite))
         .collect()
 }
 
@@ -89,7 +89,7 @@ pub fn create_invite(
     use self::invites::dsl::*;
 
     let tid = if let Some(username) = &req.try_username {
-        get_user_by_username(&conn, username)?.id
+        get_user_by_username(conn, username)?.id
     } else {
         req.target_id
     };

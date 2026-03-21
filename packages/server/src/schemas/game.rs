@@ -136,7 +136,7 @@ pub fn get_games(conn: &PgConnection) -> Vec<ScGame> {
         .load::<Game>(conn)
         .unwrap()
         .iter()
-        .map(|game| convert_to_sc_game(game))
+        .map(convert_to_sc_game)
         .collect()
 }
 

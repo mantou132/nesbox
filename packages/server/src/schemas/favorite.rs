@@ -47,7 +47,7 @@ pub fn create_favorite(conn: &PgConnection, uid: i32, gid: i32) -> FieldResult<i
     diesel::insert_into(favorites::table)
         .values(&new_favorite)
         .execute(conn)
-        .map(|_| gid as i32)
+        .map(|_| gid)
         .map_err(|err| err.into())
 }
 

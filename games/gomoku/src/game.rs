@@ -1,5 +1,5 @@
 use nesbox_utils::prelude::*;
-use std::{str::FromStr, time::Duration};
+use std::{mem::swap, str::FromStr, time::Duration};
 use strum::IntoEnumIterator;
 use strum_macros::{Display, EnumIter, EnumString};
 
@@ -90,7 +90,7 @@ impl Checkerboard {
     }
 
     fn valid(&self, x: usize, y: usize) -> bool {
-        self.grid[y][x] == None
+        self.grid[y][x].is_none()
     }
 
     fn put(&mut self, x: usize, y: usize) -> bool {
@@ -105,10 +105,8 @@ impl Checkerboard {
             return true;
         }
 
-        let current = self.current;
-        self.current = self.next;
-        self.next = current;
-        return false;
+        swap(&mut self.current, &mut self.next);
+        false
     }
 
     fn is_full(&self) -> bool {
@@ -365,12 +363,12 @@ fn update_state(
 fn get_player(mode: &GameMode, checkerboard: &Checkerboard) -> Player {
     if mode.is_1p_white() {
         if checkerboard.current == Player::Two {
-            return Player::One;
+            Player::One
         } else {
-            return Player::Two;
+            Player::Two
         }
     } else {
-        return checkerboard.current;
+        checkerboard.current
     }
 }
 
@@ -386,7 +384,7 @@ fn mouse_motion(
 ) {
     if let Some(event) = mouse_evt.iter().last() {
         let checkerboard = board_query.single();
-        if event.player != get_player(&mode, &checkerboard) {
+        if event.player != get_player(&mode, checkerboard) {
             return;
         }
 
@@ -422,7 +420,7 @@ fn handle_dir(
     mode: Res<GameMode>,
 ) {
     let checkerboard = board_query.single();
-    let input = input.get_input(get_player(&mode, &checkerboard));
+    let input = input.get_input(get_player(&mode, checkerboard));
 
     let mut change = |mut transform: Mut<Transform>| {
         if input.just_pressed(Button::JoypadLeft) {

@@ -124,7 +124,7 @@ pub fn update_user(conn: &PgConnection, uid: i32, req: &ScUpdateUser) -> FieldRe
             settings.eq(req
                 .settings
                 .as_ref()
-                .map(|s| serde_json::from_str::<serde_json::Value>(&s).unwrap_or_default())),
+                .map(|s| serde_json::from_str::<serde_json::Value>(s).unwrap_or_default())),
             updated_at.eq(Utc::now().naive_utc()),
         ))
         .get_result::<User>(conn)?;
@@ -200,7 +200,7 @@ pub fn register(conn: &PgConnection, req: ScRegisterReq, secret: &str) -> FieldR
     let new_user = NewUser {
         username: &req.username,
         password: &hash_password(&req.password),
-        nickname: &req
+        nickname: req
             .username
             .trim_start_matches('@')
             .split('@')

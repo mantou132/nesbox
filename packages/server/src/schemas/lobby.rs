@@ -41,7 +41,7 @@ pub fn enter_lobby(uid: i32, req: ScEnterLobbyReq) -> ScLobbyInfo {
     leave_lobby(uid);
 
     let mut map = LOBBY.lock().unwrap();
-    let area = map.entry(req.area).or_insert(HashSet::new());
+    let area = map.entry(req.area).or_default();
     area.insert(uid);
 
     let lobby_user_count = area.len().try_into().unwrap();

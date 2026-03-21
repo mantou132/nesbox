@@ -31,7 +31,7 @@ pub async fn subscriptions(
             .unwrap_or(params.get("Authorization").unwrap_or(&InputValue::Null));
         let user = match authorization {
             InputValue::Scalar(DefaultScalarValue::String(auth_string)) => {
-                UserToken::parse(&secret, extract_token_from_str(&auth_string))
+                UserToken::parse(&secret, extract_token_from_str(auth_string))
             }
             _ => None,
         };
@@ -115,36 +115,33 @@ pub async fn webhook(
     let closed = action == "closed";
     let edited = action == "edited" && state == "closed";
     let labeled = action == "labeled" && state == "closed";
-    if payload
+    let validate = !payload
         .issue
         .labels
         .iter()
-        .find(|label| label.name == "duplicate")
-        .is_none()
-    {
-        if closed || edited || labeled {
-            let (old_name, sc_game) = get_sc_game(&payload);
-            if sc_game.rom.is_empty() {
-                log::debug!("Not rom");
-            } else {
-                match get_game_from_name(&conn, &old_name) {
-                    Some(game) => {
-                        update_game(&conn, game.id, &sc_game).ok();
-                    }
-                    None => {
-                        if closed {
-                            if let Ok(game) = create_game(&conn, &sc_game) {
-                                notify_all(
-                                    ScNotifyMessageBuilder::default()
-                                        .new_game(game)
-                                        .build()
-                                        .unwrap(),
-                                );
-                            }
+        .any(|label| label.name == "duplicate");
+    if validate && (closed || edited || labeled) {
+        let (old_name, sc_game) = get_sc_game(&payload);
+        if sc_game.rom.is_empty() {
+            log::debug!("Not rom");
+        } else {
+            match get_game_from_name(&conn, &old_name) {
+                Some(game) => {
+                    update_game(&conn, game.id, &sc_game).ok();
+                }
+                None => {
+                    if closed {
+                        if let Ok(game) = create_game(&conn, &sc_game) {
+                            notify_all(
+                                ScNotifyMessageBuilder::default()
+                                    .new_game(game)
+                                    .build()
+                                    .unwrap(),
+                            );
                         }
                     }
-                };
-            }
+                }
+            };
         }
     }
     HttpResponse::Ok().json(payload)

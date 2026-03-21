@@ -38,7 +38,7 @@ pub fn start_game(conn: &PgConnection, uid: i32, gid: i32) {
         .get_results::<Record>(conn)
         .unwrap();
 
-    if r.len() != 0 {
+    if !r.is_empty() {
         diesel::update(records.filter(game_id.eq(gid)).filter(user_id.eq(uid)))
             .set((
                 last_play_start_at.eq(Utc::now().naive_utc()),

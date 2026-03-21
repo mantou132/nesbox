@@ -62,13 +62,13 @@ pub fn create_bevy_app(width: u32, height: u32, clear_color: Color) -> App {
         clear_color,
     })
     .add_plugin(AudioPlugin::default())
-    .add_plugin(AssetsPlugin::default())
+    .add_plugin(AssetsPlugin)
     .add_plugin(TaskPoolPlugin::default())
-    .add_plugin(TypeRegistrationPlugin::default())
-    .add_plugin(FrameCountPlugin::default())
-    .add_plugin(TimePlugin::default())
-    .add_plugin(TransformPlugin::default())
-    .add_plugin(HierarchyPlugin::default())
+    .add_plugin(TypeRegistrationPlugin)
+    .add_plugin(FrameCountPlugin)
+    .add_plugin(TimePlugin)
+    .add_plugin(TransformPlugin)
+    .add_plugin(HierarchyPlugin)
     .add_event::<MouseEvent>()
     .init_resource::<ButtonInput>();
 

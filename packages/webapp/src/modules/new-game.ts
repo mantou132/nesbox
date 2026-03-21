@@ -2,7 +2,7 @@ import { adoptedStyle, createState, css, customElement, GemElement, html } from 
 import { Modal } from 'duoyun-ui/elements/modal';
 import { locale } from 'duoyun-ui/lib/locale';
 import { githubRelease } from 'src/constants';
-import { gameKindList, gameSeriesList } from 'src/enums';
+import { gameKindList, gamePlatformList } from 'src/enums';
 import { i18n } from 'src/i18n/basic';
 import { type GameAttributes, store } from 'src/store';
 import { theme } from 'src/theme';
@@ -93,7 +93,7 @@ export class MNewGameElement extends GemElement {
   };
 
   #getContent = () => {
-    const { kind, maxPlayer, series, title, metadata, step, attrs } = this.state;
+    const { kind, maxPlayer, platform, title, metadata, step, attrs } = this.state;
     const { ad_link = '', ad_text = '' } = attrs;
     switch (step) {
       case 1:
@@ -134,6 +134,15 @@ export class MNewGameElement extends GemElement {
           </dy-input-group>
           <dy-input-group>
             <dy-picker
+              .value=${platform ?? undefined}
+              .placeholder=${i18n.get('page.game.platform')}
+              .options=${gamePlatformList.map((e) => ({
+                value: e.value && `game.platform.${e.value.toLowerCase()}`,
+                label: i18n.get(e.label),
+              }))}
+              @change=${({ detail }: CustomEvent<string>) => this.state({ platform: detail })}
+            ></dy-picker>
+            <dy-picker
               .value=${maxPlayer ?? undefined}
               .placeholder=${i18n.get('page.game.maxPlayer')}
               .options=${['', '1', '2', '4'].map((value) => ({
@@ -150,15 +159,6 @@ export class MNewGameElement extends GemElement {
                 label: i18n.get(e.label),
               }))}
               @change=${({ detail }: CustomEvent<string>) => this.state({ kind: detail })}
-            ></dy-picker>
-            <dy-picker
-              .value=${series ?? undefined}
-              .placeholder=${i18n.get('page.game.series')}
-              .options=${gameSeriesList.map((e) => ({
-                value: e.value && `game.series.${e.value.toLowerCase()}`,
-                label: i18n.get(e.label),
-              }))}
-              @change=${({ detail }: CustomEvent<string>) => this.state({ series: detail })}
             ></dy-picker>
           </dy-input-group>
         `;

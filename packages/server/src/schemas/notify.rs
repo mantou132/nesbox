@@ -72,7 +72,7 @@ pub fn notify_ids(ids: Vec<i32>, msg: ScNotifyMessage) {
 pub fn notify_all(msg: ScNotifyMessage) {
     let map = NOTIFY_MAP.read().unwrap();
     for (user_id, _) in map.iter() {
-        map.get(&user_id)
+        map.get(user_id)
             .and_then(|sender| sender.0.send(msg.clone()).ok());
     }
 }

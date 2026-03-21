@@ -30,14 +30,14 @@ pub fn encode_qoi_frame(
     width: u32,
     qoi_whole_frame: bool,
 ) -> Vec<u8> {
-    let line_bytes: i32 = width as i32 * 4 as i32;
+    let line_bytes: i32 = width as i32 * 4;
 
     let mut start = 0;
     let mut end = 0;
 
     if qoi_whole_frame {
         end = current_frame.len();
-    } else if prev_frame.len() > 0 {
+    } else if !prev_frame.is_empty() {
         let end_index = find_diff_index(prev_frame, current_frame, true);
 
         let end_line = end_index / line_bytes;

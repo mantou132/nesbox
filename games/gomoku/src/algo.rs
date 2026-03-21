@@ -1,7 +1,7 @@
 use nesbox_utils::{log, prelude::Player};
 
 fn get_shape(
-    grid: &Vec<Vec<Option<Player>>>,
+    grid: &[Vec<Option<Player>>],
     player: Player,
     mut x: usize,
     mut y: usize,
@@ -75,25 +75,25 @@ fn match_score(shape: &[u8]) -> i32 {
     }
 }
 
-fn evaluate(grid: &Vec<Vec<Option<Player>>>, player: Player) -> i32 {
+fn evaluate(grid: &[Vec<Option<Player>>], player: Player) -> i32 {
     let rows = grid.len();
     let mut score = 0;
     for y in 0..rows {
         for x in 0..rows {
-            let shape = get_shape(&grid, player, x, y, 1, 0);
+            let shape = get_shape(grid, player, x, y, 1, 0);
             score += match_score(&shape[..]);
-            let shape = get_shape(&grid, player, x, y, 1, 1);
+            let shape = get_shape(grid, player, x, y, 1, 1);
             score += match_score(&shape[..]);
-            let shape = get_shape(&grid, player, x, y, 0, 1);
+            let shape = get_shape(grid, player, x, y, 0, 1);
             score += match_score(&shape[..]);
-            let shape = get_shape(&grid, player, x, y, -1, 1);
+            let shape = get_shape(grid, player, x, y, -1, 1);
             score += match_score(&shape[..]);
         }
     }
     score
 }
 
-fn is_maybe(grid: &Vec<Vec<Option<Player>>>, x: usize, y: usize, player: Player) -> bool {
+fn is_maybe(grid: &[Vec<Option<Player>>], x: usize, y: usize, player: Player) -> bool {
     let rows = grid.len();
     for i in 0..4 {
         for j in 0..4 {
@@ -112,7 +112,7 @@ fn is_maybe(grid: &Vec<Vec<Option<Player>>>, x: usize, y: usize, player: Player)
     false
 }
 
-fn find_point(grid: &mut Vec<Vec<Option<Player>>>, player: Player) -> (i32, usize, usize) {
+fn find_point(grid: &mut [Vec<Option<Player>>], player: Player) -> (i32, usize, usize) {
     let rows = grid.len();
     let start = rows / 2;
     let mut result = if grid[start][start].is_none() {
@@ -123,9 +123,9 @@ fn find_point(grid: &mut Vec<Vec<Option<Player>>>, player: Player) -> (i32, usiz
     };
     for y in 0..rows {
         for x in 0..rows {
-            if grid[y][x].is_none() && is_maybe(&grid, x, y, player) {
+            if grid[y][x].is_none() && is_maybe(grid, x, y, player) {
                 grid[y][x] = Some(player);
-                let score = evaluate(&grid, player);
+                let score = evaluate(grid, player);
                 if score > result.0 {
                     result = (score, x, y);
                 }
@@ -136,12 +136,8 @@ fn find_point(grid: &mut Vec<Vec<Option<Player>>>, player: Player) -> (i32, usiz
     result
 }
 
-pub fn find(
-    origin_grid: &Vec<Vec<Option<Player>>>,
-    player: Player,
-    next: Player,
-) -> (usize, usize) {
-    let mut grid = origin_grid.clone();
+pub fn find(origin_grid: &[Vec<Option<Player>>], player: Player, next: Player) -> (usize, usize) {
+    let mut grid = origin_grid.to_vec();
 
     let next_point = find_point(&mut grid, player);
     let opponent_next_point = find_point(&mut grid, next);
@@ -175,13 +171,13 @@ mod tests {
         let mut board = Vec::with_capacity(rows);
         for y in 0..rows {
             board.push(Vec::with_capacity(rows));
-            for x in 0..rows {
+            (0..rows).for_each(|x| {
                 board[y].push(match temp[y][x] {
                     1 => Some(Player::One),
                     2 => Some(Player::Two),
                     _ => None,
                 });
-            }
+            });
         }
         board
     }
