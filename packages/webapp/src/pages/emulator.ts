@@ -59,6 +59,7 @@ export class PEmulatorElement extends GemElement {
   #state = createState({
     canvasWidth: 0,
     canvasHeight: 0,
+    rotate: false,
   });
 
   get #isVisible() {
@@ -193,7 +194,11 @@ export class PEmulatorElement extends GemElement {
       this.#sampleRate,
     );
 
-    this.#state({ canvasWidth: this.#game.width(), canvasHeight: this.#game.height() });
+    this.#state({
+      canvasWidth: this.#game.width(),
+      canvasHeight: this.#game.height(),
+      rotate: this.#game.rotate(),
+    });
 
     this.#nextStartTime = 0;
   };
@@ -224,7 +229,7 @@ export class PEmulatorElement extends GemElement {
   };
 
   render = () => {
-    const { canvasWidth, canvasHeight } = this.#state;
+    const { canvasWidth, canvasHeight, rotate } = this.#state;
 
     return html`
       <nesbox-canvas
@@ -232,6 +237,7 @@ export class PEmulatorElement extends GemElement {
         class="canvas"
         .width=${canvasWidth}
         .height=${canvasHeight}
+        .rotate=${rotate}
       ></nesbox-canvas>
       <div class="nodata" ?hidden=${!!configure.openNesFile}>
         <dy-heading lv="1">${locale.noData}</dy-heading>

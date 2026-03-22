@@ -66,6 +66,7 @@ export class MUiSettingsElement extends GemElement {
             ? html`
               <div>${i18n.get('settings.ui.transition')}</div>
               <dy-switch
+                .neutral=${'informative'}
                 .checked=${!!configure.user?.settings.ui.viewTransition}
                 @change=${({ detail }: CustomEvent<boolean>) => this.#updateVideoSetting('viewTransition', detail)}
               ></dy-switch>

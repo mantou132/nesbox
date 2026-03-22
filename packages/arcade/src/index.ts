@@ -34,9 +34,13 @@ export class Arcade implements ONes {
   #audioArray: Int16Array = new Int16Array();
   #controllers = new Controllers();
   #statePath = '';
+  #rotate = false;
 
   mem(): Uint8Array {
     return this.#mem;
+  }
+  rotate() {
+    return this.#rotate;
   }
   width() {
     return this.#width;
@@ -91,9 +95,10 @@ export class Arcade implements ONes {
           if (path === 'fbneo-arcade.wasm') return wasmURL;
           return prefix + path;
         },
-        setRomProps: (w, h, _rotateGame, _flipped, vidImageDepth, _nBurnFPS, _aspectX, _aspectY) => {
+        setRomProps: (w, h, rotateGame, _flipped, vidImageDepth, _nBurnFPS, _aspectX, _aspectY) => {
           this.#width = w;
           this.#height = h;
+          this.#rotate = !!rotateGame;
           this.#vidBits = vidImageDepth;
           resolve(null);
         },

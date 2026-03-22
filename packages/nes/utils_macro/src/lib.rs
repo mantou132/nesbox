@@ -33,6 +33,10 @@ pub fn nesbox_bevy(_: TokenStream, item: TokenStream) -> TokenStream {
                 wasm_bindgen::memory()
             }
 
+            pub fn rotate(&self) -> bool {
+                false
+            }
+
             pub fn width(&self) -> u32 {
                 self.app
                     .world

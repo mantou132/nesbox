@@ -1,6 +1,7 @@
 import {
   adoptedStyle,
   attribute,
+  boolattribute,
   createRef,
   css,
   customElement,
@@ -18,6 +19,8 @@ import normalVert from 'src/shaders/normal.vert?raw';
 import { saveFile } from 'src/utils/common';
 
 import 'duoyun-ui/elements/reflect';
+
+import { createDecoratorTheme } from '@mantou/gem/helper/theme';
 
 const getShader = (filter: VideoFilter) => {
   switch (filter) {
@@ -43,6 +46,8 @@ const ortho = (left: number, right: number, bottom: number, top: number): number
   return m;
 };
 
+const elementTheme = createDecoratorTheme({ width: 0, height: 0 });
+
 const style = css`
   :host {
     display: block;
@@ -53,6 +58,12 @@ const style = css`
     height: 100%;
     object-fit: contain;
   }
+  :host([rotate]) {
+    canvas {
+      rotate: 270deg;
+      scale: min(calc(${elementTheme.width} / ${elementTheme.height}), calc(${elementTheme.height} / ${elementTheme.width}));
+    }
+  }
 `;
 
 @adoptedStyle(style)
@@ -62,6 +73,7 @@ export class NesboxCanvasElement extends GemElement {
   @numattribute width: number;
   @numattribute height: number;
   @attribute filter: VideoFilter;
+  @boolattribute rotate: boolean;
 
   canvasRef = createRef<HTMLCanvasElement>();
 
@@ -74,6 +86,9 @@ export class NesboxCanvasElement extends GemElement {
   get #renderHeight() {
     return this.height * this.#scale;
   }
+
+  @elementTheme()
+  #updateTheme = () => ({ width: this.width, height: this.height });
 
   // https://github.com/lukexor/tetanes/blob/main/web/www/src/index.ts#L60
   #webgl?: WebGL2RenderingContext;

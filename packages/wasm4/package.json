@@ -8,8 +8,8 @@
     "@mantou/nes-wasm4": "^0.0.6"
   },
   "peerDependencies": {
-    "@mantou/nes": "^1.0.14",
-    "@mantou/nes-sandbox": "^0.0.12"
+    "@mantou/nes": "^1.0.15",
+    "@mantou/nes-sandbox": "^0.0.13"
   },
   "devDependencies": {
     "@nesbox/config": "^0.0.1"

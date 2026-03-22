@@ -84,6 +84,9 @@ export class Wasm4 implements ONes {
   mem(): Uint8Array {
     return this.#mem;
   }
+  rotate() {
+    return false;
+  }
   width() {
     return WIDTH;
   }

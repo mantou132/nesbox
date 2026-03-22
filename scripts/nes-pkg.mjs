@@ -31,24 +31,17 @@ function executeShellCommand(command, cwd = process.cwd()) {
 // 用 debug 模式生成包含 nesbox_bevy app 相关的代码，这让 js 胶水代码同时兼容 nes 模拟器和 nesbox_bevy app.
 await executeShellCommand('yarn build:nes --debug');
 
-const pathname = path.resolve(
-  process.cwd(),
-  'packages/nes-pkg',
-  (await import('../packages/nes-pkg/package.json', { assert: { type: 'json' } })).default.module,
-);
+const nesPkgJson = await import('../packages/nes-pkg/package.json', { with: { type: 'json' } });
+const pathname = path.resolve(process.cwd(), 'packages/nes-pkg', nesPkgJson.default.main);
 
-const content = (
-  await fs.readFile(pathname, {
-    encoding: 'utf8',
-  })
-)
+const content = (await fs.readFile(pathname, { encoding: 'utf8' }))
   .replace(/new Function\(.*\)/g, 'new Function("console.warn(`new Function be replaced`)")')
   .replace('return imports;', (matchStr, _i, scriptContent) => {
     const f = old
       .map((name) => {
         const n = name.match(/(.*_)[0-9a-z]{16}/)[1];
         const newName = scriptContent.match(new RegExp(`${n}[0-9a-z]{16}`))[0];
-        return `imports.wbg.${name} = imports.wbg.${newName}`;
+        return `\nimports.wbg.${name} = imports.wbg.${newName}`;
       })
       .join(';');
     return `${f};${matchStr}`;

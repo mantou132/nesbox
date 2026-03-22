@@ -119,6 +119,7 @@ export class MStageElement extends GemElement {
     comboKeyHandles: {} as Record<string, (evt: KeyboardEvent) => void>,
     canvasWidth: 0,
     canvasHeight: 0,
+    rotate: false,
   });
 
   get #settings() {
@@ -317,7 +318,11 @@ export class MStageElement extends GemElement {
 
       const game: Nes = await createGame(filename, romBuffer, this.#sampleRate, this.#game!.maxPlayer);
 
-      this.#state({ canvasWidth: game.width(), canvasHeight: game.height() });
+      this.#state({
+        canvasWidth: game.width(),
+        canvasHeight: game.height(),
+        rotate: game.rotate(),
+      });
       this.#gameInstance = game;
       if (this.#isHost) {
         this.hostRomBuffer = romBuffer;
@@ -644,14 +649,15 @@ export class MStageElement extends GemElement {
   };
 
   render = () => {
-    const { messages, roles, canvasWidth, canvasHeight } = this.#state;
+    const { messages, roles, canvasWidth, canvasHeight, rotate } = this.#state;
 
     return html`
       <nesbox-canvas
-      ${this.#canvasRef}
+        ${this.#canvasRef}
         class="canvas"
         .width=${canvasWidth}
         .height=${canvasHeight}
+        .rotate=${rotate}
         .filter=${this.#settings?.video.filter || VideoFilter.DEFAULT}
         style=${styleMap({
           padding: this.padding,
@@ -660,7 +666,7 @@ export class MStageElement extends GemElement {
       ></nesbox-canvas>
       <audio ${this.#audioRef} hidden></audio>
       <m-room-chat
-      ${this.#chatRef}
+        ${this.#chatRef}
         class="chat"
         .messages=${messages}
         @pointerdown=${(evt: PointerEvent) => this.#stopPropagation(evt, true)}

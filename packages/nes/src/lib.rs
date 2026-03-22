@@ -46,6 +46,10 @@ impl Nes {
         wasm_bindgen::memory()
     }
 
+    pub fn rotate(&mut self) -> bool {
+        false
+    }
+
     pub fn width(&self) -> u32 {
         Ppu::WIDTH
     }
