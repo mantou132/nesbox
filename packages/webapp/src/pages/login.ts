@@ -210,13 +210,6 @@ export class PLoginElement extends GemElement {
   render = () => {
     const { username, password, loading } = this.#state;
     return html`
-      <div class="bg-copyright">
-        <nesbox-tooltip .content=${i18n.get('tooltip.login.imgCopyright')}>
-          <dy-link @click=${() => open('https://dribbble.com/shots/10244007-Old-tech-devices-2')}>
-            @Tanner Wayment
-          </dy-link>
-        </nesbox-tooltip>
-      </div>
       <div class="slogan">
         <h1>${i18n.get('global.slogan')}</h1>
         ${i18n
@@ -251,6 +244,13 @@ export class PLoginElement extends GemElement {
         </div>
       </div>
       <m-guest ?hidden=${isMtApp || mediaQuery.isPhone}></m-guest>
+      <div class="bg-copyright">
+        <nesbox-tooltip .content=${i18n.get('tooltip.login.imgCopyright')}>
+          <dy-link @click=${() => open('https://dribbble.com/shots/10244007-Old-tech-devices-2')}>
+            @Tanner Wayment
+          </dy-link>
+        </nesbox-tooltip>
+      </div>
     `;
   };
 }

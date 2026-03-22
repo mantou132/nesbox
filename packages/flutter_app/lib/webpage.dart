@@ -77,10 +77,7 @@ class WebPageState extends State<WebPage> {
       _ready = true;
       _controller
         ..loadRequest(Uri.parse(widget.url))
-        ..addJavaScriptChannel(
-          '__MT__APP__BRIDGE',
-          onMessageReceived: _onMessageReceived,
-        )
+        ..addJavaScriptChannel('__MT__APP__BRIDGE', onMessageReceived: _onMessageReceived)
         ..setJavaScriptMode(JavaScriptMode.unrestricted)
         ..setNavigationDelegate(NavigationDelegate(
             onNavigationRequest: _navigationDelegate, onPageFinished: (String url) => _updateTitle()));
