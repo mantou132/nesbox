@@ -23,7 +23,7 @@ const style = css`
     width: 100%;
   }
   .tabs::part(tabs) {
-    width: 8em;
+    width: 10em;
   }
   .tabs::part(tab) {
     padding: 0.5em;

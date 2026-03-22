@@ -8,6 +8,7 @@ import {
   GemElement,
   history,
   html,
+  memo,
   mounted,
   styleMap,
 } from '@mantou/gem';
@@ -25,7 +26,7 @@ import { i18n } from 'src/i18n/basic';
 import { icons } from 'src/icons';
 import { routes } from 'src/routes';
 import { createInvite, createRoom, enterPubRoom, updateRoom } from 'src/services/api';
-import { friendStore, store, toggleFriendChatState } from 'src/store';
+import { friendStore, type Game, store, toggleFriendChatState } from 'src/store';
 import { theme } from 'src/theme';
 import { getCDNSrc, getTempText, matchRoute } from 'src/utils/common';
 
@@ -35,6 +36,8 @@ import 'duoyun-ui/elements/list';
 import 'duoyun-ui/elements/options';
 import 'duoyun-ui/elements/paragraph';
 import 'duoyun-ui/elements/space';
+
+import { debounce } from 'duoyun-ui/lib/timer';
 
 const style = css`
   :scope {
@@ -89,7 +92,7 @@ export class MSearchElement extends GemElement {
 
   #state = createState({
     search: '',
-    result: [] as Option[],
+    result: [] as (Option & { id?: number })[],
   });
 
   get #isRooms() {
@@ -98,6 +101,11 @@ export class MSearchElement extends GemElement {
 
   get #playing() {
     return configure.user?.playing;
+  }
+
+  @memo(() => [store.favoriteIds])
+  get _favoriteIds() {
+    return new Set(store.favoriteIds);
   }
 
   #helpMessages: string[] = [];
@@ -174,38 +182,42 @@ export class MSearchElement extends GemElement {
     return isIncludesString(str, search);
   };
 
+  #genGameItem = (game: Game) => {
+    return {
+      id: game.id,
+      icon: icons.game,
+      label: html`
+        <dy-space>
+          <span>${game.name}</span>
+          <dy-use v-if=${this._favoriteIds.has(game.id)} style="width:1em" .element=${icons.favorited}></dy-use>
+        </dy-space>
+      `,
+      tagIcon: icons.received,
+      onClick: async () => {
+        if (mediaQuery.isPhone) {
+          history.push({ path: createPath(routes.game, { params: { [paramKeys.GAME_ID]: String(game.id) } }) });
+        } else if (this.#playing) {
+          updateRoom({
+            id: this.#playing.id,
+            private: this.#playing.private,
+            host: this.#playing.host,
+            gameId: game.id,
+          });
+        } else {
+          createRoom({ gameId: game.id, private: false });
+        }
+        toggleSearchState();
+      },
+    };
+  };
+
   #genGameOptions = (): Option[] => {
-    const favorites = new Set(store.favoriteIds);
     return (
       store.gameIds
-        ?.map((id) => {
+        ?.map((id: number) => {
           const game = store.games[id];
           if (!game || !this.#matchSearch(game.name)) return;
-          return {
-            icon: icons.game,
-            label: html`
-            <dy-space>
-              <span>${game.name}</span>
-              <dy-use v-if=${favorites.has(id)} style="width:1em" .element=${icons.favorited}></dy-use>
-            </dy-space>
-          `,
-            tagIcon: icons.received,
-            onClick: async () => {
-              if (mediaQuery.isPhone) {
-                history.push({ path: createPath(routes.game, { params: { [paramKeys.GAME_ID]: String(game.id) } }) });
-              } else if (this.#playing) {
-                updateRoom({
-                  id: this.#playing.id,
-                  private: this.#playing.private,
-                  host: this.#playing.host,
-                  gameId: game.id,
-                });
-              } else {
-                createRoom({ gameId: game.id, private: false });
-              }
-              toggleSearchState();
-            },
-          };
+          return this.#genGameItem(game);
         })
         .filter(isNotNullish) || []
     );
@@ -291,10 +303,36 @@ export class MSearchElement extends GemElement {
     );
   };
 
+  #abortCon = new AbortController();
+  #aiSearch = debounce(() => {
+    const { search, result } = this.#state;
+    if (!search || result.length > 5) return;
+    this.#abortCon = new AbortController();
+    fetch(`https://nesbox.709922234.workers.dev/search?${new URLSearchParams({ q: this.#state.search })}`, {
+      signal: this.#abortCon.signal,
+    })
+      .then((res) => res.json())
+      .then((data: { matches: { id: string }[] }) => {
+        const currentIds = new Set(result.map((e) => e.id));
+        this.#state({
+          result: [
+            ...result,
+            ...data.matches
+              .map((e) => Number(e.id))
+              .filter((id) => store.games[id] && !currentIds.has(id))
+              .map((id) => this.#genGameItem(store.games[id]!))
+              .filter(isNotNullish),
+          ],
+        });
+      });
+  });
+
   #genOptions = (): Option[] => {
     const { search } = this.#state;
+    this.#abortCon.abort();
 
     if (configure.searchCommand === SearchCommand.SELECT_GAME) {
+      this.#aiSearch();
       return this.#genGameOptions();
     } else if (configure.searchCommand === SearchCommand.HELP) {
       if (!search) return [];

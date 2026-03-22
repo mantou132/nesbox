@@ -54,8 +54,27 @@ async function transformGame(ai: Ai<AiModels>, games: GetGamesQuery['games']) {
   return gameInfoList.map((item, index) => ({ ...item, values: embeddingList[index] }));
 }
 
+const resInit = {
+  headers: {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Credentials': 'true',
+  },
+};
+
 export default {
   async fetch(req, env, _ctx): Promise<Response> {
+    if (req.method === 'OPTIONS') {
+      return new Response(null, {
+        status: 204,
+        headers: {
+          ...resInit.headers,
+          'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        },
+      });
+    }
+
     const url = new URL(req.url);
     const params = new URLSearchParams(url.search);
 
@@ -81,7 +100,7 @@ export default {
       })();
 
       return new Response(readable, {
-        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+        headers: { ...resInit.headers, 'Content-Type': 'text/plain; charset=utf-8' },
       });
     }
 
@@ -91,16 +110,16 @@ export default {
           req.method === 'POST' ? await req.json() : (Object.fromEntries(params.entries()) as any),
         ]),
       );
-      return new Response('Complete');
+      return new Response('Complete', resInit);
     }
 
     if (url.pathname === '/search') {
       const q = params.get('q') || 'all';
       const [values] = await embedding(env.AI, [q]);
       const res = await env.GAMES_SEARCH.query(values);
-      return Response.json(res);
+      return Response.json(res, resInit);
     }
 
-    return new Response('Hello World!!!');
+    return new Response('Hello World!', resInit);
   },
 } satisfies ExportedHandler<Env>;

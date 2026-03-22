@@ -130,7 +130,7 @@ pub async fn webhook(
                 Some(game) => {
                     update_game(&conn, game.id, &sc_game).ok();
                     let _ = Client::new()
-                        .post("https://nesbox-vec.709922234.workers.dev")
+                        .post("https://nesbox.709922234.workers.dev")
                         .json(&sc_game)
                         .send()
                         .await;

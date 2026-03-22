@@ -4,7 +4,7 @@
  */
 {
   "$schema": "https://unpkg.com/wrangler@4.76.0/config-schema.json",
-  "name": "nesbox-vec",
+  "name": "nesbox",
   "main": "cf/index.ts",
   "compatibility_date": "2026-03-10",
   "observability": {
