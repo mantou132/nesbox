@@ -1,11 +1,11 @@
 # This file tracks properties of this Flutter project.
 # Used by Flutter tool to assess capabilities and perform upgrades etc.
 #
-# This file should be version controlled.
+# This file should be version controlled and should not be manually edited.
 
 version:
-  revision: 85684f9300908116a78138ea4c6036c35c9a1236
-  channel: stable
+  revision: "2c9eb20739dfec95e2c74bd3dfa4601b0a8a36aa"
+  channel: "stable"
 
 project_type: app
 
@@ -13,14 +13,11 @@ project_type: app
 migration:
   platforms:
     - platform: root
-      create_revision: 85684f9300908116a78138ea4c6036c35c9a1236
-      base_revision: 85684f9300908116a78138ea4c6036c35c9a1236
+      create_revision: 2c9eb20739dfec95e2c74bd3dfa4601b0a8a36aa
+      base_revision: 2c9eb20739dfec95e2c74bd3dfa4601b0a8a36aa
     - platform: android
-      create_revision: 85684f9300908116a78138ea4c6036c35c9a1236
-      base_revision: 85684f9300908116a78138ea4c6036c35c9a1236
-    - platform: ios
-      create_revision: 85684f9300908116a78138ea4c6036c35c9a1236
-      base_revision: 85684f9300908116a78138ea4c6036c35c9a1236
+      create_revision: 2c9eb20739dfec95e2c74bd3dfa4601b0a8a36aa
+      base_revision: 2c9eb20739dfec95e2c74bd3dfa4601b0a8a36aa
 
   # User provided section
 
@@ -29,5 +26,5 @@ migration:
   #
   # Files that are not part of the templates will be ignored by default.
   unmanaged_files:
-    - "lib/main.dart"
-    - "ios/Runner.xcodeproj/project.pbxproj"
+    - 'lib/main.dart'
+    - 'ios/Runner.xcodeproj/project.pbxproj'
