@@ -21,7 +21,7 @@ import 'cypress-wait-until';
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
-const exec = () =>
+const injectDeepSelector = () =>
   cy.window({ log: false }).then((win) => {
     win.eval(
       // biome-ignore lint: copy
@@ -30,7 +30,7 @@ const exec = () =>
   });
 
 Cypress.Commands.add('deep', (selector: string) => {
-  exec();
+  injectDeepSelector();
 
   cy.waitUntil(
     () =>

@@ -5,9 +5,9 @@ context('Start cypress test', () => {
 
   it('Favorite', () => {
     cy.deep('m-game-item:not([favorited])').then(($item) => {
-      cy.wrap($item).shadow().find('[data-cy=favorite]').click();
+      cy.wrap($item).find('[data-cy=favorite]').click({ force: true });
       cy.wrap($item).should('have.attr', 'favorited');
-      cy.wrap($item).shadow().find('[data-cy=favorite]').click();
+      cy.wrap($item).find('[data-cy=favorite]').click({ force: true });
       cy.wrap($item).should('not.have.attr', 'favorited');
     });
   });
