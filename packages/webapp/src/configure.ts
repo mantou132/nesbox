@@ -156,7 +156,7 @@ export interface Profile {
 // only char
 export enum SearchCommand {
   HELP = '?',
-  SELECT_GAME = '~',
+  SELECT_GAME = '#', // 没有全角半角之分
 }
 
 interface Configure {

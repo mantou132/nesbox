@@ -29,6 +29,12 @@
       "index_name": "nesbox-games"
     }
   ],
+  "kv_namespaces": [
+    {
+      "binding": "KV",
+      "id": "5ce06539754b4d0ea5a1cecbcbc43d0a"
+    }
+  ],
   "ai": {
     "binding": "AI"
   }

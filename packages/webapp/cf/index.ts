@@ -114,12 +114,16 @@ export default {
     }
 
     if (url.pathname === '/search') {
+      const cacheRes = await env.KV.get(req.url);
+      if (cacheRes) return new Response(cacheRes, resInit);
+
       const q = params.get('q') || 'all';
       const [values] = await embedding(env.AI, [q]);
       const res = await env.GAMES_SEARCH.query(values);
+      await env.KV.put(req.url, JSON.stringify(res), { expirationTtl: 60 * 60 });
       return Response.json(res, resInit);
     }
 
-    return new Response('Hello World!', resInit);
+    return new Response('Hello World!');
   },
 } satisfies ExportedHandler<Env>;
