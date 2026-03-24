@@ -2,16 +2,17 @@
 
 ## development
 
-install postgresql, diesel, create database, create `.env` file:
+install postgresql, diesel_cli@1.x, create database, create `.env` file:
 
 ```
 DATABASE_URL=postgres://username:password@localhost/database_name
 ```
 
-init database:
-
 ```bash
+# init database
 diesel migration run
+# modify table
+diesel migration generate add_age_to_users
 ```
 
 start:
