@@ -1,0 +1,13 @@
+diff --git a/node_modules/duoyun-ui/elements/base/scroll.js b/node_modules/duoyun-ui/elements/base/scroll.js
+index 837261e..1e97344 100644
+--- a/node_modules/duoyun-ui/elements/base/scroll.js
++++ b/node_modules/duoyun-ui/elements/base/scroll.js
+@@ -42,7 +42,7 @@ const style = css `
+     display: block;
+     overflow: auto;
+     scrollbar-width: none;
+-    overscroll-behavior: contain;
++    /*overscroll-behavior: contain;*/
+     --mask-width: 1.5em;
+     --mask-top: 0;
+     --mask-right: 100%;

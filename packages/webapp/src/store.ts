@@ -17,11 +17,12 @@ import type { GetCommentsQuery, GetGamesQuery, GetRoomsQuery } from 'src/generat
 export type GameAttributes = {
   ad_text?: string;
   ad_link?: string;
+  ref?: string;
 };
 
 export function convertGame(game: ElementOf<GetGamesQuery['games']>): Game {
-  const { body, attributes } = frontmatter(game.description);
-  return { ...game, attributes: attributes as GameAttributes, description: body };
+  const { body, attributes } = frontmatter<GameAttributes>(game.description);
+  return { ...game, attributes: attributes, description: body };
 }
 
 export type Game = ElementOf<GetGamesQuery['games']> & { attributes: GameAttributes };

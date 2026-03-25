@@ -1,18 +1,5 @@
 import { NodeHtmlMarkdown } from 'node-html-markdown';
 
-export function getFrontmatter(md = '') {
-  const [, frontmatter = ''] = md.match(/^---\n([\s\S]*?)\n---/) || [];
-  return Object.fromEntries(
-    frontmatter
-      .split(/\n+/)
-      .filter(Boolean)
-      .map((s) => {
-        const [key, ...rest] = s.split(':');
-        return [key.trim(), rest.join(':').trim()];
-      }),
-  );
-}
-
 export function truncateByBytes(str = '', maxBytes = 10000) {
   const encoder = new TextEncoder();
   const decoder = new TextDecoder('utf-8', { fatal: false });
@@ -66,5 +53,15 @@ export function htmlToMarkdown(html: string) {
       audio: () => ({ content: '' }),
       iframe: () => ({ content: '' }),
     },
+  );
+}
+
+export function stripMarkdown(md: string) {
+  return (
+    md
+      // 1. 去掉图片 ![alt](url)
+      .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+      // 2. 链接 [text](url) -> text
+      .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
   );
 }
