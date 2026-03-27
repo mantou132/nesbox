@@ -150,3 +150,29 @@ export function subscribe<Result, InputVar = Record<string, any>>(
     },
   };
 }
+
+export async function* eventStream(input: string | URL | Request, init?: RequestInit) {
+  const res = await fetch(input, init);
+  if (!res.body) throw new Error('invalid method');
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) return;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      const data = line.slice(6);
+      if (data === '[DONE]') return;
+      yield JSON.parse(data);
+    }
+  }
+}

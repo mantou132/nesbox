@@ -68,7 +68,7 @@ const resInit = {
 };
 
 export default {
-  async fetch(req, env, _ctx): Promise<Response> {
+  async fetch(req, env, ctx): Promise<Response> {
     if (req.method === 'OPTIONS') {
       return new Response(null, {
         status: 204,
@@ -129,26 +129,43 @@ export default {
       }
       case '/completions': {
         const cacheRes = await env.KV.get(req.url);
-        if (cacheRes) return new Response(cacheRes, resInit);
-
+        if (cacheRes) {
+          return new Response(cacheRes, {
+            headers: { ...resInit.headers, 'Content-Type': 'text/event-stream' },
+          });
+        }
         const q = params.get('q') || '';
         const [values] = await embedding(env.AI, [q]);
         const res = await env.GAMES_SEARCH.query(values, { returnMetadata: true });
         const messages = [
           {
             role: 'system',
-            content: `You are an application assistant and need to answer user questions in the target language(${req.headers.get('Accept-Language') ?? 'en'}) according to the following requirements::
-                      ${res.matches.map((e) => (e.metadata as any).text).join('\n\n\n')}`,
+            content: `You are an application assistant.
+Response user input based on the context and your existing knowledge.
+
+Requirements:
+1. Language: respond in (${req.headers.get('Accept-Language') ?? 'en'}).
+2. Maximum 1000 words.
+
+Context:
+${res.matches.map((e) => (e.metadata as any).text).join('\n\n---\n\n')}
+`,
           },
           {
             role: 'user',
             content: params.get('q') || '',
           },
         ];
-        const result = await env.AI.run('@cf/nvidia/nemotron-3-120b-a12b' as any, { messages });
-        const body = { content: result?.choices?.at?.(0)?.message?.content };
-        await env.KV.put(req.url, JSON.stringify(body), { expirationTtl: 60 * 60 });
-        return Response.json(body, resInit);
+        const stream = await env.AI.run('@cf/nvidia/nemotron-3-120b-a12b' as any, { messages, stream: true });
+        const [stream1, stream2] = stream.tee();
+
+        ctx.waitUntil(
+          new Response(stream1).text().then((text) => env.KV.put(req.url, text, { expirationTtl: 60 * 60 })),
+        );
+
+        return new Response(stream2, {
+          headers: { ...resInit.headers, 'Content-Type': 'text/event-stream' },
+        });
       }
       default: {
         return new Response('Hello World!');
