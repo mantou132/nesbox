@@ -18,6 +18,7 @@ import type { DuoyunOptionsElement, Option } from 'duoyun-ui/elements/options';
 import { createPath } from 'duoyun-ui/elements/route';
 import { getDisplayKey, hotkeys, isMac } from 'duoyun-ui/lib/hotkeys';
 import { locale } from 'duoyun-ui/lib/locale';
+import { debounce } from 'duoyun-ui/lib/timer';
 import { isNotNullish } from 'duoyun-ui/lib/types';
 import { isIncludesString } from 'duoyun-ui/lib/utils';
 import { configure, getShortcut, SearchCommand, setSearchCommand, toggleSearchState } from 'src/configure';
@@ -36,8 +37,7 @@ import 'duoyun-ui/elements/list';
 import 'duoyun-ui/elements/options';
 import 'duoyun-ui/elements/paragraph';
 import 'duoyun-ui/elements/space';
-
-import { debounce } from 'duoyun-ui/lib/timer';
+import 'src/modules/sse';
 
 const style = css`
   :scope {
@@ -224,7 +224,7 @@ export class MSearchElement extends GemElement {
   };
 
   #genHelpOptions = (): Option[] => {
-    return this.#helpMessages
+    const result = this.#helpMessages
       .map((value) => {
         if (!this.#matchSearch(value)) return;
         const [title, desc] = value.split('\n');
@@ -244,6 +244,13 @@ export class MSearchElement extends GemElement {
         };
       })
       .filter(isNotNullish);
+    return result.length
+      ? result
+      : [
+          {
+            label: html`<m-sse prompt=${this.#state.search}></m-sse>`,
+          },
+        ];
   };
 
   #genFriendOptions = (): Option[] => {
@@ -395,6 +402,25 @@ export class MSearchElement extends GemElement {
       });
     }
 
+    const placeholder = getTempText(
+      i18n.get(
+        configure.searchCommand === SearchCommand.HELP
+          ? 'tooltip.docs.help'
+          : configure.searchCommand === SearchCommand.SELECT_GAME
+            ? 'tooltip.game.change'
+            : this.#isRooms
+              ? 'placeholder.roomSearch'
+              : configure.user?.playing
+                ? 'placeholder.searchPlaying'
+                : 'placeholder.search',
+        configure.searchCommand === SearchCommand.HELP
+          ? getShortcut('OPEN_SEARCH', true)
+          : configure.searchCommand === SearchCommand.SELECT_GAME
+            ? ''
+            : getShortcut('OPEN_SEARCH', true),
+      ),
+    );
+
     return html`
       <div class="input-wrap">
         <dy-input
@@ -405,24 +431,7 @@ export class MSearchElement extends GemElement {
           .icon=${this.#getSearchCommandIcon(configure.searchCommand)}
           @change=${this.#onChange}
           @keydown=${this.#onKeydownInput}
-          placeholder=${getTempText(
-            i18n.get(
-              configure.searchCommand === SearchCommand.HELP
-                ? 'tooltip.docs.help'
-                : configure.searchCommand === SearchCommand.SELECT_GAME
-                  ? 'tooltip.game.change'
-                  : this.#isRooms
-                    ? 'placeholder.roomSearch'
-                    : configure.user?.playing
-                      ? 'placeholder.searchPlaying'
-                      : 'placeholder.search',
-              configure.searchCommand === SearchCommand.HELP
-                ? getShortcut('OPEN_SEARCH', true)
-                : configure.searchCommand === SearchCommand.SELECT_GAME
-                  ? ''
-                  : getShortcut('OPEN_SEARCH', true),
-            ),
-          )}
+          placeholder=${placeholder}
         ></dy-input>
       </div>
       <div class="result">

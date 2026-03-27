@@ -135,17 +135,17 @@ export default {
           });
         }
         const q = params.get('q') || '';
+        const l = params.get('l') || req.headers.get('Accept-Language') || 'en';
         const [values] = await embedding(env.AI, [q]);
         const res = await env.GAMES_SEARCH.query(values, { returnMetadata: true });
         const messages = [
           {
             role: 'system',
             content: `You are an application assistant.
-Response user input based on the context and your existing knowledge.
 
 Requirements:
-1. Language: respond in (${req.headers.get('Accept-Language') ?? 'en'}).
-2. Maximum 1000 words.
+1. Respond briefly to user input based on context.
+2. Language: respond in (${l}).
 
 Context:
 ${res.matches.map((e) => (e.metadata as any).text).join('\n\n---\n\n')}
