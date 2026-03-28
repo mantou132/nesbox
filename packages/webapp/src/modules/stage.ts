@@ -607,6 +607,7 @@ export class MStageElement extends GemElement {
   @effect((i) => [i.#rom])
   #showLoading = () => {
     if (this.#rom) {
+      this.#abortController?.abort();
       waitLoading(this.#loadRom(), {
         transparent: true,
         position: this.#hasMask() ? 'center' : 'start',
