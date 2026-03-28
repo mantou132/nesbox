@@ -24,4 +24,4 @@ Rust 游戏可以参考 [`五子棋 - MT`](./games/gomoku/)，JavaScript 游戏�
 
 在开发期间，只需要让你的游戏文件能被一个端口 `8000` 的 Web 服务被访问到，就可以在 NESBox 中快速预览你的游戏。
 
-测试完毕后，将你的游戏构建成单文件 `.js` 或者 `.wasm`，然后打包成 ZIP 并通过 GitHub Issue 提交。
+测试完毕后，将你的游戏构建成单文件 `.js` 或者 `.wasm`，然后打包成 ZIP 并通过 GitHub Issue 发布。

@@ -14,7 +14,7 @@
 
 ## Feature
 
-- Support multiplayer online
+- Support multi-user connection
 - Support gamepad
 - Support pointer device(partial game)
 - Support game state restore
@@ -27,9 +27,9 @@
 ## Download
 
 - [Desktop](https://nesbox.xianqiao.wang)
-- [TV/Mobile(Testing)](https://github.com/mantou132/nesbox/issues/154#issuecomment-1430810077)
+- [TV/Mobile(Testing)](https://github.com/mantou132/nesbox/issues/154#issuecomment-4111284271)
 
-## Support games
+## Support platform
 
 - [NES(FC)](https://en.wikipedia.org/wiki/Nintendo_Entertainment_System)
 - [Arcade](https://en.wikipedia.org/wiki/Arcade_video_game)
