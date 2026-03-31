@@ -15,7 +15,7 @@ export const setViewTransitionName = (ele: HTMLElement | null, name: string) => 
   }
 };
 
-export const isValidGameFile = (filename: string) => /\.(js|nes|wasm|zip)$/i.test(filename);
+export const isValidGameFile = (filename: string) => /\.(js|nes|wasm|zip|swf)$/i.test(filename);
 
 export const getCorSrc = (url: string) => {
   return `${corsOrigin}/${url}`;

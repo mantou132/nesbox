@@ -131,6 +131,15 @@ export async function createGame(filename: string, romBuffer: ArrayBuffer, sampl
       await game.load_rom(new Uint8Array(romBuffer), fragments.join('.'));
       return game;
     }
+    case 'swf': {
+      const { default: wasmUrl } = await import('@mantou/ruffle-core/dist/ruffle_web_bg.wasm?url');
+      const { default: init, Flash } = await import('@mantou/ruffle-core/dist/ruffle_web');
+      console.log(wasmUrl);
+      await init(wasmUrl);
+      const game = Flash.new(sampleRate);
+      game.load_rom(new Uint8Array(romBuffer));
+      return game;
+    }
     case 'wasm': {
       if (fragments.pop() === 'wasm4') {
         const { Wasm4 } = await import('@nesbox/wasm4');

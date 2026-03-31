@@ -22,9 +22,9 @@ import type { NesboxCanvasElement } from 'src/elements/canvas';
 import { routes } from 'src/routes';
 import { createGame, mapPointerButton, positionMapping, requestFrame, watchDevRom } from 'src/utils/game';
 
+import 'duoyun-ui/elements/button';
 import 'duoyun-ui/elements/heading';
 import 'duoyun-ui/elements/link';
-import 'duoyun-ui/elements/button';
 import 'src/elements/canvas';
 
 const style = css`

@@ -18,6 +18,7 @@
     "@mantou/gem": "^2.2.2",
     "@mantou/nes": "^1.0.15",
     "@mantou/nes-sandbox": "^0.0.13",
+    "@mantou/ruffle-core": "^0.1.0",
     "@nesbox/arcade": "^0.0.1",
     "@nesbox/fceux": "^0.0.1",
     "@nesbox/mtapp": "^0.0.1",

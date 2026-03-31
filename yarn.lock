@@ -1386,6 +1386,13 @@
   resolved "https://registry.yarnpkg.com/@mantou/nes-wasm4/-/nes-wasm4-0.0.6.tgz#4cae22789935867aaae66b58abea99b682c7506c"
   integrity sha512-+Dfefwa3s8Tzrih7VwqaXXvW/sbMW+HIB0H4HMlZzgaURAm9l0cMepEB+dSy03dytSj5hcBzfqMocs4vnq/0Hg==
 
+"@mantou/ruffle-core@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@mantou/ruffle-core/-/ruffle-core-0.1.0.tgz#276993b02b68330312aa6a0d013096e541a91c91"
+  integrity sha512-SWWPTxqiJNBQ2f38H650kKGFJSFtAsMWd2LxMcMy7QcwKO80JD5VS/goE/7DxX3+6u0hg7VgVscMgflRhYRdUw==
+  dependencies:
+    wasm-feature-detect "^1.8.0"
+
 "@mapbox/node-pre-gyp@^1.0.4":
   version "1.0.11"
   resolved "https://registry.yarnpkg.com/@mapbox/node-pre-gyp/-/node-pre-gyp-1.0.11.tgz#417db42b7f5323d79e93b34a6d7a2a12c0df43fa"
@@ -8967,6 +8974,11 @@ walk-up-path@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/walk-up-path/-/walk-up-path-3.0.1.tgz#c8d78d5375b4966c717eb17ada73dbd41490e886"
   integrity sha512-9YlCL/ynK3CTlrSRrDxZvUauLzAswPCrsaCgilqFevUYpeEW0/3ScEjaa3kbW/T0ghhkEr7mv+fpjqn1Y1YuTA==
+
+wasm-feature-detect@^1.8.0:
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/wasm-feature-detect/-/wasm-feature-detect-1.8.0.tgz#4e9f55b0a64d801f372fbb0324ed11ad3abd0c78"
+  integrity sha512-zksaLKM2fVlnB5jQQDqKXXwYHLQUVH9es+5TOOHwGOVJOCeRBCiPjwSg+3tN2AdTCzjgli4jijCH290kXb/zWQ==
 
 wcwidth@^1.0.0, wcwidth@^1.0.1:
   version "1.0.1"
