@@ -38,7 +38,7 @@ const style = css`
     justify-content: center;
     flex-shrink: 0;
   }
-  :host([type='win']) {
+  :host([type="win"]) {
     justify-content: space-between;
   }
   .title {

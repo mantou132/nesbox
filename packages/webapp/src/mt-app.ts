@@ -32,8 +32,8 @@ const style = css`
   :scope {
     display: grid;
     grid-template:
-      'nav' auto
-      'page' 1fr;
+      "nav" auto
+      "page" 1fr;
     height: 100vh;
     min-height: auto;
   }

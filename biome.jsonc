@@ -71,7 +71,9 @@
       "suspicious": {
         "noAssignInExpressions": "off",
         "noExplicitAny": "off",
-        "useGetterReturn": "off"
+        "noTsIgnore": "off",
+        "useGetterReturn": "off",
+        "useIterableCallbackReturn": "off"
       }
     }
   },
@@ -79,7 +81,11 @@
   "overrides": [
     {
       "includes": ["**/*.md"],
-      "formatter": { "lineWidth": 100 }
+      "formatter": {
+        "lineWidth": 100,
+        // 目前不支持
+        "enabled": false
+      }
     },
     {
       "includes": ["packages/zombie/**/*"],

@@ -86,6 +86,7 @@ export enum ScGameKind {
 
 export enum ScGamePlatform {
   Arcade = 'ARCADE',
+  Flash = 'FLASH',
   Nes = 'NES',
   UniversalJs = 'UNIVERSAL_JS',
   UniversalWasm = 'UNIVERSAL_WASM',

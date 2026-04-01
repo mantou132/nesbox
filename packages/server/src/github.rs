@@ -98,26 +98,37 @@ pub fn get_sc_game(payload: &GithubPayload) -> (String, ScNewGame) {
             _ => (),
         }
     }
-    let mut labels = payload.issue.labels.iter();
     let game = ScNewGame {
         name: payload.issue.title.clone(),
         description: payload.issue.body.clone(),
         preview,
         rom,
         screenshots,
-        kind: labels
+        kind: payload
+            .issue
+            .labels
+            .iter()
             .find(|label| label.name.starts_with("game.kind."))
             .and_then(|label| label.name.split_terminator(".").last())
             .and_then(|s| ScGameKind::from_str(s).ok()),
-        max_player: labels
+        max_player: payload
+            .issue
+            .labels
+            .iter()
             .find(|label| label.name.starts_with("game.max_player."))
             .and_then(|label| label.name.split_terminator(".").last())
             .and_then(|s| s.parse::<i32>().ok()),
-        platform: labels
+        platform: payload
+            .issue
+            .labels
+            .iter()
             .find(|label| label.name.starts_with("game.platform."))
             .and_then(|label| label.name.split_terminator(".").last())
             .and_then(|s| ScGamePlatform::from_str(s).ok()),
-        series: labels
+        series: payload
+            .issue
+            .labels
+            .iter()
             .find(|label| label.name.starts_with("game.series."))
             .and_then(|label| label.name.split_terminator(".").last())
             .and_then(|s| ScGameSeries::from_str(s).ok()),
