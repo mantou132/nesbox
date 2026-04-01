@@ -15,6 +15,7 @@ use crate::db::schema::games;
 pub enum ScGamePlatform {
     Arcade,
     Nes,
+    Flash,
     Wasm4,
     UniversalWasm,
     UniversalJs,

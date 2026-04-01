@@ -1,4 +1,5 @@
 {
   "ping": "Ping 代表什麼意義？\n表示客戶機發送的指令到收到主機進行更新後的幀所用的時間，不適用於主機。 Ping 值會影響主機向該客戶機發送幀的頻率，當延時過高時，會暫時停止發送幀",
-  "webapp": "Web 和 App 的區別？ \nApp 相較於 Web 有更好的體驗，如豐富的提示音、系統通知（Dock 徽章），將來可能加入更多的功能"
+  "webapp": "Web 和 App 的區別？ \nApp 相較於 Web 有更好的體驗，如豐富的提示音、系統通知（Dock 徽章），將來可能加入更多的功能",
+  "flashButton": "Flash 遊戲的按鍵是什麼？\n由於 Flash 遊戲沒有固定的按鍵，NESBox 假設了 p1/p2/p3/p4 按鍵配置。玩家 1：方向鍵(WASD)、A(F)、B(G)、C(H)、Select(Tab)、Start(Space)；玩家 2：方向鍵(箭頭鍵)、A(.)、B(/)、C(;)、Select(Backspace)、Start(Enter)；玩家 3：方向鍵(IJKL)、A(U)、B(O)、C(P)、Select(9)、Start(0)；玩家 4：方向鍵(數字鍵盤8456)、A(7)、B(9)、C(+)、Select(-)、Start(數字鍵盤Enter)"
 }

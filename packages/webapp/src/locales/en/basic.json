@@ -18,6 +18,7 @@
   "enum.gameKind.stg": "Shooting",
   "enum.gameKind.strategy": "Strategy",
   "enum.gamePlatform.arcade": "Arcade",
+  "enum.gamePlatform.flash": "Flash",
   "enum.gamePlatform.nes": "Nes",
   "enum.gamePlatform.universalJs": "Universal JavaScript",
   "enum.gamePlatform.universalWasm": "Universal Webassembly",

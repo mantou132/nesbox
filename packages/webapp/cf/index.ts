@@ -61,7 +61,7 @@ async function transformGame(ai: Ai<AiModels>, games: GetGamesQuery['games']) {
 
 const resInit = {
   headers: {
-    'Content-Type': 'application/json',
+    'Content-Type': 'application/json; charset=utf-8',
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Credentials': 'true',
   },
@@ -131,7 +131,7 @@ export default {
         const cacheRes = await env.KV.get(req.url);
         if (cacheRes) {
           return new Response(cacheRes, {
-            headers: { ...resInit.headers, 'Content-Type': 'text/event-stream' },
+            headers: { ...resInit.headers, 'Content-Type': 'text/event-stream; charset=utf-8' },
           });
         }
         const q = params.get('q') || '';
@@ -164,7 +164,7 @@ ${res.matches.map((e) => (e.metadata as any).text).join('\n\n---\n\n')}
         );
 
         return new Response(stream2, {
-          headers: { ...resInit.headers, 'Content-Type': 'text/event-stream' },
+          headers: { ...resInit.headers, 'Content-Type': 'text/event-stream; charset=utf-8' },
         });
       }
       default: {

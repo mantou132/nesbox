@@ -126,6 +126,10 @@ export const gamePlatformList: { value: ScGamePlatform | ''; label: LocaleKey }[
     value: ScGamePlatform.Wasm4,
     label: 'enum.gamePlatform.wasm4',
   },
+  {
+    value: ScGamePlatform.Flash,
+    label: 'enum.gamePlatform.flash',
+  },
 ];
 
 export const gamePlatformMap = convertToMap<ElementOf<typeof gamePlatformList>, LocaleKey>(

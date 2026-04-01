@@ -33,6 +33,7 @@
 
 - [NES(FC)](https://en.wikipedia.org/wiki/Nintendo_Entertainment_System)
 - [Arcade](https://en.wikipedia.org/wiki/Arcade_video_game)
+- [Flash](https://en.wikipedia.org/wiki/Adobe_Flash_Player)
 - [Wasm4](https://wasm4.org/)
 - Universal Wasm (implementing [NESBox API](https://github.com/mantou132/nesbox/blob/dev/packages/nes/utils_macro/src/lib.rs))
 - Universal JavaScript (implementing [NESBox Sandbox API](https://github.com/mantou132/nesbox/blob/dev/packages/sandbox/types.d.ts))

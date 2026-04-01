@@ -19,6 +19,7 @@
   "enum.gameKind.strategy": "策略烧脑",
   "enum.gamePlatform.arcade": "街机",
   "enum.gamePlatform.nes": "红白机",
+  "enum.gamePlatform.flash": "Flash",
   "enum.gamePlatform.universalJs": "通用 JavaScript",
   "enum.gamePlatform.universalWasm": "通用 Webassembly",
   "enum.gamePlatform.wasm4": "WASM4",
