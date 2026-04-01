@@ -480,6 +480,7 @@ export class MStageElement extends GemElement {
     if (button) {
       this.#pressButton(button.player, button.btn);
       event.stopPropagation();
+      event.preventDefault();
     } else {
       hotkeys({
         enter: (event: KeyboardEvent) => {

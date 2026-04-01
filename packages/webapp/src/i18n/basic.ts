@@ -45,11 +45,13 @@ export const i18n = new I18n<typeof zhCN>({
 const jaRegExp = /\p{sc=Katakana}|\p{sc=Hiragana}/u;
 const jaDescRegExp = /(\p{sc=Katakana}|\p{sc=Hiragana}){5}/gu;
 const zhRegExp = /\p{sc=Han}/u;
+const numberExp = /^[0-9- ]*$/;
 export const isCurrentLang = (game: Pick<ScGame, 'name' | 'description'>) => {
+  const text = numberExp.test(game.name) ? game.description : game.name;
   const lang =
-    jaRegExp.test(game.name) || Number(game.description.match(jaDescRegExp)?.length) > 2
+    jaRegExp.test(text) || Number(game.description.match(jaDescRegExp)?.length) > 5
       ? 'ja'
-      : zhRegExp.test(game.name)
+      : zhRegExp.test(text)
         ? 'zh'
         : 'en';
   return lang === i18n.currentLanguage.split('-').shift()?.toLowerCase();

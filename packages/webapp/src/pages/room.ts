@@ -411,7 +411,7 @@ export class PRoomElement extends DuoyunWakeLockBaseElement {
   render = () => {
     return html`
       <m-stage
-      ${this.#stageRef}
+        ${this.#stageRef}
         class="stage"
         @contextmenu=${this.#onContextMenu}
         .padding=${'1em 0 5em'}

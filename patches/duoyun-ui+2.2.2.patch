@@ -1,3 +1,23 @@
+diff --git a/node_modules/duoyun-ui/elements/avatar.js b/node_modules/duoyun-ui/elements/avatar.js
+index ffc5ba9..d36dc28 100644
+--- a/node_modules/duoyun-ui/elements/avatar.js
++++ b/node_modules/duoyun-ui/elements/avatar.js
+@@ -61,13 +61,13 @@ const style = css `
+   :host([size='large']) {
+     width: 3.8em;
+   }
+-  .slot:has-slotted {
++  .slot:where(:has-slotted) {
+     place-items: center;
+     place-content: center;
+     border-color: ${theme.textColor};
+   }
+   .img,
+-  .slot:has-slotted {
++  .slot:where(:has-slotted) {
+     display: flex;
+     width: 100%;
+     aspect-ratio: 1;
 diff --git a/node_modules/duoyun-ui/elements/base/scroll.js b/node_modules/duoyun-ui/elements/base/scroll.js
 index 837261e..1e97344 100644
 --- a/node_modules/duoyun-ui/elements/base/scroll.js

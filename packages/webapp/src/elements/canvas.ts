@@ -180,8 +180,12 @@ export class NesboxCanvasElement extends GemElement {
 
     const texcoord_buffer = webgl.createBuffer();
     webgl.bindBuffer(webgl.ARRAY_BUFFER, texcoord_buffer);
+    // Texture is max_size x max_size, image data fills width x height region
+    // Texture coords must be normalized to [0, 1] range
+    const texU = width >= height ? 1.0 : width / max_size;
+    const texV = width >= height ? height / max_size : 1.0;
     // prettier-ignore
-    const texcoords = [0.0, 0.0, 0.0, height / width, 1.0, 0.0, 1.0, height / width];
+    const texcoords = [0.0, 0.0, 0.0, texV, texU, 0.0, texU, texV];
     webgl.bufferData(webgl.ARRAY_BUFFER, new Float32Array(texcoords), webgl.STATIC_DRAW);
     webgl.vertexAttribPointer(texcoord_attr, 2, webgl.FLOAT, false, 0, 0);
 
