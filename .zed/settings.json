@@ -3,12 +3,14 @@
 // For a full list of overridable settings, and general information on folder-specific settings,
 // see the documentation: https://zed.dev/docs/configuring-zed#settings-files
 {
-  "auto_install_extension": {
+  "$schema": "zed://schemas/settings",
+  "auto_install_extensions": {
     "biome": true,
     "emmet": true,
-    "toml": true,
+    "tombi": true,
     "html": true,
-    "gem": true
+    "gem": true,
+    "vue": false
   },
   "tab_size": 2,
   "formatter": {
@@ -20,6 +22,11 @@
     "source.fixAll.biome": true,
     "source.organizeImports.biome": true
   },
+  "file_types": {
+    "JSONC": [".all-contributorsrc"],
+    "Git Ignore": [".taurignore"]
+  },
+  "read_only_files": ["deps/**", "target/**/*.rs", "**/*.lock"],
   "language_servers": [
     "vtsls",
     "!typescript-language-server",
@@ -53,6 +60,13 @@
       "formatter": {
         "language_server": {
           "name": "rust-analyzer"
+        }
+      }
+    },
+    "TOML": {
+      "formatter": {
+        "language_server": {
+          "name": "tombi"
         }
       }
     }

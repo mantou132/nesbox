@@ -1,14 +1,13 @@
 [package]
 name = "nesbox_utils_macro"
 version = "0.0.3"
-authors = ["mantou132"]
 edition = "2021"
-license = "MIT"
 description = "macro provided for nesbox_utils"
+license = "MIT"
 
 [lib]
 proc-macro = true
 
 [dependencies]
-syn = { version = "1.0", features = ["full"]}
 quote = "1.0"
+syn = { version = "1.0", features = ["full"] }
