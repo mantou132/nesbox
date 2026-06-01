@@ -92,19 +92,19 @@ fn hash_password(password: &str) -> String {
     HEXUPPER.encode(&pbkdf2_hash)
 }
 
-fn convert_to_sc_user(conn: &PgConnection, user: &User) -> ScUser {
+fn convert_to_sc_user(conn: &mut PgConnection, user: &User) -> ScUser {
     ScUser {
         id: user.id,
         username: user.username.clone(),
         nickname: user.nickname.clone(),
         settings: user.settings.clone().map(|v| v.to_string()),
-        created_at: user.created_at.timestamp_millis() as f64,
-        updated_at: user.updated_at.timestamp_millis() as f64,
+        created_at: user.created_at.and_utc().timestamp_millis() as f64,
+        updated_at: user.updated_at.and_utc().timestamp_millis() as f64,
         playing: get_playing(conn, user.id),
     }
 }
 
-pub fn get_account(conn: &PgConnection, uid: i32) -> FieldResult<ScUser> {
+pub fn get_account(conn: &mut PgConnection, uid: i32) -> FieldResult<ScUser> {
     use self::users::dsl::*;
 
     let user = users
@@ -115,7 +115,7 @@ pub fn get_account(conn: &PgConnection, uid: i32) -> FieldResult<ScUser> {
     Ok(convert_to_sc_user(conn, &user))
 }
 
-pub fn update_user(conn: &PgConnection, uid: i32, req: &ScUpdateUser) -> FieldResult<ScUser> {
+pub fn update_user(conn: &mut PgConnection, uid: i32, req: &ScUpdateUser) -> FieldResult<ScUser> {
     use self::users::dsl::*;
 
     let user = diesel::update(users.filter(deleted_at.is_null()).filter(id.eq(uid)))
@@ -133,7 +133,7 @@ pub fn update_user(conn: &PgConnection, uid: i32, req: &ScUpdateUser) -> FieldRe
 }
 
 pub fn update_password(
-    conn: &PgConnection,
+    conn: &mut PgConnection,
     uid: i32,
     req: &ScUpdatePassword,
 ) -> FieldResult<ScUser> {
@@ -154,7 +154,7 @@ pub fn update_password(
     Ok(convert_to_sc_user(conn, &user))
 }
 
-pub fn get_user_basic(conn: &PgConnection, uid: i32) -> FieldResult<ScUserBasic> {
+pub fn get_user_basic(conn: &mut PgConnection, uid: i32) -> FieldResult<ScUserBasic> {
     use self::users::dsl::*;
 
     let user = users
@@ -171,7 +171,7 @@ pub fn get_user_basic(conn: &PgConnection, uid: i32) -> FieldResult<ScUserBasic>
     })
 }
 
-pub fn get_user_by_username(conn: &PgConnection, u: &str) -> FieldResult<ScUser> {
+pub fn get_user_by_username(conn: &mut PgConnection, u: &str) -> FieldResult<ScUser> {
     use self::users::dsl::*;
 
     let user = users.filter(username.eq(u)).get_result(conn)?;
@@ -179,7 +179,7 @@ pub fn get_user_by_username(conn: &PgConnection, u: &str) -> FieldResult<ScUser>
     Ok(convert_to_sc_user(conn, &user))
 }
 
-pub fn login(conn: &PgConnection, req: ScLoginReq, secret: &str) -> FieldResult<ScLoginResp> {
+pub fn login(conn: &mut PgConnection, req: ScLoginReq, secret: &str) -> FieldResult<ScLoginResp> {
     use self::users::dsl::*;
 
     let user = users
@@ -196,7 +196,7 @@ pub fn login(conn: &PgConnection, req: ScLoginReq, secret: &str) -> FieldResult<
     Ok(ScLoginResp { user, token })
 }
 
-pub fn register(conn: &PgConnection, req: ScRegisterReq, secret: &str) -> FieldResult<ScLoginResp> {
+pub fn register(conn: &mut PgConnection, req: ScRegisterReq, secret: &str) -> FieldResult<ScLoginResp> {
     let new_user = NewUser {
         username: &req.username,
         password: &hash_password(&req.password),

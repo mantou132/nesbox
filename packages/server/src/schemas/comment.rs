@@ -30,18 +30,18 @@ pub struct ScCommentsReq {
     pub game_id: i32,
 }
 
-fn convert_to_sc_comment(conn: &PgConnection, comment: &Comment) -> ScComment {
+fn convert_to_sc_comment(conn: &mut PgConnection, comment: &Comment) -> ScComment {
     ScComment {
         user: get_user_basic(conn, comment.user_id).unwrap(),
         game_id: comment.game_id,
         body: comment.body.clone(),
         like: comment.like,
-        created_at: comment.created_at.timestamp_millis() as f64,
-        updated_at: comment.updated_at.timestamp_millis() as f64,
+        created_at: comment.created_at.and_utc().timestamp_millis() as f64,
+        updated_at: comment.updated_at.and_utc().timestamp_millis() as f64,
     }
 }
 
-pub fn get_comments(conn: &PgConnection, gid: i32) -> Vec<ScComment> {
+pub fn get_comments(conn: &mut PgConnection, gid: i32) -> Vec<ScComment> {
     use self::comments::dsl::*;
 
     comments
@@ -55,7 +55,11 @@ pub fn get_comments(conn: &PgConnection, gid: i32) -> Vec<ScComment> {
         .collect()
 }
 
-pub fn create_comment(conn: &PgConnection, uid: i32, req: &ScNewComment) -> FieldResult<ScComment> {
+pub fn create_comment(
+    conn: &mut PgConnection,
+    uid: i32,
+    req: &ScNewComment,
+) -> FieldResult<ScComment> {
     use self::comments::dsl::*;
 
     let c = comments
@@ -84,7 +88,11 @@ pub fn create_comment(conn: &PgConnection, uid: i32, req: &ScNewComment) -> Fiel
     Ok(convert_to_sc_comment(conn, &comment))
 }
 
-pub fn update_comment(conn: &PgConnection, uid: i32, req: &ScNewComment) -> FieldResult<ScComment> {
+pub fn update_comment(
+    conn: &mut PgConnection,
+    uid: i32,
+    req: &ScNewComment,
+) -> FieldResult<ScComment> {
     use self::comments::dsl::*;
 
     let comment = diesel::update(

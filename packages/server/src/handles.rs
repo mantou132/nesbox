@@ -3,7 +3,7 @@ use juniper::{
     http::{GraphQLRequest, GraphQLResponse},
     introspect, DefaultScalarValue, InputValue, IntrospectionFormat, Variables,
 };
-use juniper_actix::subscriptions::subscriptions_handler;
+use juniper_actix::subscriptions::ws_handler;
 use juniper_graphql_ws::ConnectionConfig;
 use reqwest::Client;
 use std::time::Duration;
@@ -26,7 +26,7 @@ pub async fn subscriptions(
     stream: web::Payload,
 ) -> Result<HttpResponse, Error> {
     let schema = schema.into_inner();
-    subscriptions_handler(req, stream, schema, |params: Variables| async move {
+    ws_handler(req, stream, schema, |params: Variables| async move {
         let authorization = params
             .get("authorization")
             .unwrap_or(params.get("Authorization").unwrap_or(&InputValue::Null));
@@ -109,7 +109,7 @@ pub async fn webhook(
         return HttpResponse::Unauthorized().finish();
     }
 
-    let conn = DB_POOL.get().unwrap();
+    let mut conn = DB_POOL.get().unwrap();
 
     let action = payload.action.as_str();
     let state = payload.issue.state.as_str();
@@ -126,9 +126,9 @@ pub async fn webhook(
         if sc_game.rom.is_empty() {
             log::debug!("Not rom");
         } else {
-            match get_game_from_name(&conn, &old_name) {
+            match get_game_from_name(&mut conn, &old_name) {
                 Some(game) => {
-                    update_game(&conn, game.id, &sc_game).ok();
+                    update_game(&mut conn, game.id, &sc_game).ok();
                     let _ = Client::new()
                         .post("https://nesbox.709922234.workers.dev")
                         .json(&sc_game)
@@ -137,7 +137,7 @@ pub async fn webhook(
                 }
                 None => {
                     if closed {
-                        if let Ok(game) = create_game(&conn, &sc_game) {
+                        if let Ok(game) = create_game(&mut conn, &sc_game) {
                             notify_all(
                                 ScNotifyMessageBuilder::default()
                                     .new_game(game)

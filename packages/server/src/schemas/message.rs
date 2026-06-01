@@ -1,6 +1,5 @@
 use chrono::NaiveDateTime;
 use chrono::Utc;
-use diesel::dsl::*;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use juniper::{FieldResult, GraphQLInputObject, GraphQLObject};
@@ -35,18 +34,18 @@ pub fn convert_to_sc_message(message: &Message) -> ScMessage {
         user_id: message.user_id,
         target_id: message.target_id,
         body: message.body.clone(),
-        created_at: message.created_at.timestamp_millis() as f64,
-        updated_at: message.updated_at.timestamp_millis() as f64,
+        created_at: message.created_at.and_utc().timestamp_millis() as f64,
+        updated_at: message.updated_at.and_utc().timestamp_millis() as f64,
     }
 }
 
-pub fn get_messages(conn: &PgConnection, uid: i32, tid: i32) -> Vec<ScMessage> {
+pub fn get_messages(conn: &mut PgConnection, uid: i32, tid: i32) -> Vec<ScMessage> {
     use self::messages::dsl::*;
 
     messages
         .filter(deleted_at.is_null())
-        .filter(user_id.eq(any(vec![uid, tid])))
-        .filter(target_id.eq(any(vec![uid, tid])))
+        .filter(user_id.eq_any(vec![uid, tid]))
+        .filter(target_id.eq_any(vec![uid, tid]))
         .limit(100)
         .load::<Message>(conn)
         .unwrap()
@@ -55,7 +54,7 @@ pub fn get_messages(conn: &PgConnection, uid: i32, tid: i32) -> Vec<ScMessage> {
         .collect()
 }
 
-pub fn get_messages_count(conn: &PgConnection, uid: i32, tid: i32, at: NaiveDateTime) -> i32 {
+pub fn get_messages_count(conn: &mut PgConnection, uid: i32, tid: i32, at: NaiveDateTime) -> i32 {
     use self::messages::dsl::*;
 
     messages
@@ -70,7 +69,7 @@ pub fn get_messages_count(conn: &PgConnection, uid: i32, tid: i32, at: NaiveDate
 }
 
 pub fn create_message(
-    conn: &PgConnection,
+    conn: &mut PgConnection,
     user_id: i32,
     req: &ScNewMessage,
 ) -> FieldResult<ScMessage> {

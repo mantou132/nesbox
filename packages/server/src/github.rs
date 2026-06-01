@@ -5,6 +5,7 @@ use std::str::FromStr;
 
 use crate::schemas::game::*;
 use ring::hmac::{verify, Key, HMAC_SHA256};
+use serde::{Deserialize, Serialize};
 
 pub fn validate(req: &HttpRequest, secret: &str, data: &[u8]) -> bool {
     let signature = req
@@ -83,16 +84,16 @@ pub fn get_sc_game(payload: &GithubPayload) -> (String, ScNewGame) {
     let mut rom = String::new();
     for event in parser {
         match event {
-            Event::Start(Tag::Image(_, url, _)) => {
+            Event::Start(Tag::Image { dest_url, .. }) => {
                 if preview.is_empty() {
-                    preview.push_str(&url);
+                    preview.push_str(&dest_url);
                 } else {
-                    screenshots.push(url.into_string());
+                    screenshots.push(dest_url.into_string());
                 }
             }
-            Event::Start(Tag::Link(_, link, _)) => {
-                if rom.is_empty() && link.ends_with(".zip") {
-                    rom.push_str(&link);
+            Event::Start(Tag::Link { dest_url, .. }) => {
+                if rom.is_empty() && dest_url.ends_with(".zip") {
+                    rom.push_str(&dest_url);
                 }
             }
             _ => (),

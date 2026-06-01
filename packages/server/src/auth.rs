@@ -5,6 +5,7 @@ use actix_web::HttpRequest;
 use chrono::Utc;
 use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, Validation};
 use jsonwebtoken::{EncodingKey, Header};
+use serde::{Deserialize, Serialize};
 
 use crate::schemas::user::ScUser;
 

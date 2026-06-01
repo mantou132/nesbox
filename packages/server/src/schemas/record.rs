@@ -23,13 +23,13 @@ fn convert_to_sc_record(record: &Record) -> ScRecord {
     ScRecord {
         last_play_end_at: record
             .last_play_end_at
-            .map(|time| time.timestamp_millis() as f64),
-        last_play_start_at: record.last_play_start_at.timestamp_millis() as f64,
+            .map(|time| time.and_utc().timestamp_millis() as f64),
+        last_play_start_at: record.last_play_start_at.and_utc().timestamp_millis() as f64,
         play_total: record.play_total as f64,
     }
 }
 
-pub fn start_game(conn: &PgConnection, uid: i32, gid: i32) {
+pub fn start_game(conn: &mut PgConnection, uid: i32, gid: i32) {
     use self::records::dsl::*;
 
     let r = records
@@ -64,7 +64,7 @@ pub fn start_game(conn: &PgConnection, uid: i32, gid: i32) {
         .ok();
 }
 
-pub fn end_game(conn: &PgConnection, uid: i32, gid: i32) {
+pub fn end_game(conn: &mut PgConnection, uid: i32, gid: i32) {
     use self::records::dsl::*;
 
     if let Some(online_time) = get_online_time(uid) {
@@ -76,7 +76,7 @@ pub fn end_game(conn: &PgConnection, uid: i32, gid: i32) {
         if let Ok(record) = r {
             let duration = Utc::now().timestamp_millis()
                 - std::cmp::max(
-                    record.last_play_start_at.timestamp_millis(),
+                    record.last_play_start_at.and_utc().timestamp_millis(),
                     online_time.timestamp_millis(),
                 );
 
@@ -91,7 +91,7 @@ pub fn end_game(conn: &PgConnection, uid: i32, gid: i32) {
     }
 }
 
-pub fn pause_game(conn: &PgConnection, uid: i32, gid: i32, online_time: DateTime<Utc>) {
+pub fn pause_game(conn: &mut PgConnection, uid: i32, gid: i32, online_time: DateTime<Utc>) {
     use self::records::dsl::*;
 
     let r = records
@@ -102,7 +102,7 @@ pub fn pause_game(conn: &PgConnection, uid: i32, gid: i32, online_time: DateTime
     if let Ok(record) = r {
         let duration = Utc::now().timestamp_millis()
             - std::cmp::max(
-                record.last_play_start_at.timestamp_millis(),
+                record.last_play_start_at.and_utc().timestamp_millis(),
                 online_time.timestamp_millis(),
             );
 
@@ -113,7 +113,7 @@ pub fn pause_game(conn: &PgConnection, uid: i32, gid: i32, online_time: DateTime
     }
 }
 
-pub fn get_recent_ids(conn: &PgConnection, uid: i32) -> Vec<i32> {
+pub fn get_recent_ids(conn: &mut PgConnection, uid: i32) -> Vec<i32> {
     use self::records::dsl::*;
 
     records
@@ -126,7 +126,7 @@ pub fn get_recent_ids(conn: &PgConnection, uid: i32) -> Vec<i32> {
         .collect()
 }
 
-pub fn get_record(conn: &PgConnection, uid: i32, gid: i32) -> Option<ScRecord> {
+pub fn get_record(conn: &mut PgConnection, uid: i32, gid: i32) -> Option<ScRecord> {
     use self::records::dsl::*;
 
     records

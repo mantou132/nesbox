@@ -60,20 +60,20 @@ pub fn convert_to_sc_room_basic(room: &Room) -> ScRoomBasic {
         host: room.host,
         private: room.private,
         game_id: room.game_id,
-        created_at: room.created_at.timestamp_millis() as f64,
-        updated_at: room.updated_at.timestamp_millis() as f64,
+        created_at: room.created_at.and_utc().timestamp_millis() as f64,
+        updated_at: room.updated_at.and_utc().timestamp_millis() as f64,
     }
 }
 
-pub fn convert_to_sc_room(conn: &PgConnection, room: &Room) -> ScRoom {
+pub fn convert_to_sc_room(conn: &mut PgConnection, room: &Room) -> ScRoom {
     ScRoom {
         id: room.id,
         host: room.host,
         private: room.private,
         game_id: room.game_id,
         screenshot: room.screenshot.clone(),
-        created_at: room.created_at.timestamp_millis() as f64,
-        updated_at: room.updated_at.timestamp_millis() as f64,
+        created_at: room.created_at.and_utc().timestamp_millis() as f64,
+        updated_at: room.updated_at.and_utc().timestamp_millis() as f64,
         users: get_room_user_ids(conn, room.id)
             .into_iter()
             .filter(|user_id| has_user(*user_id))
@@ -82,7 +82,7 @@ pub fn convert_to_sc_room(conn: &PgConnection, room: &Room) -> ScRoom {
     }
 }
 
-pub fn get_room(conn: &PgConnection, rid: i32) -> FieldResult<ScRoomBasic> {
+pub fn get_room(conn: &mut PgConnection, rid: i32) -> FieldResult<ScRoomBasic> {
     use self::rooms::dsl::*;
 
     let room = rooms.filter(id.eq(rid)).get_result::<Room>(conn)?;
@@ -90,7 +90,7 @@ pub fn get_room(conn: &PgConnection, rid: i32) -> FieldResult<ScRoomBasic> {
     Ok(convert_to_sc_room_basic(&room))
 }
 
-pub fn get_outdated_rooms(conn: &PgConnection) -> Vec<ScRoomBasic> {
+pub fn get_outdated_rooms(conn: &mut PgConnection) -> Vec<ScRoomBasic> {
     use self::rooms::dsl::*;
 
     rooms
@@ -104,7 +104,7 @@ pub fn get_outdated_rooms(conn: &PgConnection) -> Vec<ScRoomBasic> {
         .collect()
 }
 
-pub fn get_rooms(conn: &PgConnection) -> Vec<ScRoom> {
+pub fn get_rooms(conn: &mut PgConnection) -> Vec<ScRoom> {
     use self::rooms::dsl::*;
 
     rooms
@@ -119,7 +119,7 @@ pub fn get_rooms(conn: &PgConnection) -> Vec<ScRoom> {
         .collect()
 }
 
-pub fn create_room(conn: &PgConnection, uid: i32, req: &ScNewRoom) -> FieldResult<ScRoomBasic> {
+pub fn create_room(conn: &mut PgConnection, uid: i32, req: &ScNewRoom) -> FieldResult<ScRoomBasic> {
     start_game(conn, uid, req.game_id);
 
     let new_room = NewRoom {
@@ -140,7 +140,7 @@ pub fn create_room(conn: &PgConnection, uid: i32, req: &ScNewRoom) -> FieldResul
     Ok(convert_to_sc_room_basic(&room))
 }
 
-pub fn update_room(conn: &PgConnection, uid: i32, req: &ScUpdateRoom) -> FieldResult<ScRoomBasic> {
+pub fn update_room(conn: &mut PgConnection, uid: i32, req: &ScUpdateRoom) -> FieldResult<ScRoomBasic> {
     use self::rooms::dsl::*;
 
     let r = rooms
@@ -172,7 +172,7 @@ pub fn update_room(conn: &PgConnection, uid: i32, req: &ScUpdateRoom) -> FieldRe
 }
 
 pub fn update_room_screenshot(
-    conn: &PgConnection,
+    conn: &mut PgConnection,
     uid: i32,
     req: &ScUpdateRoomScreenshot,
 ) -> FieldResult<ScRoomBasic> {
@@ -193,7 +193,7 @@ pub fn update_room_screenshot(
     Ok(convert_to_sc_room_basic(&room))
 }
 
-pub fn delete_room(conn: &PgConnection, rid: i32) {
+pub fn delete_room(conn: &mut PgConnection, rid: i32) {
     use self::rooms::dsl::*;
 
     if let Ok(room) = rooms.filter(id.eq(rid)).get_result::<Room>(conn) {
@@ -203,13 +203,14 @@ pub fn delete_room(conn: &PgConnection, rid: i32) {
     }
 
     delete_playing_with_room(conn, rid);
+    delete_invite_with_room(conn, rid);
 
     diesel::delete(rooms.filter(id.eq(rid)))
         .execute(conn)
         .unwrap();
 }
 
-pub fn enter_room(conn: &PgConnection, uid: i32, rid: i32) {
+pub fn enter_room(conn: &mut PgConnection, uid: i32, rid: i32) {
     use self::rooms::dsl::*;
 
     if let Ok(room) = rooms.filter(id.eq(rid)).get_result::<Room>(conn) {
@@ -221,7 +222,7 @@ pub fn enter_room(conn: &PgConnection, uid: i32, rid: i32) {
     delete_invite(conn, uid, true);
 }
 
-pub fn leave_room(conn: &PgConnection, uid: i32, rid: i32) {
+pub fn leave_room(conn: &mut PgConnection, uid: i32, rid: i32) {
     use self::rooms::dsl::*;
 
     if let Ok(room) = rooms.filter(id.eq(rid)).get_result::<Room>(conn) {

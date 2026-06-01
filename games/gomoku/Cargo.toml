@@ -8,8 +8,13 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 nesbox_utils = { path = "../../packages/nes/utils" }
-strum = "0.24"
-strum_macros = "0.24"
+strum = "0.28"
+strum_macros = "0.28"
 
 # fixed ecs macro
 bevy = { version = "0.10", default-features = false }
+
+# uuid is pulled in transitively by bevy_utils; on wasm32 it requires an
+# explicit source of randomness, so enable the `js` feature here.
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+uuid = { version = "1", default-features = false, features = ["js"] }

@@ -128,10 +128,10 @@ impl Drop for NoyifyReceiver {
 
             leave_lobby(user_id);
 
-            let conn = DB_POOL.get().unwrap();
-            if let Ok(user) = get_user_basic(&conn, user_id) {
+            let mut conn = DB_POOL.get().unwrap();
+            if let Ok(user) = get_user_basic(&mut conn, user_id) {
                 notify_ids(
-                    get_friend_ids(&conn, user_id),
+                    get_friend_ids(&mut conn, user_id),
                     ScNotifyMessageBuilder::default()
                         .update_user(user.clone())
                         .build()
@@ -139,7 +139,7 @@ impl Drop for NoyifyReceiver {
                 );
 
                 if let Some(playing) = user.playing {
-                    pause_game(&conn, user_id, playing.game_id, time);
+                    pause_game(&mut conn, user_id, playing.game_id, time);
                 }
             }
         }

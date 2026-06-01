@@ -13,7 +13,7 @@ pub struct ScNewFavorite {
     pub favorite: bool,
 }
 
-pub fn get_favorites(conn: &PgConnection, uid: i32) -> Vec<i32> {
+pub fn get_favorites(conn: &mut PgConnection, uid: i32) -> Vec<i32> {
     use self::favorites::dsl::*;
 
     favorites
@@ -26,7 +26,7 @@ pub fn get_favorites(conn: &PgConnection, uid: i32) -> Vec<i32> {
         .collect()
 }
 
-pub fn get_top_ids(conn: &PgConnection) -> Vec<i32> {
+pub fn get_top_ids(conn: &mut PgConnection) -> Vec<i32> {
     use self::favorites::dsl::*;
 
     favorites
@@ -37,7 +37,7 @@ pub fn get_top_ids(conn: &PgConnection) -> Vec<i32> {
         .unwrap()
 }
 
-pub fn create_favorite(conn: &PgConnection, uid: i32, gid: i32) -> FieldResult<i32> {
+pub fn create_favorite(conn: &mut PgConnection, uid: i32, gid: i32) -> FieldResult<i32> {
     let new_favorite = NewFavorite {
         user_id: uid,
         game_id: gid,
@@ -51,7 +51,7 @@ pub fn create_favorite(conn: &PgConnection, uid: i32, gid: i32) -> FieldResult<i
         .map_err(|err| err.into())
 }
 
-pub fn delete_favorite(conn: &PgConnection, uid: i32, gid: i32) {
+pub fn delete_favorite(conn: &mut PgConnection, uid: i32, gid: i32) {
     use self::favorites::dsl::*;
 
     diesel::delete(favorites.filter(user_id.eq(uid)).filter(game_id.eq(gid)))

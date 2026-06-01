@@ -22,7 +22,7 @@ pub struct Record {
 }
 
 #[derive(Insertable)]
-#[table_name = "records"]
+#[diesel(table_name = records)]
 pub struct NewRecord {
     pub user_id: i32,
     pub game_id: i32,
@@ -43,7 +43,7 @@ pub struct Comment {
 }
 
 #[derive(Insertable)]
-#[table_name = "comments"]
+#[diesel(table_name = comments)]
 pub struct NewComment<'a> {
     pub user_id: i32,
     pub game_id: i32,
@@ -72,7 +72,7 @@ pub struct Game {
 }
 
 #[derive(Insertable)]
-#[table_name = "games"]
+#[diesel(table_name = games)]
 pub struct NewGame<'a> {
     pub name: &'a str,
     pub description: &'a str,
@@ -101,7 +101,7 @@ pub struct User {
 }
 
 #[derive(Insertable)]
-#[table_name = "users"]
+#[diesel(table_name = users)]
 pub struct NewUser<'a> {
     pub username: &'a str,
     pub password: &'a str,
@@ -124,7 +124,7 @@ pub struct Message {
 }
 
 #[derive(Insertable)]
-#[table_name = "messages"]
+#[diesel(table_name = messages)]
 pub struct NewMessage<'a> {
     pub body: &'a str,
     pub target_id: i32,
@@ -142,7 +142,7 @@ pub struct Favorite {
 }
 
 #[derive(Insertable)]
-#[table_name = "favorites"]
+#[diesel(table_name = favorites)]
 pub struct NewFavorite {
     pub user_id: i32,
     pub game_id: i32,
@@ -162,7 +162,7 @@ pub struct Room {
 }
 
 #[derive(Insertable)]
-#[table_name = "rooms"]
+#[diesel(table_name = rooms)]
 pub struct NewRoom {
     pub game_id: i32,
     pub private: bool,
@@ -182,7 +182,7 @@ pub struct Friend {
 }
 
 #[derive(Insertable)]
-#[table_name = "friends"]
+#[diesel(table_name = friends)]
 pub struct NewFriend<'a> {
     pub user_id: i32,
     pub target_id: i32,
@@ -198,7 +198,7 @@ pub struct Playing {
 }
 
 #[derive(Insertable)]
-#[table_name = "playing"]
+#[diesel(table_name = playing)]
 pub struct NewPlaying {
     pub user_id: i32,
     pub room_id: i32,
@@ -217,7 +217,7 @@ pub struct Invite {
 }
 
 #[derive(Insertable)]
-#[table_name = "invites"]
+#[diesel(table_name = invites)]
 pub struct NewInvite {
     pub room_id: i32,
     pub target_id: i32,

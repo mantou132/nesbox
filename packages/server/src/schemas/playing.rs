@@ -12,7 +12,7 @@ pub struct ScUpdatePlaying {
     pub room_id: i32,
 }
 
-pub fn get_playing(conn: &PgConnection, uid: i32) -> Option<ScRoomBasic> {
+pub fn get_playing(conn: &mut PgConnection, uid: i32) -> Option<ScRoomBasic> {
     use self::playing::dsl::*;
 
     playing
@@ -23,7 +23,7 @@ pub fn get_playing(conn: &PgConnection, uid: i32) -> Option<ScRoomBasic> {
         .map(|row| get_room(conn, row.room_id).unwrap())
 }
 
-pub fn get_room_user_ids(conn: &PgConnection, rid: i32) -> Vec<i32> {
+pub fn get_room_user_ids(conn: &mut PgConnection, rid: i32) -> Vec<i32> {
     use self::playing::dsl::*;
 
     playing
@@ -33,7 +33,7 @@ pub fn get_room_user_ids(conn: &PgConnection, rid: i32) -> Vec<i32> {
         .unwrap()
 }
 
-pub fn create_playing(conn: &PgConnection, uid: i32, rid: i32) -> FieldResult<i32> {
+pub fn create_playing(conn: &mut PgConnection, uid: i32, rid: i32) -> FieldResult<i32> {
     let new_playing = NewPlaying {
         room_id: rid,
         user_id: uid,
@@ -47,7 +47,7 @@ pub fn create_playing(conn: &PgConnection, uid: i32, rid: i32) -> FieldResult<i3
         .map_err(|err| err.into())
 }
 
-pub fn delete_playing(conn: &PgConnection, uid: i32) {
+pub fn delete_playing(conn: &mut PgConnection, uid: i32) {
     use self::playing::dsl::*;
 
     diesel::delete(playing.filter(user_id.eq(uid)))
@@ -55,7 +55,7 @@ pub fn delete_playing(conn: &PgConnection, uid: i32) {
         .unwrap();
 }
 
-pub fn delete_playing_with_room(conn: &PgConnection, rid: i32) {
+pub fn delete_playing_with_room(conn: &mut PgConnection, rid: i32) {
     use self::playing::dsl::*;
 
     diesel::delete(playing.filter(room_id.eq(rid)))

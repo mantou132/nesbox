@@ -32,18 +32,18 @@ pub struct ScUpdateInvite {
     pub accept: bool,
 }
 
-fn convert_to_sc_invite(conn: &PgConnection, invite: &Invite) -> ScInvite {
+fn convert_to_sc_invite(conn: &mut PgConnection, invite: &Invite) -> ScInvite {
     ScInvite {
         id: invite.id,
         room: get_room(conn, invite.room_id).unwrap(),
         target_id: invite.target_id,
         user_id: invite.user_id,
-        created_at: invite.created_at.timestamp_millis() as f64,
-        updated_at: invite.updated_at.timestamp_millis() as f64,
+        created_at: invite.created_at.and_utc().timestamp_millis() as f64,
+        updated_at: invite.updated_at.and_utc().timestamp_millis() as f64,
     }
 }
 
-pub fn get_invites(conn: &PgConnection, uid: i32) -> Vec<ScInvite> {
+pub fn get_invites(conn: &mut PgConnection, uid: i32) -> Vec<ScInvite> {
     use self::invites::dsl::*;
 
     invites
@@ -56,7 +56,7 @@ pub fn get_invites(conn: &PgConnection, uid: i32) -> Vec<ScInvite> {
         .collect()
 }
 
-pub fn get_invites_with(conn: &PgConnection, uid: i32) -> Vec<ScInvite> {
+pub fn get_invites_with(conn: &mut PgConnection, uid: i32) -> Vec<ScInvite> {
     use self::invites::dsl::*;
 
     invites
@@ -69,7 +69,7 @@ pub fn get_invites_with(conn: &PgConnection, uid: i32) -> Vec<ScInvite> {
         .collect()
 }
 
-pub fn get_invite(conn: &PgConnection, uid: i32, iid: i32) -> FieldResult<ScInvite> {
+pub fn get_invite(conn: &mut PgConnection, uid: i32, iid: i32) -> FieldResult<ScInvite> {
     use self::invites::dsl::*;
 
     let invite = invites
@@ -82,7 +82,7 @@ pub fn get_invite(conn: &PgConnection, uid: i32, iid: i32) -> FieldResult<ScInvi
 }
 
 pub fn create_invite(
-    conn: &PgConnection,
+    conn: &mut PgConnection,
     uid: i32,
     req: &ScNewInvite,
 ) -> FieldResult<(Option<i32>, ScInvite)> {
@@ -115,7 +115,7 @@ pub fn create_invite(
     Ok((deleted_invite, convert_to_sc_invite(conn, &invite)))
 }
 
-pub fn delete_invite_by_id(conn: &PgConnection, uid: i32, iid: i32) {
+pub fn delete_invite_by_id(conn: &mut PgConnection, uid: i32, iid: i32) {
     use self::invites::dsl::*;
 
     diesel::delete(invites.filter(target_id.eq(uid)).filter(id.eq(iid)))
@@ -123,7 +123,15 @@ pub fn delete_invite_by_id(conn: &PgConnection, uid: i32, iid: i32) {
         .unwrap();
 }
 
-pub fn delete_invite(conn: &PgConnection, uid: i32, all: bool) {
+pub fn delete_invite_with_room(conn: &mut PgConnection, rid: i32) {
+    use self::invites::dsl::*;
+
+    diesel::delete(invites.filter(room_id.eq(rid)))
+        .execute(conn)
+        .unwrap();
+}
+
+pub fn delete_invite(conn: &mut PgConnection, uid: i32, all: bool) {
     use self::invites::dsl::*;
 
     diesel::delete(invites.filter(user_id.eq(uid)))

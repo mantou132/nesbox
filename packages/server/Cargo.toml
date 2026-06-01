@@ -5,38 +5,29 @@ edition = "2021"
 default-run = "server"
 
 [dependencies]
-openssl-probe = "0.1.2"
-dotenv = "0.15.0"
-env_logger = "0.9"
-log = "0.4"
-lazy_static = "1.4.0"
-derive_builder = "0.11.2"
-
-diesel = { version = "1.4.4", features = ["postgres", "chrono", "r2d2", "serde_json"] }
-openssl = "*"
-
-reqwest = { version = "0.11", features = ["json"] }
+actix-cors = "0.7"
 actix-web = "4"
-actix-web-lab = "0.17.0"
-actix-cors = "0.6"
-
-juniper = { git = "https://github.com/graphql-rust/juniper", rev = "a32140cd46f17491d3f7a93b4a6c67732a29b0e8" }
-juniper_actix = { git = "https://github.com/graphql-rust/juniper", features = ["subscriptions"], rev = "a32140cd46f17491d3f7a93b4a6c67732a29b0e8" }
-juniper_graphql_ws = { git = "https://github.com/graphql-rust/juniper", rev = "a32140cd46f17491d3f7a93b4a6c67732a29b0e8" }
-
-strum = { version = "0.24", features = ["derive"] }
+async-stream = "0.3"
+chrono = "0.4.19"
+data-encoding = "2.3.2"
+derive_builder = "0.20"
+diesel = { version = "2.3", features = ["chrono", "postgres", "r2d2", "serde_json"] }
+dotenv = "0.15.0"
+env_logger = "0.11"
+futures = "0.3.21"
+jsonwebtoken = { version = "10", features = ["rust_crypto"] }
+juniper = "0.16"
+juniper_actix = { version = "0.6", features = ["subscriptions"] }
+juniper_graphql_ws = "0.4"
+lazy_static = "1.4.0"
+log = "0.4"
+openssl = "*"
+openssl-probe = "0.2.1"
+pulldown-cmark = "0.13"
+reqwest = { version = "0.11", features = ["json"] }
+ring = "0.17"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-serde_derive = "1.0.123"
-chrono='0.4.19'
-
-jsonwebtoken = "8.1.0"
-data-encoding = "2.3.2"
-ring = "0.16.20"
-
-futures = "0.3.21"
+strum = { version = "0.28", features = ["derive"] }
 tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
-async-stream = "0.3"
-pulldown-cmark = "0.9.1"
-
-webrtc = "0.5.1"
+webrtc = "0.11"

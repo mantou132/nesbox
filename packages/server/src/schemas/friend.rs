@@ -44,10 +44,10 @@ pub struct ScFriend {
     unread_message_count: i32,
 }
 
-fn convert_to_sc_friend(conn: &PgConnection, friend: &Friend) -> ScFriend {
+fn convert_to_sc_friend(conn: &mut PgConnection, friend: &Friend) -> ScFriend {
     ScFriend {
         user: get_user_basic(conn, friend.target_id).unwrap(),
-        created_at: friend.created_at.timestamp_millis() as f64,
+        created_at: friend.created_at.and_utc().timestamp_millis() as f64,
         status: ScFriendStatus::from_str(&friend.status).unwrap(),
         unread_message_count: get_messages_count(
             conn,
@@ -58,7 +58,7 @@ fn convert_to_sc_friend(conn: &PgConnection, friend: &Friend) -> ScFriend {
     }
 }
 
-pub fn get_friends(conn: &PgConnection, uid: i32) -> Vec<ScFriend> {
+pub fn get_friends(conn: &mut PgConnection, uid: i32) -> Vec<ScFriend> {
     use self::friends::dsl::*;
 
     friends
@@ -71,7 +71,7 @@ pub fn get_friends(conn: &PgConnection, uid: i32) -> Vec<ScFriend> {
         .collect()
 }
 
-pub fn get_friend_ids(conn: &PgConnection, uid: i32) -> Vec<i32> {
+pub fn get_friend_ids(conn: &mut PgConnection, uid: i32) -> Vec<i32> {
     use self::friends::dsl::*;
 
     friends
@@ -84,7 +84,7 @@ pub fn get_friend_ids(conn: &PgConnection, uid: i32) -> Vec<i32> {
         .collect()
 }
 
-pub fn apply_friend(conn: &PgConnection, uid: i32, tid: i32) -> FieldResult<ScFriend> {
+pub fn apply_friend(conn: &mut PgConnection, uid: i32, tid: i32) -> FieldResult<ScFriend> {
     let new_friend = NewFriend {
         user_id: tid,
         target_id: uid,
@@ -99,7 +99,7 @@ pub fn apply_friend(conn: &PgConnection, uid: i32, tid: i32) -> FieldResult<ScFr
     Ok(convert_to_sc_friend(conn, &friend))
 }
 
-pub fn accept_friend(conn: &PgConnection, uid: i32, tid: i32) -> FieldResult<ScFriend> {
+pub fn accept_friend(conn: &mut PgConnection, uid: i32, tid: i32) -> FieldResult<ScFriend> {
     use self::friends::dsl::*;
 
     diesel::update(friends.filter(user_id.eq(uid)).filter(target_id.eq(tid)))
@@ -124,7 +124,7 @@ pub fn accept_friend(conn: &PgConnection, uid: i32, tid: i32) -> FieldResult<ScF
     Ok(convert_to_sc_friend(conn, &friend))
 }
 
-pub fn read_message(conn: &PgConnection, uid: i32, tid: i32) -> FieldResult<ScFriend> {
+pub fn read_message(conn: &mut PgConnection, uid: i32, tid: i32) -> FieldResult<ScFriend> {
     use self::friends::dsl::*;
 
     let friend = diesel::update(friends.filter(user_id.eq(uid)).filter(target_id.eq(tid)))
@@ -134,7 +134,7 @@ pub fn read_message(conn: &PgConnection, uid: i32, tid: i32) -> FieldResult<ScFr
     Ok(convert_to_sc_friend(conn, &friend))
 }
 
-pub fn delete_friend(conn: &PgConnection, uid: i32, tid: i32) {
+pub fn delete_friend(conn: &mut PgConnection, uid: i32, tid: i32) {
     use self::friends::dsl::*;
 
     diesel::delete(friends.filter(user_id.eq(uid)).filter(target_id.eq(tid)))

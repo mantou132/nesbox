@@ -2,7 +2,12 @@
 
 ## development
 
-install postgresql, diesel_cli@1.x, create database, create `.env` file:
+install postgresql, diesel_cli@2.x, create database, create `.env` file:
+
+```bash
+# install diesel_cli with postgres support
+cargo install diesel_cli --no-default-features --features postgres
+```
 
 ```
 DATABASE_URL=postgres://username:password@localhost/database_name

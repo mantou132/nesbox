@@ -14,4 +14,4 @@ bincode = "1.3.3"
 nesbox_utils_macro = { path = "../utils_macro", version = "0.0.3" }
 qoi = "0.4.0"
 rand = "0.8"
-wasm-bindgen = "0.2.63"
+wasm-bindgen = "=0.2.100"

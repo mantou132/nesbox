@@ -1,4 +1,5 @@
 use juniper::{GraphQLEnum, GraphQLInputObject};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::mpsc::Sender;
@@ -17,6 +18,7 @@ use webrtc::peer_connection::sdp::sdp_type::RTCSdpType;
 use webrtc::peer_connection::RTCPeerConnection;
 use webrtc::rtp_transceiver::rtp_codec::RTCRtpCodecCapability;
 use webrtc::rtp_transceiver::rtp_receiver::RTCRtpReceiver;
+use webrtc::rtp_transceiver::RTCRtpTransceiver;
 use webrtc::track::track_local::track_local_static_rtp::TrackLocalStaticRTP;
 use webrtc::track::track_local::{TrackLocal, TrackLocalWriter};
 use webrtc::track::track_remote::TrackRemote;
@@ -141,77 +143,72 @@ pub async fn create_rtc(
         tokio::sync::mpsc::channel::<Arc<TrackLocalStaticRTP>>(1);
     let local_track_chan_tx = Arc::new(local_track_chan_tx);
 
-    peer_connection
-        .on_track(Box::new(
-            move |track: Option<Arc<TrackRemote>>, _receiver: Option<Arc<RTCRtpReceiver>>| {
-                if let Some(track) = track {
-                    tokio::spawn(async move {
-                        // Create Track that we send video back to browser on
-                        let local_track = Arc::new(TrackLocalStaticRTP::new(
-                            track.codec().await.capability,
-                            user_id.to_string(),
-                            "webrtc-rs".to_owned(),
-                        ));
+    peer_connection.on_track(Box::new(
+        move |track: Arc<TrackRemote>,
+              _receiver: Arc<RTCRtpReceiver>,
+              _transceiver: Arc<RTCRtpTransceiver>| {
+            tokio::spawn(async move {
+                // Create Track that we send video back to browser on
+                let local_track = Arc::new(TrackLocalStaticRTP::new(
+                    track.codec().capability,
+                    user_id.to_string(),
+                    "webrtc-rs".to_owned(),
+                ));
 
-                        if let Some(room) = ROOM_USER_CONN_STATE_MAP.lock().await.get_mut(&room_id)
-                        {
-                            for (key, val) in room.iter_mut() {
-                                if key == &user_id {
-                                    val.track = local_track.clone();
-                                } else {
-                                    let _ = val.sender.send(local_track.clone()).await;
-                                }
-                            }
+                if let Some(room) = ROOM_USER_CONN_STATE_MAP.lock().await.get_mut(&room_id) {
+                    for (key, val) in room.iter_mut() {
+                        if key == &user_id {
+                            val.track = local_track.clone();
+                        } else {
+                            let _ = val.sender.send(local_track.clone()).await;
                         }
-
-                        // Read RTP packets being sent to webrtc-rs
-                        while let Ok((rtp, _)) = track.read_rtp().await {
-                            if let Err(err) = local_track.write_rtp(&rtp).await {
-                                if Error::ErrClosedPipe != err {
-                                    print!("output track write_rtp got error: {} and break", err);
-                                    break;
-                                } else {
-                                    print!("output track write_rtp got error: {}", err);
-                                }
-                            }
-                        }
-                    });
+                    }
                 }
 
-                Box::pin(async {})
-            },
-        ))
-        .await;
-
-    peer_connection
-        .on_ice_candidate(Box::new(move |c: Option<RTCIceCandidate>| {
-            Box::pin(async move {
-                if let Some(candidate) = c {
-                    log::debug!("{:?}", candidate);
-                    let json = serde_json::to_string(&candidate.to_json().await.unwrap()).unwrap();
-                    callback(json);
+                // Read RTP packets being sent to webrtc-rs
+                while let Ok((rtp, _)) = track.read_rtp().await {
+                    if let Err(err) = local_track.write_rtp(&rtp).await {
+                        if Error::ErrClosedPipe != err {
+                            print!("output track write_rtp got error: {} and break", err);
+                            break;
+                        } else {
+                            print!("output track write_rtp got error: {}", err);
+                        }
+                    }
                 }
-            })
-        }))
-        .await;
+            });
+
+            Box::pin(async {})
+        },
+    ));
+
+    peer_connection.on_ice_candidate(Box::new(move |c: Option<RTCIceCandidate>| {
+        Box::pin(async move {
+            if let Some(candidate) = c {
+                log::debug!("{:?}", candidate);
+                let json = serde_json::to_string(&candidate.to_json().unwrap()).unwrap();
+                callback(json);
+            }
+        })
+    }));
 
     let pc1 = peer_connection.clone();
-    peer_connection
-        .on_ice_connection_state_change(Box::new(move |connection_state: RTCIceConnectionState| {
+    peer_connection.on_ice_connection_state_change(Box::new(
+        move |connection_state: RTCIceConnectionState| {
             log::debug!("ICE Connection State has changed: {}", connection_state);
             if connection_state == RTCIceConnectionState::Failed {
                 let _ = pc1.close();
             }
             Box::pin(async {})
-        }))
-        .await;
+        },
+    ));
 
     let pc2 = peer_connection.clone();
     let tx2 = local_track_chan_tx.clone();
     // Set the handler for Peer connection state
     // This will notify you when the peer has connected/disconnected
-    peer_connection
-        .on_peer_connection_state_change(Box::new(move |state: RTCPeerConnectionState| {
+    peer_connection.on_peer_connection_state_change(Box::new(
+        move |state: RTCPeerConnectionState| {
             log::debug!("Peer Connection State has changed: {}", state);
 
             let pc3 = pc2.clone();
@@ -274,8 +271,8 @@ pub async fn create_rtc(
                 }
             });
             Box::pin(async {})
-        }))
-        .await;
+        },
+    ));
 
     if let Some(room) = ROOM_USER_CONN_STATE_MAP.lock().await.get(&room_id) {
         for (key, val) in room.iter() {

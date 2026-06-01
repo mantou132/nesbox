@@ -9,3 +9,8 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 nesbox_utils = { path = "utils" }
 tetanes = { path = "../../deps/tetanes", default-features = false }
+
+# uuid is pulled in transitively by bevy_utils; on wasm32 it requires an
+# explicit source of randomness, so enable the `js` feature here.
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+uuid = { version = "1", default-features = false, features = ["js"] }

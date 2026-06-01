@@ -2,8 +2,6 @@ extern crate openssl;
 #[macro_use]
 extern crate diesel;
 #[macro_use]
-extern crate serde_derive;
-#[macro_use]
 extern crate lazy_static;
 #[macro_use]
 extern crate derive_builder;
@@ -17,7 +15,7 @@ use actix_web::{
     web::{self, Data},
     App, HttpServer,
 };
-use actix_web_lab::respond::Html;
+use actix_web::web::Html;
 use juniper::http::playground::playground_source;
 use tokio::time;
 
@@ -42,7 +40,9 @@ mod voice;
 
 #[actix_web::main]
 async fn main() -> io::Result<()> {
-    openssl_probe::init_ssl_cert_env_vars();
+    unsafe {
+        openssl_probe::try_init_openssl_env_vars();
+    }
 
     dotenv().ok();
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
@@ -62,13 +62,13 @@ async fn main() -> io::Result<()> {
         let mut interval = time::interval(Duration::from_secs(60 * 60));
         loop {
             interval.tick().await;
-            let conn = DB_POOL.get().unwrap();
-            let mut rooms = get_outdated_rooms(&conn);
+            let mut conn = DB_POOL.get().unwrap();
+            let mut rooms = get_outdated_rooms(&mut conn);
             rooms.truncate(100);
             rooms.iter().for_each(|room| {
                 if let Err(err) = leave_room_and_notify(room.host) {
                     if *err.extensions() == Error::username_not_playing() {
-                        delete_room(&conn, room.id);
+                        delete_room(&mut conn, room.id);
                     } else {
                         log::error!("{:?}", err);
                     }
@@ -100,7 +100,7 @@ async fn main() -> io::Result<()> {
             .service(
                 web::resource("/playground").route(
                     web::get().to(|| async {
-                        Html(playground_source("/graphql", Some("/subscriptions")))
+                        Html::new(playground_source("/graphql", Some("/subscriptions")))
                     }),
                 ),
             )
@@ -117,7 +117,7 @@ async fn main() -> io::Result<()> {
             )
             .service(
                 web::resource("/guestplayground").route(
-                    web::get().to(|| async { Html(playground_source("/guestgraphql", None)) }),
+                    web::get().to(|| async { Html::new(playground_source("/guestgraphql", None)) }),
                 ),
             )
             .service(

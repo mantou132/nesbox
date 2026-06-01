@@ -104,8 +104,8 @@ fn convert_to_sc_game(game: &Game) -> ScGame {
         description: game.description.clone(),
         preview: game.preview.clone(),
         rom: game.rom.clone(),
-        created_at: game.created_at.timestamp_millis() as f64,
-        updated_at: game.updated_at.timestamp_millis() as f64,
+        created_at: game.created_at.and_utc().timestamp_millis() as f64,
+        updated_at: game.updated_at.and_utc().timestamp_millis() as f64,
         max_player: game.max_player,
         screenshots: game
             .screenshots
@@ -129,7 +129,7 @@ fn convert_to_sc_game(game: &Game) -> ScGame {
     }
 }
 
-pub fn get_games(conn: &PgConnection) -> Vec<ScGame> {
+pub fn get_games(conn: &mut PgConnection) -> Vec<ScGame> {
     use self::games::dsl::*;
 
     games
@@ -142,7 +142,7 @@ pub fn get_games(conn: &PgConnection) -> Vec<ScGame> {
         .collect()
 }
 
-pub fn get_game_from_name(conn: &PgConnection, n: &str) -> Option<ScGame> {
+pub fn get_game_from_name(conn: &mut PgConnection, n: &str) -> Option<ScGame> {
     use self::games::dsl::*;
 
     games
@@ -153,7 +153,7 @@ pub fn get_game_from_name(conn: &PgConnection, n: &str) -> Option<ScGame> {
         .ok()
 }
 
-pub fn create_game(conn: &PgConnection, req: &ScNewGame) -> FieldResult<ScGame> {
+pub fn create_game(conn: &mut PgConnection, req: &ScNewGame) -> FieldResult<ScGame> {
     let screenshots_str = &req.screenshots.join(",");
     let new_game = NewGame {
         name: &req.name,
@@ -177,7 +177,7 @@ pub fn create_game(conn: &PgConnection, req: &ScNewGame) -> FieldResult<ScGame> 
     Ok(convert_to_sc_game(&game))
 }
 
-pub fn update_game(conn: &PgConnection, gid: i32, req: &ScNewGame) -> FieldResult<ScGame> {
+pub fn update_game(conn: &mut PgConnection, gid: i32, req: &ScNewGame) -> FieldResult<ScGame> {
     use self::games::dsl::*;
 
     let screenshots_str = &req.screenshots.join(",");
