@@ -1,6 +1,6 @@
 import { adoptedStyle, attribute, createState, css, customElement, effect, GemElement, html } from '@mantou/gem';
 import { marked } from 'marked';
-import { eventStream } from 'src/services';
+import { AI_BASE, eventStream } from 'src/services';
 
 import 'duoyun-ui/elements/unsafe';
 
@@ -36,7 +36,7 @@ export class MSeeElement extends GemElement {
     const initMd = 'Thinking...';
     this.#state({ md: initMd });
     const timer = setTimeout(async () => {
-      const url = `https://nesbox.709922234.workers.dev/completions?${new URLSearchParams({ q: this.prompt, l: i18n.currentLanguage })}`;
+      const url = `${AI_BASE}/completions?${new URLSearchParams({ q: this.prompt, l: i18n.currentLanguage })}`;
       const iter = eventStream(url, { signal: this.#control.signal });
       for await (const chunk of iter) {
         const append = chunk.choices?.at(0)?.delta?.content;

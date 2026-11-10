@@ -6,6 +6,7 @@ import { errorCodeMap, graphqlErrorMap, grpcCommonErrorMap } from 'src/services/
 import { SubscriptionClient } from 'subscriptions-transport-ws';
 
 const API_BASE = process.env.API_BASE || '/api';
+export const AI_BASE = process.env.AI_BASE || 'https://nesbox.709922234.workers.dev';
 const ENDPOINT = '/graphql';
 
 interface Res<R> {

@@ -26,7 +26,7 @@
     {
       "remote": true,
       "binding": "GAMES_SEARCH",
-      "index_name": "nesbox-games"
+      "index_name": "nesbox-games-m3"
     }
   ],
   "kv_namespaces": [

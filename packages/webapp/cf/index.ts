@@ -10,53 +10,192 @@ import { GetGames, type GetGamesQuery, type GetGamesQueryVariables } from '../sr
 import enJson from '../src/locales/en/basic.json';
 import zhJson from '../src/locales/zh-CN/basic.json';
 import type { GameAttributes } from '../src/store';
-import { embedding, fetchNesbox, fetchWikiHTML, htmlToMarkdown, stripMarkdown, truncateByBytes } from './utils';
+import {
+  type Bm25Index,
+  bm25AddDocs,
+  bm25RemoveGames,
+  bm25Search,
+  chunkText,
+  embedding,
+  fetchNesbox,
+  fetchWikiHTML,
+  htmlToMarkdown,
+  MAX_CHUNKS_PER_GAME,
+  rerank,
+  rrf,
+  stripMarkdown,
+  truncateByBytes,
+} from './utils';
+
+type ChunkMetadata = { gameId: string; chunk: number; text: string };
+
+// Vectorize Workers binding 单次 upsert 上限 1000
+const UPSERT_BATCH_SIZE = 500;
+// 向量召回数量（开启 rerank 时作为精排的候选集）
+const RECALL_TOP_K = 20;
+// 问答时拼入上下文的块数
+const CONTEXT_TOP_N = 5;
+
+// 前端筛选把这些类型合并了，`gameKindMap` 里没有，检索时仍需要它们的语义标签
+const extraKindLabels: Partial<Record<string, string[]>> = {
+  RCG: ['赛车竞速', 'Racing'],
+  PZG: ['益智解谜', 'Puzzle'],
+  TBS: ['回合制策略', 'Turn-based Strategy'],
+  SLG: ['策略模拟', 'Simulation Strategy'],
+  TBG: ['桌游', 'Board Game'],
+};
+
+const chunkCountKey = (gameId: string) => `chunks:${gameId}`;
+const BM25_INDEX_KEY = 'bm25:index';
 
 async function transformGame(ai: Ai<AiModels>, games: GetGamesQuery['games']) {
-  const gameInfoList = await Promise.all(
+  const gameChunkList = await Promise.all(
     games.map(async (game) => {
       const { attributes, body } = frontmatter<GameAttributes>(game.description);
       if (!game.id || !game.name) throw new Error('invalid game');
 
-      const infoList = [game.name];
-
+      // 每个块都带上游戏名和标签，保证单独检索到某一块时仍知道属于哪个游戏
+      const headerList = [game.name];
       if (game.platform) {
         const label = gamePlatformMap[game.platform];
-        infoList.push((zhJson as any)[label], (enJson as any)[label]);
+        headerList.push((zhJson as any)[label], (enJson as any)[label]);
       }
       if (game.kind) {
+        // `gameKindMap` 是 Proxy，缺失的 key 会原样返回 key，所以先查 `extraKindLabels`
+        const extra = extraKindLabels[game.kind];
         const label = gameKindMap[game.kind];
-        infoList.push((zhJson as any)[label], (enJson as any)[label]);
+        headerList.push(...(extra || [(zhJson as any)[label], (enJson as any)[label]]));
       }
       if (game.series) {
         const label = gameSeriesMap[game.series];
-        infoList.push((zhJson as any)[label], (enJson as any)[label]);
+        headerList.push((zhJson as any)[label], (enJson as any)[label]);
       }
+      const header = headerList.filter(isNotNullish).join(' ');
 
-      infoList.push('\n', stripMarkdown(body));
-
+      const contentList = [stripMarkdown(body)];
       if (attributes.ref) {
         try {
           const url = new URL(attributes.ref);
           const html = url.origin.endsWith('.wikipedia.org')
             ? await fetchWikiHTML(url)
             : await (await fetch(url)).text();
-          infoList.push('\n', htmlToMarkdown(html));
+          contentList.push(htmlToMarkdown(html));
         } catch (err) {
           console.info(err);
         }
       }
 
-      const text = infoList.filter(isNotNullish).join(' ');
-
-      return { id: game.id.toString(), text, metadata: { text: truncateByBytes(text) } };
+      const chunks = chunkText(contentList.join('\n')).slice(0, MAX_CHUNKS_PER_GAME);
+      const gameId = game.id.toString();
+      return (chunks.length ? chunks : ['']).map((chunk, index) => {
+        const text = chunk ? `${header}\n${chunk}` : header;
+        const metadata: ChunkMetadata = { gameId, chunk: index, text: truncateByBytes(text, 8000) };
+        return { id: `${gameId}#${index}`, text, metadata };
+      });
     }),
   );
+
+  const chunkList = gameChunkList.flat();
   const embeddingList = await embedding(
     ai,
-    gameInfoList.map((item) => item.text),
+    chunkList.map((item) => item.text),
   );
-  return gameInfoList.map((item, index) => ({ ...item, values: embeddingList[index] }));
+  return chunkList.map(({ id, metadata }, index) => ({ id, metadata, values: embeddingList[index] }));
+}
+
+async function upsertGames(
+  env: Env,
+  games: GetGamesQuery['games'],
+  { full = false, log }: { full?: boolean; log?: (message: object) => Promise<void> } = {},
+) {
+  const vectors = await transformGame(env.AI, games);
+  await log?.({ status: 'info', chunks: vectors.length });
+
+  // BM25 索引：全量同步时重建，单条更新时替换该游戏的块
+  const bm25Index: Bm25Index = (!full && (await env.KV.get<Bm25Index>(BM25_INDEX_KEY, 'json'))) || {
+    docs: {},
+    terms: {},
+  };
+  bm25RemoveGames(bm25Index, new Set(vectors.map(({ metadata }) => metadata.gameId)));
+  bm25AddDocs(
+    bm25Index,
+    vectors.map(({ id, metadata }) => ({ id, gameId: metadata.gameId, text: metadata.text })),
+  );
+  await env.KV.put(BM25_INDEX_KEY, JSON.stringify(bm25Index));
+  await log?.({ status: 'info', terms: Object.keys(bm25Index.terms).length });
+
+  for (let i = 0; i < vectors.length; i += UPSERT_BATCH_SIZE) {
+    await env.GAMES_SEARCH.upsert(vectors.slice(i, i + UPSERT_BATCH_SIZE));
+  }
+
+  // 块数变少时删除多出来的旧块
+  const countMap = new Map<string, number>();
+  vectors.forEach(({ metadata }) => countMap.set(metadata.gameId, (countMap.get(metadata.gameId) || 0) + 1));
+  for (const [gameId, count] of countMap) {
+    const oldCount = Number((await env.KV.get(chunkCountKey(gameId))) || 0);
+    if (oldCount > count) {
+      const staleIds = Array.from({ length: oldCount - count }, (_, i) => `${gameId}#${count + i}`);
+      await env.GAMES_SEARCH.deleteByIds(staleIds);
+    }
+    if (oldCount !== count) await env.KV.put(chunkCountKey(gameId), String(count));
+  }
+}
+
+type RetrieveMode = 'hybrid' | 'vector' | 'bm25';
+
+/**
+ * 混合检索：向量和 BM25 各召回 RECALL_TOP_K 块，用 RRF 融合，返回前 topN 块
+ *
+ * `mode` 可只用其中一路，用于对比效果。
+ * `useRerank` 时再用 bge-reranker-base 精排。默认关闭：
+ * 在本项目的中英日混合数据上，它的排序比 bge-m3 的向量相似度差
+ */
+async function retrieve(
+  env: Env,
+  query: string,
+  topN: number,
+  { mode = 'hybrid', useRerank = false }: { mode?: RetrieveMode; useRerank?: boolean } = {},
+) {
+  const [vectorMatches, bm25Matches] = await Promise.all([
+    mode === 'bm25'
+      ? []
+      : embedding(env.AI, [query]).then(
+          async ([values]) =>
+            (await env.GAMES_SEARCH.query(values, { topK: RECALL_TOP_K, returnMetadata: 'all' })).matches,
+        ),
+    mode === 'vector'
+      ? []
+      : env.KV.get<Bm25Index>(BM25_INDEX_KEY, 'json').then((index) =>
+          index ? bm25Search(index, query, RECALL_TOP_K) : [],
+        ),
+  ]);
+
+  const fused = rrf([vectorMatches.map((e) => e.id), bm25Matches.map((e) => e.id)]);
+  // 只被 BM25 命中的块需要再取一次元数据
+  const metadataMap = new Map(vectorMatches.map((e) => [e.id, e.metadata as ChunkMetadata | undefined]));
+  const missingIds = fused.map((e) => e.id).filter((id) => !metadataMap.has(id));
+  if (missingIds.length) {
+    (await env.GAMES_SEARCH.getByIds(missingIds)).forEach((e) =>
+      metadataMap.set(e.id, e.metadata as ChunkMetadata | undefined),
+    );
+  }
+  const candidates = fused
+    .map(({ id, score }) => ({ metadata: metadataMap.get(id), score }))
+    .filter((e): e is { metadata: ChunkMetadata; score: number } => !!e.metadata?.text);
+
+  if (!useRerank) {
+    return candidates.slice(0, topN).map((e) => ({ ...e.metadata, score: e.score }));
+  }
+  const ranked = await rerank(
+    env.AI,
+    query,
+    candidates.map((e) => (e.metadata as ChunkMetadata).text),
+    topN,
+  );
+  return ranked.map(({ index, score }) => ({
+    ...(candidates[index].metadata as ChunkMetadata),
+    score,
+  }));
 }
 
 const resInit = {
@@ -82,6 +221,10 @@ export default {
 
     const url = new URL(req.url);
     const params = new URLSearchParams(url.search);
+    // `rerank=1` 开启精排，用于对比效果；参数在 URL 里，KV 缓存会分开存
+    const useRerank = params.get('rerank') === '1';
+    // `mode=vector|bm25` 只用其中一路检索，用于对比效果，默认混合
+    const mode = (params.get('mode') || 'hybrid') as RetrieveMode;
 
     switch (url.pathname) {
       case '/sync': {
@@ -96,7 +239,7 @@ export default {
             await log({ status: 'start' });
             const { data } = await fetchNesbox<GetGamesQuery, GetGamesQueryVariables>(GetGames, {});
             await log({ status: 'info', total: data.games.length });
-            await env.GAMES_SEARCH.upsert(await transformGame(env.AI, data.games));
+            await upsertGames(env, data.games, { full: true, log });
             await log({ status: 'done' });
           } catch (e: any) {
             await log({ status: 'fatal', message: e.message });
@@ -110,11 +253,9 @@ export default {
         });
       }
       case '/update': {
-        await env.GAMES_SEARCH.upsert(
-          await transformGame(env.AI, [
-            req.method === 'POST' ? await req.json() : (Object.fromEntries(params.entries()) as any),
-          ]),
-        );
+        await upsertGames(env, [
+          req.method === 'POST' ? await req.json() : (Object.fromEntries(params.entries()) as any),
+        ]);
         return new Response('Complete', resInit);
       }
       case '/search': {
@@ -122,8 +263,12 @@ export default {
         if (cacheRes) return new Response(cacheRes, resInit);
 
         const q = params.get('q') || 'all';
-        const [values] = await embedding(env.AI, [q]);
-        const res = await env.GAMES_SEARCH.query(values);
+        // 一个游戏可能命中多个块，按游戏去重，保持 `{ matches: { id, score }[] }` 格式（id 为游戏 id）
+        const seen = new Set<string>();
+        const matches = (await retrieve(env, q, RECALL_TOP_K, { mode, useRerank }))
+          .filter(({ gameId }) => !seen.has(gameId) && seen.add(gameId))
+          .map(({ gameId, score }) => ({ id: gameId, score }));
+        const res = { matches, count: matches.length };
         await env.KV.put(req.url, JSON.stringify(res), { expirationTtl: 60 * 60 });
         return Response.json(res, resInit);
       }
@@ -136,8 +281,7 @@ export default {
         }
         const q = params.get('q') || '';
         const l = params.get('l') || req.headers.get('Accept-Language') || 'en';
-        const [values] = await embedding(env.AI, [q]);
-        const res = await env.GAMES_SEARCH.query(values, { returnMetadata: true });
+        const chunks = await retrieve(env, q, CONTEXT_TOP_N, { mode, useRerank });
         const messages = [
           {
             role: 'system',
@@ -148,7 +292,7 @@ Requirements:
 2. Language: respond in (${l}).
 
 Context:
-${res.matches.map((e) => (e.metadata as any).text).join('\n\n---\n\n')}
+${chunks.map((e) => e.text).join('\n\n---\n\n')}
 `,
           },
           {

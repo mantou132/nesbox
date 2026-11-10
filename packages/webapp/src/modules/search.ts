@@ -26,6 +26,7 @@ import { paramKeys } from 'src/constants';
 import { i18n } from 'src/i18n/basic';
 import { icons } from 'src/icons';
 import { routes } from 'src/routes';
+import { AI_BASE } from 'src/services';
 import { createInvite, createRoom, enterPubRoom, updateRoom } from 'src/services/api';
 import { friendStore, type Game, store, toggleFriendChatState } from 'src/store';
 import { theme } from 'src/theme';
@@ -315,7 +316,7 @@ export class MSearchElement extends GemElement {
     const { search, result } = this.#state;
     if (!search || result.length > 5) return;
     this.#abortCon = new AbortController();
-    fetch(`https://nesbox.709922234.workers.dev/search?${new URLSearchParams({ q: this.#state.search })}`, {
+    fetch(`${AI_BASE}/search?${new URLSearchParams({ q: this.#state.search })}`, {
       signal: this.#abortCon.signal,
     })
       .then((res) => res.json())

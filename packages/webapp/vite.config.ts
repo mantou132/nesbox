@@ -27,6 +27,7 @@ const config = async ({ command }: any) => {
       'process.env.RELEASE': JSON.stringify(Date.now()),
       'process.env.COMMAND': JSON.stringify(command),
       'process.env.API_BASE': JSON.stringify(process.env.API_BASE),
+      'process.env.AI_BASE': JSON.stringify(process.env.AI_BASE),
     },
     server: {
       allowedHosts: true,
