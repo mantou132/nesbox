@@ -6,7 +6,7 @@ use juniper::{
 use juniper_actix::subscriptions::ws_handler;
 use juniper_graphql_ws::ConnectionConfig;
 use reqwest::Client;
-use std::time::Duration;
+use std::{env, time::Duration};
 
 use crate::{
     auth::{extract_token_from_req, extract_token_from_str, UserToken},
@@ -102,8 +102,14 @@ const AI_SEARCH_UPDATE_URL: &str = "https://nesbox.709922234.workers.dev/update"
 ///
 /// Worker 要抓取参考页面并生成向量，耗时可能超过 GitHub webhook 的超时时间，所以放到后台执行
 fn update_ai_search(game: ScGame) {
+    // 和 Worker 的 `AI_SEARCH_TOKEN` secret 相同
+    let Ok(token) = env::var("AI_SEARCH_TOKEN") else {
+        log::warn!("AI_SEARCH_TOKEN not set, skip AI search update: {}", game.id);
+        return;
+    };
     tokio::spawn(async move {
-        match Client::new().post(AI_SEARCH_UPDATE_URL).json(&game).send().await {
+        let req = Client::new().post(AI_SEARCH_UPDATE_URL).bearer_auth(token).json(&game);
+        match req.send().await {
             Ok(res) if res.status().is_success() => {
                 log::info!("AI search updated: {}", game.id);
             }

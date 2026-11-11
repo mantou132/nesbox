@@ -27,6 +27,15 @@ import {
   truncateByBytes,
 } from './utils';
 
+declare global {
+  namespace Cloudflare {
+    interface Env {
+      // `/sync`、`/update` 的鉴权 token，用 `wrangler secret put AI_SEARCH_TOKEN` 设置
+      AI_SEARCH_TOKEN?: string;
+    }
+  }
+}
+
 type ChunkMetadata = { gameId: string; chunk: number; text: string };
 
 // Vectorize Workers binding 单次 upsert 上限 1000
@@ -225,6 +234,15 @@ export default {
     const useRerank = params.get('rerank') === '1';
     // `mode=vector|bm25` 只用其中一路检索，用于对比效果，默认混合
     const mode = (params.get('mode') || 'hybrid') as RetrieveMode;
+
+    // 写入接口需要鉴权：`Authorization: Bearer <token>` 或 `?token=<token>`（方便手动调用）；未配置 token 时一律拒绝
+    const token = req.headers.get('Authorization')?.replace(/^Bearer /, '') || params.get('token');
+    if (
+      (url.pathname === '/sync' || url.pathname === '/update') &&
+      (!env.AI_SEARCH_TOKEN || token !== env.AI_SEARCH_TOKEN)
+    ) {
+      return new Response('Unauthorized', { ...resInit, status: 401 });
+    }
 
     switch (url.pathname) {
       case '/sync': {

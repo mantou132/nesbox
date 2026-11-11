@@ -44,6 +44,12 @@ set a secret and add this secret to the `.env` file:
 SECRET=your_secret
 ```
 
+to also update the AI search index when a game changes, add the token configured on the Worker (`wrangler secret put AI_SEARCH_TOKEN`):
+
+```bash
+AI_SEARCH_TOKEN=your_token
+```
+
 restart local server. now, if you create an issue, will notify your local server. if issue meets the game to the conditions, it will be updated to the database when the issue is closed. conditions:
 
 - operator is repo owner
