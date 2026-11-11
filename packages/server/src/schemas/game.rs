@@ -12,6 +12,8 @@ use crate::db::schema::games;
 
 #[derive(GraphQLEnum, Debug, Clone, Display, EnumString, PartialEq, Serialize)]
 #[strum(serialize_all = "snake_case")]
+// 和 GraphQL 枚举值保持一致（如 `DOUBLE_DRAGON`），供 AI 搜索 Worker 使用
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ScGamePlatform {
     Arcade,
     Nes,
@@ -24,6 +26,8 @@ pub enum ScGamePlatform {
 // https://zh.wikipedia.org/wiki/%E7%94%B5%E5%AD%90%E6%B8%B8%E6%88%8F%E7%B1%BB%E5%9E%8B#%E9%A1%9E%E5%9E%8B%E7%B8%AE%E5%AF%AB
 #[derive(GraphQLEnum, Debug, Clone, Display, EnumString, PartialEq, Serialize)]
 #[strum(serialize_all = "snake_case")]
+// 和 GraphQL 枚举值保持一致（如 `DOUBLE_DRAGON`），供 AI 搜索 Worker 使用
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ScGameKind {
     // 动作，闯关冒险
     Act,
@@ -53,6 +57,8 @@ pub enum ScGameKind {
 
 #[derive(GraphQLEnum, Debug, Clone, Display, EnumString, PartialEq, Serialize)]
 #[strum(serialize_all = "snake_case")]
+// 和 GraphQL 枚举值保持一致（如 `DOUBLE_DRAGON`），供 AI 搜索 Worker 使用
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ScGameSeries {
     Tmnt,
     Tank,
@@ -68,7 +74,9 @@ pub enum ScGameSeries {
     Kof,
 }
 
-#[derive(GraphQLObject, Debug, Clone)]
+// 序列化格式和 GraphQL 返回的一致，AI 搜索 Worker 的 `/update` 直接使用
+#[derive(GraphQLObject, Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ScGame {
     pub id: i32,
     name: String,
@@ -197,4 +205,24 @@ pub fn update_game(conn: &mut PgConnection, gid: i32, req: &ScNewGame) -> FieldR
         .get_result::<Game>(conn)?;
 
     Ok(convert_to_sc_game(&game))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn enum_serialize_same_as_graphql() {
+        let to_json = |v: serde_json::Value| v.as_str().unwrap().to_owned();
+        assert_eq!(to_json(serde_json::to_value(ScGameKind::Rcg).unwrap()), "RCG");
+        assert_eq!(to_json(serde_json::to_value(ScGamePlatform::Wasm4).unwrap()), "WASM4");
+        assert_eq!(
+            to_json(serde_json::to_value(ScGamePlatform::UniversalWasm).unwrap()),
+            "UNIVERSAL_WASM"
+        );
+        assert_eq!(
+            to_json(serde_json::to_value(ScGameSeries::DoubleDragon).unwrap()),
+            "DOUBLE_DRAGON"
+        );
+    }
 }

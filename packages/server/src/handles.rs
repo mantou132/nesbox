@@ -14,7 +14,7 @@ use crate::{
     github::{get_sc_game, validate, GithubPayload},
     schemas::root::{Context, GuestContext, GuestSchema, Schema},
     schemas::{
-        game::{create_game, get_game_from_name, update_game},
+        game::{create_game, get_game_from_name, update_game, ScGame},
         notify::{notify_all, ScNotifyMessageBuilder},
     },
 };
@@ -96,6 +96,27 @@ pub async fn guestgraphqlschema(schema: web::Data<GuestSchema>) -> impl Responde
     HttpResponse::Ok().json(GraphQLResponse::from_result(result))
 }
 
+const AI_SEARCH_UPDATE_URL: &str = "https://nesbox.709922234.workers.dev/update";
+
+/// 通知 AI 搜索 Worker 更新该游戏的向量和 BM25 索引
+///
+/// Worker 要抓取参考页面并生成向量，耗时可能超过 GitHub webhook 的超时时间，所以放到后台执行
+fn update_ai_search(game: ScGame) {
+    tokio::spawn(async move {
+        match Client::new().post(AI_SEARCH_UPDATE_URL).json(&game).send().await {
+            Ok(res) if res.status().is_success() => {
+                log::info!("AI search updated: {}", game.id);
+            }
+            Ok(res) => {
+                log::error!("AI search update failed: {} {}", game.id, res.status());
+            }
+            Err(err) => {
+                log::error!("AI search update failed: {} {}", game.id, err);
+            }
+        }
+    });
+}
+
 pub async fn webhook(
     req: HttpRequest,
     body: web::Bytes,
@@ -128,16 +149,14 @@ pub async fn webhook(
         } else {
             match get_game_from_name(&mut conn, &old_name) {
                 Some(game) => {
-                    update_game(&mut conn, game.id, &sc_game).ok();
-                    let _ = Client::new()
-                        .post("https://nesbox.709922234.workers.dev")
-                        .json(&sc_game)
-                        .send()
-                        .await;
+                    if let Ok(game) = update_game(&mut conn, game.id, &sc_game) {
+                        update_ai_search(game);
+                    }
                 }
                 None => {
                     if closed {
                         if let Ok(game) = create_game(&mut conn, &sc_game) {
+                            update_ai_search(game.clone());
                             notify_all(
                                 ScNotifyMessageBuilder::default()
                                     .new_game(game)
